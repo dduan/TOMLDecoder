@@ -5,7 +5,7 @@ public final class TOMLDecoder {
     public func decode<T : Decodable, Bytes>(_ type: T.Type, from data: Bytes) throws -> T
         where Bytes: Collection, Bytes.Element == UInt8
     {
-        let topLevel: [String: Any] = ["a": Int64(42), "b": UInt16(0), "c": "a c"]
+        let topLevel = try TOMLDeserializer.tomlTable(with: data)
         let decoder = TOMLDecoderImpl(referencing: self)
         guard let value = try decoder.unbox(topLevel, as: type) else {
             throw "Bad"
@@ -14,8 +14,8 @@ public final class TOMLDecoder {
         return value
     }
 
-    // TODO: delete. This is for debug only.
-    public func decode<T : Decodable>(_ type: T.Type, from topLevel: [String: Any]) throws -> T {
+    public func decode<T : Decodable>(_ type: T.Type, from string: String) throws -> T {
+        let topLevel = try TOMLDeserializer.tomlTable(with: string)
         let decoder = TOMLDecoderImpl(referencing: self)
         guard let value = try decoder.unbox(topLevel, as: type) else {
             throw "Bad"
