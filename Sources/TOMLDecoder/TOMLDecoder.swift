@@ -1,12 +1,32 @@
 import TOMLDeserializer
 
 public final class TOMLDecoder {
+    public enum NumberDecodingStrategy {
+        case strict
+        case flexible
+    }
+
+    var numberDecodingStrategy = NumberDecodingStrategy.strict // TODO: is this the right default?
+    var userInfo: [CodingUserInfoKey : Any] = [:]
+
+    /// Options set on the top-level encoder to pass down the decoding hierarchy.
+    fileprivate struct Options {
+        let numberDecodingStrategy: NumberDecodingStrategy
+        let userInfo: [CodingUserInfoKey : Any]
+    }
+
+    /// The options set on the top-level decoder.
+    fileprivate var options: Options {
+        return Options(numberDecodingStrategy: self.numberDecodingStrategy,
+                       userInfo: userInfo)
+    }
+
     public init() {}
     public func decode<T : Decodable, Bytes>(_ type: T.Type, from data: Bytes) throws -> T
         where Bytes: Collection, Bytes.Element == UInt8
     {
         let topLevel = try TOMLDeserializer.tomlTable(with: data)
-        let decoder = TOMLDecoderImpl(referencing: self)
+        let decoder = TOMLDecoderImpl(referencing: self, options: self.options)
         guard let value = try decoder.unbox(topLevel, as: type) else {
             throw "Bad"
         }
@@ -16,7 +36,7 @@ public final class TOMLDecoder {
 
     public func decode<T : Decodable>(_ type: T.Type, from string: String) throws -> T {
         let topLevel = try TOMLDeserializer.tomlTable(with: string)
-        let decoder = TOMLDecoderImpl(referencing: self)
+        let decoder = TOMLDecoderImpl(referencing: self, options: self.options)
         guard let value = try decoder.unbox(topLevel, as: type) else {
             throw "Bad"
         }
@@ -58,7 +78,10 @@ extension DecodingError {
 fileprivate final class TOMLDecoderImpl: Decoder {
     var storage: TOMLDecodingStorage
     var codingPath: [CodingKey]
-    var userInfo: [CodingUserInfoKey : Any] = [:]
+    var options: TOMLDecoder.Options
+    var userInfo: [CodingUserInfoKey : Any] {
+        return self.options.userInfo
+    }
 
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
         guard let table = self.storage.topContainer as? [String: Any] else {
@@ -80,10 +103,11 @@ fileprivate final class TOMLDecoderImpl: Decoder {
         return self
     }
 
-    fileprivate init(referencing container: Any, at codingPath: [CodingKey] = []) {
+    fileprivate init(referencing container: Any, at codingPath: [CodingKey] = [], options: TOMLDecoder.Options) {
         self.storage = TOMLDecodingStorage()
         self.storage.push(container: container)
         self.codingPath = codingPath
+        self.options = options
     }
 }
 
@@ -103,51 +127,121 @@ extension TOMLDecoderImpl {
     }
 
     fileprivate func unbox(_ value: Any, as type: Double.Type) throws -> Double? {
-        return value as? Double
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Double
+        case .flexible:
+            return (value as? Double) ?? (value as? Int64).flatMap(Double.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Float.Type) throws -> Float? {
-        return value as? Float
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Float
+        case .flexible:
+            return (value as? Double).flatMap(Float.init(exactly:))
+                ?? (value as? Int64).flatMap(Float.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Int.Type) throws -> Int? {
-        return value as? Int
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Int
+        case .flexible:
+            return (value as? Int64).flatMap(Int.init(exactly:))
+                ?? (value as? Double).flatMap(Int.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Int8.Type) throws -> Int8? {
-        return value as? Int8
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Int8
+        case .flexible:
+            return (value as? Int64).flatMap(Int8.init(exactly:))
+                ?? (value as? Double).flatMap(Int8.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Int16.Type) throws -> Int16? {
-        return value as? Int16
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Int16
+        case .flexible:
+            return (value as? Int64).flatMap(Int16.init(exactly:))
+                ?? (value as? Double).flatMap(Int16.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Int32.Type) throws -> Int32? {
-        return value as? Int32
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Int32
+        case .flexible:
+            return (value as? Int64).flatMap(Int32.init(exactly:))
+                ?? (value as? Double).flatMap(Int32.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: Int64.Type) throws -> Int64? {
-        return value as? Int64
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? Int64
+        case .flexible:
+            return (value as? Int64) ?? (value as? Double).flatMap(Int64.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: UInt.Type) throws -> UInt? {
-        return value as? UInt
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? UInt
+        case .flexible:
+            return (value as? Int64).flatMap(UInt.init(exactly:))
+                ?? (value as? Double).flatMap(UInt.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: UInt8.Type) throws -> UInt8? {
-        return value as? UInt8
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? UInt8
+        case .flexible:
+            return (value as? Int64).flatMap(UInt8.init(exactly:))
+                ?? (value as? Double).flatMap(UInt8.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: UInt16.Type) throws -> UInt16? {
-        return value as? UInt16
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? UInt16
+        case .flexible:
+            return (value as? Int64).flatMap(UInt16.init(exactly:))
+                ?? (value as? Double).flatMap(UInt16.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: UInt32.Type) throws -> UInt32? {
-        return value as? UInt32
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? UInt32
+        case .flexible:
+            return (value as? Int64).flatMap(UInt32.init(exactly:))
+                ?? (value as? Double).flatMap(UInt32.init(exactly:))
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: UInt64.Type) throws -> UInt64? {
-        return value as? UInt64
+        switch self.options.numberDecodingStrategy {
+        case .strict:
+            return value as? UInt64
+        case .flexible:
+            return (value as? Int64).flatMap(UInt64.init(exactly:))
+                ?? (value as? Double).flatMap(UInt64.init(exactly:))
+        }
     }
 }
 
@@ -442,7 +536,7 @@ fileprivate struct TOMLKeyedDecodingContainer<K : CodingKey> : KeyedDecodingCont
         defer { self.decoder.codingPath.removeLast() }
 
         let value: Any = self.container[key.stringValue]! // ?? NSNull() TODO: huh?
-        return TOMLDecoderImpl(referencing: value, at: self.decoder.codingPath)
+        return TOMLDecoderImpl(referencing: value, at: self.decoder.codingPath, options: self.decoder.options)
     }
 
 
@@ -772,7 +866,7 @@ fileprivate struct TOMLUnkeyedDecodingContainer : UnkeyedDecodingContainer {
 
         let value = self.container[self.currentIndex]
         self.currentIndex += 1
-        return TOMLDecoderImpl(referencing: value, at: self.decoder.codingPath)
+        return TOMLDecoderImpl(referencing: value, at: self.decoder.codingPath, options: self.decoder.options)
     }
 
 }

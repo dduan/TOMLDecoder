@@ -118,4 +118,24 @@ final class TOMLDecoderTests: XCTestCase {
 
         XCTAssertEqual(result, expectation)
     }
+
+    func testFlexibleIntegerDecodingStrategy() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let health: Int
+        }
+
+        let expectation = Player(id: "abc", health: 123)
+
+        let toml = """
+        id = "abc"
+        health = 123
+        """
+
+        let decoder = TOMLDecoder()
+        decoder.numberDecodingStrategy = .flexible
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
 }
