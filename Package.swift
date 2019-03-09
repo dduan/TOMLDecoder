@@ -10,12 +10,13 @@ let package = Package(
             targets: ["TOMLDecoder"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/dduan/TOMLDeserialization", from: "0.1.0"),
+        .package(url: "https://github.com/dduan/TOMLDeserializer", from: "0.1.0"),
+        .package(url: "https://github.com/dduan/NetTime", from: "0.1.1"),
     ],
     targets: [
         .target(
             name: "TOMLDecoder",
-            dependencies: ["TOMLDeserializer"]),
+            dependencies: ["TOMLDeserializer", "NetTime"]),
         .testTarget(
             name: "TOMLDecoderTests",
             dependencies: ["TOMLDecoder"]),

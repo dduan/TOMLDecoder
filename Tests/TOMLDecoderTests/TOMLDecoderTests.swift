@@ -138,4 +138,37 @@ final class TOMLDecoderTests: XCTestCase {
 
         XCTAssertEqual(result, expectation)
     }
+
+    func testNetTimeDateDecoding() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let health: Int64
+            let signUpDate: DateTime
+            let favoriteDate: LocalDate
+            let favoriteTime: LocalTime
+            let favoriteLocalDateTime: LocalDateTime
+        }
+
+        let date = LocalDate(year: 2019, month: 3, day: 08)!
+        let time = LocalTime(hour: 21, minute: 57, second: 0)!
+        let offset = TimeOffset(sign: .plus, hour: 0, minute: 0)!
+        let dateTime = DateTime(date: date, time: time, utcOffset: offset)
+        let localDateTime = LocalDateTime(date: date, time: time)
+        let expectation = Player(id: "abc", health: 123, signUpDate: dateTime, favoriteDate: date,
+                                 favoriteTime: time, favoriteLocalDateTime: localDateTime)
+
+        let toml = """
+        id = "abc"
+        health = 123
+        signUpDate = 2019-03-08 21:57:00Z
+        favoriteDate = 2019-03-08
+        favoriteTime = 21:57:00
+        favoriteLocalDateTime = 2019-03-08 21:57:00
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
 }

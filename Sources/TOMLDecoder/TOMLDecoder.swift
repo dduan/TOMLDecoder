@@ -1,4 +1,5 @@
 import TOMLDeserializer
+import NetTime
 
 public final class TOMLDecoder {
     public enum NumberDecodingStrategy {
@@ -113,6 +114,20 @@ fileprivate final class TOMLDecoderImpl: Decoder {
 
 extension TOMLDecoderImpl {
     fileprivate func unbox<T : Decodable>(_ value: Any, as type: T.Type) throws -> T? {
+        if type == String.self {
+            return (value as? String) as? T
+        } else if type == Bool.self {
+            return (value as? Bool) as? T
+        } else if type == DateTime.self {
+            return (value as? DateTime) as? T
+        } else if type == LocalDate.self {
+            return (value as? LocalDate) as? T
+        } else if type == LocalTime.self {
+            return (value as? LocalTime) as? T
+        } else if type == LocalDateTime.self {
+            return (value as? LocalDateTime) as? T
+        }
+
         self.storage.push(container: value)
         defer { self.storage.popContainer() }
         return try type.init(from: self)

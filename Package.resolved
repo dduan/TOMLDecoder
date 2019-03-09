@@ -6,17 +6,17 @@
         "repositoryURL": "https://github.com/dduan/NetTime",
         "state": {
           "branch": null,
-          "revision": "1c3fddf304a96add27dc69f926df18c07783d699",
-          "version": "0.1.0"
+          "revision": "5128a33932b4c8d5da12b3103f90a03f749c94ad",
+          "version": "0.1.1"
         }
       },
       {
         "package": "TOMLDeserializer",
-        "repositoryURL": "https://github.com/dduan/TOMLDeserialization",
+        "repositoryURL": "https://github.com/dduan/TOMLDeserializer",
         "state": {
           "branch": null,
-          "revision": "151e7d8c12b0d9a61965c848aaa2e5cfab4e6136",
-          "version": "0.1.0"
+          "revision": "5342af119b04b2cc44bd7c745c4467bcb9d43074",
+          "version": "0.1.1"
         }
       }
     ]
