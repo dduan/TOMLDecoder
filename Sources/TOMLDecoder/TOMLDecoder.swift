@@ -13,14 +13,21 @@ public final class TOMLDecoder {
         case normal
     }
 
+    public enum DataDecodingStrategy {
+        case base64
+        case custom((_ decoder: Decoder) throws -> Data)
+    }
+
     var numberDecodingStrategy = NumberDecodingStrategy.normal
     var dateDecodingStrategy = NumberDecodingStrategy.normal
+    var dataDecodingStrategy = DataDecodingStrategy.base64
     var userInfo: [CodingUserInfoKey : Any] = [:]
 
     /// Options set on the top-level encoder to pass down the decoding hierarchy.
     fileprivate struct Options {
         let numberDecodingStrategy: NumberDecodingStrategy
         let dateDecodingStrategy: NumberDecodingStrategy
+        let dataDecodingStrategy: DataDecodingStrategy
         let userInfo: [CodingUserInfoKey : Any]
     }
 
@@ -28,6 +35,7 @@ public final class TOMLDecoder {
     fileprivate var options: Options {
         return Options(numberDecodingStrategy: self.numberDecodingStrategy,
                        dateDecodingStrategy: self.dateDecodingStrategy,
+                       dataDecodingStrategy: self.dataDecodingStrategy,
                        userInfo: userInfo)
     }
 
@@ -145,11 +153,33 @@ extension TOMLDecoderImpl {
             return (value as? LocalTime) as? T
         } else if type == LocalDateTime.self {
             return (value as? LocalDateTime) as? T
+        } else if type == Data.self {
+            return try self.unbox(value, as: Data.self) as? T
         }
 
         self.storage.push(container: value)
         defer { self.storage.popContainer() }
         return try type.init(from: self)
+    }
+
+    fileprivate func unbox(_ value: Any, as type: Data.Type) throws -> Data? {
+        switch self.options.dataDecodingStrategy {
+        case .base64:
+            guard let string = value as? String else {
+                throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
+            }
+
+            guard let data = Data(base64Encoded: string) else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Encountered Data is not valid Base64."))
+            }
+
+            return data
+
+        case .custom(let closure):
+            self.storage.push(container: value)
+            defer { self.storage.popContainer() }
+            return try closure(self)
+        }
     }
 
     fileprivate func unbox(_ value: Any, as type: DateComponents.Type) throws -> DateComponents? {

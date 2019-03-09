@@ -85,8 +85,8 @@ final class TOMLDecoderTests: XCTestCase {
             enum Keys: String, CodingKey {
                 case players
             }
-            init(from decoder: Decoder) throws {
 
+            init(from decoder: Decoder) throws {
                 var values = try decoder.container(keyedBy: Keys.self)
                     .nestedUnkeyedContainer(forKey: .players)
 
@@ -265,5 +265,49 @@ final class TOMLDecoderTests: XCTestCase {
         let decoder = TOMLDecoder()
         decoder.dateDecodingStrategy = .strict
         XCTAssertThrowsError(try decoder.decode(Player.self, from: toml))
+    }
+
+    func testDecodingFoundationDataWithCustom() throws {
+        struct Payload: Codable, Equatable {
+            let id: String
+            let body: Data
+        }
+
+        let expectation = Payload(id: "abc", body: "def".data(using: .utf8)!)
+        let toml = """
+        id = 'abc'
+        body = 'def'
+        """
+
+        let decoder = TOMLDecoder()
+        decoder.dataDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            return try container.decode(String.self).data(using: .utf8)!
+        }
+
+        let result = try decoder.decode(Payload.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testDecodingFoundationDataWithBase64() throws {
+        struct Payload: Codable, Equatable {
+            let id: String
+            let body: Data
+        }
+
+
+        let base64Data = "aGVsbG8sIHdvcmxkIQ=="
+        let body = Data(base64Encoded: base64Data)!
+        let expectation = Payload(id: "abc", body: body)
+        let toml = """
+        id = 'abc'
+        body = '\(base64Data)'
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Payload.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
     }
 }
