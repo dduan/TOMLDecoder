@@ -39,28 +39,33 @@ final class TOMLDecoderTests: XCTestCase {
         struct Player: Decodable, Equatable {
             let id: String
             let health: Int64
+            let pi: Double
 
             enum PlayerKeys: String, CodingKey {
                 case id
                 case health
+                case pi
             }
 
-            init(id: String, health: Int64) {
+            init(id: String, health: Int64, pi: Double) {
                 self.id = id
                 self.health = health
+                self.pi = pi
             }
 
             init(from decoder: Decoder) throws {
                 let values = try decoder.container(keyedBy: PlayerKeys.self)
                 self.id = try values.decode(String.self, forKey: .id)
                 self.health = try values.decode(Int64.self, forKey: .health)
+                self.pi = try values.decode(Double.self, forKey: .pi)
             }
         }
 
-        let expectation = Player(id: "abc", health: 123)
+        let expectation = Player(id: "abc", health: 123, pi: 3.14)
         let toml = """
         id = "abc"
         health = 123
+        pi = 3.14
         """
 
         let result = try TOMLDecoder().decode(Player.self, from: toml)
