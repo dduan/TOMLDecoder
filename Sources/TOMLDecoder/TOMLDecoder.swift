@@ -121,6 +121,8 @@ extension TOMLDecoderImpl {
             return (value as? Bool) as? T
         } else if type == Date.self {
             return try self.unbox(value, as: Date.self) as? T
+        } else if type == DateComponents.self {
+            return try self.unbox(value, as: DateComponents.self) as? T
         } else if type == DateTime.self {
             return (value as? DateTime) as? T
         } else if type == LocalDate.self {
@@ -134,6 +136,20 @@ extension TOMLDecoderImpl {
         self.storage.push(container: value)
         defer { self.storage.popContainer() }
         return try type.init(from: self)
+    }
+
+    fileprivate func unbox(_ value: Any, as type: DateComponents.Type) throws -> DateComponents? {
+        if let time = value as? LocalTime {
+            // TODO: second fractions needs to be supported
+            return DateComponents(hour: Int(time.hour), minute: Int(time.minute), second: Int(time.second))
+        } else if let date = value as? LocalDate {
+            return DateComponents(year: Int(date.year), month: Int(date.month), day: Int(date.day))
+        } else if let date = value as? LocalDateTime {
+            return DateComponents(year: Int(date.year), month: Int(date.month), day: Int(date.day),
+                                  hour: Int(date.hour), minute: Int(date.minute), second: Int(date.second))
+        }
+
+        throw DecodingError._typeMismatch(at: self.codingPath, expectation: LocalDateTime.self, reality: value)
     }
 
     fileprivate func unbox(_ value: Any, as type: Date.Type) throws -> Date? {

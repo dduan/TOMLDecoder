@@ -191,4 +191,62 @@ final class TOMLDecoderTests: XCTestCase {
 
         XCTAssertEqual(result, expectation)
     }
+
+    func testFoundationDateComponentsFromLocalDateDecoding() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let signUpDate: DateComponents
+        }
+
+        let expectation = Player(id: "abc", signUpDate: DateComponents(year: 2001, month: 1, day: 1))
+
+        let toml = """
+        id = "abc"
+        signUpDate = 2001-01-01
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testFoundationDateComponentsFromLocalTimeDecoding() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let signUpTime: DateComponents
+        }
+
+        let expectation = Player(id: "abc", signUpTime: DateComponents(hour: 1, minute: 2, second: 3))
+
+        let toml = """
+        id = "abc"
+        signUpTime = 01:02:03
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testFoundationDateComponentsFromLocalDateTimeDecoding() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let signUpTime: DateComponents
+        }
+
+        let expectation = Player(id: "abc", signUpTime: DateComponents(year: 2001, month: 1, day: 1, hour: 1,
+                                                                       minute: 2, second: 3))
+
+        let toml = """
+        id = "abc"
+        signUpTime = 2001-01-01 01:02:03
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
 }
