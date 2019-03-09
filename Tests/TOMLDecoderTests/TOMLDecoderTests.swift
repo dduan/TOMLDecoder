@@ -296,7 +296,6 @@ final class TOMLDecoderTests: XCTestCase {
             let body: Data
         }
 
-
         let base64Data = "aGVsbG8sIHdvcmxkIQ=="
         let body = Data(base64Encoded: base64Data)!
         let expectation = Payload(id: "abc", body: body)
@@ -307,6 +306,50 @@ final class TOMLDecoderTests: XCTestCase {
 
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Payload.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testDecodingSnakeCaseKeyStrategy() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let firstProfession: String
+        }
+
+        let expectation = Player(id: "abc", firstProfession: "Cook")
+
+        let toml = """
+        id = "abc"
+        first_profession = "Cook"
+        """
+
+        let decoder = TOMLDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testDecodingCustomKeyStrategy() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let profession: String
+        }
+
+        let expectation = Player(id: "abc", profession: "Cook")
+
+        let toml = """
+        id = "abc"
+        PROFESSION = "Cook"
+        """
+
+        let decoder = TOMLDecoder()
+        decoder.keyDecodingStrategy = .custom { codingPath in
+            let key = codingPath.last!
+            return type(of: key).init(stringValue: key.stringValue.lowercased())!
+        }
+
+        let result = try decoder.decode(Player.self, from: toml)
 
         XCTAssertEqual(result, expectation)
     }
