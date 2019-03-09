@@ -120,13 +120,11 @@ final class TOMLDecoderTests: XCTestCase {
         XCTAssertEqual(result, expectation)
     }
 
-    func testFlexibleIntegerDecodingStrategy() throws {
+    func testnormalIntegerDecodingStrategy() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int
         }
-
-        let expectation = Player(id: "abc", health: 123)
 
         let toml = """
         id = "abc"
@@ -134,10 +132,8 @@ final class TOMLDecoderTests: XCTestCase {
         """
 
         let decoder = TOMLDecoder()
-        decoder.numberDecodingStrategy = .flexible
-        let result = try decoder.decode(Player.self, from: toml)
-
-        XCTAssertEqual(result, expectation)
+        decoder.numberDecodingStrategy = .strict
+        XCTAssertThrowsError(try decoder.decode(Player.self, from: toml))
     }
 
     func testNetTimeDateDecoding() throws {
@@ -248,5 +244,21 @@ final class TOMLDecoderTests: XCTestCase {
         let result = try decoder.decode(Player.self, from: toml)
 
         XCTAssertEqual(result, expectation)
+    }
+
+    func testFoundationDateDecodingWithStrictStrategy() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let signUpDate: Date
+        }
+
+        let toml = """
+        id = "abc"
+        signUpDate = 2001-01-01 00:00:00Z
+        """
+
+        let decoder = TOMLDecoder()
+        decoder.dateDecodingStrategy = .strict
+        XCTAssertThrowsError(try decoder.decode(Player.self, from: toml))
     }
 }

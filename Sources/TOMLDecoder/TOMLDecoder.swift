@@ -5,21 +5,29 @@ import TOMLDeserializer
 public final class TOMLDecoder {
     public enum NumberDecodingStrategy {
         case strict
-        case flexible
+        case normal
     }
 
-    var numberDecodingStrategy = NumberDecodingStrategy.strict // TODO: is this the right default?
+    public enum DateDecodingStrategy {
+        case strict
+        case normal
+    }
+
+    var numberDecodingStrategy = NumberDecodingStrategy.normal
+    var dateDecodingStrategy = NumberDecodingStrategy.normal
     var userInfo: [CodingUserInfoKey : Any] = [:]
 
     /// Options set on the top-level encoder to pass down the decoding hierarchy.
     fileprivate struct Options {
         let numberDecodingStrategy: NumberDecodingStrategy
+        let dateDecodingStrategy: NumberDecodingStrategy
         let userInfo: [CodingUserInfoKey : Any]
     }
 
     /// The options set on the top-level decoder.
     fileprivate var options: Options {
         return Options(numberDecodingStrategy: self.numberDecodingStrategy,
+                       dateDecodingStrategy: self.dateDecodingStrategy,
                        userInfo: userInfo)
     }
 
@@ -120,8 +128,14 @@ extension TOMLDecoderImpl {
         } else if type == Bool.self {
             return (value as? Bool) as? T
         } else if type == Date.self {
+            if self.options.dateDecodingStrategy == .strict {
+                throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Foundation Date is not allowed in strict date strategy"))
+            }
             return try self.unbox(value, as: Date.self) as? T
         } else if type == DateComponents.self {
+            if self.options.dateDecodingStrategy == .strict {
+                throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Foundation DateComponents is not allowed in strict date strategy"))
+            }
             return try self.unbox(value, as: DateComponents.self) as? T
         } else if type == DateTime.self {
             return (value as? DateTime) as? T
@@ -172,7 +186,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Double
-        case .flexible:
+        case .normal:
             return (value as? Double) ?? (value as? Int64).flatMap(Double.init(exactly:))
         }
     }
@@ -181,7 +195,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Float
-        case .flexible:
+        case .normal:
             return (value as? Double).flatMap(Float.init(exactly:))
                 ?? (value as? Int64).flatMap(Float.init(exactly:))
         }
@@ -191,7 +205,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(Int.init(exactly:))
                 ?? (value as? Double).flatMap(Int.init(exactly:))
         }
@@ -201,7 +215,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int8
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(Int8.init(exactly:))
                 ?? (value as? Double).flatMap(Int8.init(exactly:))
         }
@@ -211,7 +225,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int16
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(Int16.init(exactly:))
                 ?? (value as? Double).flatMap(Int16.init(exactly:))
         }
@@ -221,7 +235,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int32
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(Int32.init(exactly:))
                 ?? (value as? Double).flatMap(Int32.init(exactly:))
         }
@@ -231,7 +245,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int64
-        case .flexible:
+        case .normal:
             return (value as? Int64) ?? (value as? Double).flatMap(Int64.init(exactly:))
         }
     }
@@ -240,7 +254,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(UInt.init(exactly:))
                 ?? (value as? Double).flatMap(UInt.init(exactly:))
         }
@@ -250,7 +264,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt8
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(UInt8.init(exactly:))
                 ?? (value as? Double).flatMap(UInt8.init(exactly:))
         }
@@ -260,7 +274,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt16
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(UInt16.init(exactly:))
                 ?? (value as? Double).flatMap(UInt16.init(exactly:))
         }
@@ -270,7 +284,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt32
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(UInt32.init(exactly:))
                 ?? (value as? Double).flatMap(UInt32.init(exactly:))
         }
@@ -280,7 +294,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt64
-        case .flexible:
+        case .normal:
             return (value as? Int64).flatMap(UInt64.init(exactly:))
                 ?? (value as? Double).flatMap(UInt64.init(exactly:))
         }
