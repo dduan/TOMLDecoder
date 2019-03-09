@@ -67,23 +67,26 @@ public final class TOMLDecoder {
     }
 
     public init() {}
-    public func decode<T : Decodable, Bytes>(_ type: T.Type, from data: Bytes) throws -> T
-        where Bytes: Collection, Bytes.Element == UInt8
-    {
-        let topLevel = try TOMLDeserializer.tomlTable(with: data)
-        let decoder = TOMLDecoderImpl(referencing: self, options: self.options)
-        guard let value = try decoder.unbox(topLevel, as: type) else {
-            throw "Bad"
+    public func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        guard let text = String(bytes: data, encoding: .utf8) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid UTF8.", underlyingError: nil))
+
         }
 
-        return value
+        return try self.decode(type, from: text)
     }
 
-    public func decode<T : Decodable>(_ type: T.Type, from string: String) throws -> T {
-        let topLevel = try TOMLDeserializer.tomlTable(with: string)
+    public func decode<T: Decodable>(_ type: T.Type, from text: String) throws -> T {
+        let topLevel: Any
+        do {
+            topLevel = try TOMLDeserializer.tomlTable(with: text)
+        } catch {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid TOML.", underlyingError: error))
+        }
+
         let decoder = TOMLDecoderImpl(referencing: self, options: self.options)
         guard let value = try decoder.unbox(topLevel, as: type) else {
-            throw "Bad"
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: [], debugDescription: "The given data did not contain a top-level value."))
         }
 
         return value
@@ -130,7 +133,9 @@ fileprivate final class TOMLDecoderImpl: Decoder {
 
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
         guard let table = self.storage.topContainer as? [String: Any] else {
-            throw "Expected table." // TODO: replace with real error
+            throw DecodingError.valueNotFound(KeyedDecodingContainer<Key>.self,
+                                              DecodingError.Context(codingPath: self.codingPath,
+                                                                    debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
         return KeyedDecodingContainer(TOMLKeyedDecodingContainer(referencing: self, wrapping: table))
@@ -138,7 +143,9 @@ fileprivate final class TOMLDecoderImpl: Decoder {
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
         guard let array = self.storage.topContainer as? [Any] else {
-            throw "Expected array." // TODO: replace with real error
+            throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
+                                              DecodingError.Context(codingPath: self.codingPath,
+                                                                    debugDescription: "Cannot get unkeyed decoding container -- found null value instead."))
         }
 
         return TOMLUnkeyedDecodingContainer(referencing: self, wrapping: array)
@@ -380,8 +387,7 @@ fileprivate struct TOMLKeyedDecodingContainer<K : CodingKey> : KeyedDecodingCont
             )
         case .custom(let converter):
             self.container = Dictionary(
-                container.map {
-                    (converter(decoder.codingPath + [TOMLKey(stringValue: $0.key, intValue: nil)]).stringValue, $0.value) },
+                container.map { (converter(decoder.codingPath + [TOMLKey(stringValue: $0.key, intValue: nil)]).stringValue, $0.value) },
                 uniquingKeysWith: { (first, _) in first }
             )
         }
