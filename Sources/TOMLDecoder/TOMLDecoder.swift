@@ -1,5 +1,6 @@
-import TOMLDeserializer
+import Foundation
 import NetTime
+import TOMLDeserializer
 
 public final class TOMLDecoder {
     public enum NumberDecodingStrategy {
@@ -118,6 +119,8 @@ extension TOMLDecoderImpl {
             return (value as? String) as? T
         } else if type == Bool.self {
             return (value as? Bool) as? T
+        } else if type == Date.self {
+            return try self.unbox(value, as: Date.self) as? T
         } else if type == DateTime.self {
             return (value as? DateTime) as? T
         } else if type == LocalDate.self {
@@ -131,6 +134,14 @@ extension TOMLDecoderImpl {
         self.storage.push(container: value)
         defer { self.storage.popContainer() }
         return try type.init(from: self)
+    }
+
+    fileprivate func unbox(_ value: Any, as type: Date.Type) throws -> Date? {
+        guard let datetime = value as? DateTime else {
+            throw DecodingError._typeMismatch(at: self.codingPath, expectation: DateTime.self, reality: value)
+        }
+
+        return Date(timeIntervalSinceReferenceDate: datetime.timeIntervalSince2001)
     }
 
     fileprivate func unbox(_ value: Any, as type: Bool.Type) throws -> Bool? {

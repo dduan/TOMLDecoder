@@ -1,4 +1,5 @@
 @testable import TOMLDecoder
+import Foundation
 import NetTime
 import XCTest
 
@@ -164,6 +165,25 @@ final class TOMLDecoderTests: XCTestCase {
         favoriteDate = 2019-03-08
         favoriteTime = 21:57:00
         favoriteLocalDateTime = 2019-03-08 21:57:00
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(Player.self, from: toml)
+
+        XCTAssertEqual(result, expectation)
+    }
+
+    func testFoundationDateDecoding() throws {
+        struct Player: Codable, Equatable {
+            let id: String
+            let signUpDate: Date
+        }
+
+        let expectation = Player(id: "abc", signUpDate: Date(timeIntervalSinceReferenceDate: 0))
+
+        let toml = """
+        id = "abc"
+        signUpDate = 2001-01-01 00:00:00Z
         """
 
         let decoder = TOMLDecoder()
