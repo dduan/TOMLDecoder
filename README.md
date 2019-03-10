@@ -3,16 +3,16 @@
 Swift Decodable for [TOML](https://github.com/toml-lang/toml).
 
 ```swift
-    struct Player: Codable {
-        let id: String
-        let health: Int64
-    }
+struct Player: Codable {
+    let id: String
+    let health: Int64
+}
 
-    struct Team: Codable {
-        let players: [Player]
-    }
+struct Team: Codable {
+    let players: [Player]
+}
 
-    let team = try TOMLDecoder().decode(Team.self, from: team_toml)
+let team = try TOMLDecoder().decode(Team.self, from: team_toml)
 ```
 
 ## Installation
