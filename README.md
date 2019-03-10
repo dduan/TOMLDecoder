@@ -1,6 +1,6 @@
 # TOMLDecoder
 
-Swift Decodable for [TOML](https://github.com/toml-lang/toml).
+Swift Decodable for [TOML 0.5](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md).
 
 ```swift
 struct Player: Codable {
