@@ -1,3 +1,8 @@
-.build
+.DS_Store
+/.build
+/Packages
 xcuserdata
-*.xcodeproj
+Carthage
+TOMLDecoder.framework.zip
+Dependencies/NetTime
+Dependencies/TOMLDeserializer

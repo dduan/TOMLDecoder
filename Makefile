@@ -9,8 +9,12 @@ update-linux-test-manifest:
 	@touch Tests/TOMLDecoderTests/XCTestManifests.swift
 	@swift test --generate-linuxmain
 
-fetch-dependencies:
+fetch-dependencies: clean-dependencies
 	@Scripts/fetch-dependencies.py
+
+clean-dependencies:
+	@rm -rf Dependencies/NetTime
+	@rm -rf Dependencies/TOMLDeserializer
 
 test-docker:
 	@Scripts/run-tests-linux-docker.sh
@@ -45,7 +49,7 @@ test-CocoaPods:
 test-iOS:
 	set -o pipefail && \
 		xcodebuild \
-		-project TOMLDecoder.xcodeproj \
+		-workspace TOMLDecoder.xcworkspace \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		-destination "name=iPhone X,OS=12.1" \
@@ -54,7 +58,7 @@ test-iOS:
 test-macOS:
 	set -o pipefail && \
 		xcodebuild \
-		-project TOMLDecoder.xcodeproj \
+		-workspace TOMLDecoder.xcworkspace \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		test \
@@ -62,7 +66,7 @@ test-macOS:
 test-tvOS:
 	set -o pipefail && \
 		xcodebuild \
-		-project TOMLDecoder.xcodeproj \
+		-workspace TOMLDecoder.xcworkspace \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		-destination "platform=tvOS Simulator,name=Apple TV,OS=12.1" \
@@ -79,5 +83,3 @@ test-carthage:
 	ls Carthage/build/tvOS/TOMLDecoder.framework
 	ls Carthage/build/watchOS/TOMLDecoder.framework
 
-clean:
-	rm -rf Dependencies/NetTime

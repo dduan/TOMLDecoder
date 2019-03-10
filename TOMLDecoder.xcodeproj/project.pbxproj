@@ -1,0 +1,401 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		373161B5223482E8009A480F /* NetTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 373161B4223482E8009A480F /* NetTime.framework */; };
+		373161B7223482EC009A480F /* TOMLDeserializer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 373161B6223482EC009A480F /* TOMLDeserializer.framework */; };
+		37D5B8E2221A3C5B004E086E /* TOMLDecoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37D5B8D8221A3C5B004E086E /* TOMLDecoder.framework */; };
+		37DA77CC22347BEC00361EE3 /* TOMLDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DA77CB22347BEC00361EE3 /* TOMLDecoder.swift */; };
+		37DA77D722347CF700361EE3 /* TOMLDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DA77CD22347BFA00361EE3 /* TOMLDecoderTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		37D5B8E3221A3C5B004E086E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 37D5B8CD221A3C20004E086E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37D5B8D7221A3C5B004E086E;
+			remoteInfo = TOMLDecoder;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		373161B4223482E8009A480F /* NetTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NetTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		373161B6223482EC009A480F /* TOMLDeserializer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TOMLDeserializer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		37D5B8D8221A3C5B004E086E /* TOMLDecoder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TOMLDecoder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		37D5B8E1221A3C5B004E086E /* TOMLDecoderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TOMLDecoderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Framework.xcconfig; sourceTree = "<group>"; };
+		37D5B915221A3CD9004E086E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		37D5B917221A3CD9004E086E /* UniversalFramework_Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Base.xcconfig; sourceTree = "<group>"; };
+		37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Test.xcconfig; sourceTree = "<group>"; };
+		37D5B919221A3CD9004E086E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		37DA77CB22347BEC00361EE3 /* TOMLDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TOMLDecoder.swift; sourceTree = "<group>"; };
+		37DA77CD22347BFA00361EE3 /* TOMLDecoderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TOMLDecoderTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		37D5B8D5221A3C5B004E086E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				373161B5223482E8009A480F /* NetTime.framework in Frameworks */,
+				373161B7223482EC009A480F /* TOMLDeserializer.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37D5B8DE221A3C5B004E086E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37D5B8E2221A3C5B004E086E /* TOMLDecoder.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		37D5B8CC221A3C20004E086E = {
+			isa = PBXGroup;
+			children = (
+				37D5B8F2221A3CB3004E086E /* Sources */,
+				37D5B902221A3CC1004E086E /* Tests */,
+				37D5B912221A3CD9004E086E /* Resources */,
+				37D5B8D9221A3C5B004E086E /* Products */,
+				E3ABEBF022267F6C005851DB /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		37D5B8D9221A3C5B004E086E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				37D5B8D8221A3C5B004E086E /* TOMLDecoder.framework */,
+				37D5B8E1221A3C5B004E086E /* TOMLDecoderTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		37D5B8F2221A3CB3004E086E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				37D5B8F3221A3CB3004E086E /* TOMLDecoder */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		37D5B8F3221A3CB3004E086E /* TOMLDecoder */ = {
+			isa = PBXGroup;
+			children = (
+				37DA77CB22347BEC00361EE3 /* TOMLDecoder.swift */,
+			);
+			path = TOMLDecoder;
+			sourceTree = "<group>";
+		};
+		37D5B902221A3CC1004E086E /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				37D5B904221A3CC1004E086E /* TOMLDecoderTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		37D5B904221A3CC1004E086E /* TOMLDecoderTests */ = {
+			isa = PBXGroup;
+			children = (
+				37DA77CD22347BFA00361EE3 /* TOMLDecoderTests.swift */,
+			);
+			path = TOMLDecoderTests;
+			sourceTree = "<group>";
+		};
+		37D5B912221A3CD9004E086E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				37D5B913221A3CD9004E086E /* xcconfigs */,
+				37D5B919221A3CD9004E086E /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		37D5B913221A3CD9004E086E /* xcconfigs */ = {
+			isa = PBXGroup;
+			children = (
+				37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */,
+				37D5B915221A3CD9004E086E /* LICENSE */,
+				37D5B917221A3CD9004E086E /* UniversalFramework_Base.xcconfig */,
+				37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */,
+			);
+			path = xcconfigs;
+			sourceTree = "<group>";
+		};
+		E3ABEBF022267F6C005851DB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				373161B4223482E8009A480F /* NetTime.framework */,
+				373161B6223482EC009A480F /* TOMLDeserializer.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		37D5B8D3221A3C5B004E086E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		37D5B8D7221A3C5B004E086E /* TOMLDecoder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37D5B8EE221A3C5B004E086E /* Build configuration list for PBXNativeTarget "TOMLDecoder" */;
+			buildPhases = (
+				37D5B8D3221A3C5B004E086E /* Headers */,
+				37D5B8D4221A3C5B004E086E /* Sources */,
+				37D5B8D5221A3C5B004E086E /* Frameworks */,
+				37D5B8D6221A3C5B004E086E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TOMLDecoder;
+			productName = TOMLDecoder;
+			productReference = 37D5B8D8221A3C5B004E086E /* TOMLDecoder.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		37D5B8E0221A3C5B004E086E /* TOMLDecoderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37D5B8EF221A3C5B004E086E /* Build configuration list for PBXNativeTarget "TOMLDecoderTests" */;
+			buildPhases = (
+				37D5B8DD221A3C5B004E086E /* Sources */,
+				37D5B8DE221A3C5B004E086E /* Frameworks */,
+				37D5B8DF221A3C5B004E086E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				37D5B8E4221A3C5B004E086E /* PBXTargetDependency */,
+			);
+			name = TOMLDecoderTests;
+			productName = TOMLDecoderTests;
+			productReference = 37D5B8E1221A3C5B004E086E /* TOMLDecoderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		37D5B8CD221A3C20004E086E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1010;
+				LastUpgradeCheck = 1010;
+				TargetAttributes = {
+					37D5B8D7221A3C5B004E086E = {
+						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
+					};
+					37D5B8E0221A3C5B004E086E = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = 37D5B8D0221A3C20004E086E /* Build configuration list for PBXProject "TOMLDecoder" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 37D5B8CC221A3C20004E086E;
+			productRefGroup = 37D5B8D9221A3C5B004E086E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				37D5B8D7221A3C5B004E086E /* TOMLDecoder */,
+				37D5B8E0221A3C5B004E086E /* TOMLDecoderTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		37D5B8D6221A3C5B004E086E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37D5B8DF221A3C5B004E086E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		37D5B8D4221A3C5B004E086E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37DA77CC22347BEC00361EE3 /* TOMLDecoder.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37D5B8DD221A3C5B004E086E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37DA77D722347CF700361EE3 /* TOMLDecoderTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		37D5B8E4221A3C5B004E086E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37D5B8D7221A3C5B004E086E /* TOMLDecoder */;
+			targetProxy = 37D5B8E3221A3C5B004E086E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		37D5B8D1221A3C20004E086E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_VERSION = 4.2;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		37D5B8D2221A3C20004E086E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_VERSION = 4.2;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		37D5B8EA221A3C5B004E086E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoder;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		37D5B8EB221A3C5B004E086E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoder;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+		37D5B8EC221A3C5B004E086E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		37D5B8ED221A3C5B004E086E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		37D5B8D0221A3C20004E086E /* Build configuration list for PBXProject "TOMLDecoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37D5B8D1221A3C20004E086E /* Debug */,
+				37D5B8D2221A3C20004E086E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37D5B8EE221A3C5B004E086E /* Build configuration list for PBXNativeTarget "TOMLDecoder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37D5B8EA221A3C5B004E086E /* Debug */,
+				37D5B8EB221A3C5B004E086E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37D5B8EF221A3C5B004E086E /* Build configuration list for PBXNativeTarget "TOMLDecoderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37D5B8EC221A3C5B004E086E /* Debug */,
+				37D5B8ED221A3C5B004E086E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 37D5B8CD221A3C20004E086E /* Project object */;
+}
