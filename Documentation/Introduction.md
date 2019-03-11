@@ -135,6 +135,15 @@ decoder.keyDecodingStrategy = .custom
 }
 ```
 
+## Deserializing TOML
+
+TOMLDecoder leverages [TOMLDeserializer][3] to convert TOML text to structured
+in-memory representation such as `[String: Any]`, `Int64`, `DateTime`, etc. If
+you, for some reason, find that `Decodable` is unnecessary or insufficient for
+your needs (for example, Foundation is not available on your platform), you can
+use [TOMLDeserializer][3] directly.
+
 [0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [1]: https://github.com/dduan/NetTime
 [2]: AboutJSONDecoder.md
+[3]: https://github.com/dduan/TOMLDeserializer
