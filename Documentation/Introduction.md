@@ -9,8 +9,8 @@ From its specification:
 > should be easy to parse into data structures in a wide variety of languages.
 
 The rest of the document assumes you are familiar with [TOML v0.5.0][0].
-Additionally, it'll make more sense if you [know the distinction][2] between
-`Decodable`, `Docoder` and `JSONDecoder`.
+Additionally, it'll make more sense if you [know the distinctions][2] among
+`Decodable`, `Docoder`, and `JSONDecoder`.
 
 ## Decoding TOML
 
