@@ -1,19 +1,24 @@
 # TOMLDecoder
 
-Swift Decodable for [TOML 0.5](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md).
+Decode your values from [TOML v0.5.0][] contents.
 
 ```swift
-struct Player: Codable {
-    let id: String
-    let health: Int64
-}
-
 struct Team: Codable {
+    struct Player: Codable {
+        let id: String
+        let health: Int
+        let joinDate: Date
+    }
+
     let players: [Player]
 }
 
-let team = try TOMLDecoder().decode(Team.self, from: team_toml)
+let team = try TOMLDecoder().decode(Team.self, from: tomlData)
 ```
+
+Learn more in the [introduction](Documentation/Introduction.md).
+
+[TOML v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 
 ## Installation
 
