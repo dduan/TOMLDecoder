@@ -119,9 +119,9 @@ decoder.numberDecodingStrategy = .strict
 
 #### Keys
 
-TOMLDecoder provides the exact same options for converting keys for keyed
-containers. As demonstrated in a example eariler in this document, the most
-useful strategy is perhaps `.convertFromSnakeCase`:
+TOMLDecoder provides the exact same options as JSONDecoder for converting keys
+for keyed containers. As demonstrated in a example eariler in this document, the
+most useful strategy is perhaps `.convertFromSnakeCase`:
 
 ```swift
 decoder.keyDecodingStrategy = .convertFromSnakeCase
