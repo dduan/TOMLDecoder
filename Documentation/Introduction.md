@@ -40,9 +40,9 @@ let p = try decoder.decode(Player.self, from: toml) // `Data` would work too
 ### Decoding Strategies
 
 TOML [defines][0] a set of well-defined types for values. For example, integers
-are signed and 64-bit. Date, time and so-called "offset Date-Time" have distict
-types. Internally, TOMLDecoder uses the following Swift types to represent them
-in memory:
+are signed and 64-bit. Date, time and so-called "offset Date-Time" have distinct
+definitions. Internally, TOMLDecoder uses the following Swift types to represent
+them in memory:
 
 | TOML             | Swift                   |
 | -                | -                       |
