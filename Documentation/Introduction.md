@@ -137,4 +137,4 @@ decoder.keyDecodingStrategy = .custom
 
 [0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [1]: https://github.com/dduan/NetTime
-[2]: AboutJSONDecocder.md
+[2]: AboutJSONDecoder.md
