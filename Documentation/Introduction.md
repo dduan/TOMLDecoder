@@ -12,7 +12,7 @@ The rest of the document assumes you are familiar with [TOML v0.5.0][0].
 Additionally, it'll make more sense if you [know the distinction][2] between
 `Decodable`, `Docoder` and `JSONDecoder`.
 
-## Working with TOML
+## Decoding TOML
 
 ### Overview
 
