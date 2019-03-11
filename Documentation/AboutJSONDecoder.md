@@ -10,8 +10,7 @@ let aThing = try JSONDecoder().decode(Thing.self, from: jsonData)
 ```
 
 However, for the rest of this document to make more sense, we must draw some
-distinction among things. *Skip this section if you feel comfortable explaining
-concepts in the title to others.*
+distinction among things.
 
 Let's examine some details from that example.
 
