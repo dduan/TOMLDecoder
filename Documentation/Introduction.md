@@ -108,9 +108,10 @@ decoder will try its best to convert the TOML number to a number type from Swift
 standard library, despite the underlying value can only be an `Int64` or
 a `Double`.
 
-When only use the actual underlying numebers are desired, you can set the
-`.strict` number decoding strategy, in which case integers are only allowed to
-be decoded as `Int64` and floats `Double`:
+Using only the underlying `Int64` or `Double` has the advantage of preserving
+most precision. If this is desirable, you can set the `.strict` number decoding
+strategy, in which case integers are only allowed to be decoded as `Int64` and
+floats `Double`:
 
 ```swift
 decoder.numberDecodingStrategy = .strict
