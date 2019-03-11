@@ -16,7 +16,7 @@ Additionally, it'll make more sense if you [know the distinction][2] between
 
 ### Overview
 
-For the most part, `TOMLDecoder` should "just work" with your
+For the most part, TOMLDecoder should "just work" with your
 `Decodable/Codable` types:
 
 ```swift
@@ -41,7 +41,7 @@ let p = try decoder.decode(Player.self, from: toml) // `Data` would work too
 
 TOML [defines][0] a set of well-defined value types. For example, integers are
 signed and 64-bit. Date, time and so-called "offset Date-Time" have distict
-types. Internally, `TOMLDecoder` uses these Swift types to represent them in
+types. Internally, TOMLDecoder uses these Swift types to represent them in
 memory:
 
 | TOML             | Swift                   |
@@ -88,12 +88,12 @@ reqested.
 #### Data
 
 There's no such thing as "data" in TOML. But you may occasionally need to embed
-a image or something. When you ask `TOMLDecoder` to decode a `Data`, the
+a image or something. When you ask TOMLDecoder to decode a `Data`, the
 expected underlying value from TOML will be a `String` in base64 format.
 Otherwise you'll get an error.
 
 You may also choose to decode manually. In that case you'll need to set
-a `TOMLDecoder`'s' `.dataDecodingStratgy` to `.custom`:
+a TOMLDecoder's' `.dataDecodingStratgy` to `.custom`:
 
 ```swift
 decoder.dataDecodingStrategy = .custom { (decoder: Decocder) -> Data in
@@ -103,7 +103,7 @@ decoder.dataDecodingStrategy = .custom { (decoder: Decocder) -> Data in
 
 #### Numbers
 
-The `.numberDecodingStrategy` property on a `TOMLDecoder` controls behaviors for
+The `.numberDecodingStrategy` property on a TOMLDecoder controls behaviors for
 decoding numbers. It's default value, `NumberDecodingStrategy.normal`, means the
 decoder will try its best to convert the TOML number to a number type from Swift
 standard library, despite the underlying value can only be an `Int64` or
@@ -119,7 +119,7 @@ decoder.numberDecodingStrategy = .strict
 
 #### Keys
 
-`TOMLDecoder` provides the exact same options for converting keys for keyed
+TOMLDecoder provides the exact same options for converting keys for keyed
 containers. As demonstrated in a example eariler in this document, the most
 useful strategy is perhaps `.convertFromSnakeCase`:
 
