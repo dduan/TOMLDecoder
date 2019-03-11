@@ -39,10 +39,10 @@ let p = try decoder.decode(Player.self, from: toml) // `Data` would work too
 
 ### Decoding Strategies
 
-TOML [defines][0] a set of well-defined value types. For example, integers are
-signed and 64-bit. Date, time and so-called "offset Date-Time" have distict
-types. Internally, TOMLDecoder uses these Swift types to represent them in
-memory:
+TOML [defines][0] a set of well-defined types for values. For example, integers
+are signed and 64-bit. Date, time and so-called "offset Date-Time" have distict
+types. Internally, TOMLDecoder uses the following Swift types to represent them
+in memory:
 
 | TOML             | Swift                   |
 | -                | -                       |
@@ -57,8 +57,7 @@ memory:
 | Array            | `Swift.[Any]`           |
 | Table            | `Swift.[String: Any]`   |
 
-This section describes how to choose types for properties in your own
-`Decodable`.
+Let's see how to best choose types for properties in your own `Decodable`.
 
 #### Date and Time
 
@@ -69,9 +68,9 @@ in time (is `2019-03-10 17:30:00` local time or UTC time?). The proper way to
 represent such information in your own type, therefore, is to use
 `DateComponents` from Foundation, or one of the matching types from NetTime.
 
-The types from [NetTime][1] library are created to losslessly deserialize
-timestamps in RFC 3339 format (which is required for TOML date/time types). They
-conform to `Decodable`. So you may use them as properties of your own decodable
+The types from [NetTime][1] library are created to losslessly deserialize RFC
+3339 timestamps (which is required for TOML date/time types). They conform to
+`Decodable`. So you may use them directly as properties of your own decodable
 object, as an alternative to `Foundation.Date`.
 
 In case you only want to use the NetTime types for some reason (performance,
@@ -88,9 +87,9 @@ reqested.
 #### Data
 
 There's no such thing as "data" in TOML. But you may occasionally need to embed
-a image or something. When you ask TOMLDecoder to decode a `Data`, the
-expected underlying value from TOML will be a `String` in base64 format.
-Otherwise you'll get an error.
+a image or something. When you ask TOMLDecoder to decode a `Data`, the expected
+underlying value from TOML will be a `String` in base64 format.  Otherwise
+you'll get an error.
 
 You may also choose to decode manually. In that case you'll need to set
 a TOMLDecoder's' `.dataDecodingStratgy` to `.custom`:
