@@ -82,7 +82,7 @@ decoder.dateDecodingStrategy = .strict
 ```
 
 With this setting, decoding will fail if `Date` or `DateComponents` are
-reqested.
+requested.
 
 #### Data
 
