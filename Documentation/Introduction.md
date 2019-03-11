@@ -103,7 +103,7 @@ decoder.dataDecodingStrategy = .custom { (decoder: Decocder) -> Data in
 #### Numbers
 
 The `.numberDecodingStrategy` property on a TOMLDecoder controls behaviors for
-decoding numbers. It's default value, `NumberDecodingStrategy.normal`, means the
+decoding numbers. Its default value, `NumberDecodingStrategy.normal`, means the
 decoder will try its best to convert the TOML number to a number type from Swift
 standard library, despite the underlying value can only be an `Int64` or
 a `Double`.
