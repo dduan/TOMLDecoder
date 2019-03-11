@@ -17,6 +17,7 @@ let team = try TOMLDecoder().decode(Team.self, from: tomlData)
 ```
 
 Learn more in the [introduction](Documentation/Introduction.md).
+
 [TOML v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 
 ## Installation
