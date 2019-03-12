@@ -2,19 +2,37 @@ import Foundation
 import NetTime
 import TOMLDeserializer
 
-public final class TOMLDecoder {
+open class TOMLDecoder {
+    /// The strategy to use for decoding numbers.
     public enum NumberDecodingStrategy {
+        /// Decode only `Int64` for integers or `Double` for floating numbers. Consider other types of number a type mismatch.
         case strict
-        case normal
+
+        /// Decode to requested standard library number types. This is the default stractegy.
+        case lenient
     }
 
     public enum DateDecodingStrategy {
+        /// Decode off-set date exclusively as `NetTime.DateTime`.
+        /// Decode local time as exclusively as `NetTime.LocalTime`.
+        /// Decode local date as exclusively `NetTime.LocalDate`.
+        /// Decode local datetime exclusively as `NetTime.LocalDateTime`.
+        /// Any unmatched type request is a type mismatch.
         case strict
-        case normal
+
+        /// Decode off-set dates as `Foundation.Date` or `NetTime.DateTime`.
+        /// Decode local time as `Foundation.DateComponents` or `NetTime.LocalTime`.
+        /// Decode local date as `Foundation.DateComponents` or `NetTime.LocalDate`.
+        /// Decode local datetime as `Foundation.DateComponents` or `NetTime.LocalDateTime`.
+        /// This is the default strategy.
+        case lenient
     }
 
     public enum DataDecodingStrategy {
+        /// Decode the `Data` from a Base64-encoded string. This is the default strategy.
         case base64
+
+        /// Decode the `Data` as a custom value decoded by the given closure.
         case custom((_ decoder: Decoder) throws -> Data)
     }
 
@@ -41,11 +59,20 @@ public final class TOMLDecoder {
         case custom((_ codingPath: [CodingKey]) -> CodingKey)
     }
 
-    var numberDecodingStrategy = NumberDecodingStrategy.normal
-    var dateDecodingStrategy = NumberDecodingStrategy.normal
-    var dataDecodingStrategy = DataDecodingStrategy.base64
-    var keyDecodingStrategy = KeyDecodingStrategy.useDefaultKeys
-    var userInfo: [CodingUserInfoKey : Any] = [:]
+    /// The strategy to use in decoding integer and floats. Defaults to `.lenient`.
+    open var numberDecodingStrategy = NumberDecodingStrategy.lenient
+
+    /// The strategy to use in decoding dates. Defaults to `.lenient`.
+    open var dateDecodingStrategy = NumberDecodingStrategy.lenient
+
+    /// The strategy to use in decoding binary data. Defaults to `.base64`.
+    open var dataDecodingStrategy = DataDecodingStrategy.base64
+
+    /// The strategy to use for decoding keys. Defaults to `.useDefaultKeys`.
+    open var keyDecodingStrategy = KeyDecodingStrategy.useDefaultKeys
+
+    /// Contextual user-provided information for use during decoding.
+    open var userInfo: [CodingUserInfoKey : Any] = [:]
 
     /// Options set on the top-level encoder to pass down the decoding hierarchy.
     fileprivate struct Options {
@@ -250,7 +277,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Double
-        case .normal:
+        case .lenient:
             return (value as? Double) ?? (value as? Int64).flatMap(Double.init(exactly:))
         }
     }
@@ -259,7 +286,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Float
-        case .normal:
+        case .lenient:
             return (value as? Double).flatMap(Float.init(exactly:))
                 ?? (value as? Int64).flatMap(Float.init(exactly:))
         }
@@ -269,7 +296,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(Int.init(exactly:))
                 ?? (value as? Double).flatMap(Int.init(exactly:))
         }
@@ -279,7 +306,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int8
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(Int8.init(exactly:))
                 ?? (value as? Double).flatMap(Int8.init(exactly:))
         }
@@ -289,7 +316,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int16
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(Int16.init(exactly:))
                 ?? (value as? Double).flatMap(Int16.init(exactly:))
         }
@@ -299,7 +326,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int32
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(Int32.init(exactly:))
                 ?? (value as? Double).flatMap(Int32.init(exactly:))
         }
@@ -309,7 +336,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? Int64
-        case .normal:
+        case .lenient:
             return (value as? Int64) ?? (value as? Double).flatMap(Int64.init(exactly:))
         }
     }
@@ -318,7 +345,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(UInt.init(exactly:))
                 ?? (value as? Double).flatMap(UInt.init(exactly:))
         }
@@ -328,7 +355,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt8
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(UInt8.init(exactly:))
                 ?? (value as? Double).flatMap(UInt8.init(exactly:))
         }
@@ -338,7 +365,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt16
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(UInt16.init(exactly:))
                 ?? (value as? Double).flatMap(UInt16.init(exactly:))
         }
@@ -348,7 +375,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt32
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(UInt32.init(exactly:))
                 ?? (value as? Double).flatMap(UInt32.init(exactly:))
         }
@@ -358,7 +385,7 @@ extension TOMLDecoderImpl {
         switch self.options.numberDecodingStrategy {
         case .strict:
             return value as? UInt64
-        case .normal:
+        case .lenient:
             return (value as? Int64).flatMap(UInt64.init(exactly:))
                 ?? (value as? Double).flatMap(UInt64.init(exactly:))
         }
@@ -687,7 +714,14 @@ fileprivate struct TOMLKeyedDecodingContainer<K : CodingKey> : KeyedDecodingCont
 fileprivate struct TOMLUnkeyedDecodingContainer : UnkeyedDecodingContainer {
     private let decoder: TOMLDecoderImpl
     private let container: [Any]
+
+    /// The path of coding keys taken to get to this point in decoding.
     public private(set) var codingPath: [CodingKey]
+
+    /// The index of the element we're about to decode.
+    public private(set) var currentIndex: Int
+
+    // MARK: - UnkeyedDecodingContainer Methods
 
     public var count: Int? {
         return self.container.count
@@ -697,7 +731,6 @@ fileprivate struct TOMLUnkeyedDecodingContainer : UnkeyedDecodingContainer {
         return self.currentIndex >= self.count!
     }
 
-    public private(set) var currentIndex: Int
 
     fileprivate init(referencing decoder: TOMLDecoderImpl, wrapping container: [Any]) {
         self.decoder = decoder
