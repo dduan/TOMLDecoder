@@ -35,7 +35,7 @@ pod "TOMLDecoder"
 #### With [SwiftPM](https://swift.org/package-manager)
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", from: "0.0.2")
+.package(url: "https://github.com/dduan/TOMLDecoder", from: "0.0.3")
 ```
 
 #### With [Carthage](https://github.com/Carthage/Carthage)
