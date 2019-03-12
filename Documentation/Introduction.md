@@ -39,7 +39,7 @@ let p = try decoder.decode(Player.self, from: toml) // `Data` would work too
 
 ### Decoding Strategies
 
-TOML [defines][0] a set of well-defined types for values. For example, integers
+TOML [has][0] a set of well-defined types for values. For example, integers
 are signed and 64-bit. Date, time and so-called "offset Date-Time" have distinct
 definitions. Internally, TOMLDecoder uses the following Swift types to represent
 them in memory:
@@ -65,13 +65,12 @@ In Foundation, a Date represents a point in time. It maps directly to the
 concept of "Offset Date-time" in TOML. However, the rest of the date/time types
 can/should not be decoded as `Date` as they lack a relationship to a fix-point
 in time (is `2019-03-10 17:30:00` local time or UTC time?). The proper way to
-represent such information in your own type, therefore, is to use
-`DateComponents` from Foundation, or one of the matching types from NetTime.
+represent such information, therefore, is to use `DateComponents` from
+Foundation, or one of the corresponding types from NetTime.
 
 The types from [NetTime][1] library are created to losslessly deserialize RFC
-3339 timestamps (which is required for TOML date/time types). They conform to
-`Decodable`. So you may use them directly as properties of your own decodable
-object, as an alternative to `Foundation.Date`.
+3339 timestamps (which is required in TOML for date/time). They conform to
+`Decodable`. They are decodable alternatives to `Foundation.Date`.
 
 In case you only want to use the NetTime types for some reason (performance,
 lossless details from RFC 3339 fields, etc), you may use the `.strict` strategy
@@ -102,11 +101,11 @@ decoder.dataDecodingStrategy = .custom { (decoder: Decocder) -> Data in
 
 #### Numbers
 
-The `.numberDecodingStrategy` property on a TOMLDecoder controls behaviors for
-decoding numbers. Its default value, `NumberDecodingStrategy.lenient`, means the
-decoder will try its best to convert the TOML number to a number type from Swift
-standard library, despite the underlying value can only be an `Int64` or
-a `Double`.
+`.numberDecodingStrategy` property on an instance of TOMLDecoder controls
+behaviors for decoding numbers. Its default value,
+`NumberDecodingStrategy.lenient`, means the decoder will try its best to convert
+the TOML number to a number type from Swift standard library or NSNumber, from
+its underlying value that can only be an `Int64` or `Double`.
 
 Using only the underlying `Int64` or `Double` has the advantage of preserving
 most precision. If this is desirable, you can set the `.strict` number decoding

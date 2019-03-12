@@ -8,7 +8,7 @@ open class TOMLDecoder {
         /// Decode only `Int64` for integers or `Double` for floating numbers. Consider other types of number a type mismatch.
         case strict
 
-        /// Decode to requested standard library number types. This is the default stractegy.
+        /// Decode to requested standard library number types or NSNumber. This is the default stractegy.
         case lenient
     }
 
@@ -216,11 +216,25 @@ extension TOMLDecoderImpl {
             return (value as? LocalDateTime) as? T
         } else if type == Data.self {
             return try self.unbox(value, as: Data.self) as? T
+        } else if type == NSNumber.self {
+            return try self.unbox(value, as: NSNumber.self) as? T
         }
 
         self.storage.push(container: value)
         defer { self.storage.popContainer() }
         return try type.init(from: self)
+    }
+
+    fileprivate func unbox(_ value: Any, as type: NSNumber.Type) throws -> NSNumber? {
+        if self.options.numberDecodingStrategy == .lenient {
+            if let integer = value as? Int64 {
+                return NSNumber(value: integer)
+            } else if let float = value as? Double {
+                return NSNumber(value: float)
+            }
+        }
+
+        throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
     }
 
     fileprivate func unbox(_ value: Any, as type: Data.Type) throws -> Data? {
