@@ -13,9 +13,9 @@ extension TOMLDecoderTests {
         ("testFoundationDateComponentsFromLocalTimeDecoding", testFoundationDateComponentsFromLocalTimeDecoding),
         ("testFoundationDateDecoding", testFoundationDateDecoding),
         ("testFoundationDateDecodingWithStrictStrategy", testFoundationDateDecodingWithStrictStrategy),
+        ("testLenientIntegerDecodingStrategy", testLenientIntegerDecodingStrategy),
         ("testNestedUnkeyedDecodingContainer", testNestedUnkeyedDecodingContainer),
         ("testNetTimeDateDecoding", testNetTimeDateDecoding),
-        ("testnormalIntegerDecodingStrategy", testnormalIntegerDecodingStrategy),
     ]
 }
 

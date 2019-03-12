@@ -125,7 +125,7 @@ final class TOMLDecoderTests: XCTestCase {
         XCTAssertEqual(result, expectation)
     }
 
-    func testnormalIntegerDecodingStrategy() throws {
+    func testLenientIntegerDecodingStrategy() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int
