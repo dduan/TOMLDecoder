@@ -79,6 +79,8 @@ express, if you will, the *schema*s of our types.
 `Foundation` provides `(JSON|Property)(De|En)coder` that uses these *schema*s
 as hints to translate external representations from/to the actual types.
 
+![](images/Summary.png?raw=true)
+
 Due to differences in format specifiactions, you'll find that not all
 `Decodable` types for JSON are appropriate for decoding from TOML content. But
 now you know that the choices you made for JSON aren't necerilly the "one true
