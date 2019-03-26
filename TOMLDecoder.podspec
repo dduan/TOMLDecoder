@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name                      = "TOMLDecoder"
-  spec.version                   = "0.0.3"
+  spec.version                   = "0.1.3"
   spec.summary                   = "Swift Decodable support for TOML."
   spec.homepage                  = "https://github.com/dduan/TOMLDecoder"
   spec.license                   = { :type => "MIT", :file => "LICENSE.md" }
