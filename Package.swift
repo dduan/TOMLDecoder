@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 
 import PackageDescription
 
@@ -10,8 +10,8 @@ let package = Package(
             targets: ["TOMLDecoder"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/dduan/TOMLDeserializer", from: "0.1.2"),
-        .package(url: "https://github.com/dduan/NetTime", from: "0.1.1"),
+        .package(url: "https://github.com/dduan/TOMLDeserializer", from: "0.2.3"),
+        .package(url: "https://github.com/dduan/NetTime", from: "0.2.1"),
     ],
     targets: [
         .target(
