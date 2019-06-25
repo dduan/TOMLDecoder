@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "TOMLDecoder",
+    platforms: [.iOS(.v9), .tvOS(.v9), .watchOS(.v2), .macOS(.v10_10)],
     products: [
         .library(
             name: "TOMLDecoder",
