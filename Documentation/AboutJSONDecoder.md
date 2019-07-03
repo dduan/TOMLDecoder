@@ -16,18 +16,18 @@ Let's examine some details from this example.
 
 ## `import Foundation`
 
-Though left out from the code, one must import `Foundation` for that example to
-work. `JSONDecoder` is part of the _Foundation_ library, which is distinct
-from the _standard library_. `PropertyListDecoder` is another decoder that
-`Foundation` provides.
+Though left out from the code, one must import `Foundation` for the example tt
+the beginning o work.  `JSONDecoder` is part of the _Foundation_ library, which
+is distinct from Swift's _standard library_.  `PropertyListDecoder` is another
+decoder that `Foundation` provides.
 
-The reason these decoders are _not_ part of the standard library is two fold.
-First, many useful types such as `Data` and `Date` are part of `Foundation`.
+Decoders living in Foundation as opposed to Swift makes a ton of sense. Firstly,
+many useful types such as `Data` and `Date` are part of `Foundation`.
 A theoretical decoder defined in the _standard library_ won't be able to support
 them (from its point-of-view, `Data` might as well be from any other third-party
 library). Secondarily, the logic that converts `Data`, a byte sequence, to
-structured, in-memory values such as a `[String: Any]`, lives in `Foundation`
-and `JSONDecoder` depends on it (Remember `JSONSerialization`? Yea, good times).
+structured, in-memory values such as a `Dictionary<String: Any>`, lives in
+`Foundation` and `JSONDecoder` depends on it (`JSONSerialization`).
 
 ## `Thing` Conforms To `Decodable`
 
@@ -63,9 +63,9 @@ So when you customize a type's conformance to `Decodable`, you are using
 `Foundation`, a separate library.
 
 On the flip side, when we talk about things like `DateDecodingStrategy`, that's
-very specific to JSON and `JSONDecoder`. The standard library absolutely nothing
-about it. In this particular case, the JSON standard does not include a date
-value type, so there might be many ways to map a JSON value to
+very specific to JSON and `JSONDecoder`. The standard library knows absolutely
+nothing about it. In this particular case, the JSON standard does not include
+a date value type, so there might be many ways to map a JSON value to
 a `Foundation.Date`. A decoder for a different external representation may not
 need to provide the same options for this kind of "strategy", or even not have
 any for it at all (perhaps that external format has first-class date values 😉).
