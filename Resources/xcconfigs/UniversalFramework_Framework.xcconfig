@@ -30,3 +30,5 @@ ENABLE_BITCODE[sdk=iphonesimulator*]          = YES
 ENABLE_BITCODE[sdk=iphone*]                   = YES
 ENABLE_BITCODE[sdk=appletvsimulator*]         = YES
 ENABLE_BITCODE[sdk=appletv*]                  = YES
+INFOPLIST_FILE = Resources/Info.plist
+PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDeserializer

@@ -25,6 +25,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3718F7B623544B6F00D47812 /* TOMLDecoder_Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TOMLDecoder_Debug.xcconfig; sourceTree = "<group>"; };
+		3718F7B723544B9900D47812 /* TOMLDecoder_Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TOMLDecoder_Release.xcconfig; sourceTree = "<group>"; };
 		373161B4223482E8009A480F /* NetTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NetTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		373161B6223482EC009A480F /* TOMLDeserializer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TOMLDeserializer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37D5B8D8221A3C5B004E086E /* TOMLDecoder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TOMLDecoder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -127,6 +129,8 @@
 				37D5B915221A3CD9004E086E /* LICENSE */,
 				37D5B917221A3CD9004E086E /* UniversalFramework_Base.xcconfig */,
 				37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */,
+				3718F7B623544B6F00D47812 /* TOMLDecoder_Debug.xcconfig */,
+				3718F7B723544B9900D47812 /* TOMLDecoder_Release.xcconfig */,
 			);
 			path = xcconfigs;
 			sourceTree = "<group>";
@@ -273,66 +277,26 @@
 		37D5B8D1221A3C20004E086E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ONLY_ACTIVE_ARCH = YES;
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		37D5B8D2221A3C20004E086E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
 		37D5B8EA221A3C5B004E086E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */;
+			baseConfigurationReference = 3718F7B623544B6F00D47812 /* TOMLDecoder_Debug.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				DEFINES_MODULE = YES;
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = Resources/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoder;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = Debug;
 		};
 		37D5B8EB221A3C5B004E086E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 37D5B914221A3CD9004E086E /* UniversalFramework_Framework.xcconfig */;
+			baseConfigurationReference = 3718F7B723544B9900D47812 /* TOMLDecoder_Release.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				DEFINES_MODULE = YES;
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = Resources/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoder;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = Release;
 		};
@@ -341,10 +305,6 @@
 			baseConfigurationReference = 37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoderTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -353,11 +313,6 @@
 			baseConfigurationReference = 37D5B918221A3CD9004E086E /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = ca.duan.TOMLDecoderTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
