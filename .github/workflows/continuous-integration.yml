@@ -1,0 +1,31 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+jobs:
+  macos:
+    name: macOS
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        action:
+          - carthage
+          - CocoaPods
+          - iOS
+          - macOS
+          - SwiftPM
+          - tvOS
+    steps:
+    - uses: actions/checkout@v1
+    - name: Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_11.1.app
+    - name: Prepare And Test
+      run: make install-${{ matrix.action }} && make test-${{ matrix.action }}
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Test
+      run: make test-docker
