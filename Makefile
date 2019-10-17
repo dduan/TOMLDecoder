@@ -5,9 +5,16 @@ test:
 	@swift test -Xswiftc -warnings-as-errors
 
 update-linux-test-manifest:
+ifeq ($(shell uname),Darwin)
 	@rm Tests/TOMLDecoderTests/XCTestManifests.swift
 	@touch Tests/TOMLDecoderTests/XCTestManifests.swift
 	@swift test --generate-linuxmain
+else
+	@echo "Only works on macOS"
+endif
+
+test-codegen: update-linux-test-manifest
+	@git diff --exit-code
 
 fetch-dependencies: clean-dependencies
 	@Scripts/fetch-dependencies.py
