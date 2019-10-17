@@ -17,10 +17,7 @@ clean-dependencies:
 	@rm -rf Dependencies/TOMLDeserializer
 
 test-docker:
-	@Scripts/run-tests-linux-docker.sh
-
-develop-docker:
-	@Scripts/develop-linux-docker.sh
+	@Scripts/ubuntu.sh TOMLDecoder test 5.1.1 bionic
 
 clean-carthage:
 	@echo "Deleting Carthage artifacts…"
