@@ -7,3 +7,4 @@ TOMLDecoder.framework.zip
 Dependencies/NetTime
 Dependencies/TOMLDeserializer
 .swiftpm
+tmp
