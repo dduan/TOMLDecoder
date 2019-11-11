@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/dduan/TOMLDeserializer", from: "0.2.3"),
-        .package(url: "https://github.com/dduan/NetTime", from: "0.2.1"),
+        .package(url: "https://github.com/dduan/NetTime", from: "0.2.2"),
     ],
     targets: [
         .target(

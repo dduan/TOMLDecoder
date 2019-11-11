@@ -4,6 +4,10 @@ build: update-linux-test-manifest
 test:
 	@swift test -Xswiftc -warnings-as-errors
 
+generate-xcodeproj:
+	@Scripts/ensure-xcodegen.sh
+	@tmp/xcodegen
+
 update-linux-test-manifest:
 ifeq ($(shell uname),Darwin)
 	@rm Tests/TOMLDecoderTests/XCTestManifests.swift
@@ -13,11 +17,8 @@ else
 	@echo "Only works on macOS"
 endif
 
-test-codegen: update-linux-test-manifest
+test-codegen: update-linux-test-manifest generate-xcodeproj
 	@git diff --exit-code
-
-fetch-dependencies: clean-dependencies
-	@Scripts/fetch-dependencies.py
 
 clean-dependencies:
 	@rm -rf Dependencies/NetTime
@@ -34,11 +35,11 @@ clean-carthage:
 carthage-archive: clean-carthage install-carthage
 	@carthage build --archive
 
-install-carthage: fetch-dependencies
+install-carthage:
 	brew update
 	brew outdated carthage || brew upgrade carthage
 
-install-%: fetch-dependencies
+install-%:
 	true
 
 test-SwiftPM: test
@@ -52,7 +53,7 @@ test-CocoaPods:
 test-iOS:
 	set -o pipefail && \
 		xcodebuild \
-		-workspace TOMLDecoder.xcworkspace \
+		-project TOMLDecoder.xcodeproj \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		-destination "name=iPhone 11,OS=13.1" \
@@ -61,7 +62,7 @@ test-iOS:
 test-macOS:
 	set -o pipefail && \
 		xcodebuild \
-		-workspace TOMLDecoder.xcworkspace \
+		-project TOMLDecoder.xcodeproj \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		test \
@@ -69,7 +70,7 @@ test-macOS:
 test-tvOS:
 	set -o pipefail && \
 		xcodebuild \
-		-workspace TOMLDecoder.xcworkspace \
+		-project TOMLDecoder.xcodeproj \
 		-scheme TOMLDecoder \
 		-configuration Release \
 		-destination "platform=tvOS Simulator,name=Apple TV,OS=13.0" \
