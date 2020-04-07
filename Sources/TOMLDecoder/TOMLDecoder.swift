@@ -1059,63 +1059,125 @@ extension TOMLDecoderImpl: SingleValueDecodingContainer {
     }
 
     func decode(_ type: Bool.Type) throws -> Bool {
-        return try self.unbox(self.storage.topContainer, as: Bool.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+
+        return value
     }
 
     func decode(_ type: String.Type) throws -> String {
-        return try self.unbox(self.storage.topContainer, as: String.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+
+        return value
     }
 
     func decode(_ type: Double.Type) throws -> Double {
-        return try self.unbox(self.storage.topContainer, as: Double.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Float.Type) throws -> Float {
-        return try self.unbox(self.storage.topContainer, as: Float.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Int.Type) throws -> Int {
-        return try self.unbox(self.storage.topContainer, as: Int.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Int8.Type) throws -> Int8 {
-        return try self.unbox(self.storage.topContainer, as: Int8.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Int16.Type) throws -> Int16 {
-        return try self.unbox(self.storage.topContainer, as: Int16.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Int32.Type) throws -> Int32 {
-        return try self.unbox(self.storage.topContainer, as: Int32.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: Int64.Type) throws -> Int64 {
-        return try self.unbox(self.storage.topContainer, as: Int64.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: UInt.Type) throws -> UInt {
-        return try self.unbox(self.storage.topContainer, as: UInt.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: UInt8.Type) throws -> UInt8 {
-        return try self.unbox(self.storage.topContainer, as: UInt8.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: UInt16.Type) throws -> UInt16 {
-        return try self.unbox(self.storage.topContainer, as: UInt16.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: UInt32.Type) throws -> UInt32 {
-        return try self.unbox(self.storage.topContainer, as: UInt32.self)!
+       guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode(_ type: UInt64.Type) throws -> UInt64 {
-        return try self.unbox(self.storage.topContainer, as: UInt64.self)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 
     func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
-        return try self.unbox(self.storage.topContainer, as: type)!
+        guard let value = try self.unbox(self.storage.topContainer, as: type) else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, 
+                                                                         debugDescription: "Expected \(type) but found null instead."))
+        }
+        return value
     }
 }
 
