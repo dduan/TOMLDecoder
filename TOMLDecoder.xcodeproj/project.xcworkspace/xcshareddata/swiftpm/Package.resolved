@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "NetTime",
+        "repositoryURL": "https://github.com/dduan/NetTime",
+        "state": {
+          "branch": null,
+          "revision": "cc71922e621731b59b2b909eac7d6748c4a5a752",
+          "version": "0.2.2"
+        }
+      },
+      {
+        "package": "TOMLDeserializer",
+        "repositoryURL": "https://github.com/dduan/TOMLDeserializer",
+        "state": {
+          "branch": null,
+          "revision": "ea6b941e53cdedc9f4737903769eb9f2cf8d2acf",
+          "version": "0.2.4"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
