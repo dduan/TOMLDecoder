@@ -1,5 +1,0 @@
-#include "UniversalFramework_Framework.xcconfig"
-
-DEBUG_INFORMATION_FORMAT = dwarf
-SWIFT_OPTIMIZATION_LEVEL = -Onone
-

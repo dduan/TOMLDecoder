@@ -6,34 +6,15 @@ jobs:
   macos:
     name: macOS
     runs-on: macOS-latest
-    strategy:
-      matrix:
-        action:
-          - carthage
-          - CocoaPods
-          - iOS
-          - macOS
-          - SwiftPM
-          - tvOS
     steps:
     - uses: actions/checkout@v1
     - name: Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_11.1.app
-    - name: Prepare And Test
-      run: make install-${{ matrix.action }} && make test-${{ matrix.action }}
-
-  macos-generated-code:
-    name: Code generation
-    runs-on: macOS-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_11.1.app
-    - name: Ensure code are generated
-      run: make test-codegen
+      run: sudo xcode-select -s /Applications/Xcode_12.3.app
+    - name: Run Tests
+      run: make test
 
   docker:
-    name: Docker
+    name: Ubuntu
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
