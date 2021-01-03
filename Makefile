@@ -7,3 +7,5 @@ test:
 test-docker:
 	@Scripts/ubuntu.sh TOMLDecoder test 5.3.2 bionic
 
+benchmark:
+	@cd Benchmarks; swift run -c release
