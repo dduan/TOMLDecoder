@@ -917,7 +917,11 @@ enum TOMLParser {
             .map { $0.flatMap { $0 } }
             .take(
                 multilineBasicQuote
-                    .take(multilineBasicContent)
+                    .take(
+                        multilineBasicContent
+                            .nOrMore(1)
+                            .map { $0.flatMap { $0 }}
+                    )
                     .map { Array($0) + $1 }
                     .zeroOrMore()
                     .map { $0.flatMap { $0 }}
