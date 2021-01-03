@@ -106,39 +106,22 @@ hosts = [
 \"\"\"
 """
 
-let deserializationBenchmarks = BenchmarkSuite(name: "deserialing") { suite in
-    let decoder = TOMLDecoder()
-    suite.benchmark("example-toml") {
+let decoder = TOMLDecoder()
+
+let exampleBenchmarks = BenchmarkSuite(name: "example-toml") { suite in
+    suite.benchmark("decoder") {
         precondition((try? decoder.decode(Doc.self, from: toml))?.title == "TOML Example")
     }
 
-    suite.benchmark("long-string") {
-        precondition((try? decoder.decode(LongString.self, from: longString))?.s.isEmpty == false)
-    }
-}
-
-let decodingBenchmarks = BenchmarkSuite(name: "decoding") { suite in
-    suite.benchmark("example-toml") {
+    suite.benchmark("combinator") {
         precondition(((try? TOMLDecoder.tomlTable(with: toml))?["title"] as? String) == "TOML Example")
     }
 
-    suite.benchmark("long-string") {
-        precondition(((try? TOMLDecoder.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
-    }
-}
-
-let scannerDecodingBenchmarks = BenchmarkSuite(name: "decoding-scanner") { suite in
-    suite.benchmark("example-toml") {
+    suite.benchmark("scanner") {
         precondition(((try? TOMLDeserializer.tomlTable(with: toml))?["title"] as? String) == "TOML Example")
     }
 
-    suite.benchmark("long-string") {
-        precondition(((try? TOMLDeserializer.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
-    }
-}
-
-let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite in
-    suite.benchmark("example-toml") {
+    suite.benchmark("c") {
         precondition(
           toml.withCString { ptr in
               toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
@@ -146,7 +129,22 @@ let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite
         )
     }
 
-    suite.benchmark("long-string") {
+}
+
+let longStringBenchmarks = BenchmarkSuite(name: "long-string") { suite in
+    suite.benchmark("decoder") {
+        precondition((try? decoder.decode(LongString.self, from: longString))?.s.isEmpty == false)
+    }
+
+    suite.benchmark("combinator") {
+        precondition(((try? TOMLDecoder.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
+    }
+
+    suite.benchmark("scanner") {
+        precondition(((try? TOMLDeserializer.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
+    }
+
+    suite.benchmark("c") {
         precondition(
           longString.withCString { ptr in
               toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
@@ -155,9 +153,11 @@ let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite
     }
 }
 
+let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite in
+
+}
+
 Benchmark.main([
-    deserializationBenchmarks,
-    decodingBenchmarks,
-    scannerDecodingBenchmarks,
-    libtomlDecodingBenchmarks,
+    exampleBenchmarks,
+    longStringBenchmarks,
 ])
