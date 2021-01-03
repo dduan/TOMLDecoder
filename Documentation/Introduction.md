@@ -8,9 +8,11 @@ From its specification:
 > obvious semantics. TOML is designed to map unambiguously to a hash table. TOML
 > should be easy to parse into data structures in a wide variety of languages.
 
-The rest of the document assumes you are familiar with [TOML v0.5.0][0].
+The rest of the document assumes you are familiar with [TOML][0].
 Additionally, it'll make more sense if you [know the distinctions][2] among
 `Decodable`, `Docoder`, and `JSONDecoder`.
+
+TOMLDecoder is compliant with TOML spec 1.0.
 
 ## Decoding TOML
 
@@ -44,18 +46,18 @@ are signed and 64-bit. Date, time and so-called "offset Date-Time" have distinct
 definitions. Internally, TOMLDecoder uses the following Swift types to represent
 them in memory:
 
-| TOML             | Swift                   |
-| -                | -                       |
-| String           | `Swift.String`          |
-| Integer          | `Swift.Int64`           |
-| Float            | `Swift.Double`          |
-| Boolean          | `Swift.Bool`            |
-| Local Time       | `NetTime.LocalTime`     |
-| Local Date       | `NetTime.LocalDate`     |
-| Local Date-Time  | `NetTime.LocalDateTime` |
-| Offset Date-Time | `NetTime.DateTime`      |
-| Array            | `Swift.[Any]`           |
-| Table            | `Swift.[String: Any]`   |
+| TOML             | Swift                       |
+| -                | -                           |
+| String           | `Swift.String`              |
+| Integer          | `Swift.Int64`               |
+| Float            | `Swift.Double`              |
+| Boolean          | `Swift.Bool`                |
+| Local Time       | `Foundation.DateComponents` |
+| Local Date       | `Foundation.DateComponents` |
+| Local Date-Time  | `Foundation.DateComponents` |
+| Offset Date-Time | `Foundation.Date`           |
+| Array            | `Swift.[Any]`               |
+| Table            | `Swift.[String: Any]`       |
 
 Let's see how to best choose types for properties in your own `Decodable`.
 
@@ -67,21 +69,6 @@ can/should not be decoded as `Date` as they lack a relationship to a fix-point
 in time (is `2019-03-10 17:30:00` local time or UTC time?). The proper way to
 represent such information, therefore, is to use `DateComponents` from
 Foundation, or one of the corresponding types from NetTime.
-
-The types from [NetTime][1] library are created to losslessly deserialize RFC
-3339 timestamps (which is required in TOML for date/time). They conform to
-`Decodable`. They are decodable alternatives to `Foundation.Date`.
-
-In case you only want to use the NetTime types for some reason (performance,
-lossless details from RFC 3339 fields, etc), you may use the `.strict` strategy
-for date decoding:
-
-```swift
-decoder.dateDecodingStrategy = .strict
-```
-
-With this setting, decoding will fail if `Date` or `DateComponents` are
-requested.
 
 #### Data
 
@@ -136,13 +123,24 @@ decoder.keyDecodingStrategy = .custom
 
 ## Deserializing TOML
 
-TOMLDecoder leverages [TOMLDeserializer][3] to convert TOML text to structured
-in-memory representation such as `[String: Any]`, `Int64`, `DateTime`, etc. If
-you, for some reason, find that `Decodable` is unnecessary or insufficient for
-your needs (for example, Foundation is not available on your platform), you can
-use [TOMLDeserializer][3] directly.
+When you decode bytes or string to your `Codable`, behind the scenes,
+the first step `TOMLDecoder` takes is to parse the input to a `[String: Any]`
+value that contains all the TOML values in the right data type, organized into
+the right shape. This is what `JSONSerialization` does for JSON.
 
-[0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-[1]: https://github.com/dduan/NetTime
+You can perform this step yourself:
+
+```swift
+let tomlString = """
+[Person]
+let firstName = "Elon"
+let lastName = "Musk"
+"""
+
+let toml: [String: Any] = try JSONDecoder.tomlTable(with: tomlString)
+
+(toml["Person"] as? [String: String])?["firstName"] // Optional("Elon")
+```
+
+[0]: https://toml.io/
 [2]: AboutJSONDecoder.md
-[3]: https://github.com/dduan/TOMLDeserializer
