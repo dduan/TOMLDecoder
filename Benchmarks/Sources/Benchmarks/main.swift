@@ -2,6 +2,7 @@ import Benchmark
 import TOMLDecoder
 import Foundation
 import Ctomlc99
+import TOMLDeserializer
 
 struct Doc: Codable {
     let title: String
@@ -40,7 +41,7 @@ title = "TOML Example"
 
 [owner]
 name = "Tom Preston-Werner"
-dob = 1979-05-27T07:32:00-08:00 # First class dates
+dob = 1979-05-27T07:32:00-08:00
 
 [database]
 server = "192.168.1.1"
@@ -126,10 +127,28 @@ let decodingBenchmarks = BenchmarkSuite(name: "decoding") { suite in
     }
 }
 
+let scannerDecodingBenchmarks = BenchmarkSuite(name: "decoding-scanner") { suite in
+    suite.benchmark("example-toml") {
+        precondition(((try? TOMLDeserializer.tomlTable(with: toml))?["title"] as? String) == "TOML Example")
+    }
+
+    suite.benchmark("long-string") {
+        precondition(((try? TOMLDeserializer.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
+    }
+}
+
 let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite in
     suite.benchmark("example-toml") {
         precondition(
           toml.withCString { ptr in
+              toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
+          } != nil
+        )
+    }
+
+    suite.benchmark("long-string") {
+        precondition(
+          longString.withCString { ptr in
               toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
           } != nil
         )
@@ -139,5 +158,6 @@ let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite
 Benchmark.main([
     deserializationBenchmarks,
     decodingBenchmarks,
+    scannerDecodingBenchmarks,
     libtomlDecodingBenchmarks,
 ])

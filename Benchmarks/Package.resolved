@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "NetTime",
+        "repositoryURL": "https://github.com/dduan/NetTime",
+        "state": {
+          "branch": null,
+          "revision": "0b242344ea78e5f9b3eef50ddb9695f580a6d772",
+          "version": "0.2.3"
+        }
+      },
+      {
         "package": "swift-argument-parser",
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
@@ -17,6 +26,15 @@
           "branch": null,
           "revision": "8e0ef8bb7482ab97dcd2cd1d6855bd38921c345d",
           "version": "0.1.0"
+        }
+      },
+      {
+        "package": "TOMLDeserializer",
+        "repositoryURL": "https://github.com/dduan/TOMLDeserializer",
+        "state": {
+          "branch": null,
+          "revision": "28762efcff64ad1bb482d4e9632b8a4e817edb4a",
+          "version": "0.2.5"
         }
       }
     ]

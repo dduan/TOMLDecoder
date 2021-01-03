@@ -7,9 +7,10 @@ let package = Package(
     dependencies: [
         .package(name: "TOMLDecoder", path: "../"),
         .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", .exact("0.1.0")),
+        .package(name: "TOMLDeserializer", url: "https://github.com/dduan/TOMLDeserializer", .exact("0.2.5")),
     ],
     targets: [
-        .target(name: "Benchmarks", dependencies: ["Benchmark", "TOMLDecoder", "Ctomlc99"]),
+        .target(name: "Benchmarks", dependencies: ["Benchmark", "TOMLDecoder", "Ctomlc99", "TOMLDeserializer"]),
         .target(name: "Ctomlc99"),
     ]
 )
