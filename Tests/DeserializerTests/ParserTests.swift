@@ -1,4 +1,4 @@
-@testable import TOMLDeserializer
+@testable import Deserializer
 import XCTest
 import Foundation
 

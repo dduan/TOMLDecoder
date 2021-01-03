@@ -1,5 +1,5 @@
 import Foundation
-import TOMLDeserializer
+import Deserializer
 import XCTest
 
 final class TOMLDeserializerTests: XCTestCase {

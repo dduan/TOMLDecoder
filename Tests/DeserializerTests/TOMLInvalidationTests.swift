@@ -1,5 +1,5 @@
 import XCTest
-import TOMLDeserializer
+import Deserializer
 
 final class TOMLInvalidationTests: XCTestCase {
     private var directory: String {

@@ -13,14 +13,14 @@ let package = Package(
     targets: [
         .target(
             name: "TOMLDecoder",
-            dependencies: ["TOMLDeserializer"]),
-        .target(name: "TOMLDeserializer"),
+            dependencies: ["Deserializer"]),
+        .target(name: "Deserializer"),
         .testTarget(
             name: "TOMLDecoderTests",
             dependencies: ["TOMLDecoder"]),
         .testTarget(
-            name: "TOMLDeserializerTests",
-            dependencies: ["TOMLDeserializer"],
+            name: "DeserializerTests",
+            dependencies: ["Deserializer"],
             exclude: [
                 "invalid_fixtures",
                 "valid_fixtures",

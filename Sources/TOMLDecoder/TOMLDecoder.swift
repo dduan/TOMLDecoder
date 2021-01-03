@@ -1,5 +1,5 @@
 import Foundation
-@_implementationOnly import TOMLDeserializer
+@_implementationOnly import Deserializer
 
 open class TOMLDecoder {
     /// The strategy to use for decoding numbers.
