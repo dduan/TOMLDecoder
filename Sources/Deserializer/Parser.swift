@@ -946,8 +946,7 @@ enum TOMLParser {
                 basicChar
                     .zeroOrMore()
             )
-            .tail("\"" as FixedChar)
-            .map { $0.0 }
+            .skip("\"" as FixedChar)
     static let basicStringFull =
         basicStringFullText
             .map { TOMLValue.string(String($0)) }
