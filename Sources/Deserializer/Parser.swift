@@ -608,6 +608,104 @@ struct EscapeChar: Parser {
     }
 }
 
+struct MultilineLiteralString: Parser {
+    static let quotes = "'''".unicodeScalars
+    static let backslash = "\\".unicodeScalars.first!
+    static let lf = "\n".unicodeScalars
+    static let lfcr = "\r\n".unicodeScalars
+    static let singleQuote = "'".unicodeScalars.first!
+    static func isMultilineChar(_ c: UnicodeScalar) -> Bool {
+        let value = c.value
+        return value == 0x09 ||
+            value >= 0x20 && value <= 0x26 ||
+            value >= 0x28 && value <= 0x7E ||
+            value >= 0x80 && value <= 0xD7FF ||
+            value >= 0xE000 && value <= 0x10FFFF ||
+            value == 0x0A ||
+            value == 0x0D
+    }
+
+    func run(_ input: inout Text) -> String? {
+        let originalInput = input
+        guard input.starts(with: Self.quotes) else {
+            return nil
+        }
+
+        input.removeFirst(3)
+
+        if input.starts(with: Self.lf) {
+            input.removeFirst()
+        } else if input.starts(with: Self.lfcr) {
+            input.removeFirst(2)
+        }
+
+        var escapingNewline = false
+
+        var index = input.startIndex
+        while index < input.endIndex {
+            let c = input[index]
+
+            if escapingNewline {
+                if c.value == 0x0A || c.value == 0x0D {
+                    input.formIndex(after: &index)
+                } else if input[index...].starts(with: Self.lf) {
+                    input.formIndex(after: &index)
+                } else if input[index...].starts(with: Self.lfcr) {
+                    input.formIndex(after: &index)
+                    input.formIndex(after: &index)
+                } else {
+                    escapingNewline = false
+                }
+
+                continue
+            }
+
+            if c == Self.backslash {
+                input.formIndex(after: &index)
+                escapingNewline = true
+                continue
+            }
+
+            if c == Self.singleQuote {
+                let endIndex = index
+                input.formIndex(after: &index)
+                if index == input.endIndex {
+                    input = originalInput
+                    return nil
+                }
+
+                if input[index] == Self.singleQuote {
+                    input.formIndex(after: &index)
+                    if index == input.endIndex {
+                        input = originalInput
+                        return nil
+                    }
+
+                    if input[index] == Self.singleQuote {
+                        let output = input[input.startIndex ..< endIndex]
+                        input.removeFirst(output.count + 3)
+                        return String(output)
+                    }
+
+                    continue
+                }
+
+                continue
+            }
+
+            if Self.isMultilineChar(c) {
+                input.formIndex(after: &index)
+                continue
+            } else {
+                return nil
+            }
+        }
+
+        input = originalInput
+        return nil
+    }
+}
+
 enum TOMLParser {
     static let boolean = OneOf2(
             FixedPrefix("true".unicodeScalars[...]),
@@ -841,12 +939,6 @@ enum TOMLParser {
             .flatten()
 
     static let multilineLiteralDelim = FixedPrefix("'''".unicodeScalars[...])
-    static let multilineLiteralStringFull =
-        multilineLiteralDelim
-            .take(newlineSeq.zeroOrOne())
-            .replace(multilineLiteralBody)
-            .tail(multilineLiteralDelim)
-            .map { TOMLValue.string(String($0.0)) }
     static let multilineLiteralStringWithoutClosing =
         multilineLiteralDelim
             .take(newlineSeq.zeroOrOne())
@@ -855,7 +947,7 @@ enum TOMLParser {
             .map { TOMLValue.error($0.index, .multilineLiteralStringMissingClosing) }
     static let multilineLiteralString =
         OneOf2(
-            multilineLiteralStringFull,
+            MultilineLiteralString().map { TOMLValue.string(String($0)) },
             multilineLiteralStringWithoutClosing
         )
 
