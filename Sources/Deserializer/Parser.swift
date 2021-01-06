@@ -54,6 +54,7 @@ indirect enum TOMLValue: Equatable {
     case error(Text.Index, Reason)
 
     enum Reason: Equatable {
+        case invalidUnicodeSequence
         case literalStringMissingOpening
         case literalStringMissingClosing
         case multilineLiteralStringMissingClosing
@@ -70,6 +71,8 @@ indirect enum TOMLValue: Equatable {
 extension TOMLValue.Reason: CustomStringConvertible {
     var description: String {
         switch self {
+        case .invalidUnicodeSequence:
+            return "Invalid unicode sequence"
         case .literalStringMissingClosing:
             return "Missing closing character `'` in literal string"
         case .literalStringMissingOpening:
@@ -608,11 +611,195 @@ struct EscapeChar: Parser {
     }
 }
 
-struct MultilineLiteralString: Parser {
-    static let quotes = "'''".unicodeScalars
-    static let backslash = "\\".unicodeScalars.first!
+func isUnescapedChar(_ c: UnicodeScalar) -> Bool {
+    let value = c.value
+    return value == 0x20 ||
+        value == 0x09 ||
+        value == 0x21 ||
+        value == 0x0A ||
+        value == 0x0D ||
+        value >= 0x23 && value <= 0x5B ||
+        value >= 0x5D && value <= 0x7E ||
+        value >= 0x80 && value <= 0xD7FF ||
+        value >= 0xE000 && value <= 0x10FFFF
+}
+
+func isHexDigit(_ c: UnicodeScalar) -> Bool {
+    let isDigit = c.value >= 0x30 && c.value <= 0x39
+    let isUpper = c.value >= 0x41 && c.value <= 0x46
+    let isLower = c.value >= 0x61 && c.value <= 0x66
+    return isDigit || isUpper || isLower
+}
+
+enum Constants {
     static let lf = "\n".unicodeScalars
     static let lfcr = "\r\n".unicodeScalars
+    static let backslash = "\\".unicodeScalars.first!
+    static let lowercaseU = "u".unicodeScalars.first!
+    static let uppercaseU = "U".unicodeScalars.first!
+}
+
+func getEscaped(_ index: inout Text.Index, _ input: Text) -> UnicodeScalar?? {
+    let originalIndex = index
+    guard input[index] == Constants.backslash else {
+        return nil
+    }
+
+    input.formIndex(after: &index)
+
+    var result: UnicodeScalar?
+    var is4Digit = true
+    switch input[index].value {
+    case 0x22: result = UnicodeScalar(0x22) // "    quotation mark  U+0022
+    case 0x5C: result = UnicodeScalar(0x5C) // \    reverse solidus U+005C
+    case 0x62: result = UnicodeScalar(0x08) // b    backspace       U+0008
+    case 0x66: result = UnicodeScalar(0x0C) // f    form feed       U+000C
+    case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
+    case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
+    case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
+    case Constants.lowercaseU.value:
+        is4Digit = true
+    case Constants.uppercaseU.value:
+        is4Digit = false
+    case 0x20, 0x0A, 0x0D, 0x09:
+        index = originalIndex
+        return nil
+    default:
+        index = originalIndex
+        return .some(nil)
+    }
+
+    input.formIndex(after: &index)
+
+    if let result = result {
+        return result
+    }
+
+    let seqStart = index
+    let stoppingPoint = is4Digit ? 4 : 8
+
+    for _ in 0 ..< stoppingPoint {
+        if isHexDigit(input[index]) {
+            input.formIndex(after: &index)
+        } else {
+            index = originalIndex
+            return nil
+        }
+    }
+
+    if let scalar = Int(String(input[seqStart ..< index]), radix: 16).flatMap(UnicodeScalar.init) {
+        result = scalar
+    } else {
+        return .some(nil)
+    }
+
+    if let result = result {
+        return result
+    } else {
+        index = originalIndex
+        return nil
+    }
+}
+
+struct MultilineBasicString: Parser {
+    static let quotes = "\"\"\"".unicodeScalars
+    static let singleQuote = "\"".unicodeScalars.first!
+    func run(_ input: inout Text) -> TOMLValue? {
+        var result = [UnicodeScalar]()
+        let originalInput = input
+        guard input.starts(with: Self.quotes) else {
+            return nil
+        }
+
+        input.removeFirst(3)
+
+        if input.starts(with: Constants.lf) {
+            input.removeFirst()
+        } else if input.starts(with: Constants.lfcr) {
+            input.removeFirst(2)
+        }
+
+        var escapingNewline = false
+        var index = input.startIndex
+        while index < input.endIndex {
+            let c = input[index]
+            let escaped = getEscaped(&index, input)
+            switch escaped {
+            case .some(.none):
+                return .error(index, .invalidUnicodeSequence)
+            case .some(.some(let scalar)):
+                result.append(scalar)
+                continue
+            case .none:
+                break
+            }
+
+            if escapingNewline {
+                if c.value == 0x20 || c.value == 0x0A || c.value == 0x0D || c.value == 0x09 {
+                    input.formIndex(after: &index)
+                } else if input[index...].starts(with: Constants.lf) {
+                    input.formIndex(after: &index)
+                } else if input[index...].starts(with: Constants.lfcr) {
+                    input.formIndex(after: &index)
+                    input.formIndex(after: &index)
+                } else {
+                    escapingNewline = false
+                }
+
+                continue
+            }
+
+            if c == Constants.backslash {
+                input.formIndex(after: &index)
+                escapingNewline = true
+                continue
+            }
+
+
+            if c == Self.singleQuote {
+                result.append(Self.singleQuote)
+                input.formIndex(after: &index)
+                if index == input.endIndex {
+                    input = originalInput
+                    return nil
+                }
+
+                if input[index] == Self.singleQuote {
+                    result.append(Self.singleQuote)
+                    input.formIndex(after: &index)
+                    if index == input.endIndex {
+                        input = originalInput
+                        return nil
+                    }
+
+                    if input[index] == Self.singleQuote {
+                        input.formIndex(after: &index)
+                        input = input[index...]
+                        return .string(String(result.dropLast(2)))
+                    }
+
+                    continue
+                }
+
+                continue
+            }
+
+            if isUnescapedChar(c) {
+                result.append(c)
+                input.formIndex(after: &index)
+            } else {
+                input = originalInput
+                return nil
+            }
+        }
+
+        input = input[index...]
+        return .string(String(result))
+    }
+}
+
+struct MultilineLiteralString: Parser {
+    static let quotes = "'''".unicodeScalars
     static let singleQuote = "'".unicodeScalars.first!
     static func isMultilineChar(_ c: UnicodeScalar) -> Bool {
         let value = c.value
@@ -633,9 +820,9 @@ struct MultilineLiteralString: Parser {
 
         input.removeFirst(3)
 
-        if input.starts(with: Self.lf) {
+        if input.starts(with: Constants.lf) {
             input.removeFirst()
-        } else if input.starts(with: Self.lfcr) {
+        } else if input.starts(with: Constants.lfcr) {
             input.removeFirst(2)
         }
 
@@ -648,9 +835,9 @@ struct MultilineLiteralString: Parser {
             if escapingNewline {
                 if c.value == 0x0A || c.value == 0x0D {
                     input.formIndex(after: &index)
-                } else if input[index...].starts(with: Self.lf) {
+                } else if input[index...].starts(with: Constants.lf) {
                     input.formIndex(after: &index)
-                } else if input[index...].starts(with: Self.lfcr) {
+                } else if input[index...].starts(with: Constants.lfcr) {
                     input.formIndex(after: &index)
                     input.formIndex(after: &index)
                 } else {
@@ -660,7 +847,7 @@ struct MultilineLiteralString: Parser {
                 continue
             }
 
-            if c == Self.backslash {
+            if c == Constants.backslash {
                 input.formIndex(after: &index)
                 escapingNewline = true
                 continue
@@ -993,44 +1180,7 @@ enum TOMLParser {
             },
             nonascii
         )
-    static let multilineBasicQuote = RepeatingPrefix<Text>(.init(0x22), lowerBound: 1, upperBound: 2)
     static let basicChar = OneOf2(multilineBasicUnescaped, escaped)
-    static let multilineBasicContent =
-        OneOf3(
-            multilineBasicEscapeNewline,
-            newlineSeq,
-            basicChar.map { [$0] }
-        )
-
-    static let multilineBasicDelim = FixedPrefix("\"\"\"".unicodeScalars[...])
-    static let multilineBasicBody =
-        multilineBasicContent
-            .zeroOrMore()
-            .map { $0.flatMap { $0 } }
-            .take(
-                multilineBasicQuote
-                    .take(
-                        multilineBasicContent
-                            .nOrMore(1)
-                            .map { $0.flatMap { $0 }}
-                    )
-                    .map { Array($0) + $1 }
-                    .zeroOrMore()
-                    .map { $0.flatMap { $0 }}
-            )
-            .flatten()
-            .take(
-                multilineBasicQuote
-                    .zeroOrOne()
-                    .map { $0.flatMap { $0 }}
-            )
-            .map { $0 + Array($1) }
-    static let multilineBasicString =
-        multilineBasicDelim
-            .take(newlineSeq.zeroOrOne())
-            .replace(multilineBasicBody)
-            .tail(multilineBasicDelim)
-            .map { TOMLValue.string(String($0.0)) }
 
     static let basicStringFullText =
         ("\"" as FixedChar)
@@ -1058,7 +1208,7 @@ enum TOMLParser {
     static let string =
         OneOf4(
             multilineLiteralString,
-            multilineBasicString,
+            MultilineBasicString(),
             literalString,
             basicString
         )

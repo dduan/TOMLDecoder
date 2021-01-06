@@ -201,16 +201,8 @@ final class NewParserTests: XCTestCase {
         let content = "\nhello \n world!\r\n"
         let expected = "hello \n world!\r\n"
         XCTAssertEqual(
-            TOMLParser.multilineBasicString.testRun("\"\"\"\(content)\"\"\""),
+            MultilineBasicString().testRun("\"\"\"\(content)\"\"\""),
             .string(expected)
-        )
-    }
-
-    func testMultilineBasicStringBody() {
-        let content = "\nhello \n world!\r\n"
-        XCTAssertEqual(
-            TOMLParser.multilineBasicBody.testRun(content),
-            Array(content.unicodeScalars)
         )
     }
 
