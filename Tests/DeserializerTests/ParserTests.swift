@@ -30,7 +30,7 @@ extension TOMLValue {
 }
 
 extension TopLevel {
-    var keyValue: KeyValuePair? {
+    var keyValue: RawKeyValuePair? {
         switch self {
         case .keyValue(let kv):
             return kv

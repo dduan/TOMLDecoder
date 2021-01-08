@@ -4,15 +4,22 @@ import struct Foundation.TimeZone
 
 typealias Text = String.UnicodeScalarView.SubSequence
 
+typealias DottedKey = [Traced<String, Text.Index>]
+
+struct RawKeyValuePair: Equatable {
+    let key: DottedKey
+    let value: TOMLValue
+}
+
 struct KeyValuePair: Equatable {
-    let key: [Traced<String, Text.Index>]
+    let key: TOMLValue
     let value: TOMLValue
 }
 
 enum TopLevel: Equatable {
-    case keyValue(KeyValuePair)
-    case table([Traced<String, Text.Index>])
-    case arrayTable([Traced<String, Text.Index>])
+    case keyValue(RawKeyValuePair)
+    case table(DottedKey)
+    case arrayTable(DottedKey)
     case error(Text.Index, Reason)
     case valueError(Text.Index, TOMLValue.Reason)
 
@@ -22,6 +29,17 @@ enum TopLevel: Equatable {
         case standardTableMissingOpening
         case standardTableMissingClosing
         case arrayTableMissingClosing
+    }
+
+    init(convertingKey key: TOMLValue, _ convert: @escaping (DottedKey) -> TopLevel) {
+        switch key {
+        case .key(let dottedKey):
+            self = convert(dottedKey)
+        case .error(let index, let reason):
+            self = .valueError(index, reason)
+        default:
+            fatalError("Failed converting TOML key to TopLevel value")
+        }
     }
 }
 
@@ -46,11 +64,12 @@ indirect enum TOMLValue: Equatable {
     case string(String)
     case boolean(Bool)
     case array([TOMLValue])
-    case inlineTable([KeyValuePair])
+    case inlineTable([RawKeyValuePair])
     case date(Date)
     case dateComponents(DateComponents)
     case float(Double)
     case integer(Int64)
+    case key(DottedKey)
     case error(Text.Index, Reason)
 
     enum Reason: Equatable {
@@ -572,16 +591,32 @@ struct ArrayValues: Parser {
 }
 
 struct InlineTableKeyValues: Parser {
-    func run(_ input: inout Text) -> [KeyValuePair]? {
+    func run(_ input: inout Text) -> TOMLValue? {
         TOMLParser.keyValueRaw
             .take(
                 TOMLParser.inlineTableSep
                     .replace(InlineTableKeyValues())
                     .zeroOrOne()
-                    .map { $0.flatMap { $0 } }
+                    .map { $0.first ?? .inlineTable([]) }
             )
             .run(&input)
-            .map { [$0] + $1 }
+            .map { one, many -> TOMLValue in
+                switch one.key {
+                case .error:
+                    return one.key
+                case .key(let dotted):
+                    switch many {
+                    case .error:
+                        return many
+                    case .inlineTable(let manyPairs):
+                        return .inlineTable( [RawKeyValuePair(key: dotted, value: one.value)] + manyPairs)
+                    default:
+                        fatalError()
+                    }
+                default:
+                    fatalError()
+                }
+            }
     }
 }
 
@@ -697,6 +732,51 @@ func getEscaped(_ index: inout Text.Index, _ input: Text) -> UnicodeScalar?? {
         return result
     } else {
         index = originalIndex
+        return nil
+    }
+}
+
+struct BasicString: Parser {
+    static let singleQuote = "\"".unicodeScalars.first!
+    func run(_ input: inout Text) -> TOMLValue? {
+        var result = [UnicodeScalar]()
+        let originalInput = input
+        guard input.first == Self.singleQuote else {
+            return nil
+        }
+
+        input.removeFirst()
+
+        var index = input.startIndex
+        while index < input.endIndex {
+            let c = input[index]
+            let escaped = getEscaped(&index, input)
+            switch escaped {
+            case .some(.none):
+                return .error(index, .invalidUnicodeSequence)
+            case .some(.some(let scalar)):
+                result.append(scalar)
+                continue
+            case .none:
+                break
+            }
+
+            if c == Self.singleQuote {
+                input.formIndex(after: &index)
+                input = input[index...]
+                return .string(String(result))
+            }
+
+            if isUnescapedChar(c) {
+                result.append(c)
+                input.formIndex(after: &index)
+            } else {
+                input = originalInput
+                return nil
+            }
+        }
+
+        input = originalInput
         return nil
     }
 }
@@ -1189,9 +1269,6 @@ enum TOMLParser {
                     .zeroOrMore()
             )
             .skip("\"" as FixedChar)
-    static let basicStringFull =
-        basicStringFullText
-            .map { TOMLValue.string(String($0)) }
     static let basicStringWithoutClosing =
         ("\"" as FixedChar)
             .replace(
@@ -1202,7 +1279,7 @@ enum TOMLParser {
             .map { TOMLValue.error($0.index, .basicStringMissingClosing) }
     static let basicString =
         OneOf2(
-            basicStringFull,
+            BasicString(),
             basicStringWithoutClosing
         )
     static let string =
@@ -1384,7 +1461,19 @@ enum TOMLParser {
             .skip(whitespaceCommentNewLine)
             .skip("]" as FixedChar)
             .map(TOMLValue.array)
-    static let quotedKey = OneOf2(literalStringFullText, basicStringFullText)
+    static let quotedKey = OneOf2(literalStringFull, BasicString())
+        .traced()
+        .map { traced -> TOMLValue in
+            switch traced.value {
+            case .string(let keyString):
+                return TOMLValue.key([.init(value: keyString, index: traced.index)])
+            case .error:
+                return traced.value
+            default:
+                fatalError("Expect quoted key to be either TOMLValue.string or .error, got \(traced.value)")
+            }
+        }
+
     static let unquotedKey =
         OneOf4(
             alpha,
@@ -1393,10 +1482,9 @@ enum TOMLParser {
             "_" as FixedChar
         )
         .nOrMore(1)
-    static let simpleKey = OneOf2(unquotedKey, quotedKey)
-        .map { String($0) }
         .traced()
-        .map { [$0] }
+        .map { TOMLValue.key([.init(value: String($0.value), index: $0.index)]) }
+    static let simpleKey = OneOf2(unquotedKey, quotedKey)
     static let dotSep = whitespace.replace("." as FixedChar).skip(whitespace)
     static let dottedKey =
         simpleKey
@@ -1405,9 +1493,22 @@ enum TOMLParser {
                     .replace(simpleKey)
                     .nOrMore(1)
             )
-            .map { $0 + $1.flatMap { $0 } }
-    static let key =
-        OneOf2(dottedKey, simpleKey)
+            .map { one, many -> TOMLValue in
+                var result = [Traced<String, Text.Index>]()
+                for value in [one] + many {
+                    switch value {
+                    case .key(let key):
+                        result += key
+                    case .error:
+                        return value
+                    default:
+                        fatalError("dottedKey segment should be either a TOMLValue.key or dot value, got \(value)")
+                    }
+                }
+
+                return .key(result)
+            }
+    static let key = OneOf2(dottedKey, simpleKey)
     static let keyValueSep =
         whitespace
             .replace("=" as FixedChar)
@@ -1417,10 +1518,14 @@ enum TOMLParser {
         key
             .skip(keyValueSep)
             .take(value)
-            .map(KeyValuePair.init(key:value:))
+            .map { KeyValuePair(key: $0, value: $1) }
     static let keyValueFull =
         keyValueRaw
-            .map(TopLevel.keyValue)
+            .map { kv in
+                TopLevel(convertingKey: kv.key) { dottedKey in
+                    .keyValue(.init(key: dottedKey, value: kv.value))
+                }
+            }
     static let keyValueMissingKey =
         keyValueSep
             .replace(value)
@@ -1450,7 +1555,7 @@ enum TOMLParser {
         standardTableOpening
             .replace(key)
             .skip(standardTableClosing)
-            .map { TopLevel.table($0) }
+            .map { TopLevel(convertingKey: $0) { .table($0) } }
     static let standardTableWithoutOpening =
         key
             .skip(standardTableClosing)
@@ -1474,10 +1579,9 @@ enum TOMLParser {
             .replace(
                 InlineTableKeyValues()
                     .zeroOrOne()
-                    .map { $0.flatMap { $0 }}
+                    .map { $0.first ?? .inlineTable([]) }
             )
             .skip(inlineTableClosing)
-            .map(TOMLValue.inlineTable)
     static let inlineTableWithoutClosing =
         inlineTableOpening
             .replace(InlineTableKeyValues())
@@ -1490,7 +1594,7 @@ enum TOMLParser {
         arrayTableOpening
             .replace(key)
             .skip(arrayTableClosing)
-            .map(TopLevel.arrayTable)
+            .map { TopLevel(convertingKey: $0) { .arrayTable($0) }}
 
     static let arrayTableMissingClosing =
         arrayTableOpening
@@ -1711,6 +1815,8 @@ extension TOMLValue {
             return try array.map { try $0.normalize(reference: reference) }
         case .inlineTable(let inlineTable):
             return try assembleTable(from: inlineTable.map(TopLevel.keyValue), referenceInput: reference)
+        case .key(let dotted):
+            fatalError("Normalizing key \(dotted)")
         }
     }
 }
