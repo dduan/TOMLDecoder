@@ -159,46 +159,6 @@ struct Unwrap<P, Value>: Parser where P: Parser, P.Output == Optional<Value> {
     }
 }
 
-// P1 and P2 must both succeed. P1 and P2's success range must overlap
-struct Tail<P1, P2>: Parser
-    where
-        P1: Parser,
-        P2: Parser,
-        P1.Input == P2.Input,
-        P1.Input: BidirectionalCollection,
-        P1.Input == P1.Input.SubSequence
-{
-    let p1: P1
-    let p2: P2
-
-    func run(_ input: inout P1.Input) -> (P1.Output, P2.Output)? {
-        let originalInput = input
-        guard let _ = p1.run(&input) else {
-            return nil
-        }
-
-        // now find the last overlapping match for p2
-        var start = input.startIndex
-        while originalInput.startIndex < start {
-            var temporaryInput = originalInput[start...]
-            if let p2Result = p2.run(&temporaryInput) {
-                var newInput = originalInput.prefix(upTo: start)
-                if let p1Result = p1.run(&newInput) {
-                    if newInput.isEmpty {
-                        input = temporaryInput
-                        return (p1Result, p2Result)
-                    }
-                }
-            }
-
-            originalInput.formIndex(before: &start)
-        }
-
-        input = originalInput
-        return nil
-    }
-}
-
 struct Map<P, NewOutput>: Parser where P: Parser {
     let p: P
     let transform: (P.Output) -> NewOutput
@@ -394,11 +354,6 @@ extension Parser {
 
     func eraseToAny() -> AnyParser<Self.Input, Self.Output> {
         AnyParser(self)
-    }
-
-    // Warning: backtracking. Expensive
-    func tail<P>(_ p: P) -> Tail<Self, P> {
-        Tail(p1: self, p2: p)
     }
 
     func repeated(_ count: Int) -> Repeat<Self> {
