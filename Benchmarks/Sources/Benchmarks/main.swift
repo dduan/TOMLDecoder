@@ -57,8 +57,8 @@ enabled = true
   dc = "eqdc10"
 
   [servers.beta]
-  ip = "10.0.0.2"
-  dc = "eqdc10"
+  ip = '10.0.0.2'
+  dc = 'eqdc10'
 
 # Line breaks are OK when inside arrays
 hosts = [
@@ -71,7 +71,8 @@ struct LongString: Codable {
     let s: String
 }
 
-let longString = """
+let longBasicString = #"s = "1979-05-27T07:32:00-08:00 # First class dates""#
+let longMultilineString = """
 s = \"\"\"
 # This is a TOML document.
 
@@ -106,6 +107,11 @@ hosts = [
 \"\"\"
 """
 
+let float = "f = 314.15926e-2"
+struct AFloat: Codable {
+    let f: Double
+}
+
 let decoder = TOMLDecoder()
 
 let exampleBenchmarks = BenchmarkSuite(name: "example-toml") { suite in
@@ -128,36 +134,77 @@ let exampleBenchmarks = BenchmarkSuite(name: "example-toml") { suite in
           } != nil
         )
     }
-
 }
 
-let longStringBenchmarks = BenchmarkSuite(name: "long-string") { suite in
+let longMultilineStringBenchmarks = BenchmarkSuite(name: "long-multiline-string") { suite in
     suite.benchmark("decoder") {
-        precondition((try? decoder.decode(LongString.self, from: longString))?.s.isEmpty == false)
+        precondition((try? decoder.decode(LongString.self, from: longMultilineString))?.s.isEmpty == false)
     }
 
     suite.benchmark("combinator") {
-        precondition(((try? TOMLDecoder.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
+        precondition(((try? TOMLDecoder.tomlTable(with: longMultilineString))?["s"] as? String)?.isEmpty == false)
     }
 
     suite.benchmark("scanner") {
-        precondition(((try? TOMLDeserializer.tomlTable(with: longString))?["s"] as? String)?.isEmpty == false)
+        precondition(((try? TOMLDeserializer.tomlTable(with: longMultilineString))?["s"] as? String)?.isEmpty == false)
     }
 
     suite.benchmark("c") {
         precondition(
-          longString.withCString { ptr in
+          longMultilineString.withCString { ptr in
               toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
           } != nil
         )
     }
 }
 
-let libtomlDecodingBenchmarks = BenchmarkSuite(name: "decoding-libtoml") { suite in
+let longBasicStringBenchmarks = BenchmarkSuite(name: "long-basic-string") { suite in
+    suite.benchmark("decoder") {
+        precondition((try? decoder.decode(LongString.self, from: longBasicString))?.s.isEmpty == false)
+    }
 
+    suite.benchmark("combinator") {
+        precondition(((try? TOMLDecoder.tomlTable(with: longBasicString))?["s"] as? String)?.isEmpty == false)
+    }
+
+    suite.benchmark("scanner") {
+        precondition(((try? TOMLDeserializer.tomlTable(with: longBasicString))?["s"] as? String)?.isEmpty == false)
+    }
+
+    suite.benchmark("c") {
+        precondition(
+          longBasicString.withCString { ptr in
+              toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
+          } != nil
+        )
+    }
+}
+
+let floatBenchmarks = BenchmarkSuite(name: "float") { suite in
+    suite.benchmark("decoder") {
+        precondition((try? decoder.decode(AFloat.self, from: float)) != nil)
+    }
+
+    suite.benchmark("combinator") {
+        precondition(((try? TOMLDecoder.tomlTable(with: float))?["f"] as? Double) != nil)
+    }
+
+    suite.benchmark("scanner") {
+        precondition(((try? TOMLDeserializer.tomlTable(with: float))?["f"] as? Double) != nil)
+    }
+
+    suite.benchmark("c") {
+        precondition(
+          longBasicString.withCString { ptr in
+              toml_parse(UnsafeMutablePointer(mutating: ptr), nil, 0)
+          } != nil
+        )
+    }
 }
 
 Benchmark.main([
     exampleBenchmarks,
-    longStringBenchmarks,
+    longMultilineStringBenchmarks,
+    longBasicStringBenchmarks,
+    floatBenchmarks,
 ])
