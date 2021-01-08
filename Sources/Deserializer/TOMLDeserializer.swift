@@ -5,13 +5,13 @@ public enum TOMLDeserializer {
             throw TOMLError.unknown
         }
 
-        let table = try assembleTable(from: result, referenceInput: text)
-
         if !scalars.isEmpty {
             throw TOMLError.deserialization(details: [
                 DeserializationError.general(.init(text, scalars.startIndex, "Invalid TOML"))
             ])
         }
+
+        let table = try assembleTable(from: result, referenceInput: text)
 
         return table
     }
