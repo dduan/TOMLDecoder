@@ -928,6 +928,43 @@ struct MultilineLiteralString: Parser {
     }
 }
 
+struct UnsignedDecIntText: Parser {
+    static let zero = "0".unicodeScalars.first!
+    static let underscore = "_".unicodeScalars.first!.value
+
+    func run(_ input: inout Text) -> [UnicodeScalar]? {
+        if input.first == Self.zero {
+            input.removeFirst()
+            return [Self.zero]
+        }
+
+        var result = [UnicodeScalar]()
+        var index = input.startIndex
+
+        guard input[index].value >= 0x31 && input[index].value <= 0x39 else {
+            return nil
+        }
+
+
+        result.append(input[index])
+        input.formIndex(after: &index)
+
+        while index < input.endIndex {
+            let value = input[index].value
+            if value >= 0x30 && value <= 0x39 {
+                result.append(input[index])
+            } else if value != Self.underscore {
+                break
+            }
+
+            input.formIndex(after: &index)
+        }
+
+        input = input[index...]
+        return result
+    }
+}
+
 enum TOMLParser {
     static let boolean = OneOf2(
             FixedPrefix("true".unicodeScalars[...]),
@@ -953,22 +990,6 @@ enum TOMLParser {
     static let digit1to9 = PredicateChar { $0.value >= 0x31 && $0.value <= 0x39 }
     static let digit0to7 = PredicateChar { $0.value >= 0x30 && $0.value <= 0x37 }
     static let digit0to1 = PredicateChar { $0.value == 0x30 || $0.value == 0x31 }
-    static let unsignedDecIntText =
-        OneOf2(
-            digit1to9
-                .take(
-                    OneOf2(
-                        digit,
-                        underscore
-                            .take(digit)
-                            .map { _, x in x }
-                    )
-                    .nOrMore(1)
-                )
-                .flatten(),
-            digit
-                .map { [$0] }
-        )
 
     static let plusOrMinus =
         OneOf2(
@@ -979,7 +1000,7 @@ enum TOMLParser {
 
     static let decIntText =
         plusOrMinus
-            .take(unsignedDecIntText)
+            .take(UnsignedDecIntText())
             .flatten()
 
     static let decInt = decIntText.map { Int64(String($0))! }
