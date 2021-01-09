@@ -933,6 +933,7 @@ struct UnsignedDecIntText: Parser {
     static let underscore = "_".unicodeScalars.first!.value
 
     func run(_ input: inout Text) -> [UnicodeScalar]? {
+        let originalInput = input
         if input.first == Self.zero {
             input.removeFirst()
             return [Self.zero]
@@ -941,7 +942,7 @@ struct UnsignedDecIntText: Parser {
         var result = [UnicodeScalar]()
         var index = input.startIndex
 
-        guard input[index].value >= 0x31 && input[index].value <= 0x39 else {
+        guard !input.isEmpty, input[index].value >= 0x31 && input[index].value <= 0x39 else {
             return nil
         }
 
@@ -953,7 +954,15 @@ struct UnsignedDecIntText: Parser {
             let value = input[index].value
             if value >= 0x30 && value <= 0x39 {
                 result.append(input[index])
-            } else if value != Self.underscore {
+            } else if value == Self.underscore {
+                input.formIndex(after: &index)
+                if index >= input.endIndex || (input[index].value < 0x30 || input[index].value > 0x39) {
+                    input = originalInput
+                    return nil
+                }
+
+                continue
+            } else {
                 break
             }
 
