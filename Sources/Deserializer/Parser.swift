@@ -1238,13 +1238,6 @@ enum TOMLParser {
         )
     static let basicChar = OneOf2(multilineBasicUnescaped, escaped)
 
-    static let basicStringFullText =
-        ("\"" as FixedChar)
-            .replace(
-                basicChar
-                    .zeroOrMore()
-            )
-            .skip("\"" as FixedChar)
     static let basicStringWithoutClosing =
         ("\"" as FixedChar)
             .replace(
