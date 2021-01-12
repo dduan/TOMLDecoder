@@ -2,11 +2,10 @@
 import XCTest
 import Foundation
 
-extension Parser where Input == String.UnicodeScalarView.SubSequence {
-    func testRun(_ s: String) -> Output? {
-        var input = s.unicodeScalars[...]
-        return self.run(&input)
-    }
+
+func runTest<T: Equatable>(_ run: (inout Substring) -> T, _ input: String) -> T {
+    var input = input[...]
+    return run(&input)
 }
 
 extension TOMLValue {
@@ -39,7 +38,7 @@ extension TopLevel {
         }
     }
 
-    var key: [Traced<String, Text.Index>] {
+    var key: [Traced<String>] {
         switch self {
         case .table(let key):
             return key
@@ -53,189 +52,206 @@ extension TopLevel {
 
 final class NewParserTests: XCTestCase {
     func testParsingDecInt() {
-        XCTAssertEqual(.integer(-42), TOMLParser.integer.testRun("-42"))
+        XCTAssertEqual(.integer(-42), runTest(integer, "-42"))
     }
 
     func testParsingHexInt() {
-        XCTAssertEqual(.integer(0x4a), TOMLParser.integer.testRun("0x4a"))
+        XCTAssertEqual(.integer(0x4a), runTest(integer, "0x4a"))
     }
 
     func testParsingOctInt() {
-        XCTAssertEqual(.integer(0o47), TOMLParser.integer.testRun("0o47"))
+        XCTAssertEqual(.integer(0o47), runTest(integer, "0o47"))
     }
 
     func testParsingBinInt() {
-        XCTAssertEqual(.integer(0b1101), TOMLParser.integer.testRun("0b1101"))
+        XCTAssertEqual(.integer(0b1101), runTest(integer, "0b1101"))
     }
 
     func testParsingNormalFloat0() {
-        XCTAssertEqual(.float(200), TOMLParser.float.testRun("2e2"))
+        XCTAssertEqual(.float(200), runTest(float, "2e2"))
     }
 
     func testParsingNormalFloat1() {
-        XCTAssertEqual(.float(2.2), TOMLParser.float.testRun("2.2"))
+        XCTAssertEqual(.float(2.2), runTest(float, "2.2"))
     }
 
     func testParsingNormalFloat2() {
-        XCTAssertEqual(.float(220), TOMLParser.float.testRun("2.2e2"))
+        XCTAssertEqual(.float(220), runTest(float, "2.2e2"))
     }
 
     func testParsingNormalFloat3() {
-        XCTAssertEqual(.float(22), TOMLParser.float.testRun("2200e-2"))
+        XCTAssertEqual(.float(22), runTest(float, "2200e-2"))
     }
 
     func testParsingNormalFloat4() {
-        XCTAssertEqual(.float(-2.2), TOMLParser.float.testRun("-2.2"))
+        XCTAssertEqual(.float(-2.2), runTest(float, "-2.2"))
     }
 
     func testParsingNormalFloat5() {
-        XCTAssertEqual(.float(-2.2), TOMLParser.float.testRun("-220e-2"))
+        XCTAssertEqual(.float(-2.2), runTest(float, "-220e-2"))
     }
 
     func testParsingNaN() {
-        XCTAssertTrue(TOMLParser.float.testRun("nan")?.isNaN == true)
+        XCTAssertTrue(runTest(float, "nan")?.isNaN == true)
     }
 
     func testParsingNaNPlus() {
-        XCTAssertTrue(TOMLParser.float.testRun("+nan")?.isNaN == true)
+        XCTAssertTrue(runTest(float, "+nan")?.isNaN == true)
     }
 
     func testParsingNaNMinus() {
-        XCTAssertTrue(TOMLParser.float.testRun("-nan")?.isNaN == true)
+        XCTAssertTrue(runTest(float, "-nan")?.isNaN == true)
     }
 
-    func specialFtestParsingInfinity() {
-        XCTAssertEqual(.float(Double.infinity), TOMLParser.float.testRun("inf"))
+    func testParsingInfinity() {
+        XCTAssertEqual(.float(Double.infinity), runTest(float, "inf"))
     }
 
-    func specialFtestParsingInfinityPlus() {
-        XCTAssertEqual(.float(Double.infinity), TOMLParser.float.testRun("+inf"))
+    func testParsingInfinityPlus() {
+        XCTAssertEqual(.float(Double.infinity), runTest(float, "+inf"))
     }
 
-    func specialFtestParsingInfinityMinus() {
-        XCTAssertEqual(.float(-Double.infinity), TOMLParser.float.testRun("-inf"))
+    func testParsingInfinityMinus() {
+        XCTAssertEqual(.float(-Double.infinity), runTest(float, "-inf"))
     }
 
     func testBooleanTrue() {
-        XCTAssertEqual(TOMLParser.boolean.testRun("true"), .boolean(true))
+        XCTAssertEqual(runTest(boolean, "true"), .boolean(true))
     }
 
     func testBooleanFalse() {
-        XCTAssertEqual(TOMLParser.boolean.testRun("false"), .boolean(false))
+        XCTAssertEqual(runTest(boolean, "false"), .boolean(false))
     }
 
     func testParseComment() {
-        XCTAssertNotNil(TOMLParser.comment.testRun("# this is a comment!"))
+        XCTAssertNotNil(runTest(comment, "# this is a comment!"))
     }
 
-    func testLiteralString() {
+    func testLiteralString() throws {
         let content = "hello world!"
         XCTAssertEqual(
-            TOMLParser.literalString.testRun("'\(content)'"),
-            .string(content)
+            try runTest(literalString, "'\(content)'")?.normalize(reference: content) as? String,
+            content
         )
     }
 
-    func testLiteralStringWithoutClosing() {
-        let content = "hello world!"
-        XCTAssertEqual(
-            TOMLParser.literalString.testRun("'\(content)")?.errorReason,
-            .literalStringMissingClosing
-        )
-    }
+//    func testLiteralStringWithoutClosing() {
+//        let content = "hello world!"
+//        XCTAssertEqual(
+//            runTest(literalString, "'\(content)")?.errorReason,
+//            .literalStringMissingClosing
+//        )
+//    }
 
     func testMultilineLiteralString() {
         let content = "\nhello \n world!\r\n"
         let expected = "hello \n world!\r\n"
         XCTAssertEqual(
-            TOMLParser.multilineLiteralString.testRun("'''\(content)'''"),
-            .string(expected)
+            try runTest(multilineLiteralString, "'''\(content)'''")?.normalize(reference: content) as? String,
+            expected
         )
     }
 
-    func testMultilineLiteralStringWithoutClosing() {
-        let content = "\nhello \n world!\r\n"
-        XCTAssertEqual(
-            TOMLParser.multilineLiteralString.testRun("'''\(content)")?.errorReason,
-            .multilineLiteralStringMissingClosing
-        )
-    }
+//    func testMultilineLiteralStringWithoutClosing() {
+//        let content = "\nhello \n world!\r\n"
+//        XCTAssertEqual(
+//            runTest(multilineLiteralString, "'''\(content)")?.errorReason,
+//            .multilineLiteralStringMissingClosing
+//        )
+//    }
 
     func testEscapedQuote() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\""#), .init(0x22))
+        let input = #"\""#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x22))
     }
 
     func testEscapedBackslash() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\\"#), .init(0x5C))
+        let input = #"\\"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x5C))
     }
 
     func testEscapedBackspace() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\b"#), .init(0x08))
+        let input = #"\b"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x08))
     }
 
     func testEscapedFormFeed() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\f"#), .init(0x0C))
+        let input = #"\f"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x0C))
     }
 
     func testEscapedLineFeed() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\n"#), .init(0x0A))
+        let input = #"\n"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x0A))
     }
 
     func testEscapedCarriageReturn() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\r"#), .init(0x0D))
+        let input = #"\r"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x0D))
     }
 
     func testEscapedCarriageTab() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\t"#), .init(0x09))
+        let input = #"\t"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), .init(0x09))
     }
 
     func testEscapedSequence4() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\uBEEF"#), UnicodeScalar(0xBEEF))
+        let input = #"\uBEEF"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), UnicodeScalar(0xBEEF))
     }
 
     func testEscapedSequence8() {
-        XCTAssertEqual(TOMLParser.escaped.testRun(#"\U0000c0de"#), UnicodeScalar(0x0000C0DE))
+        let input = #"\U0000c0de"#[...].unicodeScalars
+        var index = input.startIndex
+        XCTAssertEqual(escaped(&index, input), UnicodeScalar(0x0000C0DE))
     }
 
     func testMultilineBasicString() {
         let content = "\nhello \n world!\r\n"
         let expected = "hello \n world!\r\n"
         XCTAssertEqual(
-            MultilineBasicString().testRun("\"\"\"\(content)\"\"\""),
-            .string(expected)
+            try runTest(multilineBasicString, "\"\"\"\(content)\"\"\"")?.normalize(reference: content) as? String,
+            expected
         )
     }
 
     func testBasicString() {
-        let content = "hello  world!"
+        let input = "hello  world!"
         XCTAssertEqual(
-            TOMLParser.basicString.testRun("\"\(content)\""),
-            .string(content)
+            try runTest(basicString, "\"\(input)\"")?.normalize(reference: input) as? String,
+            input
         )
     }
 
-    func testBasicStringWithoutClosing() {
-        let content = "hello  world!"
-        XCTAssertEqual(
-            TOMLParser.basicString.testRun("\"\(content)")?.errorReason,
-            .basicStringMissingClosing
-        )
-    }
+//    func testBasicStringWithoutClosing() {
+//        let content = "hello  world!"
+//        XCTAssertEqual(
+//            TOMLParser.basicString.testRun("\"\(content)")?.errorReason,
+//            .basicStringMissingClosing
+//        )
+//    }
 
     func testBasicStringWithEscape() {
         let input = #"hello  \" world!"#
         let expected = #"hello  " world!"#
         XCTAssertEqual(
-            TOMLParser.basicString.testRun("\"\(input)\""),
-            .string(expected)
+            try runTest(basicString, "\"\(input)\"")?.normalize(reference: input) as? String,
+            expected
         )
-
     }
 
     func testLocalTime() {
         let content = "05:05:05"
         XCTAssertEqual(
-            TOMLParser.localTime.testRun(content),
+            runTest(dateTime, content),
             .dateComponents(DateComponents(hour: 5, minute: 5, second: 5))
         )
     }
@@ -243,7 +259,7 @@ final class NewParserTests: XCTestCase {
     func testInvalidLocalTime() {
         let content = "25:05:05"
         XCTAssertEqual(
-            TOMLParser.localTime.testRun(content)?.errorReason,
+            runTest(dateTime, content)?.errorReason,
             .invalidTime
         )
     }
@@ -251,7 +267,7 @@ final class NewParserTests: XCTestCase {
     func testLocalDate() {
         let content = "2005-05-05"
         XCTAssertEqual(
-            TOMLParser.localDate.testRun(content),
+            runTest(dateTime, content),
             .dateComponents(DateComponents(year: 2005, month: 5, day: 5))
         )
     }
@@ -259,7 +275,7 @@ final class NewParserTests: XCTestCase {
     func testInvalidLocalDate() {
         let content = "2005-15-05"
         XCTAssertEqual(
-            TOMLParser.localDate.testRun(content)?.errorReason,
+            runTest(dateTime, content)?.errorReason,
             .invalidDate
         )
     }
@@ -267,12 +283,9 @@ final class NewParserTests: XCTestCase {
     func testLocalDateTime() {
         let content = "2005-05-05T05:05:05"
         XCTAssertEqual(
-            TOMLParser.localDateTime.testRun(content),
+            runTest(dateTime, content),
             .dateComponents(
-                DateComponents(
-                    date: DateComponents(year: 2005, month: 5, day: 5),
-                    time: DateComponents(hour: 5, minute: 5, second: 5)
-                )
+                DateComponents(year: 2005, month: 5, day: 5, hour: 5, minute: 5, second: 5)
             )
         )
     }
@@ -280,7 +293,7 @@ final class NewParserTests: XCTestCase {
     func testInvalidLocalDateTime1() {
         let content = "2005-15-05T05:05:05"
         XCTAssertEqual(
-            TOMLParser.localDateTime.testRun(content)?.errorReason,
+            runTest(dateTime, content)?.errorReason,
             .invalidDate
         )
     }
@@ -288,26 +301,33 @@ final class NewParserTests: XCTestCase {
     func testInvalidLocalDateTime2() {
         let content = "2005-05-05T25:05:05"
         XCTAssertEqual(
-            TOMLParser.localDateTime.testRun(content)?.errorReason,
+            runTest(dateTime, content)?.errorReason,
             .invalidTime
         )
     }
 
-    func testOffsetDateTime() {
+    func testOffsetDateTime() throws {
         let content = "2005-05-05T05:05:05-08:00"
         XCTAssertEqual(
-            TOMLParser.offsetDateTime.testRun(content),
-            .date(Date(
-                date: DateComponents(year: 2005, month: 5, day: 5),
-                time: DateComponents(hour: 5, minute: 5, second: 5),
-                timeZone: TimeZone(secondsFromGMT: -(8 * 3600))!
-            ))
+            runTest(dateTime, content),
+            .date(
+                try XCTUnwrap(
+                    Calendar(identifier: .gregorian)
+                    .date(
+                        from: DateComponents(
+                            timeZone: TimeZone(secondsFromGMT: -(8 * 3600)),
+                            year: 2005, month: 5, day: 5,
+                            hour: 5, minute: 5, second: 5
+                        )
+                    )
+                )
+            )
         )
     }
 
     func testArray1() throws {
         let content = "[1, '2', [3], 4]"
-        let result = try XCTUnwrap(TOMLParser.array.testRun(content))
+        let result = try XCTUnwrap(runTest(array, content))
         switch result {
         case .array(let a):
             XCTAssertEqual(a.count, 4)
@@ -318,14 +338,14 @@ final class NewParserTests: XCTestCase {
     }
 
     func testWhitespaceCommentNewline() {
-        var input = "   #  \n".unicodeScalars[...]
-        TOMLParser.whitespaceCommentNewLine.run(&input)
+        var input = "   #  \n"[...]
+        whitespaceCommentSkip(&input)
         XCTAssertEqual(Array(input), [])
     }
 
     func testKeyValue() {
-        var input = "my.key  = 0xdead".unicodeScalars[...]
-        let result = TOMLParser.keyValue.run(&input)
+        var input = "my.key  = 0xdead"[...]
+        let result = keyValue(&input)
         XCTAssertEqual(
             result?.keyValue?.key.map { $0.value },
             ["my", "key"]
@@ -337,24 +357,24 @@ final class NewParserTests: XCTestCase {
     }
 
     func testStandardTable() {
-        var input = "[ my.key ]".unicodeScalars[...]
+        var input = "[ my.key ]"[...]
         XCTAssertEqual(
-            TOMLParser.standardTable.run(&input)?.key.map { $0.value },
+            table(&input)?.key.map { $0.value },
             ["my", "key"]
         )
     }
 
     func testArrayTable() {
-        var input = "[[ my.key ]]".unicodeScalars[...]
+        var input = "[[ my.key ]]"[...]
         XCTAssertEqual(
-            TOMLParser.arrayTable.run(&input)?.key.map { $0.value },
+            arrayTable(&input)?.key.map { $0.value },
             ["my", "key"]
         )
     }
 
     func testInlineTable() {
-        var input = "{my.key  = 0xdead}".unicodeScalars[...]
-        guard let result = TOMLParser.inlineTable.run(&input) else {
+        var input = "{my.key  = 0xdead}"[...]
+        guard let result = inlineTable(&input) else {
             XCTFail()
             return
         }
@@ -369,8 +389,8 @@ final class NewParserTests: XCTestCase {
     }
 
     func testKeyEmptyArrayValue() {
-        var input = "a = []".unicodeScalars[...]
-        let result = TOMLParser.keyValue.run(&input)
+        var input = "a = []"[...]
+        let result = keyValue(&input)
         XCTAssertEqual(
             result?.keyValue?.key.map { $0.value },
             ["a"]
@@ -379,12 +399,6 @@ final class NewParserTests: XCTestCase {
             result?.keyValue?.value,
             .array([])
         )
-    }
-
-    func testMultilineQuotes1() {
-        let input = "'"
-        let result = TOMLParser.multilineQuote.testRun(input)
-        XCTAssertEqual(result.map(String.init), input)
     }
 
     func testParseArbitraryStuff() throws {
@@ -538,7 +552,6 @@ final class NewParserTests: XCTestCase {
 
     func testInfinityAndNan() throws {
         let input = """
-
         nan = nan
         nan_neg = -nan
         nan_plus = +nan

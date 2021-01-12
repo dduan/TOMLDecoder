@@ -1,17 +1,14 @@
 public enum TOMLDeserializer {
     public static func tomlTable(with text: String) throws -> [String: Any] {
-        var scalars = text.unicodeScalars[...]
-        guard let result = TOMLParser.root.run(&scalars) else {
-            throw TOMLError.unknown
-        }
+        var input = text[...]
+        let topLevelEntries = topLevels(&input)
+        let table = try assembleTable(from: topLevelEntries, referenceInput: text)
 
-        if !scalars.isEmpty {
+        if !input.isEmpty {
             throw TOMLError.deserialization(details: [
-                DeserializationError.general(.init(text, scalars.startIndex, "Invalid TOML"))
+                DeserializationError.general(.init(text, input.startIndex, "Invalid TOML"))
             ])
         }
-
-        let table = try assembleTable(from: result, referenceInput: text)
 
         return table
     }
