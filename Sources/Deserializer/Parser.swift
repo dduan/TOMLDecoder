@@ -2,9 +2,7 @@ import struct Foundation.DateComponents
 import struct Foundation.Date
 import struct Foundation.TimeZone
 
-typealias Text = String.UnicodeScalarView.SubSequence
-
-typealias DottedKey = [Traced<String, Text.Index>]
+typealias DottedKey = [Traced<String>]
 
 struct RawKeyValuePair: Equatable {
     let key: DottedKey
@@ -20,8 +18,8 @@ enum TopLevel: Equatable {
     case keyValue(RawKeyValuePair)
     case table(DottedKey)
     case arrayTable(DottedKey)
-    case error(Text.Index, Reason)
-    case valueError(Text.Index, TOMLValue.Reason)
+    case error(Substring.Index, Reason)
+    case valueError(Substring.Index, TOMLValue.Reason)
 
     enum Reason: Equatable {
         case missingKey
@@ -61,7 +59,7 @@ extension TopLevel.Reason: CustomStringConvertible {
 }
 
 indirect enum TOMLValue: Equatable {
-    case string(String)
+    case string(Traced<String>)
     case boolean(Bool)
     case array([TOMLValue])
     case inlineTable([RawKeyValuePair])
@@ -70,7 +68,7 @@ indirect enum TOMLValue: Equatable {
     case float(Double)
     case integer(Int64)
     case key(DottedKey)
-    case error(Text.Index, Reason)
+    case error(Substring.Index, Reason)
 
     enum Reason: Equatable {
         case invalidUnicodeSequence
@@ -84,6 +82,11 @@ indirect enum TOMLValue: Equatable {
         case invalidDate
         case invalidTimeOffset
         case inlineTableMissingClosing
+        case incompleteDottedKey
+        case invalidDecimal
+        case invalidHexadecimal
+        case invalidOctal
+        case invalidBinary
     }
 }
 
@@ -112,495 +115,110 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Ill-formatted time offset"
         case .inlineTableMissingClosing:
             return "Missing closing character `]` in table"
+        case .incompleteDottedKey:
+            return "Dotted key lacks a final part"
+        case .invalidDecimal:
+            return "Invalid decimal value: can't represent by 64-bit integer"
+        case .invalidHexadecimal:
+            return "Ill-formed hexadecimal"
+        case .invalidOctal:
+            return "Ill-formed octal"
+        case .invalidBinary:
+            return "Ill-formed binary integer"
         }
     }
 }
 
-// MARK: - generic stuff
-
-extension String {
-    init<S>(_ scalars: S) where S: Sequence, S.Element == UnicodeScalar {
-        self.init(UnicodeScalarView(scalars))
+@discardableResult
+func whitespace(_ input: inout Substring) -> Bool {
+    if input.isEmpty {
+        return false
     }
+
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+    while index < utf8.endIndex, (utf8[index] == 0x20 || utf8[index] == 0x09)  {
+        utf8.formIndex(after: &index)
+    }
+
+    let detecetd = index != utf8.startIndex
+    input = Substring(utf8[index...])
+
+    return detecetd
 }
 
-protocol Parser {
-    associatedtype Input
-    associatedtype Output
-
-    func run(_ input: inout Input) -> Output?
+@inline(__always)
+func isAlpha(_ c: UTF8.CodeUnit) -> Bool {
+    c >= 0x41 && c <= 0x5A || c >= 0x61 && c <= 0x7A
 }
 
-struct AnyParser<Input, Output>: Parser {
-    let actualRun: (inout Input) -> Output?
-
-    init<P>(_ p: P) where P: Parser, P.Input == Input, P.Output == Output {
-        actualRun = p.run
-    }
-
-    func run(_ input: inout Input) -> Output? {
-        actualRun(&input)
-    }
+@inline(__always)
+func isDigit(_ c: UTF8.CodeUnit) -> Bool {
+    c >= 0x30 && c <= 0x39
 }
 
-struct Unwrap<P, Value>: Parser where P: Parser, P.Output == Optional<Value> {
-    let p: P
-    func run(_ input: inout P.Input) -> Value? {
-        let originalInput = input
-        switch p.run(&input) {
-        case .none:
-            return nil
-        case .some(.none):
-            input = originalInput
-            return nil
-        case .some(.some(let value)):
-            return value
-        }
-    }
+@inline(__always)
+func isHexDigit(_ c: UnicodeScalar) -> Bool {
+    let v = c.value
+    let isDigit = v >= 0x30 && v <= 0x39
+    let isUpper = v >= 0x41 && v <= 0x46
+    let isLower = v >= 0x61 && v <= 0x66
+    return isDigit || isUpper || isLower
 }
 
-struct Map<P, NewOutput>: Parser where P: Parser {
-    let p: P
-    let transform: (P.Output) -> NewOutput
-
-    func run(_ input: inout P.Input) -> NewOutput? {
-        p.run(&input).map(transform)
-    }
-}
-
-struct Zip<P1, P2>: Parser
-    where P1: Parser, P2: Parser, P1.Input == P2.Input
-{
-    let p1: P1
-    let p2: P2
-
-    func run(_ input: inout P1.Input) -> (P1.Output, P2.Output)? {
-        let originalInput = input
-        guard let output1 = p1.run(&input) else {
-            return nil
-        }
-
-        guard let output2 = p2.run(&input) else {
-            input = originalInput
-            return nil
-        }
-
-        return (output1, output2)
-    }
-}
-
-struct ZeroOrMore<P>: Parser where P: Parser {
-    let p: P
-
-    func run(_ input: inout P.Input) -> [P.Output]? {
-        var rest = input
-        var matches: [P.Output] = []
-        while let match = p.run(&input) {
-            rest = input
-            matches.append(match)
-        }
-        input = rest
-        return matches
-    }
-}
-
-struct ZeroOrOne<P>: Parser where P: Parser {
-    let p: P
-
-    func run(_ input: inout P.Input) -> [P.Output]? {
-        if let output = p.run(&input) {
-            return [output]
-        }
-
-        return []
-    }
-}
-
-struct NOrMore<P>: Parser where P: Parser {
-    let p: P
-    let count: Int
-
-    func run(_ input: inout P.Input) -> [P.Output]? {
-        let originalInput = input
-        guard let output = ZeroOrMore(p: p).run(&input) else {
-            return nil
-        }
-
-        if output.count < count {
-            input = originalInput
-            return nil
-        }
-
-        return output
-    }
-}
-
-struct TracedParser<P>: Parser where P: Parser, P.Input: Collection {
-    let p: P
-
-    func run(_ input: inout P.Input) -> Traced<P.Output, P.Input.Index>? {
-        let index = input.startIndex
-        guard let result = p.run(&input) else {
-            return nil
-        }
-
-        return .init(value: result, index: index)
-    }
-}
-
-struct OneOf2<P1, P2>: Parser
-    where P1: Parser, P2: Parser, P1.Input == P2.Input, P1.Output == P2.Output
-{
-    let p1: P1
-    let p2: P2
-
-    init(_ p1: P1, _ p2: P2) {
-        self.p1 = p1
-        self.p2 = p2
+func unquotedKey(_ input: inout Substring) -> String? {
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+    while index < utf8.endIndex, case let c = utf8[index], isAlpha(c) || isDigit(c) || c == 0x2D || c == 0x5F {
+        utf8.formIndex(after: &index)
     }
 
-    func run(_ input: inout P1.Input) -> P1.Output? {
-        p1.run(&input) ?? p2.run(&input)
-    }
-}
-
-struct OneOf3<P1, P2, P3>: Parser
-    where
-        P1: Parser,
-        P2: Parser,
-        P3: Parser,
-        P1.Input == P2.Input, P1.Output == P2.Output,
-        P1.Input == P3.Input, P1.Output == P3.Output
-{
-    let p1: P1
-    let p2: P2
-    let p3: P3
-
-    init(
-        _ p1: P1,
-        _ p2: P2,
-        _ p3: P3
-    ) {
-        self.p1 = p1
-        self.p2 = p2
-        self.p3 = p3
-    }
-
-    func run(_ input: inout P1.Input) -> P1.Output? {
-        p1.run(&input) ?? p2.run(&input) ?? p3.run(&input)
-    }
-}
-
-struct OneOf4<P1, P2, P3, P4>: Parser
-    where
-        P1: Parser,
-        P2: Parser,
-        P3: Parser,
-        P4: Parser,
-        P1.Input == P2.Input, P1.Output == P2.Output,
-        P1.Input == P3.Input, P1.Output == P3.Output,
-        P1.Input == P4.Input, P1.Output == P4.Output
-{
-    let p1: P1
-    let p2: P2
-    let p3: P3
-    let p4: P4
-
-    init(
-        _ p1: P1,
-        _ p2: P2,
-        _ p3: P3,
-        _ p4: P4
-    ) {
-        self.p1 = p1
-        self.p2 = p2
-        self.p3 = p3
-        self.p4 = p4
-    }
-
-    func run(_ input: inout P1.Input) -> P1.Output? {
-        p1.run(&input) ?? p2.run(&input) ?? p3.run(&input) ?? p4.run(&input)
-    }
-}
-
-extension Parser {
-    func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Map<Self, NewOutput> {
-        Map(p: self, transform: transform)
-    }
-
-    func skip<P>(_ p: P) -> AnyParser<Input, Output> where P: Parser, P.Input == Input {
-        Zip(p1: self, p2: p)
-            .map { x, _ in x }
-            .eraseToAny()
-    }
-
-    func replace<P>(_ p: P) -> AnyParser<P.Input, P.Output> where P: Parser, P.Input == Input {
-        Zip(p1: self, p2: p)
-            .map { _, x in x }
-            .eraseToAny()
-    }
-
-    func take<P>(_ p: P) -> Zip<Self, P> where P: Parser, P.Input == Input {
-        Zip(p1: self, p2: p)
-    }
-
-    func zeroOrMore() -> ZeroOrMore<Self> {
-        ZeroOrMore(p: self)
-    }
-
-    func zeroOrOne() -> ZeroOrOne<Self> {
-        ZeroOrOne(p: self)
-    }
-
-    func eraseToAny() -> AnyParser<Self.Input, Self.Output> {
-        AnyParser(self)
-    }
-
-    func repeated(_ count: Int) -> Repeat<Self> {
-        Repeat(self, count)
-    }
-
-    func nOrMore(_ count: Int) -> NOrMore<Self> {
-        NOrMore(p: self, count: count)
-    }
-}
-
-extension Parser where Input: Sequence {
-    func debug(line: Int = #line) -> Debug<Self> {
-        Debug(p: self, line: line)
-    }
-}
-
-struct Debug<P>: Parser where P: Parser, P.Input: Sequence {
-    let p: P
-    let line: Int
-    func run(_ input: inout P.Input) -> P.Output? {
-        print(line, "[debug] >", Array(input))
-        let r = p.run(&input)
-        dump(r)
-        print(line, "[debug] <", Array(input))
-        return r
-    }
-}
-
-extension Parser where Input: Collection {
-    func traced() -> TracedParser<Self> {
-        TracedParser(p: self)
-    }
-}
-
-struct FixedPrefix: Parser {
-    let s: Text
-
-    init(_ s: Text) { self.s = s }
-    func run(_ input: inout Text) -> Text? {
-        guard input.starts(with: s) else {
-            return nil
-        }
-
-        input.removeFirst(s.count)
-        return s
-    }
-}
-
-struct RepeatingPrefix<C>: Parser where C: Collection, C.Element: Equatable, C == C.SubSequence {
-    let target: C.Element
-    let lowerBound: Int?
-    let upperBound: Int
-
-    init(_ target: C.Element, lowerBound: Int? = nil, upperBound: Int) {
-        self.target = target
-        self.lowerBound = lowerBound
-        self.upperBound = upperBound
-    }
-
-    func run(_ input: inout C) -> C.SubSequence? {
-        let lowerBound = self.lowerBound ?? upperBound
-        let upperBound = min(self.upperBound, input.count)
-        for count in stride(from: upperBound, through: lowerBound, by: -1) {
-            let prefix = input.prefix(count)
-            if prefix.allSatisfy({ $0 == target }) {
-                input.removeFirst(count)
-                return prefix
-            }
-        }
-
+    guard utf8.startIndex != index else {
         return nil
     }
+
+    input = Substring(utf8[index...])
+    return String(utf8[utf8.startIndex ..< index])
 }
 
-struct Repeat<P>: Parser where P: Parser {
-    let p: P
-    let count: Int
-
-    init(_ p: P, _ count: Int) {
-        self.p = p
-        self.count = count
-    }
-
-    func run(_ input: inout P.Input) -> [P.Output]? {
-        let originalInput = input
-        var results = [P.Output]()
-        for _ in 0 ..< count {
-            guard let result = p.run(&input) else {
-                input = originalInput
-                return nil
-            }
-
-            results.append(result)
-        }
-
-        return results
-    }
+enum Constants {
+    static let backslashScalar = "\\".unicodeScalars.first!
+    static let lfScalar = "\n".unicodeScalars
+    static let crlfScalar = "\r\n".unicodeScalars
+    static let lfUTF8 = "\n".utf8.first!
+    static let crUTF8 = "\r".utf8.first!
+    static let doubleQuoteScalar = "\"".unicodeScalars.first!
+    static let singleQuoteScalar = "'".unicodeScalars.first!
+    static let singleQuoteUTF8 = "'".utf8.first!
+    static let doubleQuoteUTF8 = "\"".utf8.first!
+    static let periodUTF8 = ".".utf8.first!
+    static let lowercaseUScalarValue = "u".unicodeScalars.first!.value
+    static let uppercaseUScalarValue = "U".unicodeScalars.first!.value
+    static let trueUTF8Sequence = "true".utf8
+    static let falseUTF8Sequence = "false".utf8
+    static let hexPrefixUTF8Sequence = "0x".utf8
+    static let octPrefixUTF8Sequence = "0o".utf8
+    static let binPrefixUTF8Sequence = "0b".utf8
+    static let plusUTF8 = "+".utf8.first!
+    static let minusUTF8 = "-".utf8.first!
+    static let zeroUTF8 = "0".utf8.first!
+    static let dashUTF8 = "-".utf8.first!
+    static let lowerEUTF8 = "e".utf8.first!
+    static let upperEUTF8 = "E".utf8.first!
+    static let spaceUTF8 = " ".utf8.first!
+    static let lowerTUTF8 = "t".utf8.first!
+    static let upperTUTF8 = "T".utf8.first!
+    static let underscoreUTF8 = "_".utf8.first!
+    static let colonUTF8 = ":".utf8.first!
+    static let nanUTF8Sequence = "nan".utf8
+    static let infUTF8Sequence = "inf".utf8
+    static let poundScalar = "#".unicodeScalars.first!
+    static let tripleDoubleQuoteScalar = "\"\"\"".unicodeScalars
+    static let tripleSingleQuoteScalar = "'''".unicodeScalars
+    static let upperZUTF8 = "Z".utf8.first!
 }
 
-struct FixedChar: Parser {
-    let target: UnicodeScalar
-
-    init(_ target: UnicodeScalar) { self.target = target }
-
-    func run(_ input: inout String.UnicodeScalarView.SubSequence) -> UnicodeScalar? {
-        guard input.first == target else {
-            return nil
-        }
-
-        input.removeFirst()
-        return target
-    }
-}
-
-extension FixedChar: ExpressibleByStringLiteral {
-    init(stringLiteral value: String) {
-        self.init(value.unicodeScalars.first!)
-    }
-}
-
-struct PredicateChar: Parser {
-    let predicate: (UnicodeScalar) -> Bool
-
-    func run(_ input: inout String.UnicodeScalarView.SubSequence) -> UnicodeScalar? {
-        guard let first = input.first, predicate(first) else {
-            return nil
-        }
-
-        input.removeFirst()
-        return first
-    }
-}
-
-struct FlattenOneAndMany<P>: Parser
-    where
-        P: Parser,
-        P.Input == String.UnicodeScalarView.SubSequence,
-        P.Output == (UnicodeScalar, [UnicodeScalar])
-{
-    let p: P
-
-    init(_ p: P) { self.p = p }
-    func run(_ input: inout String.UnicodeScalarView.SubSequence) -> [UnicodeScalar]? {
-        if let (one, many) = p.run(&input) {
-            return [one] + many
-        }
-
-        return nil
-    }
-}
-
-struct FlattenManyAndMany<P, C>: Parser
-    where
-        P: Parser,
-        C: RangeReplaceableCollection,
-        P.Output == (C, C)
-{
-    let p: P
-    init(_ p: P) { self.p = p }
-    func run(_ input: inout P.Input) -> C? {
-        if let (many1, many2) = p.run(&input) {
-            return many1 + many2
-        }
-
-        return nil
-    }
-}
-
-extension Parser where Output == ([Text.Element], [Text.Element]), Input == Text {
-    func flatten() -> FlattenManyAndMany<Self, [Text.Element]> {
-        FlattenManyAndMany(self)
-    }
-}
-
-extension Parser where Output == (Text.Element, [Text.Element]), Input == Text {
-    func flatten() -> FlattenOneAndMany<Self> {
-        FlattenOneAndMany(self)
-    }
-}
-
-struct ArrayValues: Parser {
-    func run(_ input: inout Text) -> [TOMLValue]? {
-        return OneOf2(
-            TOMLParser.arrayValues1,
-            TOMLParser.arrayValues2
-        )
-        .run(&input)
-    }
-}
-
-struct InlineTableKeyValues: Parser {
-    func run(_ input: inout Text) -> TOMLValue? {
-        TOMLParser.keyValueRaw
-            .take(
-                TOMLParser.inlineTableSep
-                    .replace(InlineTableKeyValues())
-                    .zeroOrOne()
-                    .map { $0.first ?? .inlineTable([]) }
-            )
-            .run(&input)
-            .map { one, many -> TOMLValue in
-                switch one.key {
-                case .error:
-                    return one.key
-                case .key(let dotted):
-                    switch many {
-                    case .error:
-                        return many
-                    case .inlineTable(let manyPairs):
-                        return .inlineTable( [RawKeyValuePair(key: dotted, value: one.value)] + manyPairs)
-                    default:
-                        fatalError()
-                    }
-                default:
-                    fatalError()
-                }
-            }
-    }
-}
-
-struct EscapeChar: Parser {
-    func run(_ input: inout Text) -> UnicodeScalar? {
-        guard let char = input.first else {
-            return nil
-        }
-
-        var result: UnicodeScalar?
-        switch char.value {
-        case 0x22: result = UnicodeScalar(0x22) // "    quotation mark  U+0022
-        case 0x5C: result = UnicodeScalar(0x5C) // \    reverse solidus U+005C
-        case 0x62: result = UnicodeScalar(0x08) // b    backspace       U+0008
-        case 0x66: result = UnicodeScalar(0x0C) // f    form feed       U+000C
-        case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
-        case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
-        case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
-        default: break
-        }
-
-        if result != nil {
-            input.removeFirst()
-        }
-
-        return result
-    }
-}
-
+@inline(__always)
 func isUnescapedChar(_ c: UnicodeScalar) -> Bool {
     let value = c.value
     return value == 0x20 ||
@@ -614,24 +232,9 @@ func isUnescapedChar(_ c: UnicodeScalar) -> Bool {
         value >= 0xE000 && value <= 0x10FFFF
 }
 
-func isHexDigit(_ c: UnicodeScalar) -> Bool {
-    let isDigit = c.value >= 0x30 && c.value <= 0x39
-    let isUpper = c.value >= 0x41 && c.value <= 0x46
-    let isLower = c.value >= 0x61 && c.value <= 0x66
-    return isDigit || isUpper || isLower
-}
-
-enum Constants {
-    static let lf = "\n".unicodeScalars
-    static let lfcr = "\r\n".unicodeScalars
-    static let backslash = "\\".unicodeScalars.first!
-    static let lowercaseU = "u".unicodeScalars.first!
-    static let uppercaseU = "U".unicodeScalars.first!
-}
-
-func getEscaped(_ index: inout Text.Index, _ input: Text) -> UnicodeScalar?? {
+func escaped(_ index: inout Substring.UnicodeScalarView.Index, _ input: Substring.UnicodeScalarView) -> UnicodeScalar?? {
     let originalIndex = index
-    guard input[index] == Constants.backslash else {
+    guard input[index] == Constants.backslashScalar else {
         return nil
     }
 
@@ -647,9 +250,9 @@ func getEscaped(_ index: inout Text.Index, _ input: Text) -> UnicodeScalar?? {
     case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
     case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
     case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
-    case Constants.lowercaseU.value:
+    case Constants.lowercaseUScalarValue:
         is4Digit = true
-    case Constants.uppercaseU.value:
+    case Constants.uppercaseUScalarValue:
         is4Digit = false
     case 0x20, 0x0A, 0x0D, 0x09:
         index = originalIndex
@@ -691,152 +294,770 @@ func getEscaped(_ index: inout Text.Index, _ input: Text) -> UnicodeScalar?? {
     }
 }
 
-struct BasicString: Parser {
-    static let singleQuote = "\"".unicodeScalars.first!
-    func run(_ input: inout Text) -> TOMLValue? {
-        var result = [UnicodeScalar]()
-        let originalInput = input
-        guard input.first == Self.singleQuote else {
+func basicString(_ input: inout Substring) -> TOMLValue? {
+    let scalars = input.unicodeScalars
+    var result = [UnicodeScalar]()
+    var index = scalars.startIndex
+    guard scalars.first == Constants.doubleQuoteScalar else {
+        return nil
+    }
+
+    result.reserveCapacity(scalars.count)
+
+    scalars.formIndex(after: &index)
+    while index < input.endIndex {
+        let c = scalars[index]
+        let escapedValue = escaped(&index, scalars)
+        switch escapedValue {
+        case .some(.none):
+            return .error(index, .invalidUnicodeSequence)
+        case .some(.some(let scalar)):
+            result.append(scalar)
+            continue
+        case .none:
+            break
+        }
+
+        if c == Constants.doubleQuoteScalar {
+            scalars.formIndex(after: &index)
+            input = Substring(scalars[index...])
+            return .string(.init(value: String(Substring.UnicodeScalarView(result)), index: input.startIndex))
+        }
+
+        if isUnescapedChar(c) {
+            result.append(c)
+            scalars.formIndex(after: &index)
+        } else {
             return nil
         }
+    }
 
-        input.removeFirst()
+    return nil
+}
 
-        var index = input.startIndex
-        while index < input.endIndex {
-            let c = input[index]
-            let escaped = getEscaped(&index, input)
-            switch escaped {
-            case .some(.none):
-                return .error(index, .invalidUnicodeSequence)
-            case .some(.some(let scalar)):
-                result.append(scalar)
-                continue
-            case .none:
-                break
-            }
+func toTimestamp(year: Int, month: Int, day: Int, hour: Int, minute: Int, seconds: Int, nanoseconds: Int, offsetInSeconds: Int) -> Double {
+    var year = year
+    year -= month <= 2 ? 1 : 0
+    let era = (year >= 0 ? year : year - 399) / 400
+    let yoe = year - era * 400
+    let doy = (153*(month + (month > 2 ? -3 : 9)) + 2)/5 + day - 1
+    let doe = yoe * 365 + yoe/4 - yoe/100 + doy
+    let dayCounts = era * 146097 + doe - 719468
+    let seconds = dayCounts * 86400 + hour * 3600 + minute * 60 + seconds - offsetInSeconds
+    return Double(seconds) + Double(nanoseconds) / 1_000_000_000
+}
 
-            if c == Self.singleQuote {
-                input.formIndex(after: &index)
-                input = input[index...]
-                return .string(String(result))
-            }
+@inline(__always)
+func isNonASCII(_ c: UnicodeScalar) -> Bool {
+    let v = c.value
+    return v >= 0x80 && v <= 0xD7FF || v >= 0xE000 && v <= 0x10FFFF
+}
 
-            if isUnescapedChar(c) {
-                result.append(c)
-                input.formIndex(after: &index)
-            } else {
-                input = originalInput
-                return nil
-            }
+func isNonEOL(_ c: UnicodeScalar) -> Bool {
+    let v = c.value
+    return v == 0x09 || v >= 0x20 && v <= 0x7F || isNonASCII(c)
+}
+
+@inline(__always)
+func isLiteralChar(_ c: UnicodeScalar) -> Bool {
+    let v = c.value
+    return v == 0x09 ||
+        v >= 0x20 && v <= 0x26 ||
+        v >= 0x28 && v <= 0x7E ||
+        isNonASCII(c)
+}
+
+func literalString(_ input: inout Substring) -> TOMLValue? {
+    let scalars = input.unicodeScalars
+    var index = scalars.startIndex
+    guard scalars.first == Constants.singleQuoteScalar else {
+        return nil
+    }
+
+    scalars.formIndex(after: &index)
+    let bodyIndexStart = index
+    while index < input.endIndex {
+        let c = scalars[index]
+
+        if c == Constants.singleQuoteScalar {
+            let bodyEndIndex = index
+            scalars.formIndex(after: &index)
+            input = Substring(scalars[index...])
+            return .string(.init(value: String(scalars[bodyIndexStart ..< bodyEndIndex]), index: input.startIndex))
         }
 
-        input = originalInput
+        if isLiteralChar(c) {
+            input.formIndex(after: &index)
+        } else {
+            return nil
+        }
+    }
+
+    return nil
+}
+
+// Returns: .string or .error
+func simpleKey(_ input: inout Substring) -> TOMLValue? {
+    let utf8 = input.utf8
+    if utf8.first == Constants.singleQuoteUTF8 {
+        return literalString(&input)
+    }
+
+    if utf8.first == Constants.doubleQuoteUTF8 {
+        return basicString(&input)
+    }
+
+    return unquotedKey(&input).map { TOMLValue.string(.init(value: $0, index: input.startIndex)) }
+}
+
+/// Returns: .key or .error
+func key(_ input: inout Substring) -> TOMLValue? {
+    guard let first = simpleKey(&input) else {
+        return nil
+    }
+
+    var parts = [first]
+
+    while input.first == "." {
+        input.removeFirst()
+        parts.append(simpleKey(&input) ?? .error(input.startIndex, .incompleteDottedKey))
+    }
+
+    var keyParts = DottedKey()
+    for part in parts {
+        switch part {
+        case .error:
+            return part // propagate the first error
+        case .string(let s):
+            keyParts.append(s)
+        default:
+            fatalError("\(#function) Expect simpleKey to return .error or .string")
+        }
+    }
+
+    return .key(keyParts)
+}
+
+func boolean(_ input: inout Substring) -> TOMLValue? {
+    var utf8 = input.utf8
+    if utf8.starts(with: Constants.trueUTF8Sequence) {
+        utf8.removeFirst(4)
+        input = Substring(utf8)
+
+        return .boolean(true)
+    }
+
+    if utf8.starts(with: Constants.falseUTF8Sequence) {
+        utf8.removeFirst(5)
+        input = Substring(utf8)
+
+        return .boolean(false)
+    }
+
+    return nil
+}
+
+/// returns .string or .error
+func string(_ input: inout Substring) -> TOMLValue? {
+    let utf8 = input.utf8
+    if utf8.first == Constants.doubleQuoteUTF8 {
+        return multilineBasicString(&input) ?? basicString(&input)
+    } else if utf8.first == Constants.singleQuoteUTF8 {
+        return multilineLiteralString(&input) ?? literalString(&input)
+    } else {
         return nil
     }
 }
 
-struct MultilineBasicString: Parser {
-    static let quotes = "\"\"\"".unicodeScalars
-    static let singleQuote = "\"".unicodeScalars.first!
-    func run(_ input: inout Text) -> TOMLValue? {
-        var result = [UnicodeScalar]()
-        let originalInput = input
-        guard input.starts(with: Self.quotes) else {
-            return nil
-        }
+func decIntTextUTF8(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
+    var index = utf8.startIndex
+    var result = [UTF8.CodeUnit]()
 
-        input.removeFirst(3)
+    if utf8.first == Constants.plusUTF8 || utf8.first == Constants.minusUTF8 {
+        result.append(utf8.first!)
+        utf8.formIndex(after: &index)
+    }
 
-        if input.starts(with: Constants.lf) {
-            input.removeFirst()
-        } else if input.starts(with: Constants.lfcr) {
-            input.removeFirst(2)
-        }
+    if index < utf8.endIndex && utf8[index] == Constants.zeroUTF8 {
+        utf8.formIndex(after: &index)
+        utf8 = utf8[index...]
+        result.append(Constants.zeroUTF8)
+        return result
+    }
 
-        var escapingNewline = false
-        var index = input.startIndex
-        while index < input.endIndex {
-            let c = input[index]
-            let escaped = getEscaped(&index, input)
-            switch escaped {
-            case .some(.none):
-                return .error(index, .invalidUnicodeSequence)
-            case .some(.some(let scalar)):
-                result.append(scalar)
-                continue
-            case .none:
-                break
-            }
+    guard !utf8.isEmpty, utf8[index] >= 0x31 && utf8[index] <= 0x39 else {
+        return nil
+    }
 
-            if escapingNewline {
-                if c.value == 0x20 || c.value == 0x0A || c.value == 0x0D || c.value == 0x09 {
-                    input.formIndex(after: &index)
-                } else if input[index...].starts(with: Constants.lf) {
-                    input.formIndex(after: &index)
-                } else if input[index...].starts(with: Constants.lfcr) {
-                    input.formIndex(after: &index)
-                    input.formIndex(after: &index)
-                } else {
-                    escapingNewline = false
-                }
+    result.append(utf8[index])
+    utf8.formIndex(after: &index)
 
-                continue
-            }
-
-            if c == Constants.backslash {
-                input.formIndex(after: &index)
-                escapingNewline = true
-                continue
-            }
-
-
-            if c == Self.singleQuote {
-                result.append(Self.singleQuote)
-                input.formIndex(after: &index)
-                if index == input.endIndex {
-                    input = originalInput
-                    return nil
-                }
-
-                if input[index] == Self.singleQuote {
-                    result.append(Self.singleQuote)
-                    input.formIndex(after: &index)
-                    if index == input.endIndex {
-                        input = originalInput
-                        return nil
-                    }
-
-                    if input[index] == Self.singleQuote {
-                        input.formIndex(after: &index)
-                        input = input[index...]
-                        return .string(String(result.dropLast(2)))
-                    }
-
-                    continue
-                }
-
-                continue
-            }
-
-            if isUnescapedChar(c) {
-                result.append(c)
-                input.formIndex(after: &index)
-            } else {
-                input = originalInput
+    while index < utf8.endIndex {
+        let value = utf8[index]
+        if isDigit(value) {
+            result.append(utf8[index])
+        } else if value == Constants.underscoreUTF8 { // TODO: report trailing '_' as value error
+            utf8.formIndex(after: &index)
+            if index >= utf8.endIndex || (utf8[index] < 0x30 || utf8[index] > 0x39) {
                 return nil
             }
+
+            continue
+        } else {
+            break
         }
 
-        input = input[index...]
-        return .string(String(result))
+        utf8.formIndex(after: &index)
+    }
+
+    utf8 = utf8[index...]
+    return result
+}
+
+func decIntText(_ input: inout Substring) -> Substring? {
+    var utf8 = input.utf8
+    if let utf8Seq = decIntTextUTF8(&utf8) {
+        input = Substring(utf8)
+        return Substring(decoding: utf8Seq, as: UTF8.self)
+    }
+
+    return nil
+}
+
+/// Returns: .integer or .error
+func decInt(_ input: inout Substring) -> TOMLValue? {
+    switch decIntText(&input).map({ Int64($0) }) {
+    case .some(.some(let result)):
+        return .integer(result)
+    case .some(nil):
+        return .error(input.startIndex, .invalidDecimal)
+    case .none:
+        return nil
     }
 }
 
-struct MultilineLiteralString: Parser {
-    static let quotes = "'''".unicodeScalars
-    static let singleQuote = "'".unicodeScalars.first!
-    static func isMultilineChar(_ c: UnicodeScalar) -> Bool {
+func hexInt(_ input: inout Substring) -> TOMLValue? {
+    @inline(__always)
+    func isHexDigit(_ c: UTF8.CodeUnit) -> Bool {
+        let isDigit = c >= 0x30 && c <= 0x39
+        let isUpper = c >= 0x41 && c <= 0x46
+        let isLower = c >= 0x61 && c <= 0x66
+        return isDigit || isUpper || isLower
+
+    }
+
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+    var body = [UTF8.CodeUnit]()
+    guard utf8.starts(with: Constants.hexPrefixUTF8Sequence) else {
+        return nil
+    }
+
+    index = utf8.index(index, offsetBy: 2)
+
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if isHexDigit(c) {
+            body.append(c)
+        } else if c == Constants.underscoreUTF8 {
+            utf8.formIndex(after: &index)
+            guard index < utf8.endIndex && isHexDigit(utf8[index]) else {
+                return TOMLValue.error(index, .invalidHexadecimal)
+            }
+
+            continue
+        } else {
+            break
+        }
+
+        input.formIndex(after: &index)
+    }
+
+    guard let n = Int64(String(decoding: body, as: UTF8.self), radix: 16) else {
+        return TOMLValue.error(input.startIndex, .invalidHexadecimal)
+    }
+
+    input = Substring(utf8[index...])
+    return .integer(n)
+}
+
+func octInt(_ input: inout Substring) -> TOMLValue? {
+    @inline(__always)
+    func isOctDigit(_ c: UTF8.CodeUnit) -> Bool {
+        c >= 0x30 && c <= 0x37
+    }
+
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+    var body = [UTF8.CodeUnit]()
+    guard utf8.starts(with: Constants.octPrefixUTF8Sequence) else {
+        return nil
+    }
+
+    index = utf8.index(index, offsetBy: 2)
+
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if isOctDigit(c) {
+            body.append(c)
+        } else if c == Constants.underscoreUTF8 {
+            utf8.formIndex(after: &index)
+            guard index < utf8.endIndex && isOctDigit(utf8[index]) else {
+                return TOMLValue.error(index, .invalidOctal)
+            }
+
+            continue
+        } else {
+            break
+        }
+
+        input.formIndex(after: &index)
+    }
+
+    guard let n = Int64(String(decoding: body, as: UTF8.self), radix: 8) else {
+        return TOMLValue.error(input.startIndex, .invalidOctal)
+    }
+
+    input = Substring(utf8[index...])
+    return .integer(n)
+}
+
+func binInt(_ input: inout Substring) -> TOMLValue? {
+    @inline(__always)
+    func isBinDigit(_ c: UTF8.CodeUnit) -> Bool {
+        c == 0x30 || c == 0x31
+    }
+
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+    var body = [UTF8.CodeUnit]()
+    guard utf8.starts(with: Constants.binPrefixUTF8Sequence) else {
+        return nil
+    }
+
+    index = utf8.index(index, offsetBy: 2)
+
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if isBinDigit(c) {
+            body.append(c)
+        } else if c == Constants.underscoreUTF8 {
+            utf8.formIndex(after: &index)
+            guard index < utf8.endIndex && isBinDigit(utf8[index]) else {
+                return TOMLValue.error(index, .invalidBinary)
+            }
+
+            continue
+        } else {
+            break
+        }
+
+        input.formIndex(after: &index)
+    }
+
+    guard let n = Int64(String(decoding: body, as: UTF8.self), radix: 2) else {
+        return TOMLValue.error(input.startIndex, .invalidBinary)
+    }
+
+    input = Substring(utf8[index...])
+    return .integer(n)
+}
+
+/// returns .error or .integer
+func integer(_ input: inout Substring) -> TOMLValue? {
+    hexInt(&input) ?? octInt(&input) ?? binInt(&input) ?? decInt(&input) // jump to decInt if input doesn't start with 0?
+}
+
+func value(_ input: inout Substring) -> TOMLValue? {
+    dateTime(&input) ?? float(&input) ?? integer(&input) ?? string(&input) ?? boolean(&input) ?? inlineTable(&input) ?? array(&input)
+}
+
+func keyValuePair(_ input: inout Substring) -> KeyValuePair? {
+    let originalInput = input
+    guard let key = key(&input) else {
+        return nil
+    }
+
+    whitespace(&input)
+    guard input.first == "=" else {
+        input = originalInput
+        return nil
+    }
+
+    input.removeFirst()
+    whitespace(&input)
+    guard let value = value(&input) else {
+        input = originalInput
+        return nil
+    }
+
+    return .init(key: key, value: value)
+}
+
+/// returns .keyValue or .valueError
+func keyValue(_ input: inout Substring) -> TopLevel? {
+    guard let pair = keyValuePair(&input) else {
+        return nil
+    }
+
+    if case let .error(index, reason) = pair.value {
+        return .valueError(index, reason)
+    }
+
+    return .init(convertingKey: pair.key) { .keyValue(.init(key: $0, value: pair.value)) }
+}
+
+func inlineTableSep(_ input: inout Substring) -> Bool {
+    let originalInput = input
+    whitespace(&input)
+    guard input.first == "," else {
+        input = originalInput
+        return false
+    }
+
+    input.removeFirst()
+    whitespace(&input)
+    return true
+}
+
+/// Returns: .inlineTable or .error
+func inlineTableKeyValues(_ input: inout Substring) -> [KeyValuePair]? {
+    let originalInput = input
+    guard let first = keyValuePair(&input) else {
+        return nil
+    }
+
+    var pairs = [first]
+    while !input.isEmpty && inlineTableSep(&input) {
+        guard let next = keyValuePair(&input) else {
+            input = originalInput
+            return nil
+        }
+
+        pairs.append(next)
+    }
+
+    return pairs
+}
+
+func inlineTable(_ input: inout Substring) -> TOMLValue? {
+    let originalInput = input
+    whitespace(&input)
+    guard input.first == "{" else {
+        input = originalInput
+        return nil
+    }
+
+    input.removeFirst()
+    whitespace(&input)
+
+    let pairs = inlineTableKeyValues(&input) ?? []
+
+    whitespace(&input)
+    guard input.first == "}" else {
+        input = originalInput
+        return nil
+    }
+
+    input.removeFirst()
+    whitespace(&input)
+
+    var result = [RawKeyValuePair]()
+    for pair in pairs {
+        if case .error = pair.key {
+            return pair.key
+        }
+
+        if case .error = pair.value {
+            return pair.value
+        }
+
+        guard case let .key(dotted) = pair.key else {
+            fatalError("\(#function) expected key")
+        }
+
+        result.append(.init(key: dotted, value: pair.value))
+    }
+
+    return .inlineTable(result)
+}
+
+func zeroPrefixableInt(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
+    var index = utf8.startIndex
+    guard !utf8.isEmpty, isDigit(utf8[index]) else {
+        return nil
+    }
+
+    var result = [utf8[index]]
+    utf8.formIndex(after: &index)
+
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if isDigit(c) {
+            result.append(c)
+        } else if c == Constants.underscoreUTF8 {
+            utf8.formIndex(after: &index)
+            if index >= utf8.endIndex {
+                return nil
+            }
+
+            if !isDigit(utf8[index]) {
+                return nil
+            }
+
+            continue
+        } else {
+            break
+        }
+
+        utf8.formIndex(after: &index)
+    }
+
+    utf8 = utf8[index...]
+    return result
+}
+
+func exp(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
+    let originalInput = utf8
+    guard let first = utf8.first, first == Constants.lowerEUTF8 || first == Constants.upperEUTF8 else {
+        return nil
+    }
+
+    var result = [first]
+    utf8.removeFirst()
+    if let sign = utf8.first, (sign == Constants.plusUTF8 || sign == Constants.minusUTF8) {
+        result.append(sign)
+        utf8.removeFirst()
+    }
+
+    guard let expBody = zeroPrefixableInt(&utf8) else {
+        utf8 = originalInput
+        return nil
+    }
+
+    return result + expBody
+}
+
+func normalFloat(_ input: inout Substring) -> TOMLValue? {
+    var utf8 = input.utf8
+    guard var result = decIntTextUTF8(&utf8) else {
+        return nil
+    }
+
+    if let exp = exp(&utf8) {
+        result += exp
+    } else {
+        guard utf8.first == Constants.periodUTF8 else {
+            return nil
+        }
+
+        result.append(Constants.periodUTF8)
+        utf8.removeFirst()
+        guard let frac = decIntTextUTF8(&utf8) else {
+            return nil
+        }
+
+        result += frac
+
+        if let exp = exp(&utf8) {
+            result += exp
+        }
+    }
+
+    input = Substring(decoding: utf8, as: UTF8.self)
+    return .float(Double(String(decoding: result, as: UTF8.self))!)
+}
+
+func float(_ input: inout Substring) -> TOMLValue? {
+    if let normal = normalFloat(&input) {
+        return normal
+    }
+
+    var utf8 = input.utf8
+    var sign = 1.0
+    if let first = utf8.first, (first == Constants.plusUTF8 || first == Constants.minusUTF8) {
+        if first == Constants.minusUTF8 {
+            sign = -1.0
+        }
+
+        utf8.removeFirst()
+    }
+
+    if utf8.starts(with: Constants.nanUTF8Sequence) {
+        utf8.removeFirst(3)
+        input = Substring(utf8)
+        return .float(Double.nan)
+    }
+
+    if utf8.starts(with: Constants.infUTF8Sequence) {
+        utf8.removeFirst(3)
+        input = Substring(utf8)
+        return .float(sign * Double.infinity)
+    }
+
+    return nil
+}
+
+func escapedScalar(_ index: inout Substring.UnicodeScalarView.Index, _ input: Substring.UnicodeScalarView) -> UnicodeScalar?? {
+    let originalIndex = index
+    guard input[index] == Constants.backslashScalar else {
+        return nil
+    }
+
+    input.formIndex(after: &index)
+
+    var result: UnicodeScalar?
+    var is4Digit = true
+    switch input[index].value {
+    case 0x22: result = UnicodeScalar(0x22) // "    quotation mark  U+0022
+    case 0x5C: result = UnicodeScalar(0x5C) // \    reverse solidus U+005C
+    case 0x62: result = UnicodeScalar(0x08) // b    backspace       U+0008
+    case 0x66: result = UnicodeScalar(0x0C) // f    form feed       U+000C
+    case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
+    case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
+    case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
+    case Constants.lowercaseUScalarValue:
+        is4Digit = true
+    case Constants.uppercaseUScalarValue:
+        is4Digit = false
+    case 0x20, 0x0A, 0x0D, 0x09:
+        index = originalIndex
+        return nil
+    default:
+        index = originalIndex
+        return .some(nil)
+    }
+
+    input.formIndex(after: &index)
+
+    if let result = result {
+        return result
+    }
+
+    let seqStart = index
+    let stoppingPoint = is4Digit ? 4 : 8
+
+    for _ in 0 ..< stoppingPoint {
+        if isHexDigit(input[index]) {
+            input.formIndex(after: &index)
+        } else {
+            index = originalIndex
+            return nil
+        }
+    }
+
+    if let scalar = Int(String(input[seqStart ..< index]), radix: 16).flatMap(UnicodeScalar.init) {
+        result = scalar
+    } else {
+        return .some(nil)
+    }
+
+    if let result = result {
+        return result
+    } else {
+        index = originalIndex
+        return nil
+    }
+}
+
+func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
+    let scalars = input.unicodeScalars
+    var index = scalars.startIndex
+    guard scalars.starts(with: Constants.tripleDoubleQuoteScalar) else {
+        return nil
+    }
+
+    index = scalars.index(index, offsetBy: 3)
+
+    if scalars[index...].starts(with: Constants.lfScalar) {
+        scalars.formIndex(after: &index)
+    } else if scalars[index...].starts(with: Constants.crlfScalar) {
+        scalars.formIndex(after: &index)
+        scalars.formIndex(after: &index)
+    }
+
+    var result = [UnicodeScalar]()
+    var escapingNewline = false
+    while index < input.endIndex {
+        let c = scalars[index]
+        let escaped = escapedScalar(&index, scalars)
+        switch escaped {
+        case .some(.none):
+            return .error(index, .invalidUnicodeSequence)
+        case .some(.some(let scalar)):
+            result.append(scalar)
+            continue
+        case .none:
+            break
+        }
+
+        if escapingNewline {
+            if c.value == 0x20 || c.value == 0x0A || c.value == 0x0D || c.value == 0x09 {
+                input.formIndex(after: &index)
+            } else if scalars[index...].starts(with: Constants.lfScalar) {
+                input.formIndex(after: &index)
+            } else if scalars[index...].starts(with: Constants.crlfScalar) {
+                input.formIndex(after: &index)
+                input.formIndex(after: &index)
+            } else {
+                escapingNewline = false
+            }
+
+            continue
+        }
+
+        if c == Constants.backslashScalar {
+            input.formIndex(after: &index)
+            escapingNewline = true
+            continue
+        }
+
+        if c == Constants.doubleQuoteScalar {
+            result.append(c)
+            scalars.formIndex(after: &index)
+            if index == scalars.endIndex {
+                return nil
+            }
+
+            if scalars[index] == Constants.doubleQuoteScalar {
+                result.append(Constants.doubleQuoteScalar)
+                scalars.formIndex(after: &index)
+                if index == scalars.endIndex {
+                    return nil
+                }
+
+                if scalars[index] == Constants.doubleQuoteScalar {
+                    scalars.formIndex(after: &index)
+                    let startIndex = input.startIndex
+                    input = Substring(Substring.UnicodeScalarView(scalars[index...]))
+                    return .string(
+                        .init(
+                            value: String(Substring.UnicodeScalarView(result.dropLast(2))),
+                            index: startIndex
+                        )
+                    )
+                }
+
+                continue
+            }
+
+            continue
+        }
+
+        if isUnescapedChar(c) {
+            result.append(c)
+            scalars.formIndex(after: &index)
+        } else {
+            return nil
+        }
+
+    }
+
+    return nil
+}
+
+func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
+    func isMultilineChar(_ c: UnicodeScalar) -> Bool {
         let value = c.value
         return value == 0x09 ||
             value >= 0x20 && value <= 0x26 ||
@@ -847,775 +1068,491 @@ struct MultilineLiteralString: Parser {
             value == 0x0D
     }
 
-    func run(_ input: inout Text) -> String? {
-        let originalInput = input
-        guard input.starts(with: Self.quotes) else {
-            return nil
-        }
+    let scalars = input.unicodeScalars
+    var index = scalars.startIndex
+    guard scalars.starts(with: Constants.tripleSingleQuoteScalar) else {
+        return nil
+    }
 
-        input.removeFirst(3)
+    index = scalars.index(index, offsetBy: 3)
+    if scalars[index...].starts(with: Constants.lfScalar) {
+        scalars.formIndex(after: &index)
+    } else if scalars[index...].starts(with: Constants.crlfScalar) {
+        scalars.formIndex(after: &index)
+        scalars.formIndex(after: &index)
+    }
 
-        if input.starts(with: Constants.lf) {
-            input.removeFirst()
-        } else if input.starts(with: Constants.lfcr) {
-            input.removeFirst(2)
-        }
-
-        var escapingNewline = false
-
-        var index = input.startIndex
-        while index < input.endIndex {
-            let c = input[index]
-
-            if escapingNewline {
-                if c.value == 0x0A || c.value == 0x0D {
-                    input.formIndex(after: &index)
-                } else if input[index...].starts(with: Constants.lf) {
-                    input.formIndex(after: &index)
-                } else if input[index...].starts(with: Constants.lfcr) {
-                    input.formIndex(after: &index)
-                    input.formIndex(after: &index)
-                } else {
-                    escapingNewline = false
-                }
-
-                continue
+    let startIndex = index
+    var escapingNewline = false
+    while index < scalars.endIndex {
+        let c = scalars[index]
+        if escapingNewline {
+            if c.value == 0x0A || c.value == 0x0D {
+                scalars.formIndex(after: &index)
+            } else if scalars[index...].starts(with: Constants.lfScalar) {
+                scalars.formIndex(after: &index)
+            } else if scalars[index...].starts(with: Constants.crlfScalar) {
+                scalars.formIndex(after: &index)
+                scalars.formIndex(after: &index)
+            } else {
+                escapingNewline = false
             }
 
-            if c == Constants.backslash {
-                input.formIndex(after: &index)
-                escapingNewline = true
-                continue
+            continue
+        }
+
+        if c == Constants.backslashScalar {
+            scalars.formIndex(after: &index)
+            escapingNewline = true
+            continue
+        }
+
+        if c == Constants.singleQuoteScalar {
+            let endIndex = index
+            scalars.formIndex(after: &index)
+            if index == scalars.endIndex {
+                return nil
             }
 
-            if c == Self.singleQuote {
-                let endIndex = index
-                input.formIndex(after: &index)
-                if index == input.endIndex {
-                    input = originalInput
+            if scalars[index] == Constants.singleQuoteScalar {
+                scalars.formIndex(after: &index)
+                if index == scalars.endIndex {
                     return nil
                 }
 
-                if input[index] == Self.singleQuote {
-                    input.formIndex(after: &index)
-                    if index == input.endIndex {
-                        input = originalInput
-                        return nil
-                    }
-
-                    if input[index] == Self.singleQuote {
-                        let output = input[input.startIndex ..< endIndex]
-                        input.removeFirst(output.count + 3)
-                        return String(output)
-                    }
-
-                    continue
+                if scalars[index] == Constants.singleQuoteScalar {
+                    let output = scalars[startIndex ..< endIndex]
+                    scalars.formIndex(after: &index)
+                    input = Substring(scalars[index...])
+                    return .string(.init(value: String(output), index: input.startIndex))
                 }
 
                 continue
             }
 
-            if Self.isMultilineChar(c) {
-                input.formIndex(after: &index)
-                continue
-            } else {
-                return nil
-            }
+            continue
         }
 
+        if isMultilineChar(c) {
+            scalars.formIndex(after: &index)
+            continue
+        } else {
+            return nil
+        }
+    }
+
+    return nil
+}
+
+func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
+    var index = utf8.startIndex
+    var year = 0
+    for _ in 0 ..< 4 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        year = year * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
+        return nil
+    }
+
+    utf8.formIndex(after: &index)
+
+    var month = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        month = month * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+
+    guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
+        return nil
+    }
+
+    utf8.formIndex(after: &index)
+
+    var day = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        day = day * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    if month == 0 || month > 12 {
+        return .some(nil)
+    }
+
+    let isLeapYear = year % 4 == 0 && year % 100 != 0
+    if (month == 3 || month == 6 || month == 9 || month == 11) && day > 30 ||
+        month == 2 && !isLeapYear && day > 28 ||
+        month == 2 && isLeapYear && day > 29 ||
+        day > 31
+    {
+        return .some(nil)
+    }
+
+    utf8 = utf8[index...]
+    return (year, month, day)
+}
+
+func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? {
+    var index = utf8.startIndex
+    var hour = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        hour = hour * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+        return nil
+    }
+
+
+    utf8.formIndex(after: &index)
+
+    var minute = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        minute = minute * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+
+    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+        return nil
+    }
+
+    utf8.formIndex(after: &index)
+
+    var second = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        second = second * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    if hour > 23  || minute > 59 || second > 60 {
+        return .some(nil)
+    }
+
+    if index < utf8.endIndex, utf8[index] == Constants.periodUTF8 {
+        utf8.formIndex(after: &index)
+    }
+
+    var fractionText = [Constants.zeroUTF8, Constants.periodUTF8]
+    while index < utf8.endIndex, isDigit(utf8[index]) {
+        fractionText.append(utf8[index])
+        utf8.formIndex(after: &index)
+    }
+
+    var fraction: Int?
+    if fractionText.count > 2 {
+        fraction = Int(Double(String(decoding: fractionText, as: UTF8.self))! * 1_000_000_000)
+    }
+
+    utf8 = utf8[index...]
+    return (hour, minute, second, fraction)
+}
+
+/// Returns: seconds from GMT
+func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
+    if utf8.first == Constants.upperZUTF8 {
+        utf8.removeFirst()
+        return 0
+    }
+
+    var sign = 1
+    switch utf8.first {
+    case Constants.plusUTF8:
+        break
+    case Constants.minusUTF8:
+        sign = -1
+    default:
+        return nil
+    }
+
+    var index = utf8.startIndex
+    utf8.formIndex(after: &index)
+
+    var hour = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        hour = hour * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+        return nil
+    }
+
+    utf8.formIndex(after: &index)
+
+    var minute = 0
+    for _ in 0 ..< 2 {
+        guard index < utf8.endIndex, isDigit(utf8[index]) else {
+            return nil
+        }
+
+        minute = minute * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        utf8.formIndex(after: &index)
+    }
+
+    if hour > 23 || minute > 59 {
+        return .some(nil)
+    }
+
+    utf8 = utf8[index...]
+    return sign * (hour * 3600 + minute * 60)
+}
+
+func dateTime(_ input: inout Substring) -> TOMLValue? {
+    let originalInput = input
+    var utf8 = input.utf8
+    let parsedDateParts = localDateUTF8(&utf8)
+    var hasSep = false
+    var dateParts: (Int, Int, Int)?
+
+    switch parsedDateParts {
+    case .some(.some(let parsed)):
+        dateParts = parsed
+        if (utf8.first == Constants.lowerTUTF8 || utf8.first == Constants.upperTUTF8 || utf8.first == Constants.spaceUTF8) {
+            utf8.removeFirst()
+            hasSep = true
+        }
+    case .some(.none):
+        return .error(input.startIndex, .invalidDate)
+    case .none:
+        break
+    }
+
+
+    let parsedTimeParts = localTimeUTF8(&utf8)
+    var timeParts: (Int, Int, Int, Int?)?
+    switch parsedTimeParts {
+    case .some(.some(let parsed)):
+        timeParts = parsed
+    case .some(.none):
+        return .error(input.startIndex, .invalidTime)
+    case .none:
+        break
+    }
+    var offset: Int?
+    if timeParts != nil {
+        let parsed = timeOffset(&utf8)
+        switch parsed {
+        case .some(.none):
+            return .error(input.startIndex, .invalidTimeOffset)
+        case .some(.some(let parsedOffset)):
+            offset = parsedOffset
+        case .none:
+            break
+        }
+    }
+
+    if dateParts != nil && timeParts != nil && !hasSep {
         input = originalInput
         return nil
     }
-}
 
-struct UnsignedDecIntText: Parser {
-    static let zero = "0".unicodeScalars.first!
-    static let underscore = "_".unicodeScalars.first!.value
-
-    func run(_ input: inout Text) -> [UnicodeScalar]? {
-        let originalInput = input
-        if input.first == Self.zero {
-            input.removeFirst()
-            return [Self.zero]
-        }
-
-        var result = [UnicodeScalar]()
-        var index = input.startIndex
-
-        guard !input.isEmpty, input[index].value >= 0x31 && input[index].value <= 0x39 else {
+    if let offset = offset {
+        guard let dateParts = dateParts else
+        {
+            input = originalInput
             return nil
         }
 
+        let secs = toTimestamp(
+            year: dateParts.0,
+            month: dateParts.1,
+            day: dateParts.2,
+            hour: timeParts?.0 ?? 0,
+            minute: timeParts?.1 ?? 0,
+            seconds: timeParts?.2 ?? 0,
+            nanoseconds: timeParts?.3 ?? 0,
+            offsetInSeconds: offset
+        )
 
-        result.append(input[index])
-        input.formIndex(after: &index)
+        let date = TOMLValue.date(Date(timeIntervalSince1970: secs))
 
-        while index < input.endIndex {
-            let value = input[index].value
-            if value >= 0x30 && value <= 0x39 {
-                result.append(input[index])
-            } else if value == Self.underscore {
-                input.formIndex(after: &index)
-                if index >= input.endIndex || (input[index].value < 0x30 || input[index].value > 0x39) {
-                    input = originalInput
-                    return nil
-                }
+        input = Substring(decoding: utf8, as: UTF8.self)
+        return date
+    } else if dateParts == nil && timeParts == nil {
+        input = originalInput
+        return nil
+    }
 
-                continue
-            } else {
-                break
-            }
+    input = Substring(decoding: utf8, as: UTF8.self)
+    return .dateComponents(.init(
+        year: dateParts?.0,
+        month: dateParts?.1,
+        day: dateParts?.2,
+        hour: timeParts?.0,
+        minute: timeParts?.1,
+        second: timeParts?.2,
+        nanosecond: timeParts?.3
+    ))
+}
 
-            input.formIndex(after: &index)
+func comment(_ input: inout Substring) -> Bool {
+    let scalars = input.unicodeScalars
+    var index = scalars.startIndex
+    guard scalars.first == Constants.poundScalar else {
+        return false
+    }
+
+    scalars.formIndex(after: &index)
+    while index < scalars.endIndex, isNonEOL(scalars[index]) {
+        scalars.formIndex(after: &index)
+    }
+
+    input = Substring(scalars[index...])
+    return true
+}
+
+@discardableResult
+func newline(_ input: inout Substring) -> Bool {
+    let utf8 = input.utf8
+    var index = utf8.startIndex
+
+    while index < utf8.endIndex, case let c = utf8[index], c == Constants.crUTF8 || c == Constants.lfUTF8 {
+        utf8.formIndex(after: &index)
+    }
+
+    let encountered = index != utf8.startIndex
+    input = Substring(utf8[index...])
+    return encountered
+}
+
+func whitespaceCommentSkip(_ input: inout Substring) {
+    while !input.isEmpty {
+        if !(whitespace(&input) || newline(&input) || comment(&input)) {
+            break
         }
-
-        input = input[index...]
-        return result
     }
 }
 
-enum TOMLParser {
-    static let boolean = OneOf2(
-            FixedPrefix("true".unicodeScalars[...]),
-            FixedPrefix("false".unicodeScalars[...])
-        )
-        .map { TOMLValue.boolean($0.first == .init(0x74)) }
-
-    static let digit = PredicateChar { $0.value >= 0x30 && $0.value <= 0x39 }
-    static let alpha = PredicateChar { c in
-        let isUpper = c.value >= 0x41 && c.value <= 0x5A
-        let isLower = c.value >= 0x61 && c.value <= 0x7A
-        return isUpper || isLower
+func arrayValues(_ input: inout Substring) -> [TOMLValue]? {
+    let originalInput = input
+    whitespaceCommentSkip(&input)
+    guard let first = value(&input) else {
+        input = originalInput
+        return nil
     }
-    static let hexDigit = PredicateChar { c in
-        let isDigit = c.value >= 0x30 && c.value <= 0x39
-        let isUpper = c.value >= 0x41 && c.value <= 0x46
-        let isLower = c.value >= 0x61 && c.value <= 0x66
-        return isDigit || isUpper || isLower
-    }
-    static let minus: FixedChar = "-"
-    static let plus: FixedChar = "+"
-    static let underscore: FixedChar = "_"
-    static let digit1to9 = PredicateChar { $0.value >= 0x31 && $0.value <= 0x39 }
-    static let digit0to7 = PredicateChar { $0.value >= 0x30 && $0.value <= 0x37 }
-    static let digit0to1 = PredicateChar { $0.value == 0x30 || $0.value == 0x31 }
-
-    static let plusOrMinus =
-        OneOf2(
-            minus,
-            plus
-        )
-        .zeroOrOne()
-
-    static let decIntText =
-        plusOrMinus
-            .take(UnsignedDecIntText())
-            .flatten()
-
-    static let decInt = decIntText.map { Int64(String($0))! }
-
-    static func int(_ prefix: FixedPrefix, _ digit: PredicateChar, radix: Int) -> AnyParser<Text, Int64> {
-        prefix
-            .take(digit)
-            .map { _, x in x }
-            .take(
-                OneOf2(
-                    digit,
-                    underscore
-                        .take(digit)
-                        .map { _, x in x }
-                )
-                .zeroOrMore()
-            )
-            .map { first, rest -> Int64 in
-                Int64(String([first] + rest), radix: radix)!
-            }
-            .eraseToAny()
+    whitespaceCommentSkip(&input)
+    if input.first == "," {
+        input.removeFirst()
+        if let rest = arrayValues(&input) {
+            return [first] + rest
+        }
     }
 
-    static let hexInt = int(FixedPrefix("0x".unicodeScalars[...]), hexDigit, radix: 16)
-    static let octInt = int(FixedPrefix("0o".unicodeScalars[...]), digit0to7, radix: 8)
-    static let binInt = int(FixedPrefix("0b".unicodeScalars[...]), digit0to1, radix: 2)
-    static let integer =
-        OneOf4(
-            hexInt,
-            octInt,
-            binInt,
-            decInt
-        )
-        .map(TOMLValue.integer)
+    return [first]
+}
 
-    static let zeroPrefixableInt =
-        digit
-            .take(
-                OneOf2(
-                    digit,
-                    underscore
-                    .take(digit)
-                    .map { _, x in x }
-                )
-                .zeroOrMore()
-            )
-            .flatten()
+func array(_ input: inout Substring) -> TOMLValue? {
+    let originalInput = input
+    guard input.first == "[" else {
+        return nil
+    }
 
-    static let exp =
-        PredicateChar { $0.value == 0x45 || $0.value == 0x65 }
-            .take(plusOrMinus)
-            .flatten()
-            .take(zeroPrefixableInt)
-            .flatten()
+    input.removeFirst()
 
-    static let frac =
-        ("." as FixedChar)
-            .take(digit)
-            .map { _, x in x }
-            .take(
-                OneOf2(
-                    digit,
-                    underscore
-                        .take(digit)
-                        .map { _, x in x }
-                )
-                .zeroOrMore()
-            )
-            .map { first, rest in
-                [.init(0x2E), first] + rest
-            }
+    let values = arrayValues(&input)
 
-    static let normalFloat =
-        decIntText
-            .take(
-                OneOf2(
-                    exp,
-                    frac
-                        .take(
-                            exp.zeroOrOne()
-                                .map { $0.flatMap { $0 } }
-                        )
-                        .flatten()
-                )
-            )
-            .flatten()
-            .map { Double(String($0))! }
+    whitespaceCommentSkip(&input)
+    guard input.first == "]" else {
+        input = originalInput
+        return nil
+    }
 
-    static let specialFloat =
-        plusOrMinus
-            .take(
-                OneOf2(
-                    FixedPrefix("nan".unicodeScalars[...]),
-                    FixedPrefix("inf".unicodeScalars[...])
-                )
-            )
-            .map { sign, value -> Double in
-                let sign = sign.first?.value == 0x2d ? -1.0 : 1.0
-                if value.first?.value == 0x6E { // 'n'
-                    return Double.nan
-                } else {
-                    return sign * Double.infinity
-                }
-            }
+    input.removeFirst()
 
-    static let float = OneOf2(normalFloat, specialFloat).map(TOMLValue.float)
-    static let nonascii =
-        PredicateChar {
-            $0.value >= 0x80 && $0.value <= 0xD7FF ||
-            $0.value >= 0xE000 && $0.value <= 0x10FFFF
+    for value in values ?? [] {
+        if case .error = value {
+            return value
         }
+    }
 
-    static let noneol =
-        OneOf2(
-            PredicateChar { $0.value == 0x09 || $0.value >= 0x20 && $0.value <= 0x7F },
-            nonascii
-        )
+    return .array(values ?? [])
+}
 
-    static let comment =
-        ("#" as FixedChar)
-            .take(noneol.zeroOrMore())
-            .map { _ in }
+func table(_ input: inout Substring) -> TopLevel? {
+    let originalInput = input
+    guard input.first == "[" else {
+        return nil
+    }
 
-    static let apostrophe: FixedChar = "'"
-    static let literalChar =
-        OneOf2(
-            PredicateChar {
-                $0.value == 0x09 ||
-                $0.value >= 0x20 && $0.value <= 0x26 ||
-                $0.value >= 0x28 && $0.value <= 0x7E
-            },
-            nonascii
-        )
-    static let literalStringFullText =
-        apostrophe
-            .replace(literalChar.zeroOrMore())
-            .skip(apostrophe)
-    static let literalStringFull =
-        literalStringFullText
-            .map { TOMLValue.string(String($0)) }
-    static let literalStringWithoutClosing =
-        apostrophe
-            .replace(literalChar.zeroOrMore())
-            .traced()
-            .map { TOMLValue.error($0.index, .literalStringMissingClosing) }
-    static let literalString =
-        OneOf2(
-            literalStringFull,
-            literalStringWithoutClosing
-        )
-    static let newlineChar = PredicateChar { $0.value == 0x0A || $0.value == 0x0D }
-    static let newlineSeq =
-        OneOf2(
-            FixedPrefix("\n".unicodeScalars[...]),
-            FixedPrefix("\r\n".unicodeScalars[...])
-        )
-        .map { Array($0) }
-    static let multilineContent = OneOf2(literalChar, newlineChar)
-    static let multilineQuote = RepeatingPrefix<Text>(.init(0x27), lowerBound: 1, upperBound: 2)
-    static let multilineLiteralBody =
-        multilineContent
-            .zeroOrMore()
-            .take(
-                multilineQuote
-                    .take(
-                        multilineContent
-                            .nOrMore(1)
-                    )
-                    .map { $0 + $1 }
-                    .zeroOrMore()
-                    .map { $0.flatMap { $0 }}
-            )
-            .flatten()
-            .take(
-                multilineQuote
-                    .zeroOrOne()
-                    .map { $0.flatMap { $0 } }
-            )
-            .flatten()
+    input.removeFirst()
+    whitespace(&input)
+    guard let key = key(&input) else {
+        input = originalInput
+        return nil
+    }
 
-    static let multilineLiteralDelim = FixedPrefix("'''".unicodeScalars[...])
-    static let multilineLiteralStringWithoutClosing =
-        multilineLiteralDelim
-            .take(newlineSeq.zeroOrOne())
-            .replace(multilineLiteralBody)
-            .traced()
-            .map { TOMLValue.error($0.index, .multilineLiteralStringMissingClosing) }
-    static let multilineLiteralString =
-        OneOf2(
-            MultilineLiteralString().map { TOMLValue.string(String($0)) },
-            multilineLiteralStringWithoutClosing
-        )
+    whitespace(&input)
+    guard input.first == "]" else {
+        input = originalInput
+        return nil
+    }
+    input.removeFirst()
+    return TopLevel(convertingKey: key) { TopLevel.table($0) }
+}
 
-    static let escape: FixedChar = #"\"#
-    static let escapeSeq =
-        OneOf2(
-            ("u" as FixedChar)
-                .replace(
-                    hexDigit.repeated(4)
-                ),
-            ("U" as FixedChar)
-                .replace(
-                    hexDigit.repeated(8)
-                )
-        )
-    static let escaped =
-        OneOf2(
-            escape.replace(EscapeChar()),
-            Unwrap(p: escape.replace(escapeSeq).map { UnicodeScalar(Int(String($0), radix: 16)!) })
-        )
+func arrayTable(_ input: inout Substring) -> TopLevel? {
+    let originalInput = input
+    guard input.starts(with: "[[") else {
+        return nil
+    }
+    input.removeFirst(2)
+    whitespace(&input)
+    guard let key = key(&input) else {
+        input = originalInput
+        return nil
+    }
+    whitespace(&input)
+    guard input.starts(with: "]]") else {
+        input = originalInput
+        return nil
+    }
+    input.removeFirst(2)
+    return TopLevel(convertingKey: key) { TopLevel.arrayTable($0) }
+}
 
-    static let whitespaceChar = PredicateChar { $0.value == 0x20 || $0.value == 0x09 }
-    static let whitespace = whitespaceChar.zeroOrMore()
-    static let multilineBasicEscapeNewline =
-        escape
-            .take(whitespace)
-            .take(newlineSeq)
-            .take(
-                OneOf2(
-                    whitespaceChar,
-                    newlineChar
-                )
-                .zeroOrMore()
-            )
-            .map { _ in [UnicodeScalar]() }
-    static let multilineBasicUnescaped =
-        OneOf3(
-            whitespaceChar,
-            PredicateChar {
-                $0.value == 0x21 ||
-                $0.value >= 0x23 && $0.value <= 0x5B ||
-                $0.value >= 0x5D && $0.value <= 0x7E
-            },
-            nonascii
-        )
-    static let basicChar = OneOf2(multilineBasicUnescaped, escaped)
+func expression(_ input: inout Substring) -> TopLevel?? {
+    var parsed = false
+    parsed = whitespace(&input)
+    if let v = keyValue(&input) ?? table(&input) ?? arrayTable(&input) {
+        whitespace(&input)
+        _ = comment(&input)
+        return v
+    }
 
-    static let basicStringWithoutClosing =
-        ("\"" as FixedChar)
-            .replace(
-                basicChar
-                    .zeroOrMore()
-             )
-            .traced()
-            .map { TOMLValue.error($0.index, .basicStringMissingClosing) }
-    static let basicString =
-        OneOf2(
-            BasicString(),
-            basicStringWithoutClosing
-        )
-    static let string =
-        OneOf4(
-            multilineLiteralString,
-            MultilineBasicString(),
-            literalString,
-            basicString
-        )
-    static let dateYear = digit.repeated(4)
-    static let dateMonth = digit.repeated(2)
-    static let dateDay = digit.repeated(2)
-    static let timeDelim =
-        OneOf3(
-            "T" as FixedChar,
-            "t" as FixedChar,
-            " " as FixedChar
-        )
-    static let timeHour = digit.repeated(2)
-    static let timeMinute = digit.repeated(2)
-    static let timeSecond = digit.repeated(2)
-    static let timeSecondFrac =
-        ("." as FixedChar)
-            .replace(digit.nOrMore(1))
-    // sign, hour, minute
-    static let timeNumOffset =
-        OneOf2(
-            "+" as FixedChar,
-            "-" as FixedChar
-        )
-        .take(timeHour)
-        .skip(":" as FixedChar)
-        .take(timeMinute)
-        .map { i -> TimeZone? in
-            let (signText, hourText, minText) = (i.0.0, i.0.1, i.1)
-            let sign: Int = signText.value == 0x2B ? 1 : -1
-            let hour = Int(String(hourText))!
-            let min = Int(String(minText))!
-            return TimeZone(secondsFromGMT: sign * (hour * 3600 + min * 60))
-        }
-    static let timeOffset =
-        OneOf2(
-            PredicateChar { $0.value == 0x5A || $0.value == 0x7A }
-                .map { _ in Optional.some(TimeZone(secondsFromGMT: 0)!) },
-            timeNumOffset
-        )
-        .traced()
-    static let localTime =
-        timeHour
-            .skip(":" as FixedChar)
-            .take(timeMinute)
-            .skip(":" as FixedChar)
-            .take(timeSecond)
-            .take(timeSecondFrac.zeroOrOne().map { $0.flatMap { $0 }})
-            .traced()
-            .map { i -> TOMLValue in
-                let (((hourText, minuteText), secondText), secFrac) = i.value
-                let hour = Int(String(hourText))!
-                let minute = Int(String(minuteText))!
-                let second = Int(String(secondText))!
-                let fracs = secFrac.map { Int($0.value - 0x30) }
-                if let time = DateComponents(validatingHour: hour, minute: minute, second: second, secondFraction: fracs) {
-                    return .dateComponents(time)
-                } else {
-                    return .error(i.index, .invalidTime)
-                }
-            }
-    static let localDate =
-        dateYear
-            .skip("-" as FixedChar)
-            .take(dateMonth)
-            .skip("-" as FixedChar)
-            .take(dateDay)
-            .traced()
-            .map { i -> TOMLValue in
-                let ((yearText, monthText), dayText) = i.value
-                let year = Int(String(yearText))!
-                let month = Int(String(monthText))!
-                let day = Int(String(dayText))!
-                if let date = DateComponents(validatingYear: year, month: month, day: day) {
-                    return .dateComponents(date)
-                } else {
-                    return .error(i.index, .invalidDate)
-                }
-            }
-    static let localDateTime =
-        localDate
-            .skip(timeDelim)
-            .take(localTime)
-            .map { date, time -> TOMLValue in
-                switch (date, time) {
-                case (.dateComponents(let date), .dateComponents(let time)):
-                    return .dateComponents(DateComponents(date: date, time: time))
-                case (.error, _):
-                    return date
-                default:
-                    return time
-                }
-            }
-
-    static let offsetLocalTime =
-        localTime
-            .take(timeOffset)
-
-    static let offsetDateTime =
-        localDate
-            .skip(timeDelim)
-            .take(offsetLocalTime)
-            .map { i -> TOMLValue in
-                let (date, (time, tracedOffset)) = i
-                guard let timeZone = tracedOffset.value else {
-                    return .error(tracedOffset.index, .invalidTimeOffset)
-                }
-
-                switch (date, time) {
-                case (.dateComponents(let date), .dateComponents(let time)):
-                    return .date(Date(date: date, time: time, timeZone: timeZone))
-                case (.error, _):
-                    return date
-                default:
-                    return time
-                }
-            }
-    static let whitespaceCommentNewLine =
-        OneOf2(
-            whitespaceChar.map { _ in () },
-            comment
-                .zeroOrOne()
-                .take(newlineSeq)
-                .map { _ in () }
-        )
-        .zeroOrMore()
-        .map { _ in }
-
-    static let value = OneOf3(
-        OneOf4(
-            offsetDateTime,
-            localDateTime,
-            localDate,
-            localTime
-        ),
-        OneOf4(
-            boolean,
-            float,
-            integer,
-            string
-        ),
-        OneOf2(
-            array,
-            inlineTable
-        )
-    )
-
-    static let arraySep = "," as FixedChar
-
-    static let arrayOneValue =
-        whitespaceCommentNewLine
-            .replace(value)
-            .skip(whitespaceCommentNewLine)
-
-    static let arrayValues1 =
-        arrayOneValue
-            .skip(TOMLParser.arraySep)
-            .take(ArrayValues())
-            .map { [$0] + $1 }
-
-    static let arrayValues2 =
-        arrayOneValue
-            .skip(TOMLParser.arraySep.zeroOrOne())
-            .map { [$0] }
-
-    static let array =
-        ("[" as FixedChar)
-            .replace(
-                ArrayValues()
-                    .zeroOrOne()
-                    .map { $0.flatMap { $0 }}
-            )
-            .skip(whitespaceCommentNewLine)
-            .skip("]" as FixedChar)
-            .map(TOMLValue.array)
-    static let quotedKey = OneOf2(literalStringFull, BasicString())
-        .traced()
-        .map { traced -> TOMLValue in
-            switch traced.value {
-            case .string(let keyString):
-                return TOMLValue.key([.init(value: keyString, index: traced.index)])
-            case .error:
-                return traced.value
-            default:
-                fatalError("Expect quoted key to be either TOMLValue.string or .error, got \(traced.value)")
-            }
-        }
-
-    static let unquotedKey =
-        OneOf4(
-            alpha,
-            digit,
-            "-" as FixedChar,
-            "_" as FixedChar
-        )
-        .nOrMore(1)
-        .traced()
-        .map { TOMLValue.key([.init(value: String($0.value), index: $0.index)]) }
-    static let simpleKey = OneOf2(unquotedKey, quotedKey)
-    static let dotSep = whitespace.replace("." as FixedChar).skip(whitespace)
-    static let dottedKey =
-        simpleKey
-            .take(
-                dotSep
-                    .replace(simpleKey)
-                    .nOrMore(1)
-            )
-            .map { one, many -> TOMLValue in
-                var result = [Traced<String, Text.Index>]()
-                for value in [one] + many {
-                    switch value {
-                    case .key(let key):
-                        result += key
-                    case .error:
-                        return value
-                    default:
-                        fatalError("dottedKey segment should be either a TOMLValue.key or dot value, got \(value)")
-                    }
-                }
-
-                return .key(result)
-            }
-    static let key = OneOf2(dottedKey, simpleKey)
-    static let keyValueSep =
-        whitespace
-            .replace("=" as FixedChar)
-            .skip(whitespace)
-
-    static let keyValueRaw =
-        key
-            .skip(keyValueSep)
-            .take(value)
-            .map { KeyValuePair(key: $0, value: $1) }
-    static let keyValueFull =
-        keyValueRaw
-            .map { kv in
-                TopLevel(convertingKey: kv.key) { dottedKey in
-                    .keyValue(.init(key: dottedKey, value: kv.value))
-                }
-            }
-    static let keyValueMissingKey =
-        keyValueSep
-            .replace(value)
-            .traced()
-            .map { TopLevel.error($0.index, .missingKey) }
-    static let keyValueMissingValue =
-        key
-            .skip(keyValueSep)
-            .traced()
-            .map { TopLevel.error($0.index, .missingValue) }
-    static let keyValue =
-        OneOf3(
-            keyValueFull,
-            keyValueMissingKey,
-            keyValueMissingValue
-        )
-
-    static let standardTableOpening = ("[" as FixedChar).skip(whitespace)
-    static let standardTableClosing = whitespace.replace("]" as FixedChar)
-    static let standardTable =
-        OneOf3(
-            standardTableFull,
-            standardTableWithoutClosing,
-            standardTableWithoutOpening
-        )
-    static let standardTableFull =
-        standardTableOpening
-            .replace(key)
-            .skip(standardTableClosing)
-            .map { TopLevel(convertingKey: $0) { .table($0) } }
-    static let standardTableWithoutOpening =
-        key
-            .skip(standardTableClosing)
-            .traced()
-            .map { TopLevel.error($0.index, .standardTableMissingOpening) }
-    static let standardTableWithoutClosing =
-        standardTableOpening
-            .replace(key)
-            .traced()
-            .map { TopLevel.error($0.index, .standardTableMissingClosing) }
-    static let inlineTableSep = whitespace.replace("," as FixedChar).skip(whitespace)
-    static let inlineTableOpening = ("{" as FixedChar).take(whitespace).map { _ in }
-    static let inlineTableClosing = whitespace.take("}" as FixedChar).map { _ in }
-    static let inlineTable =
-        OneOf2(
-            inlineTableFull,
-            inlineTableWithoutClosing
-        )
-    static let inlineTableFull =
-        inlineTableOpening
-            .replace(
-                InlineTableKeyValues()
-                    .zeroOrOne()
-                    .map { $0.first ?? .inlineTable([]) }
-            )
-            .skip(inlineTableClosing)
-    static let inlineTableWithoutClosing =
-        inlineTableOpening
-            .replace(InlineTableKeyValues())
-            .traced()
-            .map { TOMLValue.error($0.index, .inlineTableMissingClosing) }
-
-    static let arrayTableOpening = ("[" as FixedChar).repeated(2).skip(whitespace).map { _ in }
-    static let arrayTableClosing = whitespace.skip(("]" as FixedChar).repeated(2)).map { _ in }
-    static let arrayTableFull =
-        arrayTableOpening
-            .replace(key)
-            .skip(arrayTableClosing)
-            .map { TopLevel(convertingKey: $0) { .arrayTable($0) }}
-
-    static let arrayTableMissingClosing =
-        arrayTableOpening
-            .replace(key)
-            .traced()
-            .map { TopLevel.error($0.index, .arrayTableMissingClosing) }
-
-    static let arrayTable =
-        OneOf2(
-            arrayTableFull,
-            arrayTableMissingClosing
-        )
-
-    static let table =
-        OneOf2(
-            arrayTable,
-            standardTable
-        )
-    static let expression =
-        OneOf3(
-            whitespace
-                .replace(keyValue)
-                .skip(whitespace)
-                .skip(comment.zeroOrOne())
-                .map { [$0] },
-            whitespace
-                .replace(table)
-                .skip(whitespace)
-                .skip(comment.zeroOrOne())
-                .map { [$0] },
-            whitespace
-                .take(comment.zeroOrOne())
-                .map { _ in [TopLevel]() }
-        )
-    static let root =
-        expression
-            .take(
-                newlineSeq
-                    .replace(expression)
-                    .zeroOrMore()
-                    .map { $0.flatMap { $0 }}
-            )
-            .map { $0 + $1 }
+    parsed = comment(&input) || parsed
+    return parsed ? .some(nil) : nil
 }
 
 enum TOMLError: Error {
@@ -1673,7 +1610,7 @@ extension DeserializationError: CustomStringConvertible {
 }
 
 extension DeserializationError.Description {
-    static func locate(index: Text.Index, reference: String) -> (Int, Int) {
+    static func locate(index: String.Index, reference: String) -> (Int, Int) {
         let endIndex = index.samePosition(in: reference) ?? reference.startIndex
         var line = 1
         var column = 1
@@ -1691,16 +1628,59 @@ extension DeserializationError.Description {
         return (line, column)
     }
 
-    init(_ reference: String, _ index: Text.Index, _ text: String) {
+    init(_ reference: String, _ index: String.Index, _ text: String) {
         (line, column) = Self.locate(index: index, reference: reference)
         self.text = text
+    }
+}
+
+func topLevels(_ input: inout Substring) -> [TopLevel] {
+    guard let first = expression(&input) else {
+        return []
+    }
+
+    var result = [first]
+    while !input.isEmpty {
+        guard newline(&input), let next = expression(&input) else {
+            return result.compactMap { $0 }
+        }
+
+        result.append(next)
+    }
+
+    return result.compactMap { $0 }
+}
+
+final class TOMLTopLevelIterator: IteratorProtocol {
+    var input: Substring
+
+    init(input: Substring) {
+        self.input = input
+    }
+
+    func next() -> TopLevel? {
+        if input.isEmpty {
+            return nil
+        }
+
+        switch expression(&input) {
+        case .some(nil):
+            _ = newline(&input)
+            return next()
+        case .some(.some(let value)):
+            _ = newline(&input)
+            return value
+        case .none:
+            return nil
+        }
+
     }
 }
 
 func insert(
     table: [String: Any],
     reference: String,
-    keys: Array<Traced<String, Text.Index>>.SubSequence,
+    keys: Array<Traced<String>>.SubSequence,
     context: [String],
     value: Any,
     isArrayTable: Bool = false,
@@ -1780,7 +1760,7 @@ extension TOMLValue {
         case .boolean(let value):
             return value
         case .string(let value):
-            return value
+            return value.value
         case .float(let value):
             return value
         case .integer(let value):
@@ -1801,7 +1781,7 @@ extension TOMLValue {
 
 func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [String: Any] {
     var result = [String: Any]()
-    var context = [Traced<String, Text.Index>]()
+    var context = [Traced<String>]()
     var errors = [Error]()
 
     for entry in entries {

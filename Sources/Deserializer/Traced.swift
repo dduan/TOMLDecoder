@@ -1,10 +1,4 @@
-struct Traced<Value, Index> {
+struct Traced<Value: Equatable>: Equatable {
     let value: Value
-    let index: Index
-}
-
-extension Traced: Equatable where Value: Equatable, Index: Equatable {
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.index == rhs.index && lhs.value == lhs.value
-    }
+    let index: Substring.Index
 }
