@@ -2,6 +2,7 @@ import Foundation
 import Deserializer
 import XCTest
 
+@available(macOS 10.12, *)
 final class TOMLDeserializerTests: XCTestCase {
     private var directory: String {
         return "/" + #file.split(separator: "/").dropLast().joined(separator: "/")
