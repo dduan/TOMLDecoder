@@ -137,7 +137,7 @@ let firstName = "Elon"
 let lastName = "Musk"
 """
 
-let toml: [String: Any] = try JSONDecoder.tomlTable(with: tomlString)
+let toml: [String: Any] = try JSONDecoder.tomlTable(from: tomlString)
 
 (toml["Person"] as? [String: String])?["firstName"] // Optional("Elon")
 ```

@@ -1,7 +1,7 @@
 ## master
 
-- Remove support for CocoaPods and Carthage
 - Rewritten from scratch to support TOML 1.0
+- Remove support for CocoaPods and Carthage
 - Remove dependency on NetTime, parser returns `Foundation.Date` and
   `Foundation.DateComponents` instead.
 - Remove SwiftPM dependency on the `TOMLDeserializer` packege. It has been

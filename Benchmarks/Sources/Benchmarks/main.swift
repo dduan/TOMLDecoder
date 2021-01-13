@@ -120,7 +120,7 @@ let exampleBenchmarks = BenchmarkSuite(name: "example-toml") { suite in
     }
 
     suite.benchmark("parser-v3") {
-        precondition(((try? TOMLDecoder.tomlTable(with: toml))?["title"] as? String) == "TOML Example")
+        precondition(((try? TOMLDecoder.tomlTable(from: toml))?["title"] as? String) == "TOML Example")
     }
 
     suite.benchmark("scanner") {
@@ -142,7 +142,7 @@ let longMultilineStringBenchmarks = BenchmarkSuite(name: "long-multiline-string"
     }
 
     suite.benchmark("parser-v3") {
-        precondition(((try? TOMLDecoder.tomlTable(with: longMultilineString))?["s"] as? String)?.isEmpty == false)
+        precondition(((try? TOMLDecoder.tomlTable(from: longMultilineString))?["s"] as? String)?.isEmpty == false)
     }
 
     suite.benchmark("scanner") {
@@ -164,7 +164,7 @@ let longBasicStringBenchmarks = BenchmarkSuite(name: "long-basic-string") { suit
     }
 
     suite.benchmark("parser-v3") {
-        precondition(((try? TOMLDecoder.tomlTable(with: longBasicString))?["s"] as? String)?.isEmpty == false)
+        precondition(((try? TOMLDecoder.tomlTable(from: longBasicString))?["s"] as? String)?.isEmpty == false)
     }
 
     suite.benchmark("scanner") {
@@ -186,7 +186,7 @@ let floatBenchmarks = BenchmarkSuite(name: "float") { suite in
     }
 
     suite.benchmark("parser-v3") {
-        precondition(((try? TOMLDecoder.tomlTable(with: float))?["f"] as? Double) != nil)
+        precondition(((try? TOMLDecoder.tomlTable(from: float))?["f"] as? Double) != nil)
     }
 
     suite.benchmark("scanner") {
