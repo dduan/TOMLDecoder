@@ -100,11 +100,50 @@ open class TOMLDecoder {
 }
 
 extension TOMLDecoder {
-    public static func tomlTable(with text: String) throws -> [String: Any] {
+    /// Deserialize `text` into a TOML table.
+    ///
+    /// - Parameter text: String whose content conforms to TOML's spec.
+    ///
+    /// - Returns: A TOML table that contains the entire content from `text`. The table uses
+    ///            types from Swift standard library, and Foundation, to represent TOML values:
+    ///
+    ///            | TOML             | Swift                       |
+    ///            | ---------------- | --------------------------- |
+    ///            | String           | `Swift.String`              |
+    ///            | Integer          | `Swift.Int64`               |
+    ///            | Float            | `Swift.Double`              |
+    ///            | Boolean          | `Swift.Bool`                |
+    ///            | Local Time       | `Foundation.DateComponents` |
+    ///            | Local Date       | `Foundation.DateComponents` |
+    ///            | Local Date-Time  | `Foundation.DateComponents` |
+    ///            | Offset Date-Time | `Foundation.Date`           |
+    ///            | Array            | `Swift.[Any]`               |
+    ///            | Table            | `Swift.[String: Any]`       |
+    public static func tomlTable(from text: String) throws -> [String: Any] {
         try TOMLDeserializer.tomlTable(with: text)
     }
 
-    public static func tomlTable<Bytes>(with bytes: Bytes) throws -> [String: Any]
+    /// Deserialize `bytes` into a TOML table.
+    ///
+    /// - Parameter text: Bytes whose content conforms to TOML's spec. Per TOML, the bytes should
+    ///                   use UTF8 encoding.
+    ///
+    /// - Returns: A TOML table that contains the entire content from `bytes`. The table uses
+    ///            types from Swift standard library, and Foundation, to represent TOML values:
+    ///
+    ///            | TOML             | Swift                       |
+    ///            | ---------------- | --------------------------- |
+    ///            | String           | `Swift.String`              |
+    ///            | Integer          | `Swift.Int64`               |
+    ///            | Float            | `Swift.Double`              |
+    ///            | Boolean          | `Swift.Bool`                |
+    ///            | Local Time       | `Foundation.DateComponents` |
+    ///            | Local Date       | `Foundation.DateComponents` |
+    ///            | Local Date-Time  | `Foundation.DateComponents` |
+    ///            | Offset Date-Time | `Foundation.Date`           |
+    ///            | Array            | `Swift.[Any]`               |
+    ///            | Table            | `Swift.[String: Any]`       |
+    public static func tomlTable<Bytes>(from bytes: Bytes) throws -> [String: Any]
         where Bytes: Collection, Bytes.Element == Unicode.UTF8.CodeUnit
     {
         try TOMLDeserializer.tomlTable(with: bytes)
