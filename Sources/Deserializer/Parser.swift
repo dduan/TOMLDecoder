@@ -305,8 +305,6 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
         return nil
     }
 
-    result.reserveCapacity(scalars.count)
-
     scalars.formIndex(after: &index)
     let contentBegin = index
     while index < input.endIndex {
