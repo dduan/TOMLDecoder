@@ -300,6 +300,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
     let scalars = input.unicodeScalars
     var result = [UTF32.CodeUnit]()
     var index = scalars.startIndex
+    var hasEscaped = false
     guard scalars.first == Constants.doubleQuoteScalar else {
         return nil
     }
@@ -307,6 +308,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
     result.reserveCapacity(scalars.count)
 
     scalars.formIndex(after: &index)
+    let contentBegin = index
     while index < input.endIndex {
         let c = scalars[index]
         let escapedValue = escaped(&index, scalars)
@@ -314,6 +316,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
         case .some(.none):
             return .error(index, .invalidUnicodeSequence)
         case .some(.some(let scalar)):
+            hasEscaped = true
             result.append(scalar.value)
             continue
         case .none:
@@ -321,9 +324,11 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
         }
 
         if c == Constants.doubleQuoteScalar {
+            let contentEnd = index
             scalars.formIndex(after: &index)
             input = Substring(scalars[index...])
-            return .string(.init(value: String(decoding: result, as: UTF32.self), index: input.startIndex))
+            let result = hasEscaped ? String(decoding: result, as: UTF32.self) : String(scalars[contentBegin ..< contentEnd])
+            return .string(.init(value: result, index: input.startIndex))
         }
 
         if isUnescapedChar(c) {
@@ -981,6 +986,7 @@ func escapedScalar(_ index: inout Substring.UnicodeScalarView.Index, _ input: Su
 func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     let scalars = input.unicodeScalars
     var index = scalars.startIndex
+    var hasEscaped = false
     guard scalars.starts(with: Constants.tripleDoubleQuoteScalar) else {
         return nil
     }
@@ -994,6 +1000,7 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
         scalars.formIndex(after: &index)
     }
 
+    let contentBegin = index
     var result = [UTF32.CodeUnit]()
     var escapingNewline = false
     while index < input.endIndex {
@@ -1003,6 +1010,7 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
         case .some(.none):
             return .error(index, .invalidUnicodeSequence)
         case .some(.some(let scalar)):
+            hasEscaped = true
             result.append(scalar.value)
             continue
         case .none:
@@ -1027,10 +1035,12 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
         if c == Constants.backslashScalar {
             input.formIndex(after: &index)
             escapingNewline = true
+            hasEscaped = true
             continue
         }
 
         if c == Constants.doubleQuoteScalar {
+            let contentEnd = index
             result.append(c.value)
             scalars.formIndex(after: &index)
             if index == scalars.endIndex {
@@ -1048,9 +1058,12 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
                     scalars.formIndex(after: &index)
                     let startIndex = input.startIndex
                     input = Substring(Substring.UnicodeScalarView(scalars[index...]))
+                    let result = hasEscaped
+                        ? String(decoding: result.dropLast(2), as: UTF32.self)
+                        : String(scalars[contentBegin ..< contentEnd])
                     return .string(
                         .init(
-                            value: String(decoding: result.dropLast(2), as: UTF32.self),
+                            value: result,
                             index: startIndex
                         )
                     )
