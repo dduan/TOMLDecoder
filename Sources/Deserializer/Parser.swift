@@ -216,6 +216,8 @@ enum Constants {
     static let tripleDoubleQuoteScalar = "\"\"\"".unicodeScalars
     static let tripleSingleQuoteScalar = "'''".unicodeScalars
     static let upperZUTF8 = "Z".utf8.first!
+    static let openBracketUTF8 = "[".utf8.first!
+    static let openBraceUTF8 = "{".utf8.first!
 }
 
 @inline(__always)
@@ -669,7 +671,23 @@ func integer(_ input: inout Substring) -> TOMLValue? {
 }
 
 func value(_ input: inout Substring) -> TOMLValue? {
-    dateTime(&input) ?? float(&input) ?? integer(&input) ?? string(&input) ?? boolean(&input) ?? inlineTable(&input) ?? array(&input)
+    let utf8 = input.utf8
+    guard let first = utf8.first else {
+        return nil
+    }
+
+    switch first {
+    case Constants.doubleQuoteUTF8:
+        return multilineBasicString(&input) ?? basicString(&input)
+    case Constants.singleQuoteUTF8:
+        return multilineLiteralString(&input) ?? literalString(&input)
+    case Constants.openBraceUTF8:
+        return inlineTable(&input)
+    case Constants.openBracketUTF8:
+        return array(&input)
+    default:
+        return dateTime(&input) ?? float(&input) ?? integer(&input) ?? boolean(&input)
+    }
 }
 
 func keyValuePair(_ input: inout Substring) -> KeyValuePair? {
