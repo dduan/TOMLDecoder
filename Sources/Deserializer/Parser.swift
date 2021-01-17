@@ -1539,8 +1539,8 @@ func table(_ input: inout Substring) -> TopLevel? {
 
     whitespace(&input)
     guard input.first == "]" else {
-        input = originalInput
-        return nil
+        synchronizeUntilExression(&input)
+        return .error(input.startIndex, .standardTableMissingClosing)
     }
     input.removeFirst()
     return TopLevel(convertingKey: key) { TopLevel.table($0) }
