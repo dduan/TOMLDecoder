@@ -12,10 +12,6 @@ struct TOMLDecodingStorage {
 
     // MARK: - Modifying the Stack
 
-    var count: Int {
-        return self.containers.count
-    }
-
     var topContainer: Any {
         precondition(!self.containers.isEmpty, "Empty container stack.")
         return self.containers.last!

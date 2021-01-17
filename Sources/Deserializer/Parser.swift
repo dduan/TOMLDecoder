@@ -1,6 +1,5 @@
 import struct Foundation.DateComponents
 import struct Foundation.Date
-import struct Foundation.TimeZone
 
 typealias DottedKey = [Traced<String>]
 
@@ -460,18 +459,6 @@ func boolean(_ input: inout Substring) -> TOMLValue? {
     }
 
     return nil
-}
-
-/// returns .string or .error
-func string(_ input: inout Substring) -> TOMLValue? {
-    let utf8 = input.utf8
-    if utf8.first == Constants.doubleQuoteUTF8 {
-        return multilineBasicString(&input) ?? basicString(&input)
-    } else if utf8.first == Constants.singleQuoteUTF8 {
-        return multilineLiteralString(&input) ?? literalString(&input)
-    } else {
-        return nil
-    }
 }
 
 func decIntTextUTF8(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
@@ -1678,32 +1665,6 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
     }
 
     return result.compactMap { $0 }
-}
-
-final class TOMLTopLevelIterator: IteratorProtocol {
-    var input: Substring
-
-    init(input: Substring) {
-        self.input = input
-    }
-
-    func next() -> TopLevel? {
-        if input.isEmpty {
-            return nil
-        }
-
-        switch expression(&input) {
-        case .some(nil):
-            _ = newline(&input)
-            return next()
-        case .some(.some(let value)):
-            _ = newline(&input)
-            return value
-        case .none:
-            return nil
-        }
-
-    }
 }
 
 func insert(
