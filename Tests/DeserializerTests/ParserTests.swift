@@ -50,7 +50,7 @@ extension TopLevel {
     }
 }
 
-final class NewParserTests: XCTestCase {
+final class ParserTests: XCTestCase {
     func testParsingDecInt() {
         XCTAssertEqual(.integer(-42), runTest(integer, "-42"))
     }
