@@ -26,6 +26,7 @@ enum TopLevel: Equatable {
         case standardTableMissingOpening
         case standardTableMissingClosing
         case arrayTableMissingClosing
+        case invalidExpression
     }
 
     init(convertingKey key: TOMLValue, _ convert: @escaping (DottedKey) -> TopLevel) {
@@ -53,6 +54,8 @@ extension TopLevel.Reason: CustomStringConvertible {
             return "Missing closing character `]` in table"
         case .arrayTableMissingClosing:
             return "Missing closing character `]]` in array table"
+        case .invalidExpression:
+            return "Invalid TOML expression"
         }
     }
 }
@@ -1650,6 +1653,18 @@ extension DeserializationError.Description {
     }
 }
 
+func synchronize(_ input: inout Substring) {
+    while !input.isEmpty {
+        input.removeFirst()
+        let syncInput = input
+        if let _ = expression(&input) {
+            input = syncInput
+            return
+        }
+
+    }
+}
+
 func topLevels(_ input: inout Substring) -> [TopLevel] {
     guard let first = expression(&input) else {
         return []
@@ -1658,7 +1673,11 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
     var result = [first]
     while !input.isEmpty {
         guard newline(&input), let next = expression(&input) else {
-            return result.compactMap { $0 }
+            if !input.isEmpty {
+                result.append(.error(input.startIndex, .invalidExpression))
+            }
+            synchronize(&input)
+            continue
         }
 
         result.append(next)
