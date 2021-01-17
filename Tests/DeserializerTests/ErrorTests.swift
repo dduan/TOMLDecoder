@@ -27,6 +27,7 @@ final class ErrorTests: XCTestCase {
     func testMissingFloatFraction() {
         let toml = """
         a = 1.
+        b = 2
         """
 
         do {
@@ -38,6 +39,26 @@ final class ErrorTests: XCTestCase {
             }
 
             XCTAssertEqual(description.text, "Floating number missing fraction")
+        } catch {
+            XCTFail("Unexpected error type")
+        }
+    }
+
+    func testTableMissingClosing() {
+        let toml = """
+        [a
+        b = 2
+        """
+
+        do {
+            _ = try TOMLDeserializer.tomlTable(with: toml)
+        } catch let error as DeserializationError {
+            guard case .structural(let description) = error else {
+                XCTFail("Unexpected error type")
+                return
+            }
+
+            XCTAssertEqual(description.text, "Missing closing character `]` in table")
         } catch {
             XCTFail("Unexpected error type")
         }
