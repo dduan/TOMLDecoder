@@ -1,5 +1,11 @@
 ## master
 
+- Include a new type `DeserializationError`. It contains information regarding
+  deserialization.
+- Improve error reporting. After encountering one error, the parser will
+  disgard characters until new line, and attempt to parse another top-level
+  expression. This is more determinastic compared to previous recovery attempts.
+
 ## 0.2.0
 
 - Rewritten from scratch to support TOML 1.0

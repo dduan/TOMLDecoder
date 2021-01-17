@@ -1,5 +1,6 @@
 import Foundation
-@_implementationOnly import Deserializer
+import enum Deserializer.TOMLDeserializer
+import enum Deserializer.DeserializationError
 
 open class TOMLDecoder {
     /// The strategy to use for decoding numbers.
@@ -149,3 +150,5 @@ extension TOMLDecoder {
         try TOMLDeserializer.tomlTable(with: bytes)
     }
 }
+
+public typealias DeserializationError = Deserializer.DeserializationError

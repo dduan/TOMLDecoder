@@ -1574,33 +1574,13 @@ func expression(_ input: inout Substring) -> TopLevel?? {
     return parsed ? .some(nil) : nil
 }
 
-enum TOMLError: Error {
-    case unknown
-    case deserialization(details: [Error])
-}
-
-extension TOMLError: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case .unknown:
-            return "Unknown error"
-        case .deserialization(details: let details):
-            let output = ["Deserialization failure:"]
-            return details
-                .reduce(into: output) { $0.append(String(describing: $1)) }
-                .joined(separator: "\n    * ")
-                + "\n"
-        }
-    }
-}
-
-enum DeserializationError: Error {
+public enum DeserializationError: Error {
     case structural(Description)
     case value(Description)
     case conflictingValue(Description)
     case general(Description)
-
-    struct Description {
+    indirect case compound([Error])
+    public struct Description {
         let line: Int
         let column: Int
         let text: String
@@ -1608,13 +1588,13 @@ enum DeserializationError: Error {
 }
 
 extension DeserializationError.Description: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         "|\(line), \(column)| \(text)"
     }
 }
 
 extension DeserializationError: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch self {
         case .structural(let error):
             return "Structure \(error)"
@@ -1624,6 +1604,12 @@ extension DeserializationError: CustomStringConvertible {
             return "Conflict \(error)"
         case .general(let error):
             return "\(error)"
+        case .compound(let details):
+            let output = ["Deserialization failure:"]
+            return details
+                .reduce(into: output) { $0.append(String(describing: $1)) }
+                .joined(separator: "\n    * ")
+                + "\n"
         }
     }
 }
@@ -1653,30 +1639,38 @@ extension DeserializationError.Description {
     }
 }
 
-func synchronize(_ input: inout Substring) {
-    while !input.isEmpty {
+func synchronizeUntilNewLine(_ input: inout Substring) {
+    while let first = input.first, first != "\n", first != "\r" {
         input.removeFirst()
-        let syncInput = input
-        if let _ = expression(&input) {
-            input = syncInput
-            return
-        }
+    }
+}
 
+func synchronizeUntilExression(_ input: inout Substring) {
+    while !input.isEmpty && expression(&input) == nil {
+        input.removeFirst()
     }
 }
 
 func topLevels(_ input: inout Substring) -> [TopLevel] {
-    guard let first = expression(&input) else {
-        return []
+    var result = [TopLevel?]()
+    while !input.isEmpty {
+        if let first = expression(&input) {
+            result.append(first)
+            break
+        } else {
+            if !input.isEmpty {
+                result.append(.error(input.startIndex, .invalidExpression))
+            }
+            synchronizeUntilExression(&input)
+        }
     }
 
-    var result = [first]
     while !input.isEmpty {
         guard newline(&input), let next = expression(&input) else {
             if !input.isEmpty {
                 result.append(.error(input.startIndex, .invalidExpression))
             }
-            synchronize(&input)
+            synchronizeUntilNewLine(&input)
             continue
         }
 
@@ -1845,7 +1839,11 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
     }
 
     if !errors.isEmpty {
-        throw TOMLError.deserialization(details: errors)
+        if errors.count == 1 {
+            throw errors[0]
+        }
+
+        throw DeserializationError.compound(errors)
     }
 
     return result
