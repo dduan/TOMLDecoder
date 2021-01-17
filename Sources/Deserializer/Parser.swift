@@ -228,11 +228,17 @@ enum Constants {
 @inline(__always)
 func isUnescapedChar(_ c: UnicodeScalar) -> Bool {
     let value = c.value
+    return value == 0x0A ||
+        value == 0x0D ||
+        isBasicUnescapedChar(c)
+}
+
+@inline(__always)
+func isBasicUnescapedChar(_ c: UnicodeScalar) -> Bool {
+    let value = c.value
     return value == 0x20 ||
         value == 0x09 ||
         value == 0x21 ||
-        value == 0x0A ||
-        value == 0x0D ||
         value >= 0x23 && value <= 0x5B ||
         value >= 0x5D && value <= 0x7E ||
         value >= 0x80 && value <= 0xD7FF ||
@@ -334,15 +340,16 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
             return .string(.init(value: result, index: input.startIndex))
         }
 
-        if isUnescapedChar(c) {
+        if isBasicUnescapedChar(c) {
             result.append(c.value)
             scalars.formIndex(after: &index)
         } else {
-            return nil
+            input = Substring(scalars[index...])
+            return .error(input.startIndex, .basicStringMissingClosing)
         }
     }
 
-    return nil
+    return .error(input.startIndex, .basicStringMissingClosing)
 }
 
 func toTimestamp(year: Int, month: Int, day: Int, hour: Int, minute: Int, seconds: Int, nanoseconds: Int, offsetInSeconds: Int) -> Double {
