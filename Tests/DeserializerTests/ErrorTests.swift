@@ -66,6 +66,27 @@ final class ErrorTests: XCTestCase {
         }
     }
 
+    func testArrayTableMissingClosing() {
+        let toml = """
+        [[a
+        b = 2
+        """
+
+        do {
+            _ = try TOMLDeserializer.tomlTable(with: toml)
+        } catch let error as DeserializationError {
+            guard case .structural(let description) = error else {
+                XCTFail("Unexpected error type")
+                return
+            }
+
+            XCTAssertEqual(description.line, 1)
+            XCTAssertEqual(description.text, "Missing closing character `]]` in array table")
+        } catch {
+            XCTFail("Unexpected error type")
+        }
+    }
+
     func testLiteralStringMissingClosing() {
         let toml = """
         a = '1

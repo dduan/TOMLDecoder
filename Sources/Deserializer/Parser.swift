@@ -1569,8 +1569,9 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
     }
     whitespace(&input)
     guard input.starts(with: "]]") else {
-        input = originalInput
-        return nil
+        let location = input.startIndex
+        synchronizeUntilExression(&input)
+        return .error(location, .arrayTableMissingClosing)
     }
     input.removeFirst(2)
     return TopLevel(convertingKey: key) { TopLevel.arrayTable($0) }
