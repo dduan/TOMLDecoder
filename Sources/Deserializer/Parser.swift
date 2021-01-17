@@ -397,13 +397,14 @@ func literalString(_ input: inout Substring) -> TOMLValue? {
         }
 
         if isLiteralChar(c) {
-            input.formIndex(after: &index)
+            scalars.formIndex(after: &index)
         } else {
-            return nil
+            input = Substring(scalars[index...])
+            return .error(input.startIndex, .literalStringMissingClosing)
         }
     }
 
-    return nil
+    return .error(input.startIndex, .literalStringMissingClosing)
 }
 
 // Returns: .string or .error
@@ -869,8 +870,9 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
         result.append(Constants.periodUTF8)
         utf8.removeFirst()
         guard let frac = decIntTextUTF8(&utf8) else {
+            let location = input.startIndex
             synchronizeUntilExression(&input)
-            return .error(input.startIndex, .invalidFloatMissingFraction)
+            return .error(location, .invalidFloatMissingFraction)
         }
 
         result += frac
@@ -1539,8 +1541,9 @@ func table(_ input: inout Substring) -> TopLevel? {
 
     whitespace(&input)
     guard input.first == "]" else {
+        let location = input.startIndex
         synchronizeUntilExression(&input)
-        return .error(input.startIndex, .standardTableMissingClosing)
+        return .error(location, .standardTableMissingClosing)
     }
     input.removeFirst()
     return TopLevel(convertingKey: key) { TopLevel.table($0) }

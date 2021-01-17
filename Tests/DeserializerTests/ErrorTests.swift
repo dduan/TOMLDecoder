@@ -38,6 +38,7 @@ final class ErrorTests: XCTestCase {
                 return
             }
 
+            XCTAssertEqual(description.line, 1)
             XCTAssertEqual(description.text, "Floating number missing fraction")
         } catch {
             XCTFail("Unexpected error type")
@@ -58,7 +59,29 @@ final class ErrorTests: XCTestCase {
                 return
             }
 
+            XCTAssertEqual(description.line, 1)
             XCTAssertEqual(description.text, "Missing closing character `]` in table")
+        } catch {
+            XCTFail("Unexpected error type")
+        }
+    }
+
+    func testLiteralStringMissingClosing() {
+        let toml = """
+        a = '1
+        b = '2'
+        """
+
+        do {
+            _ = try TOMLDeserializer.tomlTable(with: toml)
+        } catch let error as DeserializationError {
+            guard case .value(let description) = error else {
+                XCTFail("Unexpected error type")
+                return
+            }
+
+            XCTAssertEqual(description.line, 1)
+            XCTAssertEqual(description.text, "Missing closing character `'` in literal string")
         } catch {
             XCTFail("Unexpected error type")
         }
