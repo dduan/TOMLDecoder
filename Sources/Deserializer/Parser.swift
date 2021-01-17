@@ -89,6 +89,7 @@ indirect enum TOMLValue: Equatable {
         case invalidHexadecimal
         case invalidOctal
         case invalidBinary
+        case invalidFloatMissingFraction
     }
 }
 
@@ -127,6 +128,8 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Ill-formed octal"
         case .invalidBinary:
             return "Ill-formed binary integer"
+        case .invalidFloatMissingFraction:
+            return "Floating number missing fraction"
         }
     }
 }
@@ -525,6 +528,7 @@ func decInt(_ input: inout Substring) -> TOMLValue? {
     case .some(.some(let result)):
         return .integer(result)
     case .some(nil):
+        synchronizeUntilExression(&input)
         return .error(input.startIndex, .invalidDecimal)
     case .none:
         return nil
@@ -865,7 +869,8 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
         result.append(Constants.periodUTF8)
         utf8.removeFirst()
         guard let frac = decIntTextUTF8(&utf8) else {
-            return nil
+            synchronizeUntilExression(&input)
+            return .error(input.startIndex, .invalidFloatMissingFraction)
         }
 
         result += frac

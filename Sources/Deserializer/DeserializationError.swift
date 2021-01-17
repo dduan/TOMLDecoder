@@ -5,9 +5,9 @@ public enum DeserializationError: Error {
     case general(Description)
     indirect case compound([Error])
     public struct Description {
-        let line: Int
-        let column: Int
-        let text: String
+        public let line: Int
+        public let column: Int
+        public let text: String
     }
 }
 
