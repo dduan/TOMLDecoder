@@ -2,6 +2,7 @@ import Foundation
 import Deserializer
 import XCTest
 
+@available(iOS 10.0, *)
 @available(macOS 10.12, *)
 final class TOMLDeserializerTests: XCTestCase {
     private var directory: String {

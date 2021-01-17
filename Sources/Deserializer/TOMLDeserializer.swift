@@ -5,9 +5,7 @@ public enum TOMLDeserializer {
         let table = try assembleTable(from: topLevelEntries, referenceInput: text)
 
         if !input.isEmpty {
-            throw TOMLError.deserialization(details: [
-                DeserializationError.general(.init(text, input.startIndex, "Invalid TOML"))
-            ])
+            throw DeserializationError.general(.init(text, input.startIndex, "Invalid TOML"))
         }
 
         return table
