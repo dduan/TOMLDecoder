@@ -86,4 +86,26 @@ final class ErrorTests: XCTestCase {
             XCTFail("Unexpected error type")
         }
     }
+
+    func testBasicStringMissingClosing() {
+        let toml = """
+        a = "1
+        b = "2"
+        """
+
+        do {
+            _ = try TOMLDeserializer.tomlTable(with: toml)
+        } catch let error as DeserializationError {
+            print(error)
+            guard case .value(let description) = error else {
+                XCTFail("Unexpected error type")
+                return
+            }
+
+            XCTAssertEqual(description.line, 1)
+            XCTAssertEqual(description.text, "Missing closing character `\"` in string")
+        } catch {
+            XCTFail("Unexpected error type")
+        }
+    }
 }
