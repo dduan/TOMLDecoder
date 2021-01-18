@@ -1,5 +1,7 @@
 ## master
 
+## 0.2.1
+
 - Include a new type `DeserializationError`. It contains information regarding
   deserialization.
 - Improve error reporting. After encountering one error, the parser will
