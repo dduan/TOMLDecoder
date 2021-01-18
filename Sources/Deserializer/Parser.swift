@@ -1046,14 +1046,18 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             result.append(c.value)
             scalars.formIndex(after: &index)
             if index == scalars.endIndex {
-                return nil
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineBasicStringMissingClosing)
             }
 
             if scalars[index] == Constants.doubleQuoteScalar {
                 result.append(Constants.doubleQuoteScalar.value)
                 scalars.formIndex(after: &index)
                 if index == scalars.endIndex {
-                    return nil
+                    let location = input.startIndex
+                    input = Substring(scalars[index...])
+                    return .error(location, .multilineBasicStringMissingClosing)
                 }
 
                 if scalars[index] == Constants.doubleQuoteScalar {
@@ -1081,12 +1085,16 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             result.append(c.value)
             scalars.formIndex(after: &index)
         } else {
-            return nil
+            let location = input.startIndex
+            input = Substring(scalars[index...])
+            return .error(location, .multilineBasicStringMissingClosing)
         }
 
     }
 
-    return nil
+    let location = input.startIndex
+    input = Substring(scalars[index...])
+    return .error(location, .multilineBasicStringMissingClosing)
 }
 
 func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
@@ -1144,13 +1152,17 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
             let endIndex = index
             scalars.formIndex(after: &index)
             if index == scalars.endIndex {
-                return nil
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineLiteralStringMissingClosing)
             }
 
             if scalars[index] == Constants.singleQuoteScalar {
                 scalars.formIndex(after: &index)
                 if index == scalars.endIndex {
-                    return nil
+                    let location = input.startIndex
+                    input = Substring(scalars[index...])
+                    return .error(location, .multilineLiteralStringMissingClosing)
                 }
 
                 if scalars[index] == Constants.singleQuoteScalar {
@@ -1170,11 +1182,15 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
             scalars.formIndex(after: &index)
             continue
         } else {
-            return nil
+            let location = input.startIndex
+            input = Substring(scalars[index...])
+            return .error(location, .multilineLiteralStringMissingClosing)
         }
     }
 
-    return nil
+    let location = input.startIndex
+    input = Substring(scalars[index...])
+    return .error(location, .multilineLiteralStringMissingClosing)
 }
 
 func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
