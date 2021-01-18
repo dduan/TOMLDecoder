@@ -5,6 +5,11 @@
 - Improve error reporting. After encountering one error, the parser will
   disgard characters until new line, and attempt to parse another top-level
   expression. This is more determinastic compared to previous recovery attempts.
+- Add more specific errors regarding missing pices at closing position. For
+  example, string missing closing quotes, or table missing closing bracket.
+  These errors will cause the parser to report detailed error message.
+- Fix a bug where newline characters sometimes are considered valid as part of
+  basic string content.
 
 ## 0.2.0
 
