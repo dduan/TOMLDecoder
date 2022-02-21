@@ -1,0 +1,58 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1644229661,
+        "narHash": "sha256-1YdnJAsNy69bpcjuoKdOYQX0YxZBiCYZo4Twxerqv7k=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "3cecb5b042f7f209c56ffd8371b2711a290ec797",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1645481637,
+        "narHash": "sha256-5l7tzAc9+kHSkglHC7eHBERZPSvTmkkUedb2DKqhPkc=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "112918938f65bb72680f58d78a51645fcb53a905",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "swift": "swift"
+      }
+    },
+    "swift": {
+      "locked": {
+        "lastModified": 1645482160,
+        "narHash": "sha256-rJ2Yk++Zohpcsv+1UGF96iGUlRu+aqsSzjv11JMvOv0=",
+        "owner": "dduan",
+        "repo": "swift-builders",
+        "rev": "47c60ff4a64c02f780db808027f1a58f7813d22f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dduan",
+        "repo": "swift-builders",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

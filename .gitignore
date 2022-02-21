@@ -8,3 +8,4 @@ Dependencies/NetTime
 Dependencies/TOMLDeserializer
 .swiftpm
 tmp
+/result
