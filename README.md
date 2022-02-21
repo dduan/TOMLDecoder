@@ -39,8 +39,8 @@ TOMLDecoder has a relatively simple set of APIs. Learn more in the [introduction
 
 ### With Nix flake
 
-Use as a `buildInputs` for [swift-builders](github.com/dduan/swift-builders). For example, your flake.nix
-for an executable could look like:
+Use as a `buildInputs` for [swift-builders](https://github.com/dduan/swift-builders). For example, your
+flake.nix for an executable could look like:
 
 ```nix
 {
