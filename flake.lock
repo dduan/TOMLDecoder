@@ -17,11 +17,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1645481637,
-        "narHash": "sha256-5l7tzAc9+kHSkglHC7eHBERZPSvTmkkUedb2DKqhPkc=",
+        "lastModified": 1645491369,
+        "narHash": "sha256-H0QMsUGQ5j1mXXh7XxXeQG5Coy0fVqIuQiX2kB3AIgk=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "112918938f65bb72680f58d78a51645fcb53a905",
+        "rev": "0d033358d6fcbed3a1cf0864e0acddbb06ed74b3",
         "type": "github"
       },
       "original": {
@@ -39,11 +39,11 @@
     },
     "swift": {
       "locked": {
-        "lastModified": 1645482160,
-        "narHash": "sha256-rJ2Yk++Zohpcsv+1UGF96iGUlRu+aqsSzjv11JMvOv0=",
+        "lastModified": 1645492464,
+        "narHash": "sha256-wRG5EbHmNqOKBnZASn7jF0Nl2LoBTk+I0qb5ZJ3CV+8=",
         "owner": "dduan",
         "repo": "swift-builders",
-        "rev": "47c60ff4a64c02f780db808027f1a58f7813d22f",
+        "rev": "5e1bfab425d58446586f9475ad024261edb11bf1",
         "type": "github"
       },
       "original": {

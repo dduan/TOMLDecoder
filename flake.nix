@@ -9,18 +9,17 @@
     flake-utils.lib.eachSystem swiftPlatforms (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      package = "TOMLDecoder";
       version = "0.4.2";
       src = ./.;
     in
     rec {
       packages = rec {
         Deserializer = mkDynamicLibrary pkgs {
-          inherit version src package;
+          inherit version src;
           target = "Deserializer";
         };
         TOMLDecoder = mkDynamicLibrary pkgs {
-          inherit version src package;
+          inherit version src;
           target = "TOMLDecoder";
           buildInputs = [ Deserializer ];
         };
