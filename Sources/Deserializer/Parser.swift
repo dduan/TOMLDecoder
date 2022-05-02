@@ -484,7 +484,6 @@ func decIntTextUTF8(_ utf8: inout Substring.UTF8View, afterDec: Bool = false) ->
         utf8.formIndex(after: &index)
     }
 
-//    if !afterDec {
     if !afterDec && index < utf8.endIndex && utf8[index] == Constants.zeroUTF8 {
         utf8.formIndex(after: &index)
         utf8 = utf8[index...]
@@ -500,7 +499,6 @@ func decIntTextUTF8(_ utf8: inout Substring.UTF8View, afterDec: Bool = false) ->
     guard !utf8.isEmpty, utf8[index] >= startUTF8NumRange && utf8[index] <= endUTF8NumRange else {
         return nil
     }
-//    }
 
     result.append(utf8[index])
     utf8.formIndex(after: &index)
