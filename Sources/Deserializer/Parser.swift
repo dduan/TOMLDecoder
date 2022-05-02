@@ -475,7 +475,7 @@ func boolean(_ input: inout Substring) -> TOMLValue? {
     return nil
 }
 
-func decIntTextUTF8(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
+func decIntTextUTF8(_ utf8: inout Substring.UTF8View, afterDec: Bool = false) -> [UTF8.CodeUnit]? {
     var index = utf8.startIndex
     var result = [UTF8.CodeUnit]()
 
@@ -484,15 +484,17 @@ func decIntTextUTF8(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
         utf8.formIndex(after: &index)
     }
 
-    if index < utf8.endIndex && utf8[index] == Constants.zeroUTF8 {
-        utf8.formIndex(after: &index)
-        utf8 = utf8[index...]
-        result.append(Constants.zeroUTF8)
-        return result
-    }
+    if !afterDec {
+        if index < utf8.endIndex && utf8[index] == Constants.zeroUTF8 {
+            utf8.formIndex(after: &index)
+            utf8 = utf8[index...]
+            result.append(Constants.zeroUTF8)
+            return result
+        }
 
-    guard !utf8.isEmpty, utf8[index] >= 0x31 && utf8[index] <= 0x39 else {
-        return nil
+        guard !utf8.isEmpty, utf8[index] >= 0x31 && utf8[index] <= 0x39 else {
+            return nil
+        }
     }
 
     result.append(utf8[index])
@@ -876,7 +878,7 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
 
         result.append(Constants.periodUTF8)
         utf8.removeFirst()
-        guard let frac = decIntTextUTF8(&utf8) else {
+        guard let frac = decIntTextUTF8(&utf8, afterDec: true) else {
             let location = input.startIndex
             synchronizeUntilExression(&input)
             return .error(location, .invalidFloatMissingFraction)
