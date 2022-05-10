@@ -1,6 +1,6 @@
 name: Ubuntu Bionic
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   linux:

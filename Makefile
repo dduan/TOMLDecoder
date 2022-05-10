@@ -8,10 +8,10 @@ build:
 	@swift build -c release -Xswiftc -warnings-as-errors > /dev/null
 
 test-SwiftPM:
-	@swift test -Xswiftc -warnings-as-errors --enable-test-discovery
+	@swift test -Xswiftc -warnings-as-errors
 
 test-docker:
-	@Scripts/docker.sh TOMLDecoder 'swift test -Xswiftc -warnings-as-errors --enable-test-discovery' 5.3.1 focal
+	@Scripts/docker.sh TOMLDecoder 'swift test -Xswiftc -warnings-as-errors --enable-test-discovery' 5.5.3 focal
 
 benchmark:
 	@cd Benchmarks; swift run -c release

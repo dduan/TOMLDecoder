@@ -65,7 +65,9 @@ final class TOMLDeserializerTests: XCTestCase {
                 return formatDateComponent(components)
             }
 
-            return "\(value)"
+            // On Windows, `\n` in a file will become '\r\n'. This is handled in our TOML parser correctly,
+            // but here we need to handle it separately.
+            return "\(value)".replacingOccurrences(of: "\r\n", with: "\n")
         }
 
         return stringify(table) as! [String: Any]
