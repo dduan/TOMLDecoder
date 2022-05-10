@@ -1,5 +1,10 @@
 ## master
 
+## 0.2.2
+
+- Fixed a bug when parsing float decimals (#47)
+- Add support for Windows
+
 ## 0.2.1
 
 - Include a new type `DeserializationError`. It contains information regarding
