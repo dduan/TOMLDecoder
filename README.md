@@ -34,7 +34,7 @@ TOMLDecoder has a relatively simple set of APIs. Learn more in the [introduction
 #### With [SwiftPM](https://swift.org/package-manager)
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", from: "0.2.1")
+.package(url: "https://github.com/dduan/TOMLDecoder", from: "0.2.2")
 ```
 
 ## License
