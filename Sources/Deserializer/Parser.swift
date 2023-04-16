@@ -221,6 +221,7 @@ enum Constants {
     static let tripleDoubleQuoteScalar = "\"\"\"".unicodeScalars
     static let tripleSingleQuoteScalar = "'''".unicodeScalars
     static let upperZUTF8 = "Z".utf8.first!
+    static let lowerZUTF8 = "z".utf8.first!
     static let openBracketUTF8 = "[".utf8.first!
     static let openBraceUTF8 = "{".utf8.first!
 }
@@ -1331,7 +1332,7 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
 
 /// Returns: seconds from GMT
 func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
-    if utf8.first == Constants.upperZUTF8 {
+    if utf8.first == Constants.upperZUTF8 || utf8.first == Constants.lowerZUTF8 {
         utf8.removeFirst()
         return 0
     }

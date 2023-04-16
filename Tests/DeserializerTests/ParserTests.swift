@@ -694,4 +694,12 @@ final class ParserTests: XCTestCase {
         """
         _ = try TOMLDeserializer.tomlTable(with: longString)
     }
+
+    func testDateTimeLowercase() throws {
+        let input = """
+        space = 1987-07-05 17:45:00Z
+        lower = 1987-07-05t17:45:00z
+        """
+        _ = try TOMLDeserializer.tomlTable(with: input)
+    }
 }

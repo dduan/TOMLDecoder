@@ -1,5 +1,7 @@
 ## master
 
+- Lowercase "z" is now accepted as zero-timezone-offset indicator
+
 ## 0.2.2
 
 - Fixed a bug when parsing float decimals (#47)
