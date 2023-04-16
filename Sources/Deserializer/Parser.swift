@@ -1011,8 +1011,30 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     let contentBegin = index
     var result = [UTF32.CodeUnit]()
     var escapingNewline = false
+    var invalidNewlineEscapeResumePoint = index
+    var seenNewlineSinceEscapingStarted = false
     while index < input.endIndex {
         let c = scalars[index]
+        if escapingNewline {
+            if c.value == 0x20 || c.value == 0x0D || c.value == 0x09 {
+                input.formIndex(after: &index)
+            } else if scalars[index...].starts(with: Constants.lfScalar) {
+                input.formIndex(after: &index)
+                seenNewlineSinceEscapingStarted = true
+            } else if scalars[index...].starts(with: Constants.crlfScalar) {
+                input.formIndex(after: &index)
+                input.formIndex(after: &index)
+                seenNewlineSinceEscapingStarted = true
+            } else if seenNewlineSinceEscapingStarted {
+                escapingNewline = false
+            } else {
+                index = invalidNewlineEscapeResumePoint
+                return .error(index, .invalidUnicodeSequence)
+            }
+
+            continue
+        }
+
         let escaped = escapedScalar(&index, scalars)
         switch escaped {
         case .some(.none):
@@ -1025,25 +1047,12 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             break
         }
 
-        if escapingNewline {
-            if c.value == 0x20 || c.value == 0x0A || c.value == 0x0D || c.value == 0x09 {
-                input.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.lfScalar) {
-                input.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.crlfScalar) {
-                input.formIndex(after: &index)
-                input.formIndex(after: &index)
-            } else {
-                escapingNewline = false
-            }
-
-            continue
-        }
-
         if c == Constants.backslashScalar {
             input.formIndex(after: &index)
             escapingNewline = true
             hasEscaped = true
+            invalidNewlineEscapeResumePoint = index
+            seenNewlineSinceEscapingStarted = false
             continue
         }
 
@@ -1474,11 +1483,11 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
 
 func comment(_ input: inout Substring) -> Bool {
     let scalars = input.unicodeScalars
-    var index = scalars.startIndex
     guard scalars.first == Constants.poundScalar else {
         return false
     }
 
+    var index = scalars.startIndex
     scalars.formIndex(after: &index)
     while index < scalars.endIndex, isNonEOL(scalars[index]) {
         scalars.formIndex(after: &index)
@@ -1502,12 +1511,15 @@ func newline(_ input: inout Substring) -> Bool {
     return encountered
 }
 
-func whitespaceCommentSkip(_ input: inout Substring) {
+@discardableResult
+func whitespaceCommentSkip(_ input: inout Substring) -> Bool {
+    let start = input.startIndex
     while !input.isEmpty {
         if !(whitespace(&input) || newline(&input) || comment(&input)) {
             break
         }
     }
+    return start != input.startIndex
 }
 
 func arrayValues(_ input: inout Substring) -> [TOMLValue]? {
@@ -1601,7 +1613,7 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
 
 func expression(_ input: inout Substring) -> TopLevel?? {
     var parsed = false
-    parsed = whitespace(&input)
+    parsed = whitespaceCommentSkip(&input)
     if let v = keyValue(&input) ?? table(&input) ?? arrayTable(&input) {
         whitespace(&input)
         _ = comment(&input)

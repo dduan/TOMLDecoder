@@ -702,4 +702,9 @@ final class ParserTests: XCTestCase {
         """
         _ = try TOMLDeserializer.tomlTable(with: input)
     }
+
+    func testSpaceIsNotValidEscape() throws {
+        let input = #"k = """t\ t""""#
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
 }

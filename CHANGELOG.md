@@ -1,6 +1,9 @@
 ## master
 
 - Lowercase "z" is now accepted as zero-timezone-offset indicator
+- Space is no longer accepted as an escaped character
+- Hex/Octal/Binary numbers with no digits surrounding `_` is considered invalid
+- Comments or whitespace at start of document no longer causes parsing failure
 
 ## 0.2.2
 

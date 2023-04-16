@@ -587,4 +587,10 @@ final class TOMLInvalidationTests: XCTestCase {
         let tomlData = try Data(contentsOf: tomlURL)
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
     }
+
+    func test_multiline_escape_space() throws {
+        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)multiline-escape-space.toml", isDirectory: false)
+        let tomlData = try Data(contentsOf: tomlURL)
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
+    }
 }
