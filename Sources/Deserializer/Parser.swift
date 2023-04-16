@@ -542,7 +542,7 @@ func decInt(_ input: inout Substring) -> TOMLValue? {
     case .some(.some(let result)):
         return .integer(result)
     case .some(nil):
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(input.startIndex, .invalidDecimal)
     case .none:
         return nil
@@ -884,7 +884,7 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
         utf8.removeFirst()
         guard let frac = decIntTextUTF8(&utf8, afterDec: true) else {
             let location = input.startIndex
-            synchronizeUntilExression(&input)
+            synchronizeUntilExpression(&input)
             return .error(location, .invalidFloatMissingFraction)
         }
 
@@ -1583,7 +1583,7 @@ func table(_ input: inout Substring) -> TopLevel? {
     whitespace(&input)
     guard input.first == "]" else {
         let location = input.startIndex
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(location, .standardTableMissingClosing)
     }
     input.removeFirst()
@@ -1604,7 +1604,7 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
     whitespace(&input)
     guard input.starts(with: "]]") else {
         let location = input.startIndex
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(location, .arrayTableMissingClosing)
     }
     input.removeFirst(2)
@@ -1630,7 +1630,7 @@ func synchronizeUntilNewLine(_ input: inout Substring) {
     }
 }
 
-func synchronizeUntilExression(_ input: inout Substring) {
+func synchronizeUntilExpression(_ input: inout Substring) {
     while !input.isEmpty && expression(&input) == nil {
         input.removeFirst()
     }
@@ -1646,7 +1646,7 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
             if !input.isEmpty {
                 result.append(.error(input.startIndex, .invalidExpression))
             }
-            synchronizeUntilExression(&input)
+            synchronizeUntilExpression(&input)
         }
     }
 
