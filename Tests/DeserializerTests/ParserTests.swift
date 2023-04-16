@@ -707,4 +707,19 @@ final class ParserTests: XCTestCase {
         let input = #"k = """t\ t""""#
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
     }
+
+    func testInvalidBinNumber() throws {
+        let input = "a = 0b_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
+
+    func testInvalidOctalNumber() throws {
+        let input = "a = 0o_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
+
+    func testInvalidHexNumber() throws {
+        let input = "a = 0x_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
 }

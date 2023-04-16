@@ -556,7 +556,6 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
         let isUpper = c >= 0x41 && c <= 0x46
         let isLower = c >= 0x61 && c <= 0x66
         return isDigit || isUpper || isLower
-
     }
 
     let utf8 = input.utf8
@@ -568,16 +567,23 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
     while index < utf8.endIndex {
         let c = utf8[index]
         if isHexDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidHexadecimal)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isHexDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidHexadecimal)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
@@ -609,16 +615,24 @@ func octInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
+
     while index < utf8.endIndex {
         let c = utf8[index]
         if isOctDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidOctal)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isOctDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidOctal)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
@@ -650,16 +664,24 @@ func binInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
+
     while index < utf8.endIndex {
         let c = utf8[index]
         if isBinDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidBinary)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isBinDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidBinary)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
