@@ -398,4 +398,8 @@ final class TOMLDeserializerTests: XCTestCase {
     func test_unicode_literal() throws {
         try self.verifyByFixture("unicode-literal")
     }
+
+    func test_without_super() throws {
+        try self.verifyByFixture("without-super")
+    }
 }

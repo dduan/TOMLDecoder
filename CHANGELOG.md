@@ -8,6 +8,8 @@
   been decoded with the replacement character (U-FFFD).
 - Local date with a trailing `T` such as `2023-04-16T` is considered invalid.
 - Day with value `00` is invalid.
+- Allow defining super table after it has been implicitly defined. For example,
+  one could define `[a.b.c]`, then later `[a]`.
 
 ## 0.2.2
 

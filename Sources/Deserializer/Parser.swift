@@ -1696,80 +1696,6 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
     return result.compactMap { $0 }
 }
 
-func insert(
-    table: [String: Any],
-    reference: String,
-    keys: Array<Traced<String>>.SubSequence,
-    context: [String],
-    value: Any,
-    isArrayTable: Bool = false,
-    isTable: Bool = false
-) throws -> [String: Any] {
-    assert(!keys.isEmpty)
-    let key = keys.first!
-    var mutable = table
-    switch (keys.count, table[key.value]) {
-    case (1, nil):
-        mutable[key.value] = value
-    case (_, nil):
-        mutable[key.value] = try insert(
-            table: [:],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-    case (1, let existing as [[String: Any]]) where isArrayTable && !existing.isEmpty:
-        mutable[key.value] = existing + [[:]]
-    case (_, let existing as [String: Any]) where keys.count > 1:
-        mutable[key.value] = try insert(
-            table: existing,
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-    case (_, let existing as [[String: Any]]) where keys.count > 1 && isTable:
-        var mutableArray = existing
-        mutableArray[mutableArray.count - 1] = try insert(
-            table: mutableArray[mutableArray.count - 1],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-        mutable[key.value] = mutableArray
-    case (_, let existing as [[String: Any]]) where keys.count > 1:
-        var mutableArray = existing
-        mutableArray[mutableArray.count - 1] = try insert(
-            table: mutableArray[mutableArray.count - 1],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-        mutable[key.value] = mutableArray
-    case (_, let .some(existing)):
-        let path = context.isEmpty ? "\(key.value)" : "\(context.joined(separator: ".")).\(key.value)"
-        throw DeserializationError.conflictingValue(
-            .init(
-                reference,
-                key.index,
-                "Conflicting value at [\(path)] Existing value is \(existing)"
-            )
-        )
-    }
-
-    return mutable
-}
 
 extension TOMLValue {
     func normalize(reference: String) throws -> Any {
@@ -1802,7 +1728,101 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
     var result = [String: Any]()
     var context = [Traced<String>]()
     var errors = [Error]()
+    var headersSeen = Set<String>()
 
+    func insert(
+        table: [String: Any],
+        reference: String,
+        keys: Array<Traced<String>>.SubSequence,
+        context: [String],
+        value: Any,
+        isArrayTable: Bool = false,
+        isTable: Bool = false
+    ) throws -> [String: Any] {
+        assert(!keys.isEmpty)
+        let keyDescription = keys.map { $0.value }.joined(separator: ".")
+
+        let key = keys.first!
+        var mutable = table
+        switch (keys.count, table[key.value]) {
+        case (1, nil):
+            mutable[key.value] = value
+            if context.isEmpty && isTable {
+                headersSeen.insert(keyDescription)
+            }
+        case (_, nil):
+            if context.isEmpty && isTable {
+                headersSeen.insert(keyDescription)
+            }
+            mutable[key.value] = try insert(
+                table: [:],
+                reference: reference,
+                keys: keys.dropFirst(),
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+        case (1, let existing as [[String: Any]]) where isArrayTable && !existing.isEmpty:
+            mutable[key.value] = existing + [[:]]
+        case (_, let existing as [String: Any]) where keys.count > 1:
+            mutable[key.value] = try insert(
+                table: existing,
+                reference: reference,
+                keys: keys.dropFirst(),
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+        case (1, _ as [String: Any]) where isTable && context.isEmpty:
+            if headersSeen.contains(keyDescription) {
+                throw DeserializationError.conflictingValue(
+                    .init(
+                        reference,
+                        key.index,
+                        "Cannot define table \(keyDescription) more than once"
+                    )
+                )
+            }
+            return table
+        case (_, let existing as [[String: Any]]) where keys.count > 1 && isTable:
+            var mutableArray = existing
+            mutableArray[mutableArray.count - 1] = try insert(
+                table: mutableArray[mutableArray.count - 1],
+                reference: reference,
+                keys: keys.dropFirst(),
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+            mutable[key.value] = mutableArray
+        case (_, let existing as [[String: Any]]) where keys.count > 1:
+            var mutableArray = existing
+            mutableArray[mutableArray.count - 1] = try insert(
+                table: mutableArray[mutableArray.count - 1],
+                reference: reference,
+                keys: keys.dropFirst(),
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+            mutable[key.value] = mutableArray
+        case (_, let .some(existing)):
+            let path = context.isEmpty ? "\(key.value)" : "\(context.joined(separator: ".")).\(key.value)"
+            throw DeserializationError.conflictingValue(
+                .init(
+                    reference,
+                    key.index,
+                    "Conflicting value at [\(path)] Existing value is \(existing)"
+                )
+            )
+        }
+
+        return mutable
+    }
     for entry in entries {
         switch entry {
         case .error(let index, let reason):
