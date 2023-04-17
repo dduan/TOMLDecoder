@@ -109,824 +109,293 @@ final class TOMLDeserializerTests: XCTestCase {
         }
     }
 
+    func verifyByFixture(_ fixture: String, file: StaticString = #file, line: UInt = #line) throws {
+        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)\(fixture).json", isDirectory: false)
+        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)\(fixture).toml", isDirectory: false)
+
+        do {
+            let jsonData = try Data(contentsOf: jsonURL)
+            let tomlData = try Data(contentsOf: tomlURL)
+            let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
+            let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
+            let doctoredTOMLTable = self.doctor(tomlTable)
+            XCTAssert(self.equate(jsonObject, doctoredTOMLTable), file: file, line: line)
+        } catch {
+            XCTFail("\(error)", file: file, line: line)
+        }
+    }
+
     func test_array_empty() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-empty.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-empty.toml", isDirectory: false)
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-empty")
     }
 
     func test_array_nospaces() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-nospaces.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-nospaces.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-nospaces")
     }
 
     func test_array_string_quote_comma_2() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-quote-comma-2.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-quote-comma-2.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-string-quote-comma-2")
     }
 
     func test_array_string_quote_comma() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-quote-comma.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-quote-comma.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-string-quote-comma")
     }
 
     func test_array_string_with_comma() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-with-comma.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-string-with-comma.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-string-with-comma")
     }
 
     func test_array_table_array_string_backslash() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-table-array-string-backslash.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)array-table-array-string-backslash.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("array-table-array-string-backslash")
     }
 
     func test_arrays_hetergeneous() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays-hetergeneous.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays-hetergeneous.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("arrays-hetergeneous")
     }
 
     func test_arrays_nested() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays-nested.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays-nested.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("arrays-nested")
     }
 
     func test_arrays() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)arrays.toml", isDirectory: false)
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("arrays")
     }
 
     func test_bool() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)bool.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)bool.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("bool")
     }
 
     func test_comments_at_eof() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-at-eof.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-at-eof.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("comments-at-eof")
     }
 
     func test_comments_at_eof2() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-at-eof2.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-at-eof2.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("comments-at-eof2")
     }
 
     func test_comments_everywhere() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-everywhere.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)comments-everywhere.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("comments-everywhere")
     }
 
     func test_datetime_timezone() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)datetime-timezone.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)datetime-timezone.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("datetime-timezone")
     }
 
     func test_datetime() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)datetime.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)datetime.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("datetime")
     }
 
     func test_dotted_keys() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)dotted-keys.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)dotted-keys.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("dotted-keys")
     }
 
     func test_double_quote_escape() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)double-quote-escape.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)double-quote-escape.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("double-quote-escape")
     }
 
     func test_empty() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)empty.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)empty.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("empty")
     }
 
     func test_escaped_escape() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)escaped-escape.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)escaped-escape.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("escaped-escape")
     }
 
     func test_example() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)example.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)example.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("example")
     }
 
     func test_exponent_part_float() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)exponent-part-float.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)exponent-part-float.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("exponent-part-float")
     }
 
     func test_float_exponent() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float-exponent.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float-exponent.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("float-exponent")
     }
 
     func test_float_underscore() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float-underscore.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float-underscore.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("float-underscore")
     }
 
     func test_float() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)float.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("float")
     }
 
     func test_implicit_and_explicit_before() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)implicit-and-explicit-before.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)implicit-and-explicit-before.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("implicit-and-explicit-before")
     }
 
     func test_implicit_groups() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)implicit-groups.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)implicit-groups.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("implicit-groups")
     }
 
     /* the '-' in -nan only prints in Swift 5, re-enable it when migrate
     func test_infinity_and_nan() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)infinity-and-nan.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)infinity-and-nan.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try verifyByFixture("infinity-and-nan")
     }
     */
 
     func test_inline_table_array() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)inline-table-array.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)inline-table-array.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("inline-table-array")
     }
 
     func test_inline_table() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)inline-table.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)inline-table.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("inline-table")
     }
 
     func test_integer_underscore() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)integer-underscore.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)integer-underscore.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("integer-underscore")
     }
 
     func test_integer() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)integer.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)integer.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("integer")
     }
 
     func test_key_equals_nospace() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-equals-nospace.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-equals-nospace.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("key-equals-nospace")
     }
 
     func test_key_numeric() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-numeric.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-numeric.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("key-numeric")
     }
 
     func test_key_space() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-space.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-space.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("key-space")
     }
 
     func test_key_special_chars() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-special-chars.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)key-special-chars.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("key-special-chars")
     }
 
     func test_keys_with_dots() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)keys-with-dots.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)keys-with-dots.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("keys-with-dots")
     }
 
     func test_local_date() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-date.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-date.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("local-date")
     }
 
     func test_local_datetime() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-datetime.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-datetime.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("local-datetime")
     }
 
     func test_local_time() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-time.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)local-time.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("local-time")
     }
 
     func test_long_float() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)long-float.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)long-float.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("long-float")
     }
 
     func test_long_integer() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)long-integer.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)long-integer.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("long-integer")
     }
 
     func test_multiline_string() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)multiline-string.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)multiline-string.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("multiline-string")
     }
 
     func test_newline_crlf() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)newline-crlf.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)newline-crlf.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("newline-crlf")
     }
 
     func test_newline_lf() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)newline-lf.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)newline-lf.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("newline-lf")
     }
 
     func test_non_dec_integers() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)non-dec-integers.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)non-dec-integers.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        do {
-            let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-            let doctoredTOMLTable = self.doctor(tomlTable)
-            XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
-        } catch let error {
-            print(error)
-        }
-
+        try self.verifyByFixture("non-dec-integers")
     }
 
     func test_raw_multiline_string() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)raw-multiline-string.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)raw-multiline-string.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("raw-multiline-string")
     }
 
     func test_raw_string() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)raw-string.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)raw-string.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("raw-string")
     }
 
     func test_string_empty() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-empty.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-empty.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("string-empty")
     }
 
     func test_string_escapes() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-escapes.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-escapes.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("string-escapes")
     }
 
     func test_string_nl() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-nl.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-nl.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("string-nl")
     }
 
     func test_string_simple() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-simple.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-simple.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("string-simple")
     }
 
     func test_string_with_pound() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-with-pound.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)string-with-pound.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("string-with-pound")
     }
 
     func test_table_array_implicit() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-implicit.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-implicit.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-array-implicit")
     }
 
     func test_table_array_many() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-many.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-many.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-array-many")
     }
 
     func test_table_array_nest() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-nest.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-nest.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-array-nest")
     }
 
     func test_table_array_one() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-one.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-one.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-array-one")
     }
 
     func test_table_array_table_array() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-table-array.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-array-table-array.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-array-table-array")
     }
 
     func test_table_empty() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-empty.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-empty.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-empty")
     }
 
     func test_table_no_eol() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-no-eol.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-no-eol.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-no-eol")
     }
 
     func test_table_sub_empty() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-sub-empty.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-sub-empty.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-sub-empty")
     }
 
     func test_table_whitespace() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-whitespace.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-whitespace.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-whitespace")
     }
 
     func test_table_with_literal_string() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-literal-string.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-literal-string.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-with-literal-string")
     }
 
     func test_table_with_pound() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-pound.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-pound.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-with-pound")
     }
 
     func test_table_with_single_quotes() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-single-quotes.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)table-with-single-quotes.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("table-with-single-quotes")
     }
 
     func test_underscored_float() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)underscored-float.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)underscored-float.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("underscored-float")
     }
 
     func test_underscored_integer() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)underscored-integer.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)underscored-integer.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("underscored-integer")
     }
 
     func test_unicode_escape() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)unicode-escape.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)unicode-escape.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("unicode-escape")
     }
 
     func test_unicode_literal() throws {
-        let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)unicode-literal.json", isDirectory: false)
-        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)unicode-literal.toml", isDirectory: false)
-
-        let jsonData = try Data(contentsOf: jsonURL)
-        let tomlData = try Data(contentsOf: tomlURL)
-        let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
-        let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
-        let doctoredTOMLTable = self.doctor(tomlTable)
-        XCTAssert(self.equate(jsonObject, doctoredTOMLTable))
+        try self.verifyByFixture("unicode-literal")
     }
 }
