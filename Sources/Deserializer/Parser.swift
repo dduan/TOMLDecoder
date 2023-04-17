@@ -1435,7 +1435,6 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
         break
     }
 
-
     let parsedTimeParts = localTimeUTF8(&utf8)
     var timeParts: (Int, Int, Int, Int?)?
     switch parsedTimeParts {
@@ -1446,6 +1445,12 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     case .none:
         break
     }
+
+    if dateParts != nil && timeParts == nil && hasSep {
+        input = originalInput
+        return nil
+    }
+
     var offset: Int?
     if timeParts != nil {
         let parsed = timeOffset(&utf8)
@@ -1458,6 +1463,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
             break
         }
     }
+
 
     if dateParts != nil && timeParts != nil && !hasSep {
         input = originalInput

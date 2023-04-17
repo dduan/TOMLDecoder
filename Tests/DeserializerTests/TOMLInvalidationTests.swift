@@ -599,4 +599,10 @@ final class TOMLInvalidationTests: XCTestCase {
         let tomlData = try Data(contentsOf: tomlURL)
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
     }
+
+    func test_date_trailing_t() throws {
+        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)trailing-t.toml", isDirectory: false)
+        let tomlData = try Data(contentsOf: tomlURL)
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
+    }
 }
