@@ -1258,6 +1258,9 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         utf8.formIndex(after: &index)
     }
 
+    if month == 0 || month > 12 {
+        return .some(nil)
+    }
 
     guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
         return nil
@@ -1275,7 +1278,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         utf8.formIndex(after: &index)
     }
 
-    if month == 0 || month > 12 {
+    if day == 0 || day > 31 {
         return .some(nil)
     }
 

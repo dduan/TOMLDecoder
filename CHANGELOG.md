@@ -7,6 +7,7 @@
 - TOML with invalid UTF-8 byte sequence will be rejected. Previously these have
   been decoded with the replacement character (U-FFFD).
 - Local date with a trailing `T` such as `2023-04-16T` is considered invalid.
+- Day with value `00` is invalid.
 
 ## 0.2.2
 
