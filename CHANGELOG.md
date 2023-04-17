@@ -4,6 +4,8 @@
 - Space is no longer accepted as an escaped character
 - Hex/Octal/Binary numbers with no digits surrounding `_` is considered invalid
 - Comments or whitespace at start of document no longer causes parsing failure
+- TOML with invalid UTF-8 byte sequence will be rejected. Previously these have
+  been decoded with the replacement character (U-FFFD).
 
 ## 0.2.2
 

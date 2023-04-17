@@ -593,4 +593,10 @@ final class TOMLInvalidationTests: XCTestCase {
         let tomlData = try Data(contentsOf: tomlURL)
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
     }
+
+    func test_bad_utf8_in_string() throws {
+        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)bad-utf8-in-string.toml", isDirectory: false)
+        let tomlData = try Data(contentsOf: tomlURL)
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
+    }
 }
