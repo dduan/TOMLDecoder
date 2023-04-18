@@ -1733,55 +1733,76 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
     func insert(
         table: [String: Any],
         reference: String,
-        keys: Array<Traced<String>>.SubSequence,
+        header: Array<Traced<String>>.SubSequence,
+        key: Array<Traced<String>> = [],
+        originalKeyDescription: String? = nil,
         context: [String],
         value: Any,
         isArrayTable: Bool = false,
         isTable: Bool = false
     ) throws -> [String: Any] {
+        let keys = header + key
         assert(!keys.isEmpty)
-        let keyDescription = keys.map { $0.value }.joined(separator: ".")
-
+        let keysDescription = keys.map { $0.value }.joined(separator: ".")
+        let headerDescription = header.map { $0.value }.joined(separator: ".")
+        let contextDescription = context.joined(separator: ".")
         let key = keys.first!
+        if context.count > 1,
+            originalKeyDescription != contextDescription,
+            headersSeen.contains(contextDescription)
+        {
+            throw DeserializationError.value(
+                .init(
+                    reference,
+                    key.index,
+                    """
+                    Using dotted keys to add to [\(contextDescription)] after \
+                    explicitly defining it above is not allowed"
+                    """
+                )
+            )
+        }
         var mutable = table
         switch (keys.count, table[key.value]) {
         case (1, nil):
             mutable[key.value] = value
             if context.isEmpty && isTable {
-                headersSeen.insert(keyDescription)
+                headersSeen.insert(keysDescription)
             }
         case (_, nil):
-            if context.isEmpty && isTable {
-                headersSeen.insert(keyDescription)
-            }
             mutable[key.value] = try insert(
                 table: [:],
                 reference: reference,
-                keys: keys.dropFirst(),
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? headerDescription,
                 context: context + [key.value],
                 value: value,
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
+            if context.isEmpty && isTable {
+                headersSeen.insert(keysDescription)
+            }
         case (1, let existing as [[String: Any]]) where isArrayTable && !existing.isEmpty:
             mutable[key.value] = existing + [[:]]
         case (_, let existing as [String: Any]) where keys.count > 1:
             mutable[key.value] = try insert(
                 table: existing,
                 reference: reference,
-                keys: keys.dropFirst(),
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? headerDescription,
                 context: context + [key.value],
                 value: value,
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
         case (1, _ as [String: Any]) where isTable && context.isEmpty:
-            if headersSeen.contains(keyDescription) {
+            if headersSeen.contains(keysDescription) {
                 throw DeserializationError.conflictingValue(
                     .init(
                         reference,
                         key.index,
-                        "Cannot define table \(keyDescription) more than once"
+                        "Cannot define table \(keysDescription) more than once"
                     )
                 )
             }
@@ -1791,7 +1812,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
             mutableArray[mutableArray.count - 1] = try insert(
                 table: mutableArray[mutableArray.count - 1],
                 reference: reference,
-                keys: keys.dropFirst(),
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? keysDescription,
                 context: context + [key.value],
                 value: value,
                 isArrayTable: isArrayTable,
@@ -1803,7 +1825,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
             mutableArray[mutableArray.count - 1] = try insert(
                 table: mutableArray[mutableArray.count - 1],
                 reference: reference,
-                keys: keys.dropFirst(),
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? keysDescription,
                 context: context + [key.value],
                 value: value,
                 isArrayTable: isArrayTable,
@@ -1834,7 +1857,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: (context + pair.key)[...],
+                    header: context[...],
+                    key: pair.key,
                     context: [],
                     value: try pair.value.normalize(reference: referenceInput)
                 )
@@ -1846,7 +1870,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: tableKey[...],
+                    header: tableKey[...],
                     context: [],
                     value: [String: Any](),
                     isTable: true
@@ -1861,7 +1885,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: arrayTableKey[...],
+                    header: arrayTableKey[...],
                     context: [],
                     value: [[String: Any]()],
                     isArrayTable: true

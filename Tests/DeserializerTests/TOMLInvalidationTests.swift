@@ -611,4 +611,10 @@ final class TOMLInvalidationTests: XCTestCase {
         let tomlData = try Data(contentsOf: tomlURL)
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
     }
+
+    func test_append_with_dotted_keys_1() throws {
+        let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)append-with-dotted-keys-1.toml", isDirectory: false)
+        let tomlData = try Data(contentsOf: tomlURL)
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData))
+    }
 }

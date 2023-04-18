@@ -10,7 +10,9 @@
 - Day with value `00` is invalid.
 - Allow defining super table after it has been implicitly defined. For example,
   one could define `[a.b.c]`, then later `[a]`.
-
+- Using dotted keys to add up to a previously header-defined table is now
+  invalid. For example, use `[a.b.c]` to create the table, and later have
+  `b.c =` under `[a]`.
 ## 0.2.2
 
 - Fixed a bug when parsing float decimals (#47)
