@@ -13,6 +13,7 @@
 - Using dotted keys to add up to a previously header-defined table is now
   invalid. For example, use `[a.b.c]` to create the table, and later have
   `b.c =` under `[a]`.
+- A standalone carriage return is no longer considered a valid newline
 ## 0.2.2
 
 - Fixed a bug when parsing float decimals (#47)

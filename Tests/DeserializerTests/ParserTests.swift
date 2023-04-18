@@ -341,9 +341,9 @@ final class ParserTests: XCTestCase {
         }
     }
 
-    func testWhitespaceCommentNewline() {
+    func testWhitespaceCommentNewline() throws {
         var input = "   #  \n"[...]
-        whitespaceCommentSkip(&input)
+        try whitespaceCommentSkip(&input)
         XCTAssertEqual(Array(input), [])
     }
 

@@ -90,6 +90,7 @@ indirect enum TOMLValue: Equatable {
         case invalidOctal
         case invalidBinary
         case invalidFloatMissingFraction
+        case invalidNewline
     }
 }
 
@@ -130,6 +131,8 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Ill-formed binary integer"
         case .invalidFloatMissingFraction:
             return "Floating number missing fraction"
+        case .invalidNewline:
+            return "Carriage return alone is not a valid newline"
         }
     }
 }
@@ -1528,13 +1531,31 @@ func comment(_ input: inout Substring) -> Bool {
     return true
 }
 
+struct NewlineError: Error {
+    let index: String.Index
+}
+
 @discardableResult
-func newline(_ input: inout Substring) -> Bool {
+func newline(_ input: inout Substring) throws -> Bool {
     let utf8 = input.utf8
     var index = utf8.startIndex
 
-    while index < utf8.endIndex, case let c = utf8[index], c == Constants.crUTF8 || c == Constants.lfUTF8 {
-        utf8.formIndex(after: &index)
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if c == Constants.lfUTF8 {
+          utf8.formIndex(after: &index)
+          continue
+        } else if c == Constants.crUTF8 {
+            let nextIndex = utf8.index(after: index)
+            if nextIndex < utf8.endIndex, utf8[nextIndex] == Constants.lfUTF8 {
+                utf8.formIndex(after: &index)
+                utf8.formIndex(after: &index)
+                continue
+            } else {
+                throw NewlineError(index: index)
+            }
+        }
+        break
     }
 
     let encountered = index != utf8.startIndex
@@ -1543,10 +1564,10 @@ func newline(_ input: inout Substring) -> Bool {
 }
 
 @discardableResult
-func whitespaceCommentSkip(_ input: inout Substring) -> Bool {
+func whitespaceCommentSkip(_ input: inout Substring) throws -> Bool {
     let start = input.startIndex
     while !input.isEmpty {
-        if !(whitespace(&input) || newline(&input) || comment(&input)) {
+        if try !(whitespace(&input) || newline(&input) || comment(&input)) {
             break
         }
     }
@@ -1555,12 +1576,28 @@ func whitespaceCommentSkip(_ input: inout Substring) -> Bool {
 
 func arrayValues(_ input: inout Substring) -> [TOMLValue]? {
     let originalInput = input
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = [TOMLValue.error(error.index, .invalidNewline)]
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     guard let first = value(&input) else {
         input = originalInput
         return nil
     }
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = [TOMLValue.error(error.index, .invalidNewline)]
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     if input.first == "," {
         input.removeFirst()
         if let rest = arrayValues(&input) {
@@ -1581,7 +1618,15 @@ func array(_ input: inout Substring) -> TOMLValue? {
 
     let values = arrayValues(&input)
 
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = TOMLValue.error(error.index, .invalidNewline)
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     guard input.first == "]" else {
         input = originalInput
         return nil
@@ -1644,7 +1689,17 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
 
 func expression(_ input: inout Substring) -> TopLevel?? {
     var parsed = false
-    parsed = whitespaceCommentSkip(&input)
+
+    do {
+        parsed = try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = TopLevel.valueError(error.index, .invalidNewline)
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
+
     if let v = keyValue(&input) ?? table(&input) ?? arrayTable(&input) {
         whitespace(&input)
         _ = comment(&input)
@@ -1682,7 +1737,16 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
     }
 
     while !input.isEmpty {
-        guard newline(&input), let next = expression(&input) else {
+        var foundNewline = false
+        do {
+            foundNewline = try newline(&input)
+        } catch let error as NewlineError {
+            result.append(.valueError(error.index, .invalidNewline))
+            input.removeFirst()
+        } catch {
+            continue
+        }
+        guard foundNewline, let next = expression(&input) else {
             if !input.isEmpty {
                 result.append(.error(input.startIndex, .invalidExpression))
             }
