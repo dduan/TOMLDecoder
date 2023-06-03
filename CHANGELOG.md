@@ -14,6 +14,8 @@
   invalid. For example, use `[a.b.c]` to create the table, and later have
   `b.c =` under `[a]`.
 - A standalone carriage return is no longer considered a valid newline
+- Inline tables are now immutable
+
 ## 0.2.2
 
 - Fixed a bug when parsing float decimals (#47)

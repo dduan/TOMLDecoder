@@ -60,6 +60,31 @@ extension TopLevel.Reason: CustomStringConvertible {
     }
 }
 
+struct TOMLTable {
+    var isMutable: Bool
+    var storage: [String: Any]
+
+    var stripped: [String: Any] {
+        var result = [String: Any]()
+        for (key, value) in storage {
+            if let valueTable = value as? TOMLTable {
+                result[key] = valueTable.stripped
+            } else if let valueArray = value as? [Any] {
+                result[key] = valueArray.map { ($0 as? TOMLTable)?.stripped ?? $0 }
+            } else {
+                result[key] = value
+            }
+        }
+
+        return result
+    }
+
+    subscript(_ key: String) -> Any? {
+        get { storage[key] }
+        set { storage[key] = newValue }
+    }
+}
+
 indirect enum TOMLValue: Equatable {
     case string(Traced<String>)
     case boolean(Bool)
@@ -1781,21 +1806,23 @@ extension TOMLValue {
         case .array(let array):
             return try array.map { try $0.normalize(reference: reference) }
         case .inlineTable(let inlineTable):
-            return try assembleTable(from: inlineTable.map(TopLevel.keyValue), referenceInput: reference)
+            var table = try assembleTable(from: inlineTable.map(TopLevel.keyValue), referenceInput: reference)
+            table.isMutable = false
+            return table
         case .key(let dotted):
             fatalError("Normalizing key \(dotted)")
         }
     }
 }
 
-func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [String: Any] {
-    var result = [String: Any]()
+func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> TOMLTable {
+    var result = TOMLTable(isMutable: true, storage: [:])
     var context = [Traced<String>]()
     var errors = [Error]()
     var headersSeen = Set<String>()
 
     func insert(
-        table: [String: Any],
+        table: TOMLTable,
         reference: String,
         header: Array<Traced<String>>.SubSequence,
         key: Array<Traced<String>> = [],
@@ -1804,7 +1831,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
         value: Any,
         isArrayTable: Bool = false,
         isTable: Bool = false
-    ) throws -> [String: Any] {
+    ) throws -> TOMLTable {
         let keys = header + key
         assert(!keys.isEmpty)
         let keysDescription = keys.map { $0.value }.joined(separator: ".")
@@ -1835,7 +1862,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
             }
         case (_, nil):
             mutable[key.value] = try insert(
-                table: [:],
+                table: TOMLTable(isMutable: true, storage: [:]),
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? headerDescription,
@@ -1847,9 +1874,13 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
             if context.isEmpty && isTable {
                 headersSeen.insert(keysDescription)
             }
-        case (1, let existing as [[String: Any]]) where isArrayTable && !existing.isEmpty:
-            mutable[key.value] = existing + [[:]]
-        case (_, let existing as [String: Any]) where keys.count > 1:
+        case (1, let existing as [TOMLTable]) where isArrayTable && !existing.isEmpty:
+            mutable[key.value] = existing + [TOMLTable(isMutable: true, storage: [:])]
+        case (_, let existing as TOMLTable) where keys.count > 1:
+            if !existing.isMutable {
+                throw DeserializationError.structural(.init(reference, key.index, "Cannot mutate inline table"))
+            }
+
             mutable[key.value] = try insert(
                 table: existing,
                 reference: reference,
@@ -1860,7 +1891,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
-        case (1, _ as [String: Any]) where isTable && context.isEmpty:
+        case (1, _ as TOMLTable) where isTable && context.isEmpty:
             if headersSeen.contains(keysDescription) {
                 throw DeserializationError.conflictingValue(
                     .init(
@@ -1871,7 +1902,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 )
             }
             return table
-        case (_, let existing as [[String: Any]]) where keys.count > 1 && isTable:
+        case (_, let existing as [TOMLTable]) where keys.count > 1 && isTable:
             var mutableArray = existing
             mutableArray[mutableArray.count - 1] = try insert(
                 table: mutableArray[mutableArray.count - 1],
@@ -1884,7 +1915,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 isTable: isTable
             )
             mutable[key.value] = mutableArray
-        case (_, let existing as [[String: Any]]) where keys.count > 1:
+        case (_, let existing as [TOMLTable]) where keys.count > 1:
             var mutableArray = existing
             mutableArray[mutableArray.count - 1] = try insert(
                 table: mutableArray[mutableArray.count - 1],
@@ -1936,7 +1967,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                     reference: referenceInput,
                     header: tableKey[...],
                     context: [],
-                    value: [String: Any](),
+                    value: TOMLTable(isMutable: true, storage: [:]),
                     isTable: true
                 )
             } catch {
@@ -1951,7 +1982,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                     reference: referenceInput,
                     header: arrayTableKey[...],
                     context: [],
-                    value: [[String: Any]()],
+                    value: [TOMLTable(isMutable: true, storage: [:])],
                     isArrayTable: true
                 )
             } catch {

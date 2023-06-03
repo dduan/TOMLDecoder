@@ -8,7 +8,7 @@ public enum TOMLDeserializer {
             throw DeserializationError.general(.init(text, input.startIndex, "Invalid TOML"))
         }
 
-        return table
+        return table.stripped
     }
 
     public static func tomlTable<Bytes>(with bytes: Bytes) throws -> [String: Any]
