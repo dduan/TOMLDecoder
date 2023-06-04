@@ -723,9 +723,4 @@ final class ParserTests: XCTestCase {
         let input = "a = 0x_1"
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
     }
-
-    func testX() throws {
-        let input = "d = 1979-05-27 # Comment"
-        print(try TOMLDeserializer.tomlTable(with: input))
-    }
 }

@@ -76,25 +76,27 @@ struct TOMLArrayTable {
     }
 }
 
+func stripInternal(_ value: Any) -> Any {
+    if let valueTable = value as? TOMLTable {
+        var result = [String: Any]()
+        for (key, value) in valueTable.storage {
+            result[key] = stripInternal(value)
+        }
+        return result
+    } else if let valueArray = value as? [Any] {
+        return valueArray.map(stripInternal(_:))
+    } else if let valueArrayTable = value as? TOMLArrayTable {
+        return valueArrayTable.storage.map(stripInternal(_:))
+    } else {
+        return value
+    }
+}
 struct TOMLTable {
     var isMutable: Bool
     var storage: [String: Any]
 
     var stripped: [String: Any] {
-        var result = [String: Any]()
-        for (key, value) in storage {
-            if let valueTable = value as? TOMLTable {
-                result[key] = valueTable.stripped
-            } else if let valueArray = value as? [Any] {
-                result[key] = valueArray.map { ($0 as? TOMLTable)?.stripped ?? $0 }
-            } else if let arrayTable = value as? TOMLArrayTable {
-                result[key] = arrayTable.storage.map { $0.stripped }
-            } else {
-                result[key] = value
-            }
-        }
-
-        return result
+        stripInternal(self) as! [String: Any]
     }
 
     subscript(_ key: String) -> Any? {
