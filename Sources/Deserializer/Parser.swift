@@ -1483,15 +1483,14 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     let originalInput = input
     var utf8 = input.utf8
     let parsedDateParts = localDateUTF8(&utf8)
-    var hasSep = false
+    var sep: String.UTF8View.Element?
     var dateParts: (Int, Int, Int)?
 
     switch parsedDateParts {
     case .some(.some(let parsed)):
         dateParts = parsed
         if (utf8.first == Constants.lowerTUTF8 || utf8.first == Constants.upperTUTF8 || utf8.first == Constants.spaceUTF8) {
-            utf8.removeFirst()
-            hasSep = true
+            sep = utf8.removeFirst()
         }
     case .some(.none):
         return .error(input.startIndex, .invalidDate)
@@ -1510,7 +1509,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
         break
     }
 
-    if dateParts != nil && timeParts == nil && hasSep {
+    if dateParts != nil && timeParts == nil && sep != nil && sep != Constants.spaceUTF8 {
         input = originalInput
         return nil
     }
@@ -1529,7 +1528,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     }
 
 
-    if dateParts != nil && timeParts != nil && !hasSep {
+    if dateParts != nil && timeParts != nil && sep == nil {
         input = originalInput
         return nil
     }

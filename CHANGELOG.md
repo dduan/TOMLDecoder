@@ -19,6 +19,7 @@
   invalid
 - Keys with spaces in between segments are now valid
 - Multiline strings can now have 1 or two quotes as valid content
+- Local date with a comment (`1970-01-01 # some comment`) is now accepted
 
 ## 0.2.2
 

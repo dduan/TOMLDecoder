@@ -73,38 +73,40 @@ final class TOMLDeserializerTests: XCTestCase {
         return stringify(table) as! [String: Any]
     }
 
-    private func equate(_ a: Any, _ b: Any) -> Bool {
+    private func equate(_ a: Any, _ b: Any) -> (Bool, String) {
         if let a = a as? [String: Any], let b = b as? [String: Any] {
             for (k, v) in a {
                 guard let bV = b[k] else {
-                    return false
+                    return (false, "'\(k)' is missing")
                 }
 
-                if !self.equate(v, bV) {
-                    return false
+                let (equal, reason) = self.equate(v, bV)
+                if !equal {
+                    return (false, reason)
                 }
             }
 
-            return true
+            return (true, "")
         } else if let a = a as? [Any], let b = b as? [Any] {
             if a.count != b.count {
-                return false
+                return (false, "Array has unequal size \(a.count) vs \(b.count)")
             }
 
             for (aV, bV) in zip(a, b) {
-                if !self.equate(aV, bV) {
-                    return false
+                let (equal, reason) = self.equate(aV, bV)
+                if !equal {
+                    return (false, reason)
                 }
             }
 
-            return true
+            return (true, "")
         } else if let a = a as? String, let b = b as? String {
             if a != b {
-                return false
+                return (false, "\(a) != \(b)")
             }
-            return true
+            return (true, "")
         } else {
-            return false
+            return (false, "")
         }
     }
 
@@ -118,7 +120,8 @@ final class TOMLDeserializerTests: XCTestCase {
             let jsonObject = try JSONSerialization.jsonObject(with: jsonData)
             let tomlTable = try TOMLDeserializer.tomlTable(with: tomlData)
             let doctoredTOMLTable = self.doctor(tomlTable)
-            XCTAssert(self.equate(jsonObject, doctoredTOMLTable), file: file, line: line)
+            let (equal, reason) = self.equate(jsonObject, doctoredTOMLTable)
+            XCTAssert(equal, reason, file: file, line: line)
         } catch {
             XCTFail("\(error)", file: file, line: line)
         }
