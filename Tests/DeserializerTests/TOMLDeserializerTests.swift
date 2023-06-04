@@ -410,4 +410,8 @@ final class TOMLDeserializerTests: XCTestCase {
     func test_escape_tricky() throws {
         try verifyByFixture("escape-tricky")
     }
+
+    func test_string_multiline_escaped_crlf() throws {
+        try verifyByFixture("string-multiline-escaped-crlf")
+    }
 }

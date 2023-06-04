@@ -21,6 +21,7 @@
 - Multiline strings can now have 1 or two quotes as valid content
 - Local date with a comment (`1970-01-01 # some comment`) is now accepted
 - Control characters (except taps) in comments are now invalid
+- Escaped CLRF character in multiline string is properly handled 
 
 ## 0.2.2
 

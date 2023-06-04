@@ -167,7 +167,7 @@ extension TOMLValue.Reason: CustomStringConvertible {
         case .basicStringMissingClosing:
             return "Missing closing character `\"` in string"
         case .multilineBasicStringMissingClosing:
-            return "Missing opening character `\"\"\"` in multiline string"
+            return "Missing closing character `\"\"\"` in multiline string"
         case .invalidTime:
             return "Ill-formatted time"
         case .invalidDate:
@@ -1103,15 +1103,14 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     while index < input.endIndex {
         let c = scalars[index]
         if escapingNewline {
-            if c.value == 0x20 || c.value == 0x0D || c.value == 0x09 {
+            if scalars[index...].starts(with: Constants.crlfScalar) {
                 input.formIndex(after: &index)
+                seenNewlineSinceEscapingStarted = true
             } else if scalars[index...].starts(with: Constants.lfScalar) {
                 input.formIndex(after: &index)
                 seenNewlineSinceEscapingStarted = true
-            } else if scalars[index...].starts(with: Constants.crlfScalar) {
+            } else if c.value == 0x20 || c.value == 0x0D || c.value == 0x09 {
                 input.formIndex(after: &index)
-                input.formIndex(after: &index)
-                seenNewlineSinceEscapingStarted = true
             } else if seenNewlineSinceEscapingStarted {
                 escapingNewline = false
             } else {
