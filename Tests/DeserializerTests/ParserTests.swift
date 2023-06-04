@@ -637,6 +637,7 @@ final class ParserTests: XCTestCase {
         ['a']
         [a.'b']
         [a.'b'.c]
+        [ g . h . i ]
         answer = 42
         """
         _ = try TOMLDeserializer.tomlTable(with: input)

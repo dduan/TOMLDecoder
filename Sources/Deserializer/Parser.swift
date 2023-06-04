@@ -468,6 +468,7 @@ func literalString(_ input: inout Substring) -> TOMLValue? {
 
 // Returns: .string or .error
 func simpleKey(_ input: inout Substring) -> TOMLValue? {
+    whitespace(&input)
     let utf8 = input.utf8
     if utf8.first == Constants.singleQuoteUTF8 {
         return literalString(&input)
@@ -488,9 +489,11 @@ func key(_ input: inout Substring) -> TOMLValue? {
 
     var parts = [first]
 
+    whitespace(&input)
     while input.first == "." {
         input.removeFirst()
         parts.append(simpleKey(&input) ?? .error(input.startIndex, .incompleteDottedKey))
+        whitespace(&input)
     }
 
     var keyParts = DottedKey()

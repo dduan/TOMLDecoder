@@ -402,4 +402,8 @@ final class TOMLDeserializerTests: XCTestCase {
     func test_without_super() throws {
         try self.verifyByFixture("without-super")
     }
+
+    func test_table_names() throws {
+        try self.verifyByFixture("table-names")
+    }
 }

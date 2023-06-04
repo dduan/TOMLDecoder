@@ -17,6 +17,7 @@
 - Inline tables are now immutable
 - Mutating array of tables that were implicitly created (e.g. `a = [{}]`) is now
   invalid
+- Keys with spaces in between segments are now valid
 
 ## 0.2.2
 
