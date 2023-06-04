@@ -15,6 +15,8 @@
   `b.c =` under `[a]`.
 - A standalone carriage return is no longer considered a valid newline
 - Inline tables are now immutable
+- Mutating array of tables that were implicitly created (e.g. `a = [{}]`) is now
+  invalid
 
 ## 0.2.2
 

@@ -5,6 +5,7 @@ typealias DottedKey = [Traced<String>]
 
 struct RawKeyValuePair: Equatable {
     let key: DottedKey
+
     let value: TOMLValue
 }
 
@@ -60,6 +61,21 @@ extension TopLevel.Reason: CustomStringConvertible {
     }
 }
 
+/// Explicitly declared array table. This is distinct from a array that happens
+/// to have tables.
+struct TOMLArrayTable {
+    var storage: [TOMLTable]
+
+    subscript(_ index: Int) -> TOMLTable {
+        get { storage[index] }
+        set { storage[index] = newValue }
+    }
+
+    init(storage: [TOMLTable] = []) {
+        self.storage = storage
+    }
+}
+
 struct TOMLTable {
     var isMutable: Bool
     var storage: [String: Any]
@@ -71,6 +87,8 @@ struct TOMLTable {
                 result[key] = valueTable.stripped
             } else if let valueArray = value as? [Any] {
                 result[key] = valueArray.map { ($0 as? TOMLTable)?.stripped ?? $0 }
+            } else if let arrayTable = value as? TOMLArrayTable {
+                result[key] = arrayTable.storage.map { $0.stripped }
             } else {
                 result[key] = value
             }
@@ -82,6 +100,11 @@ struct TOMLTable {
     subscript(_ key: String) -> Any? {
         get { storage[key] }
         set { storage[key] = newValue }
+    }
+
+    init() {
+        isMutable = true
+        storage = [:]
     }
 }
 
@@ -1816,7 +1839,7 @@ extension TOMLValue {
 }
 
 func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> TOMLTable {
-    var result = TOMLTable(isMutable: true, storage: [:])
+    var result = TOMLTable()
     var context = [Traced<String>]()
     var errors = [Error]()
     var headersSeen = Set<String>()
@@ -1862,7 +1885,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
             }
         case (_, nil):
             mutable[key.value] = try insert(
-                table: TOMLTable(isMutable: true, storage: [:]),
+                table: TOMLTable(),
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? headerDescription,
@@ -1874,8 +1897,10 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
             if context.isEmpty && isTable {
                 headersSeen.insert(keysDescription)
             }
-        case (1, let existing as [TOMLTable]) where isArrayTable && !existing.isEmpty:
-            mutable[key.value] = existing + [TOMLTable(isMutable: true, storage: [:])]
+        case (1, var existing as TOMLArrayTable) where isArrayTable && !existing.storage.isEmpty:
+            existing.storage.append(TOMLTable())
+            mutable[key.value] = existing
+
         case (_, let existing as TOMLTable) where keys.count > 1:
             if !existing.isMutable {
                 throw DeserializationError.structural(.init(reference, key.index, "Cannot mutate inline table"))
@@ -1902,10 +1927,10 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 )
             }
             return table
-        case (_, let existing as [TOMLTable]) where keys.count > 1 && isTable:
+        case (_, let existing as TOMLArrayTable) where keys.count > 1:
             var mutableArray = existing
-            mutableArray[mutableArray.count - 1] = try insert(
-                table: mutableArray[mutableArray.count - 1],
+            mutableArray[mutableArray.storage.count - 1] = try insert(
+                table: mutableArray[mutableArray.storage.count - 1],
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? keysDescription,
@@ -1915,10 +1940,10 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isTable: isTable
             )
             mutable[key.value] = mutableArray
-        case (_, let existing as [TOMLTable]) where keys.count > 1:
+        case (_, let existing as TOMLArrayTable) where keys.count > 1:
             var mutableArray = existing
-            mutableArray[mutableArray.count - 1] = try insert(
-                table: mutableArray[mutableArray.count - 1],
+            mutableArray[mutableArray.storage.count - 1] = try insert(
+                table: mutableArray[mutableArray.storage.count - 1],
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? keysDescription,
@@ -1967,7 +1992,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                     reference: referenceInput,
                     header: tableKey[...],
                     context: [],
-                    value: TOMLTable(isMutable: true, storage: [:]),
+                    value: TOMLTable(),
                     isTable: true
                 )
             } catch {
@@ -1982,7 +2007,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                     reference: referenceInput,
                     header: arrayTableKey[...],
                     context: [],
-                    value: [TOMLTable(isMutable: true, storage: [:])],
+                    value: TOMLArrayTable(storage: [TOMLTable()]),
                     isArrayTable: true
                 )
             } catch {
