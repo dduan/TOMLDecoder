@@ -435,4 +435,8 @@ final class TOMLInvalidationTests: XCTestCase {
     func test_array_extending_table() throws {
         try invalidate(name: "array-extending-table")
     }
+
+    func test_comment_del() throws {
+        try invalidate(name: "comment-del")
+    }
 }

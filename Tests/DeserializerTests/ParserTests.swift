@@ -127,10 +127,6 @@ final class ParserTests: XCTestCase {
         XCTAssertEqual(runTest(boolean, "false"), .boolean(false))
     }
 
-    func testParseComment() {
-        XCTAssertNotNil(runTest(comment, "# this is a comment!"))
-    }
-
     func testLiteralString() throws {
         let content = "hello world!"
         XCTAssertEqual(

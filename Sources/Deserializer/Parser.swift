@@ -143,6 +143,7 @@ indirect enum TOMLValue: Equatable {
         case invalidBinary
         case invalidFloatMissingFraction
         case invalidNewline
+        case invalidControlCharacterInComment
     }
 }
 
@@ -189,6 +190,8 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Floating number missing fraction"
         case .invalidNewline:
             return "Carriage return alone is not a valid newline"
+        case .invalidControlCharacterInComment:
+            return "Invalid control character found in comment"
         }
     }
 }
@@ -1574,7 +1577,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     ))
 }
 
-func comment(_ input: inout Substring) -> Bool {
+func comment(_ input: inout Substring) throws -> Bool {
     let scalars = input.unicodeScalars
     guard scalars.first == Constants.poundScalar else {
         return false
@@ -1582,7 +1585,10 @@ func comment(_ input: inout Substring) -> Bool {
 
     var index = scalars.startIndex
     scalars.formIndex(after: &index)
-    while index < scalars.endIndex, isNonEOL(scalars[index]) {
+    while index < scalars.endIndex, case let c = scalars[index], isNonEOL(c) {
+        if c.value >= 0 && c.value <= 0x8 || c.value >= 0xa && c.value <= 0x1f || c.value == 0x7f {
+            throw DeserializationError.value(.init(input.base, index, "Control character found in comment"))
+        }
         scalars.formIndex(after: &index)
     }
 
@@ -1761,12 +1767,23 @@ func expression(_ input: inout Substring) -> TopLevel?? {
 
     if let v = keyValue(&input) ?? table(&input) ?? arrayTable(&input) {
         whitespace(&input)
-        _ = comment(&input)
+        do {
+            _ = try comment(&input)
+        } catch {
+            return .valueError(input.startIndex, .invalidControlCharacterInComment)
+        }
+
         return v
     }
 
-    parsed = comment(&input) || parsed
-    return parsed ? .some(nil) : nil
+    do {
+        let parsedComment = try comment(&input)
+        parsed = parsedComment || parsed
+        return parsed ? .some(nil) : nil
+    } catch {
+        return .valueError(input.startIndex, .invalidControlCharacterInComment)
+    }
+
 }
 
 func synchronizeUntilNewLine(_ input: inout Substring) {
