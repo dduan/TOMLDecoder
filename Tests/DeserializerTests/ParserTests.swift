@@ -90,7 +90,7 @@ final class ParserTests: XCTestCase {
     func testParsingNormalFloat5() {
         XCTAssertEqual(.float(-2.2), runTest(float, "-220e-2"))
     }
-    
+
     func testParsingNormalFloat6() {
         XCTAssertEqual(.float(-225.03255), runTest(float, "-225.03255"))
     }

@@ -100,7 +100,6 @@ final class TOMLDeserializerTests: XCTestCase {
             return true
         } else if let a = a as? String, let b = b as? String {
             if a != b {
-                print("\(a) != \(b)")
                 return false
             }
             return true
@@ -229,181 +228,183 @@ final class TOMLDeserializerTests: XCTestCase {
         try verifyByFixture("implicit-groups")
     }
 
-    /* the '-' in -nan only prints in Swift 5, re-enable it when migrate
-    func test_infinity_and_nan() throws {
-        try verifyByFixture("infinity-and-nan")
-    }
-    */
-
     func test_inline_table_array() throws {
-        try self.verifyByFixture("inline-table-array")
+        try verifyByFixture("inline-table-array")
     }
 
     func test_inline_table() throws {
-        try self.verifyByFixture("inline-table")
+        try verifyByFixture("inline-table")
     }
 
     func test_integer_underscore() throws {
-        try self.verifyByFixture("integer-underscore")
+        try verifyByFixture("integer-underscore")
     }
 
     func test_integer() throws {
-        try self.verifyByFixture("integer")
+        try verifyByFixture("integer")
     }
 
     func test_key_equals_nospace() throws {
-        try self.verifyByFixture("key-equals-nospace")
+        try verifyByFixture("key-equals-nospace")
     }
 
     func test_key_numeric() throws {
-        try self.verifyByFixture("key-numeric")
+        try verifyByFixture("key-numeric")
     }
 
     func test_key_space() throws {
-        try self.verifyByFixture("key-space")
+        try verifyByFixture("key-space")
     }
 
     func test_key_special_chars() throws {
-        try self.verifyByFixture("key-special-chars")
+        try verifyByFixture("key-special-chars")
     }
 
     func test_keys_with_dots() throws {
-        try self.verifyByFixture("keys-with-dots")
+        try verifyByFixture("keys-with-dots")
     }
 
     func test_local_date() throws {
-        try self.verifyByFixture("local-date")
+        try verifyByFixture("local-date")
     }
 
     func test_local_datetime() throws {
-        try self.verifyByFixture("local-datetime")
+        try verifyByFixture("local-datetime")
     }
 
     func test_local_time() throws {
-        try self.verifyByFixture("local-time")
+        try verifyByFixture("local-time")
     }
 
     func test_long_float() throws {
-        try self.verifyByFixture("long-float")
+        try verifyByFixture("long-float")
     }
 
     func test_long_integer() throws {
-        try self.verifyByFixture("long-integer")
+        try verifyByFixture("long-integer")
     }
 
     func test_multiline_string() throws {
-        try self.verifyByFixture("multiline-string")
+        try verifyByFixture("multiline-string")
     }
 
     func test_newline_crlf() throws {
-        try self.verifyByFixture("newline-crlf")
+        try verifyByFixture("newline-crlf")
     }
 
     func test_newline_lf() throws {
-        try self.verifyByFixture("newline-lf")
+        try verifyByFixture("newline-lf")
     }
 
     func test_non_dec_integers() throws {
-        try self.verifyByFixture("non-dec-integers")
+        try verifyByFixture("non-dec-integers")
     }
 
     func test_raw_multiline_string() throws {
-        try self.verifyByFixture("raw-multiline-string")
+        try verifyByFixture("raw-multiline-string")
     }
 
     func test_raw_string() throws {
-        try self.verifyByFixture("raw-string")
+        try verifyByFixture("raw-string")
     }
 
     func test_string_empty() throws {
-        try self.verifyByFixture("string-empty")
+        try verifyByFixture("string-empty")
     }
 
     func test_string_escapes() throws {
-        try self.verifyByFixture("string-escapes")
+        try verifyByFixture("string-escapes")
     }
 
     func test_string_nl() throws {
-        try self.verifyByFixture("string-nl")
+        try verifyByFixture("string-nl")
     }
 
     func test_string_simple() throws {
-        try self.verifyByFixture("string-simple")
+        try verifyByFixture("string-simple")
     }
 
     func test_string_with_pound() throws {
-        try self.verifyByFixture("string-with-pound")
+        try verifyByFixture("string-with-pound")
     }
 
     func test_table_array_implicit() throws {
-        try self.verifyByFixture("table-array-implicit")
+        try verifyByFixture("table-array-implicit")
     }
 
     func test_table_array_many() throws {
-        try self.verifyByFixture("table-array-many")
+        try verifyByFixture("table-array-many")
     }
 
     func test_table_array_nest() throws {
-        try self.verifyByFixture("table-array-nest")
+        try verifyByFixture("table-array-nest")
     }
 
     func test_table_array_one() throws {
-        try self.verifyByFixture("table-array-one")
+        try verifyByFixture("table-array-one")
     }
 
     func test_table_array_table_array() throws {
-        try self.verifyByFixture("table-array-table-array")
+        try verifyByFixture("table-array-table-array")
     }
 
     func test_table_empty() throws {
-        try self.verifyByFixture("table-empty")
+        try verifyByFixture("table-empty")
     }
 
     func test_table_no_eol() throws {
-        try self.verifyByFixture("table-no-eol")
+        try verifyByFixture("table-no-eol")
     }
 
     func test_table_sub_empty() throws {
-        try self.verifyByFixture("table-sub-empty")
+        try verifyByFixture("table-sub-empty")
     }
 
     func test_table_whitespace() throws {
-        try self.verifyByFixture("table-whitespace")
+        try verifyByFixture("table-whitespace")
     }
 
     func test_table_with_literal_string() throws {
-        try self.verifyByFixture("table-with-literal-string")
+        try verifyByFixture("table-with-literal-string")
     }
 
     func test_table_with_pound() throws {
-        try self.verifyByFixture("table-with-pound")
+        try verifyByFixture("table-with-pound")
     }
 
     func test_table_with_single_quotes() throws {
-        try self.verifyByFixture("table-with-single-quotes")
+        try verifyByFixture("table-with-single-quotes")
     }
 
     func test_underscored_float() throws {
-        try self.verifyByFixture("underscored-float")
+        try verifyByFixture("underscored-float")
     }
 
     func test_underscored_integer() throws {
-        try self.verifyByFixture("underscored-integer")
+        try verifyByFixture("underscored-integer")
     }
 
     func test_unicode_escape() throws {
-        try self.verifyByFixture("unicode-escape")
+        try verifyByFixture("unicode-escape")
     }
 
     func test_unicode_literal() throws {
-        try self.verifyByFixture("unicode-literal")
+        try verifyByFixture("unicode-literal")
     }
 
     func test_without_super() throws {
-        try self.verifyByFixture("without-super")
+        try verifyByFixture("without-super")
     }
 
     func test_table_names() throws {
-        try self.verifyByFixture("table-names")
+        try verifyByFixture("table-names")
+    }
+
+    func test_multiline_quotes() throws {
+        try verifyByFixture("multiline-quotes")
+    }
+
+    func test_escape_tricky() throws {
+        try verifyByFixture("escape-tricky")
     }
 }

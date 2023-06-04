@@ -1,0 +1,9 @@
+{
+  "end_esc": "String does not end here\" but ends here\\",
+  "lit_end_esc": "String ends here\\",
+  "lit_multiline_end": "There is no escape\\",
+  "lit_multiline_not_unicode": "\\u007f",
+  "multiline_end_esc": "When will it end? \"\"\"...\"\"\" should be here\"",
+  "multiline_not_unicode": "\\u0041",
+  "multiline_unicode": " "
+}

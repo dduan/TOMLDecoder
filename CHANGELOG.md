@@ -18,6 +18,7 @@
 - Mutating array of tables that were implicitly created (e.g. `a = [{}]`) is now
   invalid
 - Keys with spaces in between segments are now valid
+- Multiline strings can now have 1 or two quotes as valid content
 
 ## 0.2.2
 

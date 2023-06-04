@@ -125,9 +125,11 @@ indirect enum TOMLValue: Equatable {
         case literalStringMissingOpening
         case literalStringMissingClosing
         case multilineLiteralStringMissingClosing
+        case multilineLiteralStringHasTooManySingleQuote
         case basicStringMissingOpening
         case basicStringMissingClosing
         case multilineBasicStringMissingClosing
+        case multilineLiteralStringHasTooManyDoubleQuote
         case invalidTime
         case invalidDate
         case invalidTimeOffset
@@ -153,6 +155,10 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Missing opening character `'` in literal string"
         case .multilineLiteralStringMissingClosing:
             return "Missing closing character `'''` in multiline literal string"
+        case .multilineLiteralStringHasTooManySingleQuote:
+            return "Multiline literal string has more than 2 `'`s"
+        case .multilineLiteralStringHasTooManyDoubleQuote:
+            return "Multiline literal string has more than 2 `\"`s"
         case .basicStringMissingOpening:
             return "Missing opening character `\"` in string"
         case .basicStringMissingClosing:
@@ -1133,40 +1139,43 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
         }
 
         if c == Constants.doubleQuoteScalar {
-            let contentEnd = index
-            result.append(c.value)
-            scalars.formIndex(after: &index)
-            if index == scalars.endIndex {
+            let quotesStart = index
+            var contentEnd = index
+            var consecutiveQuotes = 0
+
+            while index < scalars.endIndex, scalars[index] == Constants.doubleQuoteScalar {
+                consecutiveQuotes += 1
+                scalars.formIndex(after: &index)
+            }
+
+            if index == scalars.endIndex && consecutiveQuotes < 3 {
                 let location = input.startIndex
                 input = Substring(scalars[index...])
                 return .error(location, .multilineBasicStringMissingClosing)
             }
 
-            if scalars[index] == Constants.doubleQuoteScalar {
-                result.append(Constants.doubleQuoteScalar.value)
-                scalars.formIndex(after: &index)
-                if index == scalars.endIndex {
-                    let location = input.startIndex
-                    input = Substring(scalars[index...])
-                    return .error(location, .multilineBasicStringMissingClosing)
-                }
+            if consecutiveQuotes > 2 && consecutiveQuotes <= 5 {
+                scalars.formIndex(&contentEnd, offsetBy: consecutiveQuotes - 3)
+                result.append(contentsOf: scalars[quotesStart ..< contentEnd].map { $0.value })
 
-                if scalars[index] == Constants.doubleQuoteScalar {
-                    scalars.formIndex(after: &index)
-                    let startIndex = input.startIndex
-                    input = Substring(Substring.UnicodeScalarView(scalars[index...]))
-                    let result = hasEscaped
-                        ? String(decoding: result.dropLast(2), as: UTF32.self)
-                        : String(scalars[contentBegin ..< contentEnd])
-                    return .string(
-                        .init(
-                            value: result,
-                            index: startIndex
-                        )
+                let startIndex = input.startIndex
+                input = Substring(Substring.UnicodeScalarView(scalars[index...]))
+                let result = hasEscaped
+                    ? String(decoding: result, as: UTF32.self)
+                    : String(scalars[contentBegin ..< contentEnd])
+
+                return .string(
+                    .init(
+                        value: result,
+                        index: startIndex
                     )
-                }
-
-                continue
+                )
+            } else if consecutiveQuotes > 5 {
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineLiteralStringHasTooManyDoubleQuote)
+            } else {
+                result.append(contentsOf: scalars[quotesStart ..< index].map { $0.value })
             }
 
             continue
@@ -1180,7 +1189,6 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             input = Substring(scalars[index...])
             return .error(location, .multilineBasicStringMissingClosing)
         }
-
     }
 
     let location = input.startIndex
@@ -1240,30 +1248,29 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
         }
 
         if c == Constants.singleQuoteScalar {
-            let endIndex = index
-            scalars.formIndex(after: &index)
-            if index == scalars.endIndex {
+            var contentEnd = index
+            var consecutiveQuotes = 0
+
+            while index < scalars.endIndex, scalars[index] == Constants.singleQuoteScalar {
+                consecutiveQuotes += 1
+                scalars.formIndex(after: &index)
+            }
+
+            if index == scalars.endIndex && consecutiveQuotes < 3 {
                 let location = input.startIndex
                 input = Substring(scalars[index...])
                 return .error(location, .multilineLiteralStringMissingClosing)
             }
 
-            if scalars[index] == Constants.singleQuoteScalar {
-                scalars.formIndex(after: &index)
-                if index == scalars.endIndex {
-                    let location = input.startIndex
-                    input = Substring(scalars[index...])
-                    return .error(location, .multilineLiteralStringMissingClosing)
-                }
-
-                if scalars[index] == Constants.singleQuoteScalar {
-                    let output = scalars[startIndex ..< endIndex]
-                    scalars.formIndex(after: &index)
-                    input = Substring(scalars[index...])
-                    return .string(.init(value: String(output), index: input.startIndex))
-                }
-
-                continue
+            if consecutiveQuotes > 2 && consecutiveQuotes <= 5 {
+                scalars.formIndex(&contentEnd, offsetBy: consecutiveQuotes - 3)
+                input = Substring(scalars[index...])
+                let output = scalars[startIndex ..< contentEnd]
+                return .string(.init(value: String(output), index: input.startIndex))
+            } else if consecutiveQuotes > 5 {
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineLiteralStringHasTooManySingleQuote)
             }
 
             continue
