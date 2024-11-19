@@ -1,4 +1,4 @@
-## master
+## 0.3.0
 
 - Lowercase "z" is now accepted as zero-timezone-offset indicator
 - Space is no longer accepted as an escaped character
