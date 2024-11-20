@@ -146,7 +146,7 @@ final class ErrorTests: XCTestCase {
             }
 
             XCTAssertEqual(description.line, 1)
-            XCTAssertEqual(description.text, #"Missing opening character `"""` in multiline string"#)
+            XCTAssertEqual(description.text, #"Missing closing character `"""` in multiline string"#)
         } catch {
             XCTFail("Unexpected error type")
         }

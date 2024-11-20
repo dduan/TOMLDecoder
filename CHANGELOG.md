@@ -1,4 +1,27 @@
-## master
+## 0.3.0
+
+- Lowercase "z" is now accepted as zero-timezone-offset indicator
+- Space is no longer accepted as an escaped character
+- Hex/Octal/Binary numbers with no digits surrounding `_` is considered invalid
+- Comments or whitespace at start of document no longer causes parsing failure
+- TOML with invalid UTF-8 byte sequence will be rejected. Previously these have
+  been decoded with the replacement character (U-FFFD).
+- Local date with a trailing `T` such as `2023-04-16T` is considered invalid.
+- Day with value `00` is invalid.
+- Allow defining super table after it has been implicitly defined. For example,
+  one could define `[a.b.c]`, then later `[a]`.
+- Using dotted keys to add up to a previously header-defined table is now
+  invalid. For example, use `[a.b.c]` to create the table, and later have
+  `b.c =` under `[a]`.
+- A standalone carriage return is no longer considered a valid newline
+- Inline tables are now immutable
+- Mutating array of tables that were implicitly created (e.g. `a = [{}]`) is now
+  invalid
+- Keys with spaces in between segments are now valid
+- Multiline strings can now have 1 or two quotes as valid content
+- Local date with a comment (`1970-01-01 # some comment`) is now accepted
+- Control characters (except taps) in comments are now invalid
+- Escaped CLRF character in multiline string is properly handled 
 
 ## 0.2.2
 

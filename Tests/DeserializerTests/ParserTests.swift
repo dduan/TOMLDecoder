@@ -90,7 +90,7 @@ final class ParserTests: XCTestCase {
     func testParsingNormalFloat5() {
         XCTAssertEqual(.float(-2.2), runTest(float, "-220e-2"))
     }
-    
+
     func testParsingNormalFloat6() {
         XCTAssertEqual(.float(-225.03255), runTest(float, "-225.03255"))
     }
@@ -125,10 +125,6 @@ final class ParserTests: XCTestCase {
 
     func testBooleanFalse() {
         XCTAssertEqual(runTest(boolean, "false"), .boolean(false))
-    }
-
-    func testParseComment() {
-        XCTAssertNotNil(runTest(comment, "# this is a comment!"))
     }
 
     func testLiteralString() throws {
@@ -341,9 +337,9 @@ final class ParserTests: XCTestCase {
         }
     }
 
-    func testWhitespaceCommentNewline() {
+    func testWhitespaceCommentNewline() throws {
         var input = "   #  \n"[...]
-        whitespaceCommentSkip(&input)
+        try whitespaceCommentSkip(&input)
         XCTAssertEqual(Array(input), [])
     }
 
@@ -637,6 +633,7 @@ final class ParserTests: XCTestCase {
         ['a']
         [a.'b']
         [a.'b'.c]
+        [ g . h . i ]
         answer = 42
         """
         _ = try TOMLDeserializer.tomlTable(with: input)
@@ -693,5 +690,33 @@ final class ParserTests: XCTestCase {
         \"\"\"
         """
         _ = try TOMLDeserializer.tomlTable(with: longString)
+    }
+
+    func testDateTimeLowercase() throws {
+        let input = """
+        space = 1987-07-05 17:45:00Z
+        lower = 1987-07-05t17:45:00z
+        """
+        _ = try TOMLDeserializer.tomlTable(with: input)
+    }
+
+    func testSpaceIsNotValidEscape() throws {
+        let input = #"k = """t\ t""""#
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
+
+    func testInvalidBinNumber() throws {
+        let input = "a = 0b_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
+
+    func testInvalidOctalNumber() throws {
+        let input = "a = 0o_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
+    }
+
+    func testInvalidHexNumber() throws {
+        let input = "a = 0x_1"
+        XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: input))
     }
 }

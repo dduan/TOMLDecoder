@@ -22,3 +22,7 @@ more = [ # Comment
 # Evil.
 # ] Did I fool you?
 ] # Hopefully not.
+
+# Make sure the space between the datetime and "#" isn't lexed.
+dt = 1979-05-27T07:32:12-07:00  # c
+d = 1979-05-27 # Comment

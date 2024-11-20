@@ -11,7 +11,7 @@ test-SwiftPM:
 	@swift test -Xswiftc -warnings-as-errors
 
 test-docker:
-	@Scripts/docker.sh TOMLDecoder 'swift test -Xswiftc -warnings-as-errors --enable-test-discovery' 5.5.3 focal
+	@Scripts/docker.sh TOMLDecoder 'swift test -Xswiftc -warnings-as-errors --enable-test-discovery' 6.0.1 focal
 
 benchmark:
 	@cd Benchmarks; swift run -c release

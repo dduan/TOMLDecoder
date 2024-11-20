@@ -5,6 +5,7 @@ typealias DottedKey = [Traced<String>]
 
 struct RawKeyValuePair: Equatable {
     let key: DottedKey
+
     let value: TOMLValue
 }
 
@@ -60,6 +61,55 @@ extension TopLevel.Reason: CustomStringConvertible {
     }
 }
 
+/// Explicitly declared array table. This is distinct from a array that happens
+/// to have tables.
+struct TOMLArrayTable {
+    var storage: [TOMLTable]
+
+    subscript(_ index: Int) -> TOMLTable {
+        get { storage[index] }
+        set { storage[index] = newValue }
+    }
+
+    init(storage: [TOMLTable] = []) {
+        self.storage = storage
+    }
+}
+
+func stripInternal(_ value: Any) -> Any {
+    if let valueTable = value as? TOMLTable {
+        var result = [String: Any]()
+        for (key, value) in valueTable.storage {
+            result[key] = stripInternal(value)
+        }
+        return result
+    } else if let valueArray = value as? [Any] {
+        return valueArray.map(stripInternal(_:))
+    } else if let valueArrayTable = value as? TOMLArrayTable {
+        return valueArrayTable.storage.map(stripInternal(_:))
+    } else {
+        return value
+    }
+}
+struct TOMLTable {
+    var isMutable: Bool
+    var storage: [String: Any]
+
+    var stripped: [String: Any] {
+        stripInternal(self) as! [String: Any]
+    }
+
+    subscript(_ key: String) -> Any? {
+        get { storage[key] }
+        set { storage[key] = newValue }
+    }
+
+    init() {
+        isMutable = true
+        storage = [:]
+    }
+}
+
 indirect enum TOMLValue: Equatable {
     case string(Traced<String>)
     case boolean(Bool)
@@ -77,9 +127,11 @@ indirect enum TOMLValue: Equatable {
         case literalStringMissingOpening
         case literalStringMissingClosing
         case multilineLiteralStringMissingClosing
+        case multilineLiteralStringHasTooManySingleQuote
         case basicStringMissingOpening
         case basicStringMissingClosing
         case multilineBasicStringMissingClosing
+        case multilineLiteralStringHasTooManyDoubleQuote
         case invalidTime
         case invalidDate
         case invalidTimeOffset
@@ -90,6 +142,8 @@ indirect enum TOMLValue: Equatable {
         case invalidOctal
         case invalidBinary
         case invalidFloatMissingFraction
+        case invalidNewline
+        case invalidControlCharacterInComment
     }
 }
 
@@ -104,12 +158,16 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Missing opening character `'` in literal string"
         case .multilineLiteralStringMissingClosing:
             return "Missing closing character `'''` in multiline literal string"
+        case .multilineLiteralStringHasTooManySingleQuote:
+            return "Multiline literal string has more than 2 `'`s"
+        case .multilineLiteralStringHasTooManyDoubleQuote:
+            return "Multiline literal string has more than 2 `\"`s"
         case .basicStringMissingOpening:
             return "Missing opening character `\"` in string"
         case .basicStringMissingClosing:
             return "Missing closing character `\"` in string"
         case .multilineBasicStringMissingClosing:
-            return "Missing opening character `\"\"\"` in multiline string"
+            return "Missing closing character `\"\"\"` in multiline string"
         case .invalidTime:
             return "Ill-formatted time"
         case .invalidDate:
@@ -130,6 +188,10 @@ extension TOMLValue.Reason: CustomStringConvertible {
             return "Ill-formed binary integer"
         case .invalidFloatMissingFraction:
             return "Floating number missing fraction"
+        case .invalidNewline:
+            return "Carriage return alone is not a valid newline"
+        case .invalidControlCharacterInComment:
+            return "Invalid control character found in comment"
         }
     }
 }
@@ -221,6 +283,7 @@ enum Constants {
     static let tripleDoubleQuoteScalar = "\"\"\"".unicodeScalars
     static let tripleSingleQuoteScalar = "'''".unicodeScalars
     static let upperZUTF8 = "Z".utf8.first!
+    static let lowerZUTF8 = "z".utf8.first!
     static let openBracketUTF8 = "[".utf8.first!
     static let openBraceUTF8 = "{".utf8.first!
 }
@@ -416,6 +479,7 @@ func literalString(_ input: inout Substring) -> TOMLValue? {
 
 // Returns: .string or .error
 func simpleKey(_ input: inout Substring) -> TOMLValue? {
+    whitespace(&input)
     let utf8 = input.utf8
     if utf8.first == Constants.singleQuoteUTF8 {
         return literalString(&input)
@@ -436,9 +500,11 @@ func key(_ input: inout Substring) -> TOMLValue? {
 
     var parts = [first]
 
+    whitespace(&input)
     while input.first == "." {
         input.removeFirst()
         parts.append(simpleKey(&input) ?? .error(input.startIndex, .incompleteDottedKey))
+        whitespace(&input)
     }
 
     var keyParts = DottedKey()
@@ -541,7 +607,7 @@ func decInt(_ input: inout Substring) -> TOMLValue? {
     case .some(.some(let result)):
         return .integer(result)
     case .some(nil):
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(input.startIndex, .invalidDecimal)
     case .none:
         return nil
@@ -555,7 +621,6 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
         let isUpper = c >= 0x41 && c <= 0x46
         let isLower = c >= 0x61 && c <= 0x66
         return isDigit || isUpper || isLower
-
     }
 
     let utf8 = input.utf8
@@ -567,16 +632,23 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
     while index < utf8.endIndex {
         let c = utf8[index]
         if isHexDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidHexadecimal)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isHexDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidHexadecimal)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
@@ -608,16 +680,24 @@ func octInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
+
     while index < utf8.endIndex {
         let c = utf8[index]
         if isOctDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidOctal)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isOctDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidOctal)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
@@ -649,16 +729,24 @@ func binInt(_ input: inout Substring) -> TOMLValue? {
 
     index = utf8.index(index, offsetBy: 2)
 
+    var previousWasDigit = false
+
     while index < utf8.endIndex {
         let c = utf8[index]
         if isBinDigit(c) {
             body.append(c)
+            previousWasDigit = true
         } else if c == Constants.underscoreUTF8 {
+            guard previousWasDigit else {
+                return TOMLValue.error(index, .invalidBinary)
+            }
+
             utf8.formIndex(after: &index)
             guard index < utf8.endIndex && isBinDigit(utf8[index]) else {
                 return TOMLValue.error(index, .invalidBinary)
             }
 
+            previousWasDigit = false
             continue
         } else {
             break
@@ -883,7 +971,7 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
         utf8.removeFirst()
         guard let frac = decIntTextUTF8(&utf8, afterDec: true) else {
             let location = input.startIndex
-            synchronizeUntilExression(&input)
+            synchronizeUntilExpression(&input)
             return .error(location, .invalidFloatMissingFraction)
         }
 
@@ -1010,8 +1098,29 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     let contentBegin = index
     var result = [UTF32.CodeUnit]()
     var escapingNewline = false
+    var invalidNewlineEscapeResumePoint = index
+    var seenNewlineSinceEscapingStarted = false
     while index < input.endIndex {
         let c = scalars[index]
+        if escapingNewline {
+            if scalars[index...].starts(with: Constants.crlfScalar) {
+                input.formIndex(after: &index)
+                seenNewlineSinceEscapingStarted = true
+            } else if scalars[index...].starts(with: Constants.lfScalar) {
+                input.formIndex(after: &index)
+                seenNewlineSinceEscapingStarted = true
+            } else if c.value == 0x20 || c.value == 0x0D || c.value == 0x09 {
+                input.formIndex(after: &index)
+            } else if seenNewlineSinceEscapingStarted {
+                escapingNewline = false
+            } else {
+                index = invalidNewlineEscapeResumePoint
+                return .error(index, .invalidUnicodeSequence)
+            }
+
+            continue
+        }
+
         let escaped = escapedScalar(&index, scalars)
         switch escaped {
         case .some(.none):
@@ -1024,63 +1133,53 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             break
         }
 
-        if escapingNewline {
-            if c.value == 0x20 || c.value == 0x0A || c.value == 0x0D || c.value == 0x09 {
-                input.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.lfScalar) {
-                input.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.crlfScalar) {
-                input.formIndex(after: &index)
-                input.formIndex(after: &index)
-            } else {
-                escapingNewline = false
-            }
-
-            continue
-        }
-
         if c == Constants.backslashScalar {
             input.formIndex(after: &index)
             escapingNewline = true
             hasEscaped = true
+            invalidNewlineEscapeResumePoint = index
+            seenNewlineSinceEscapingStarted = false
             continue
         }
 
         if c == Constants.doubleQuoteScalar {
-            let contentEnd = index
-            result.append(c.value)
-            scalars.formIndex(after: &index)
-            if index == scalars.endIndex {
+            let quotesStart = index
+            var contentEnd = index
+            var consecutiveQuotes = 0
+
+            while index < scalars.endIndex, scalars[index] == Constants.doubleQuoteScalar {
+                consecutiveQuotes += 1
+                scalars.formIndex(after: &index)
+            }
+
+            if index == scalars.endIndex && consecutiveQuotes < 3 {
                 let location = input.startIndex
                 input = Substring(scalars[index...])
                 return .error(location, .multilineBasicStringMissingClosing)
             }
 
-            if scalars[index] == Constants.doubleQuoteScalar {
-                result.append(Constants.doubleQuoteScalar.value)
-                scalars.formIndex(after: &index)
-                if index == scalars.endIndex {
-                    let location = input.startIndex
-                    input = Substring(scalars[index...])
-                    return .error(location, .multilineBasicStringMissingClosing)
-                }
+            if consecutiveQuotes > 2 && consecutiveQuotes <= 5 {
+                scalars.formIndex(&contentEnd, offsetBy: consecutiveQuotes - 3)
+                result.append(contentsOf: scalars[quotesStart ..< contentEnd].map { $0.value })
 
-                if scalars[index] == Constants.doubleQuoteScalar {
-                    scalars.formIndex(after: &index)
-                    let startIndex = input.startIndex
-                    input = Substring(Substring.UnicodeScalarView(scalars[index...]))
-                    let result = hasEscaped
-                        ? String(decoding: result.dropLast(2), as: UTF32.self)
-                        : String(scalars[contentBegin ..< contentEnd])
-                    return .string(
-                        .init(
-                            value: result,
-                            index: startIndex
-                        )
+                let startIndex = input.startIndex
+                input = Substring(Substring.UnicodeScalarView(scalars[index...]))
+                let result = hasEscaped
+                    ? String(decoding: result, as: UTF32.self)
+                    : String(scalars[contentBegin ..< contentEnd])
+
+                return .string(
+                    .init(
+                        value: result,
+                        index: startIndex
                     )
-                }
-
-                continue
+                )
+            } else if consecutiveQuotes > 5 {
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineLiteralStringHasTooManyDoubleQuote)
+            } else {
+                result.append(contentsOf: scalars[quotesStart ..< index].map { $0.value })
             }
 
             continue
@@ -1094,7 +1193,6 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             input = Substring(scalars[index...])
             return .error(location, .multilineBasicStringMissingClosing)
         }
-
     }
 
     let location = input.startIndex
@@ -1154,30 +1252,29 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
         }
 
         if c == Constants.singleQuoteScalar {
-            let endIndex = index
-            scalars.formIndex(after: &index)
-            if index == scalars.endIndex {
+            var contentEnd = index
+            var consecutiveQuotes = 0
+
+            while index < scalars.endIndex, scalars[index] == Constants.singleQuoteScalar {
+                consecutiveQuotes += 1
+                scalars.formIndex(after: &index)
+            }
+
+            if index == scalars.endIndex && consecutiveQuotes < 3 {
                 let location = input.startIndex
                 input = Substring(scalars[index...])
                 return .error(location, .multilineLiteralStringMissingClosing)
             }
 
-            if scalars[index] == Constants.singleQuoteScalar {
-                scalars.formIndex(after: &index)
-                if index == scalars.endIndex {
-                    let location = input.startIndex
-                    input = Substring(scalars[index...])
-                    return .error(location, .multilineLiteralStringMissingClosing)
-                }
-
-                if scalars[index] == Constants.singleQuoteScalar {
-                    let output = scalars[startIndex ..< endIndex]
-                    scalars.formIndex(after: &index)
-                    input = Substring(scalars[index...])
-                    return .string(.init(value: String(output), index: input.startIndex))
-                }
-
-                continue
+            if consecutiveQuotes > 2 && consecutiveQuotes <= 5 {
+                scalars.formIndex(&contentEnd, offsetBy: consecutiveQuotes - 3)
+                input = Substring(scalars[index...])
+                let output = scalars[startIndex ..< contentEnd]
+                return .string(.init(value: String(output), index: input.startIndex))
+            } else if consecutiveQuotes > 5 {
+                let location = input.startIndex
+                input = Substring(scalars[index...])
+                return .error(location, .multilineLiteralStringHasTooManySingleQuote)
             }
 
             continue
@@ -1226,6 +1323,9 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         utf8.formIndex(after: &index)
     }
 
+    if month == 0 || month > 12 {
+        return .some(nil)
+    }
 
     guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
         return nil
@@ -1243,7 +1343,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         utf8.formIndex(after: &index)
     }
 
-    if month == 0 || month > 12 {
+    if day == 0 || day > 31 {
         return .some(nil)
     }
 
@@ -1331,7 +1431,7 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
 
 /// Returns: seconds from GMT
 func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
-    if utf8.first == Constants.upperZUTF8 {
+    if utf8.first == Constants.upperZUTF8 || utf8.first == Constants.lowerZUTF8 {
         utf8.removeFirst()
         return 0
     }
@@ -1387,22 +1487,20 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     let originalInput = input
     var utf8 = input.utf8
     let parsedDateParts = localDateUTF8(&utf8)
-    var hasSep = false
+    var sep: String.UTF8View.Element?
     var dateParts: (Int, Int, Int)?
 
     switch parsedDateParts {
     case .some(.some(let parsed)):
         dateParts = parsed
         if (utf8.first == Constants.lowerTUTF8 || utf8.first == Constants.upperTUTF8 || utf8.first == Constants.spaceUTF8) {
-            utf8.removeFirst()
-            hasSep = true
+            sep = utf8.removeFirst()
         }
     case .some(.none):
         return .error(input.startIndex, .invalidDate)
     case .none:
         break
     }
-
 
     let parsedTimeParts = localTimeUTF8(&utf8)
     var timeParts: (Int, Int, Int, Int?)?
@@ -1414,6 +1512,12 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     case .none:
         break
     }
+
+    if dateParts != nil && timeParts == nil && sep != nil && sep != Constants.spaceUTF8 {
+        input = originalInput
+        return nil
+    }
+
     var offset: Int?
     if timeParts != nil {
         let parsed = timeOffset(&utf8)
@@ -1427,7 +1531,8 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
         }
     }
 
-    if dateParts != nil && timeParts != nil && !hasSep {
+
+    if dateParts != nil && timeParts != nil && sep == nil {
         input = originalInput
         return nil
     }
@@ -1471,15 +1576,18 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     ))
 }
 
-func comment(_ input: inout Substring) -> Bool {
+func comment(_ input: inout Substring) throws -> Bool {
     let scalars = input.unicodeScalars
-    var index = scalars.startIndex
     guard scalars.first == Constants.poundScalar else {
         return false
     }
 
+    var index = scalars.startIndex
     scalars.formIndex(after: &index)
-    while index < scalars.endIndex, isNonEOL(scalars[index]) {
+    while index < scalars.endIndex, case let c = scalars[index], isNonEOL(c) {
+        if c.value >= 0 && c.value <= 0x8 || c.value >= 0xa && c.value <= 0x1f || c.value == 0x7f {
+            throw DeserializationError.value(.init(input.base, index, "Control character found in comment"))
+        }
         scalars.formIndex(after: &index)
     }
 
@@ -1487,13 +1595,31 @@ func comment(_ input: inout Substring) -> Bool {
     return true
 }
 
+struct NewlineError: Error {
+    let index: String.Index
+}
+
 @discardableResult
-func newline(_ input: inout Substring) -> Bool {
+func newline(_ input: inout Substring) throws -> Bool {
     let utf8 = input.utf8
     var index = utf8.startIndex
 
-    while index < utf8.endIndex, case let c = utf8[index], c == Constants.crUTF8 || c == Constants.lfUTF8 {
-        utf8.formIndex(after: &index)
+    while index < utf8.endIndex {
+        let c = utf8[index]
+        if c == Constants.lfUTF8 {
+          utf8.formIndex(after: &index)
+          continue
+        } else if c == Constants.crUTF8 {
+            let nextIndex = utf8.index(after: index)
+            if nextIndex < utf8.endIndex, utf8[nextIndex] == Constants.lfUTF8 {
+                utf8.formIndex(after: &index)
+                utf8.formIndex(after: &index)
+                continue
+            } else {
+                throw NewlineError(index: index)
+            }
+        }
+        break
     }
 
     let encountered = index != utf8.startIndex
@@ -1501,22 +1627,41 @@ func newline(_ input: inout Substring) -> Bool {
     return encountered
 }
 
-func whitespaceCommentSkip(_ input: inout Substring) {
+@discardableResult
+func whitespaceCommentSkip(_ input: inout Substring) throws -> Bool {
+    let start = input.startIndex
     while !input.isEmpty {
-        if !(whitespace(&input) || newline(&input) || comment(&input)) {
+        if try !(whitespace(&input) || newline(&input) || comment(&input)) {
             break
         }
     }
+    return start != input.startIndex
 }
 
 func arrayValues(_ input: inout Substring) -> [TOMLValue]? {
     let originalInput = input
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = [TOMLValue.error(error.index, .invalidNewline)]
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     guard let first = value(&input) else {
         input = originalInput
         return nil
     }
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = [TOMLValue.error(error.index, .invalidNewline)]
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     if input.first == "," {
         input.removeFirst()
         if let rest = arrayValues(&input) {
@@ -1537,7 +1682,15 @@ func array(_ input: inout Substring) -> TOMLValue? {
 
     let values = arrayValues(&input)
 
-    whitespaceCommentSkip(&input)
+    do {
+        try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = TOMLValue.error(error.index, .invalidNewline)
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
     guard input.first == "]" else {
         input = originalInput
         return nil
@@ -1570,7 +1723,7 @@ func table(_ input: inout Substring) -> TopLevel? {
     whitespace(&input)
     guard input.first == "]" else {
         let location = input.startIndex
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(location, .standardTableMissingClosing)
     }
     input.removeFirst()
@@ -1591,7 +1744,7 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
     whitespace(&input)
     guard input.starts(with: "]]") else {
         let location = input.startIndex
-        synchronizeUntilExression(&input)
+        synchronizeUntilExpression(&input)
         return .error(location, .arrayTableMissingClosing)
     }
     input.removeFirst(2)
@@ -1600,15 +1753,36 @@ func arrayTable(_ input: inout Substring) -> TopLevel? {
 
 func expression(_ input: inout Substring) -> TopLevel?? {
     var parsed = false
-    parsed = whitespace(&input)
+
+    do {
+        parsed = try whitespaceCommentSkip(&input)
+    } catch let error as NewlineError {
+        let result = TopLevel.valueError(error.index, .invalidNewline)
+        input.removeFirst()
+        return result
+    } catch {
+        return nil
+    }
+
     if let v = keyValue(&input) ?? table(&input) ?? arrayTable(&input) {
         whitespace(&input)
-        _ = comment(&input)
+        do {
+            _ = try comment(&input)
+        } catch {
+            return .valueError(input.startIndex, .invalidControlCharacterInComment)
+        }
+
         return v
     }
 
-    parsed = comment(&input) || parsed
-    return parsed ? .some(nil) : nil
+    do {
+        let parsedComment = try comment(&input)
+        parsed = parsedComment || parsed
+        return parsed ? .some(nil) : nil
+    } catch {
+        return .valueError(input.startIndex, .invalidControlCharacterInComment)
+    }
+
 }
 
 func synchronizeUntilNewLine(_ input: inout Substring) {
@@ -1617,7 +1791,7 @@ func synchronizeUntilNewLine(_ input: inout Substring) {
     }
 }
 
-func synchronizeUntilExression(_ input: inout Substring) {
+func synchronizeUntilExpression(_ input: inout Substring) {
     while !input.isEmpty && expression(&input) == nil {
         input.removeFirst()
     }
@@ -1633,12 +1807,21 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
             if !input.isEmpty {
                 result.append(.error(input.startIndex, .invalidExpression))
             }
-            synchronizeUntilExression(&input)
+            synchronizeUntilExpression(&input)
         }
     }
 
     while !input.isEmpty {
-        guard newline(&input), let next = expression(&input) else {
+        var foundNewline = false
+        do {
+            foundNewline = try newline(&input)
+        } catch let error as NewlineError {
+            result.append(.valueError(error.index, .invalidNewline))
+            input.removeFirst()
+        } catch {
+            continue
+        }
+        guard foundNewline, let next = expression(&input) else {
             if !input.isEmpty {
                 result.append(.error(input.startIndex, .invalidExpression))
             }
@@ -1652,80 +1835,6 @@ func topLevels(_ input: inout Substring) -> [TopLevel] {
     return result.compactMap { $0 }
 }
 
-func insert(
-    table: [String: Any],
-    reference: String,
-    keys: Array<Traced<String>>.SubSequence,
-    context: [String],
-    value: Any,
-    isArrayTable: Bool = false,
-    isTable: Bool = false
-) throws -> [String: Any] {
-    assert(!keys.isEmpty)
-    let key = keys.first!
-    var mutable = table
-    switch (keys.count, table[key.value]) {
-    case (1, nil):
-        mutable[key.value] = value
-    case (_, nil):
-        mutable[key.value] = try insert(
-            table: [:],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-    case (1, let existing as [[String: Any]]) where isArrayTable && !existing.isEmpty:
-        mutable[key.value] = existing + [[:]]
-    case (_, let existing as [String: Any]) where keys.count > 1:
-        mutable[key.value] = try insert(
-            table: existing,
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-    case (_, let existing as [[String: Any]]) where keys.count > 1 && isTable:
-        var mutableArray = existing
-        mutableArray[mutableArray.count - 1] = try insert(
-            table: mutableArray[mutableArray.count - 1],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-        mutable[key.value] = mutableArray
-    case (_, let existing as [[String: Any]]) where keys.count > 1:
-        var mutableArray = existing
-        mutableArray[mutableArray.count - 1] = try insert(
-            table: mutableArray[mutableArray.count - 1],
-            reference: reference,
-            keys: keys.dropFirst(),
-            context: context + [key.value],
-            value: value,
-            isArrayTable: isArrayTable,
-            isTable: isTable
-        )
-        mutable[key.value] = mutableArray
-    case (_, let .some(existing)):
-        let path = context.isEmpty ? "\(key.value)" : "\(context.joined(separator: ".")).\(key.value)"
-        throw DeserializationError.conflictingValue(
-            .init(
-                reference,
-                key.index,
-                "Conflicting value at [\(path)] Existing value is \(existing)"
-            )
-        )
-    }
-
-    return mutable
-}
 
 extension TOMLValue {
     func normalize(reference: String) throws -> Any {
@@ -1747,18 +1856,143 @@ extension TOMLValue {
         case .array(let array):
             return try array.map { try $0.normalize(reference: reference) }
         case .inlineTable(let inlineTable):
-            return try assembleTable(from: inlineTable.map(TopLevel.keyValue), referenceInput: reference)
+            var table = try assembleTable(from: inlineTable.map(TopLevel.keyValue), referenceInput: reference)
+            table.isMutable = false
+            return table
         case .key(let dotted):
             fatalError("Normalizing key \(dotted)")
         }
     }
 }
 
-func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [String: Any] {
-    var result = [String: Any]()
+func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> TOMLTable {
+    var result = TOMLTable()
     var context = [Traced<String>]()
     var errors = [Error]()
+    var headersSeen = Set<String>()
 
+    func insert(
+        table: TOMLTable,
+        reference: String,
+        header: Array<Traced<String>>.SubSequence,
+        key: Array<Traced<String>> = [],
+        originalKeyDescription: String? = nil,
+        context: [String],
+        value: Any,
+        isArrayTable: Bool = false,
+        isTable: Bool = false
+    ) throws -> TOMLTable {
+        let keys = header + key
+        assert(!keys.isEmpty)
+        let keysDescription = keys.map { $0.value }.joined(separator: ".")
+        let headerDescription = header.map { $0.value }.joined(separator: ".")
+        let contextDescription = context.joined(separator: ".")
+        let key = keys.first!
+        if context.count > 1,
+            originalKeyDescription != contextDescription,
+            headersSeen.contains(contextDescription)
+        {
+            throw DeserializationError.value(
+                .init(
+                    reference,
+                    key.index,
+                    """
+                    Using dotted keys to add to [\(contextDescription)] after \
+                    explicitly defining it above is not allowed"
+                    """
+                )
+            )
+        }
+        var mutable = table
+        switch (keys.count, table[key.value]) {
+        case (1, nil):
+            mutable[key.value] = value
+            if context.isEmpty && isTable {
+                headersSeen.insert(keysDescription)
+            }
+        case (_, nil):
+            mutable[key.value] = try insert(
+                table: TOMLTable(),
+                reference: reference,
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? headerDescription,
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+            if context.isEmpty && isTable {
+                headersSeen.insert(keysDescription)
+            }
+        case (1, var existing as TOMLArrayTable) where isArrayTable && !existing.storage.isEmpty:
+            existing.storage.append(TOMLTable())
+            mutable[key.value] = existing
+
+        case (_, let existing as TOMLTable) where keys.count > 1:
+            if !existing.isMutable {
+                throw DeserializationError.structural(.init(reference, key.index, "Cannot mutate inline table"))
+            }
+
+            mutable[key.value] = try insert(
+                table: existing,
+                reference: reference,
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? headerDescription,
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+        case (1, _ as TOMLTable) where isTable && context.isEmpty:
+            if headersSeen.contains(keysDescription) {
+                throw DeserializationError.conflictingValue(
+                    .init(
+                        reference,
+                        key.index,
+                        "Cannot define table \(keysDescription) more than once"
+                    )
+                )
+            }
+            return table
+        case (_, let existing as TOMLArrayTable) where keys.count > 1:
+            var mutableArray = existing
+            mutableArray[mutableArray.storage.count - 1] = try insert(
+                table: mutableArray[mutableArray.storage.count - 1],
+                reference: reference,
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? keysDescription,
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+            mutable[key.value] = mutableArray
+        case (_, let existing as TOMLArrayTable) where keys.count > 1:
+            var mutableArray = existing
+            mutableArray[mutableArray.storage.count - 1] = try insert(
+                table: mutableArray[mutableArray.storage.count - 1],
+                reference: reference,
+                header: keys.dropFirst(),
+                originalKeyDescription: originalKeyDescription ?? keysDescription,
+                context: context + [key.value],
+                value: value,
+                isArrayTable: isArrayTable,
+                isTable: isTable
+            )
+            mutable[key.value] = mutableArray
+        case (_, let .some(existing)):
+            let path = context.isEmpty ? "\(key.value)" : "\(context.joined(separator: ".")).\(key.value)"
+            throw DeserializationError.conflictingValue(
+                .init(
+                    reference,
+                    key.index,
+                    "Conflicting value at [\(path)] Existing value is \(existing)"
+                )
+            )
+        }
+
+        return mutable
+    }
     for entry in entries {
         switch entry {
         case .error(let index, let reason):
@@ -1770,7 +2004,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: (context + pair.key)[...],
+                    header: context[...],
+                    key: pair.key,
                     context: [],
                     value: try pair.value.normalize(reference: referenceInput)
                 )
@@ -1782,9 +2017,9 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: tableKey[...],
+                    header: tableKey[...],
                     context: [],
-                    value: [String: Any](),
+                    value: TOMLTable(),
                     isTable: true
                 )
             } catch {
@@ -1797,9 +2032,9 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> [
                 result = try insert(
                     table: result,
                     reference: referenceInput,
-                    keys: arrayTableKey[...],
+                    header: arrayTableKey[...],
                     context: [],
-                    value: [[String: Any]()],
+                    value: TOMLArrayTable(storage: [TOMLTable()]),
                     isArrayTable: true
                 )
             } catch {
