@@ -4,7 +4,7 @@ public enum DeserializationError: Error {
     case conflictingValue(Description)
     case general(Description)
     indirect case compound([Error])
-    public struct Description {
+    public struct Description: Sendable {
         public let line: Int
         public let column: Int
         public let text: String

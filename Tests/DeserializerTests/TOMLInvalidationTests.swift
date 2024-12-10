@@ -11,14 +11,14 @@ private let kSeparator: Character = "/"
 final class TOMLInvalidationTests: XCTestCase {
     private var directory: String {
         (
-            (#file.first == "/" ? [""] : [])
-                + #file.split(separator: kSeparator).dropLast()
+            (#filePath.first == "/" ? [""] : [])
+                + #filePath.split(separator: kSeparator).dropLast()
                 + ["invalid_fixtures"]
         )
             .joined(separator: "\(kSeparator)")
     }
 
-    func invalidate(name: String, file: StaticString = #file, line: UInt = #line) throws {
+    func invalidate(name: String, file: StaticString = #filePath, line: UInt = #line) throws {
         let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)\(name).toml", isDirectory: false)
         let tomlData = try Data(contentsOf: tomlURL)
         XCTAssertThrowsError(try TOMLDeserializer.tomlTable(with: tomlData), file: file, line: line)

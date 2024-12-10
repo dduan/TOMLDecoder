@@ -13,8 +13,8 @@ private let kSeparator: Character = "/"
 final class TOMLDeserializerTests: XCTestCase {
     private var directory: String {
         (
-            (#file.first == "/" ? [""] : [])
-                + #file.split(separator: kSeparator).dropLast()
+            (#filePath.first == "/" ? [""] : [])
+                + #filePath.split(separator: kSeparator).dropLast()
                 + ["valid_fixtures"]
         )
             .joined(separator: "\(kSeparator)")
@@ -110,7 +110,7 @@ final class TOMLDeserializerTests: XCTestCase {
         }
     }
 
-    func verifyByFixture(_ fixture: String, file: StaticString = #file, line: UInt = #line) throws {
+    func verifyByFixture(_ fixture: String, file: StaticString = #filePath, line: UInt = #line) throws {
         let jsonURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)\(fixture).json", isDirectory: false)
         let tomlURL = URL(fileURLWithPath: "\(self.directory)\(kSeparator)\(fixture).toml", isDirectory: false)
 
