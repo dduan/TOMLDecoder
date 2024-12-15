@@ -628,6 +628,18 @@ final class ParserTests: XCTestCase {
         _ = try TOMLDeserializer.tomlTable(with: input)
     }
 
+    func testExtendingKeyed() throws {
+        let input = """
+        [one.two]
+        hello = "world"
+
+        [one.two.three]
+        foo = "bar"
+        """
+
+        _ = try TOMLDeserializer.tomlTable(with: input)
+    }
+
     func testValidKey() throws {
         let input = """
         ['a']
