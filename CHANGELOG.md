@@ -1,7 +1,10 @@
 ## Development
 
+## 0.3.1
+
 - Fixed a bug where extending table via dotted key was not allowed (#54)
 - Declare support for Swift 6
+- Add experimental support for building with Bazel
 
 ## 0.3.0
 
