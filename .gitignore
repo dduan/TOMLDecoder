@@ -9,3 +9,6 @@ Dependencies/TOMLDeserializer
 .swiftpm
 tmp
 /result
+/bazel-*
+MODULE.bazel.lock
+/.vscode
