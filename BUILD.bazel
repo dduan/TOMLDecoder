@@ -1,0 +1,58 @@
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library", "swift_test", "swift_binary")
+load("@bazel_skylib//rules:copy_directory.bzl", "copy_directory")
+
+swift_binary(
+    name = "compliance",
+    srcs = ["Sources/compliance/main.swift"],
+    deps = [
+        ":TOMLDecoder",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+swift_library(
+    name = "TOMLDecoder",
+    srcs = glob(["Sources/TOMLDecoder/**/*.swift"]),
+    deps = [
+        ":Deserializer",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+swift_library(
+    name = "Deserializer",
+    srcs = glob(["Sources/Deserializer/**/*.swift"]),
+    visibility = ["//visibility:private"],
+)
+
+swift_test(
+    name = "TOMLDecoderTests",
+    srcs = glob(["Tests/TOMLDecoderTests/**/*.swift"]),
+    deps = [":TOMLDecoder"],
+    visibility = ["//visibility:private"],
+)
+
+swift_test(
+    name = "DeserializerTests",
+    srcs = glob(["Tests/DeserializerTests/**/*.swift"]),
+    deps = [":Deserializer"],
+    data = [
+        ":valid_fixtures",
+        ":invalid_fixtures",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+copy_directory(
+    name = "valid_fixtures",
+    src = "Tests/DeserializerTests/valid_fixtures",
+    out = "Tests/DeserializerTests/valid_fixtures",
+    visibility = ["//visibility:private"],
+)
+
+copy_directory(
+    name = "invalid_fixtures",
+    src = "Tests/DeserializerTests/invalid_fixtures",
+    out = "Tests/DeserializerTests/invalid_fixtures",
+    visibility = ["//visibility:private"],
+)
