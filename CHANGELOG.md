@@ -1,3 +1,8 @@
+## Development
+
+- Fixed a bug where extending table via dotted key was not allowed (#54)
+- Declare support for Swift 6
+
 ## 0.3.0
 
 - Lowercase "z" is now accepted as zero-timezone-offset indicator

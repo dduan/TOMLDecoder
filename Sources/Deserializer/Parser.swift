@@ -1890,6 +1890,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
         let key = keys.first!
         if context.count > 1,
             originalKeyDescription != contextDescription,
+            !(originalKeyDescription?.hasPrefix(contextDescription) == true),
             headersSeen.contains(contextDescription)
         {
             throw DeserializationError.value(
