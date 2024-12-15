@@ -68,7 +68,7 @@ concept of "Offset Date-time" in TOML. However, the rest of the date/time types
 can/should not be decoded as `Date` as they lack a relationship to a fix-point
 in time (is `2019-03-10 17:30:00` local time or UTC time?). The proper way to
 represent such information, therefore, is to use `DateComponents` from
-Foundation, or one of the corresponding types from NetTime.
+Foundation.
 
 #### Data
 
