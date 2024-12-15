@@ -1,4 +1,4 @@
-name: CI Tests
+name: Swift Tests
 on: [push]
 jobs:
   swift-test:
