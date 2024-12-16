@@ -131,13 +131,14 @@ the right shape. This is what `JSONSerialization` does for JSON.
 You can perform this step yourself:
 
 ```swift
+import TOMLDecoder
 let tomlString = """
 [Person]
 let firstName = "Elon"
 let lastName = "Musk"
 """
 
-let toml: [String: Any] = try JSONDecoder.tomlTable(from: tomlString)
+let toml: [String: Any] = try TOMLDecoder.tomlTable(from: tomlString)
 
 (toml["Person"] as? [String: String])?["firstName"] // Optional("Elon")
 ```
