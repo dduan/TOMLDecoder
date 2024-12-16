@@ -11,6 +11,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(name: "compliance", dependencies: ["TOMLDecoder"]),
+        .executableTarget(name: "Deserializer2"),
         .target(name: "TOMLDecoder", dependencies: ["Deserializer"]),
         .target(name: "Deserializer"),
         .testTarget(name: "TOMLDecoderTests", dependencies: ["TOMLDecoder"]),
