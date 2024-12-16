@@ -1872,7 +1872,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
     var headersSeen = Set<String>()
 
     func insert(
-        table: TOMLTable,
+        table: inout TOMLTable,
         reference: String,
         header: Array<Traced<String>>.SubSequence,
         key: Array<Traced<String>> = [],
@@ -1881,7 +1881,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
         value: Any,
         isArrayTable: Bool = false,
         isTable: Bool = false
-    ) throws -> TOMLTable {
+    ) throws {
         let keys = header + key
         assert(!keys.isEmpty)
         let keysDescription = keys.map { $0.value }.joined(separator: ".")
@@ -1904,16 +1904,16 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 )
             )
         }
-        var mutable = table
         switch (keys.count, table[key.value]) {
         case (1, nil):
-            mutable[key.value] = value
+            table[key.value] = value
             if context.isEmpty && isTable {
                 headersSeen.insert(keysDescription)
             }
         case (_, nil):
-            mutable[key.value] = try insert(
-                table: TOMLTable(),
+            var newTable = TOMLTable()
+            try insert(
+                table: &newTable,
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? headerDescription,
@@ -1922,20 +1922,21 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
+            table[key.value] = newTable
             if context.isEmpty && isTable {
                 headersSeen.insert(keysDescription)
             }
         case (1, var existing as TOMLArrayTable) where isArrayTable && !existing.storage.isEmpty:
             existing.storage.append(TOMLTable())
-            mutable[key.value] = existing
+            table[key.value] = existing
 
-        case (_, let existing as TOMLTable) where keys.count > 1:
+        case (_, var existing as TOMLTable) where keys.count > 1:
             if !existing.isMutable {
                 throw DeserializationError.structural(.init(reference, key.index, "Cannot mutate inline table"))
             }
 
-            mutable[key.value] = try insert(
-                table: existing,
+            try insert(
+                table: &existing,
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? headerDescription,
@@ -1944,6 +1945,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
+            table[key.value] = existing
         case (1, _ as TOMLTable) where isTable && context.isEmpty:
             if headersSeen.contains(keysDescription) {
                 throw DeserializationError.conflictingValue(
@@ -1954,11 +1956,9 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                     )
                 )
             }
-            return table
-        case (_, let existing as TOMLArrayTable) where keys.count > 1:
-            var mutableArray = existing
-            mutableArray[mutableArray.storage.count - 1] = try insert(
-                table: mutableArray[mutableArray.storage.count - 1],
+        case (_, var existing as TOMLArrayTable) where keys.count > 1:
+            try insert(
+                table: &existing[existing.storage.count - 1],
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? keysDescription,
@@ -1967,11 +1967,10 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
-            mutable[key.value] = mutableArray
-        case (_, let existing as TOMLArrayTable) where keys.count > 1:
-            var mutableArray = existing
-            mutableArray[mutableArray.storage.count - 1] = try insert(
-                table: mutableArray[mutableArray.storage.count - 1],
+            table[key.value] = existing
+        case (_, var existing as TOMLArrayTable) where keys.count > 1:
+            try insert(
+                table: &existing[existing.storage.count - 1],
                 reference: reference,
                 header: keys.dropFirst(),
                 originalKeyDescription: originalKeyDescription ?? keysDescription,
@@ -1980,7 +1979,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isArrayTable: isArrayTable,
                 isTable: isTable
             )
-            mutable[key.value] = mutableArray
+            table[key.value] = existing
         case (_, let .some(existing)):
             let path = context.isEmpty ? "\(key.value)" : "\(context.joined(separator: ".")).\(key.value)"
             throw DeserializationError.conflictingValue(
@@ -1991,9 +1990,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 )
             )
         }
-
-        return mutable
     }
+
     for entry in entries {
         switch entry {
         case .error(let index, let reason):
@@ -2002,8 +2000,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
             errors.append(DeserializationError.value(.init(referenceInput, index, reason.description)))
         case .keyValue(let pair):
             do {
-                result = try insert(
-                    table: result,
+                try insert(
+                    table: &result,
                     reference: referenceInput,
                     header: context[...],
                     key: pair.key,
@@ -2015,8 +2013,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
             }
         case .table(let tableKey):
             do {
-                result = try insert(
-                    table: result,
+                try insert(
+                    table: &result,
                     reference: referenceInput,
                     header: tableKey[...],
                     context: [],
@@ -2030,8 +2028,8 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
             context = tableKey
         case .arrayTable(let arrayTableKey):
             do {
-                result = try insert(
-                    table: result,
+                try insert(
+                    table: &result,
                     reference: referenceInput,
                     header: arrayTableKey[...],
                     context: [],
