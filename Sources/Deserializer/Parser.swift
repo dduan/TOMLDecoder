@@ -1347,7 +1347,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         return .some(nil)
     }
 
-    let isLeapYear = year % 4 == 0 && year % 100 != 0
+    let isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
     if (month == 3 || month == 6 || month == 9 || month == 11) && day > 30 ||
         month == 2 && !isLeapYear && day > 28 ||
         month == 2 && isLeapYear && day > 29 ||
