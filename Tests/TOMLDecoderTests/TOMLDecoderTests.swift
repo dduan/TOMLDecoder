@@ -303,4 +303,35 @@ final class TOMLDecoderTests: XCTestCase {
 
         XCTAssertEqual(result, expectation)
     }
+
+    func testSuperDecoder() throws {
+        class Player: Codable {
+            let id: String
+            let health: Int
+        }
+
+        final class LocalPlayer: Player {
+            let ip: String
+
+            private enum CodingKeys: String, CodingKey {
+                case ip
+            }
+
+            required init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.ip = try container.decode(String.self, forKey: .ip)
+                let superDecoder = try container.superDecoder()
+                try super.init(from: superDecoder)
+            }
+        }
+
+        let toml = """
+        id = "abc"
+        health = 123
+        ip = "127.0.0.1"
+        """
+
+        let decoder = TOMLDecoder()
+        let result = try decoder.decode(LocalPlayer.self, from: toml)
+    }
 }
