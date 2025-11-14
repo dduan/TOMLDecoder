@@ -1,3 +1,0 @@
-bin1 = -0b11010110 # non decimal integers are only for non negative
-oct1 = 0o_1
-hex3 = 0xdeadbeeg

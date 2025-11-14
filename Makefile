@@ -5,6 +5,7 @@ export LC_CTYPE     = en_US.UTF-8
 .DEFAULT_GOAL := build
 
 build:
+	@Scripts/gyb
 	@swift build -c release -Xswiftc -warnings-as-errors > /dev/null
 
 test-SwiftPM:

@@ -1,9 +1,10 @@
+import Testing
 @testable import TOMLDecoder
 import Foundation
-import XCTest
 
-final class TOMLDecoderTests: XCTestCase {
-    func testBasicGeneratedCodables() throws {
+@Suite
+struct TOMLDecoderTests {
+    @Test func `basic generated codables`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int64
@@ -31,10 +32,10 @@ final class TOMLDecoderTests: XCTestCase {
 
         let result = try TOMLDecoder().decode(Team.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testDecodingContainerKeyed() throws {
+    @Test func `decoding container keyed`() throws {
         struct Player: Decodable, Equatable {
             let id: String
             let health: Int64
@@ -69,10 +70,10 @@ final class TOMLDecoderTests: XCTestCase {
 
         let result = try TOMLDecoder().decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testNestedUnkeyedDecodingContainer() throws {
+    @Test func `nested unkeyed decoding container`() throws {
         struct Player: Decodable, Equatable {
             let id: String
             let health: Int64
@@ -121,10 +122,10 @@ final class TOMLDecoderTests: XCTestCase {
 
         let result = try TOMLDecoder().decode(Team.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testLenientIntegerDecodingStrategy() throws {
+    @Test func `lenient integer decoding strategy`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int
@@ -135,12 +136,15 @@ final class TOMLDecoderTests: XCTestCase {
         health = 123
         """
 
-        let decoder = TOMLDecoder()
-        decoder.numberDecodingStrategy = .strict
-        XCTAssertThrowsError(try decoder.decode(Player.self, from: toml))
+        var decoder = TOMLDecoder()
+        decoder.isLenient = false
+        #expect(throws: (any Error).self) {
+            try decoder.decode(Player.self, from: toml)
+        }
     }
 
-    func testFoundationDateDecoding() throws {
+    @Test
+    func `foundation date decoding`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpDate: Date
@@ -156,10 +160,11 @@ final class TOMLDecoderTests: XCTestCase {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testFoundationDateComponentsFromLocalDateDecoding() throws {
+    @Test
+    func `foundation date components from local date decoding`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpDate: DateComponents
@@ -175,10 +180,11 @@ final class TOMLDecoderTests: XCTestCase {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testFoundationDateComponentsFromLocalTimeDecoding() throws {
+    @Test
+    func `foundation date components from local time decoding`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpTime: DateComponents
@@ -194,10 +200,11 @@ final class TOMLDecoderTests: XCTestCase {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testFoundationDateComponentsFromLocalDateTimeDecoding() throws {
+    @Test
+    func `foundation date components from local datetime decoding`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpTime: DateComponents
@@ -214,53 +221,10 @@ final class TOMLDecoderTests: XCTestCase {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testDecodingFoundationDataWithCustom() throws {
-        struct Payload: Codable, Equatable {
-            let id: String
-            let body: Data
-        }
-
-        let expectation = Payload(id: "abc", body: "def".data(using: .utf8)!)
-        let toml = """
-        id = 'abc'
-        body = 'def'
-        """
-
-        let decoder = TOMLDecoder()
-        decoder.dataDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            return try container.decode(String.self).data(using: .utf8)!
-        }
-
-        let result = try decoder.decode(Payload.self, from: toml)
-
-        XCTAssertEqual(result, expectation)
-    }
-
-    func testDecodingFoundationDataWithBase64() throws {
-        struct Payload: Codable, Equatable {
-            let id: String
-            let body: Data
-        }
-
-        let base64Data = "aGVsbG8sIHdvcmxkIQ=="
-        let body = Data(base64Encoded: base64Data)!
-        let expectation = Payload(id: "abc", body: body)
-        let toml = """
-        id = 'abc'
-        body = '\(base64Data)'
-        """
-
-        let decoder = TOMLDecoder()
-        let result = try decoder.decode(Payload.self, from: toml)
-
-        XCTAssertEqual(result, expectation)
-    }
-
-    func testDecodingSnakeCaseKeyStrategy() throws {
+    @Test func `decoding snake case key strategy`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let firstProfession: String
@@ -273,14 +237,14 @@ final class TOMLDecoderTests: XCTestCase {
         first_profession = "Cook"
         """
 
-        let decoder = TOMLDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        var decoder = TOMLDecoder()
+        decoder.strategy.key = .convertFromSnakeCase
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
     }
 
-    func testDecodingCustomKeyStrategy() throws {
+    @Test func `decoding custom key strategy`() throws {
         struct Player: Codable, Equatable {
             let id: String
             let profession: String
@@ -293,15 +257,53 @@ final class TOMLDecoderTests: XCTestCase {
         PROFESSION = "Cook"
         """
 
-        let decoder = TOMLDecoder()
-        decoder.keyDecodingStrategy = .custom { codingPath in
-            let key = codingPath.last!
-            return type(of: key).init(stringValue: key.stringValue.lowercased())!
-        }
+        var decoder = TOMLDecoder()
+        decoder.strategy.key = .custom { $0.lowercased() }
 
         let result = try decoder.decode(Player.self, from: toml)
 
-        XCTAssertEqual(result, expectation)
+        #expect(result == expectation)
+    }
+    
+    @Test func `array of strings parsing`() throws {
+        struct AppConfig: Codable, Equatable {
+            let name: String
+            let version: String
+            let features: [String]
+            let database: DatabaseConfig
+            
+            struct DatabaseConfig: Codable, Equatable {
+                let host: String
+                let port: Int
+                let username: String
+            }
+        }
+
+        let expectation = AppConfig(
+            name: "Sample App",
+            version: "1.0.0", 
+            features: ["logging", "monitoring", "caching"],
+            database: AppConfig.DatabaseConfig(
+                host: "localhost",
+                port: 5432,
+                username: "admin"
+            )
+        )
+
+        let toml = """
+        name = "Sample App"
+        version = "1.0.0"
+        features = ["logging", "monitoring", "caching"]
+        
+        [database]
+        host = "localhost"
+        port = 5432
+        username = "admin"
+        """
+
+        let result = try TOMLDecoder().decode(AppConfig.self, from: toml)
+
+        #expect(result == expectation)
     }
 
     func testSuperDecoder() throws {

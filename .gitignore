@@ -8,3 +8,6 @@ tmp
 /bazel-*
 MODULE.bazel.lock
 /.vscode
+.claude
+tmp
+Docs

@@ -12,7 +12,10 @@ let package = Package(
     targets: [
         .executableTarget(name: "compliance", dependencies: ["TOMLDecoder"]),
         .target(
-            name: "TOMLDecoder"
+            name: "TOMLDecoder",
+            exclude: [
+                "gyb",
+            ]
         ),
         .target(
             name: "ProlepticGregorianTestHelpers",
@@ -26,9 +29,7 @@ let package = Package(
             ],
             exclude: [
                 "invalid_fixtures",
-                "invalid_fixtures_",
                 "valid_fixtures",
-                "valid_fixtures_",
             ]
         ),
     ],

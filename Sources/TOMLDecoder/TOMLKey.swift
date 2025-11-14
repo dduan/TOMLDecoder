@@ -1,26 +1,33 @@
-struct TOMLKey : CodingKey {
-    var stringValue: String
-    var intValue: Int?
+enum TOMLKey: CodingKey {
+    case string(String)
+    case int(Int)
+    case `super`
 
-    init?(stringValue: String) {
-        self.stringValue = stringValue
-        self.intValue = nil
+    init(stringValue: String) {
+        self = .string(stringValue)
     }
 
-    init?(intValue: Int) {
-        self.stringValue = "\(intValue)"
-        self.intValue = intValue
+    init(intValue: Int) {
+        self = .int(intValue)
     }
 
-    init(stringValue: String, intValue: Int?) {
-        self.stringValue = stringValue
-        self.intValue = intValue
+    var stringValue: String {
+        switch self {
+        case .string(let string):
+            return string
+        case .int(let int):
+            return "Index \(int)"
+        case .`super`:
+            return "super"
+        }
     }
 
-    init(index: Int) {
-        self.stringValue = "Index \(index)"
-        self.intValue = index
+    var intValue: Int? {
+        switch self {
+        case .int(let int):
+            return int
+        default:
+            return nil
+        }
     }
-
-    static let `super` = TOMLKey(stringValue: "super")!
 }

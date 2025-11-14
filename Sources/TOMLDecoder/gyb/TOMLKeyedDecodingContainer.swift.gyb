@@ -1,0 +1,250 @@
+%{
+# gyb variables available: `__file__` gives the template’s path.
+from pathlib import Path
+template_name = Path(__file__).name
+generated_file = template_name[:-4] if template_name.endswith('.gyb') else template_name
+}%
+//  WARNING: This file is generated from ${template_name}
+//  Do not edit ${generated_file} directly.
+
+import Foundation
+
+struct TOMLKeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtocol {
+    private let decoder: _TOMLDecoder
+    private let table: TOMLTable
+
+    var codingPath: [CodingKey] {
+        self.decoder.codingPath
+    }
+
+    init(referencing decoder: _TOMLDecoder, wrapping table: TOMLTable) {
+        self.decoder = decoder
+        self.table = table
+    }
+
+    var allKeys: [Key] {
+        self.table.allKeys.compactMap { Key(stringValue: $0) }
+    }
+
+    func contains(_ key: Key) -> Bool {
+        self.table.contains(key: key.stringValue)
+    }
+
+    func decodeNil(forKey key: Key) throws -> Bool {
+        false
+    }
+
+    func decode(_ type: Double.Type, forKey key: Key) throws -> Double {
+        do {
+            return try self.table.float(forKey: key.stringValue)
+        } catch let floatError {
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self, forKey: key)
+                return try Double(from: offsetDateTime, strategy: self.decoder.strategy.offsetDateTime)
+            } catch let error as DecodingError {
+                throw error
+            } catch {
+                throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(floatError)", underlyingError: floatError))
+            }
+        }
+    }
+
+    func decode(_ type: Float.Type, forKey key: Key) throws -> Float {
+        if !self.decoder.isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: self.codingPath + [key],
+                debugDescription: "Use Double or lenient decoding strategy."
+            ))
+        }
+        do {
+            return Float(try decode(Double.self, forKey: key))
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+    %{
+    int_types = ["Int", "Int8", "Int16", "Int32", "UInt", "UInt8", "UInt16", "UInt32", "UInt64"]
+    }%
+    % for int_type in int_types:
+
+    func decode(_ type: ${int_type}.Type, forKey key: Key) throws -> ${int_type} {
+        if !self.decoder.isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: self.codingPath + [key],
+                debugDescription: "Use Int64 or lenient decoding strategy."
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self, forKey: key)
+            guard let result = ${int_type}(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: self.codingPath + [key], debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+    % end
+    %{
+    native_types = [("Int64", "integer"), ("String", "string"), ("Bool", "bool")]
+    datetime_types = [("OffsetDateTime", "offsetDateTime"), ("LocalDateTime", "localDateTime"), ("LocalDate", "localDate"), ("LocalTime", "localTime")]
+    }%
+    % for type in native_types + datetime_types:
+    func decode(_ type: ${type[0]}.Type, forKey key: Key) throws -> ${type[0]} {
+        do {
+            return try self.table.${type[1]}(forKey: key.stringValue)
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+    % end
+
+    func decode(_ type: Date.Type, forKey key: Key) throws -> Date {
+        if !self.decoder.isLenient {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "No date associated with key \(key). Use lenient decoding strategy."))
+        }
+
+        switch self.decoder.strategy.offsetDateTime {
+        case .intervalSince1970:
+            let float = try decode(Double.self, forKey: key)
+            return Date(timeIntervalSince1970: float)
+        case .intervalSince2001:
+            let float = try decode(Double.self, forKey: key)
+            return Date(timeIntervalSinceReferenceDate: float)
+        case .dateFromGregorianCalendar:
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self, forKey: key)
+                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
+            } catch {
+                throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        case .dateFromCalendar(let identifier):
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self, forKey: key)
+                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: identifier))
+            } catch {
+                throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        case .dateFromProlepticGregorianCalendar:
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self, forKey: key)
+                return Date(timeIntervalSinceReferenceDate: offsetDateTime.timeIntervalSince2001)
+            } catch {
+                throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        }
+    }
+
+    func decode(_ type: DateComponents.Type, forKey key: Key) throws -> DateComponents {
+        if !self.decoder.isLenient {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "No date components associated with key \(key)."))
+        }
+
+        let datetimeComponents = try self.table.datetimeComponents(forKey: key.stringValue)
+        var components = DateComponents()
+        if let date = datetimeComponents.date {
+            components.year = Int(date.year)
+            components.month = Int(date.month)
+            components.day = Int(date.day)
+        }
+        if let time = datetimeComponents.time {
+            components.hour = Int(time.hour)
+            components.minute = Int(time.minute)
+            components.second = Int(time.second)
+        }
+        if let offset = datetimeComponents.offset {
+            components.timeZone = TimeZone(secondsFromGMT: Int(offset) * 60)
+        }
+        return components
+    }
+
+    func decode<T>(_ type: T.Type, forKey key: Key) throws -> T where T: Decodable {
+        %{
+        # Combine types that have specific decode methods
+        all_supported_types = (
+            # Native and datetime types from the lists above
+            [(t[0], t[0]) for t in native_types + datetime_types] +
+            # Integer types that are generated above  
+            [(t, t) for t in int_types] +
+            # Special types with custom decode methods (hardcoded)
+            [("Date", "Date"), ("DateComponents", "DateComponents"), ("Float", "Float"), ("Double", "Double")]
+        )
+        }%
+        // Handle types that have direct support
+        % for i, (type_name, decode_type) in enumerate(all_supported_types):
+        ${"if" if i == 0 else "} else if"} type == ${type_name}.self {
+            return try decode(${decode_type}.self, forKey: key) as! T
+        % end
+        }
+
+        // For complex types, we need to create a nested decoder
+        var nestedCodingPath = self.codingPath
+        nestedCodingPath.append(key)
+
+        // Try to get the nested value
+        if self.table.contains(key: key.stringValue) {
+            // Check if it's an array or table
+            if let nestedArray = try? self.table.array(forKey: key.stringValue) {
+                let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+                return try T(from: nestedDecoder)
+            } else if let nestedTable = try? self.table.table(forKey: key.stringValue) {
+                let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+                return try T(from: nestedDecoder)
+            }
+        }
+
+        throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "No value associated with key \(key)."))
+    }
+
+    func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+        do {
+            let nestedTable = try self.table.table(forKey: key.stringValue)
+            var nestedCodingPath = self.codingPath
+            nestedCodingPath.append(key)
+            let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+
+            let container = TOMLKeyedDecodingContainer<NestedKey>(referencing: nestedDecoder, wrapping: nestedTable)
+            return KeyedDecodingContainer(container)
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+
+    func nestedUnkeyedContainer(forKey key: Key) throws -> UnkeyedDecodingContainer {
+        do {
+            let nestedArray = try self.table.array(forKey: key.stringValue)
+            var nestedCodingPath = self.codingPath
+            nestedCodingPath.append(key)
+            let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+
+            return TOMLUnkeyedDecodingContainer(referencing: nestedDecoder, wrapping: nestedArray)
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+
+    private func _superDecoder(forKey key: CodingKey) throws -> Decoder {
+        var nestedCodingPath = self.codingPath
+        nestedCodingPath.append(key)
+
+        if let nestedTable = try? self.table.table(forKey: key.stringValue) {
+            return _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        } else if let nestedArray = try? self.table.array(forKey: key.stringValue) {
+            return _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        } else {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(
+                codingPath: self.codingPath,
+                debugDescription: "No value found for key \(key)"
+            ))
+        }
+    }
+
+    func superDecoder() throws -> Decoder {
+        return try self._superDecoder(forKey: TOMLKey.super)
+    }
+
+    func superDecoder(forKey key: Key) throws -> Decoder {
+        return try self._superDecoder(forKey: key)
+    }
+}
