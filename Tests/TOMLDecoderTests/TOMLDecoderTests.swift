@@ -332,6 +332,6 @@ final class TOMLDecoderTests: XCTestCase {
         """
 
         let decoder = TOMLDecoder()
-        let result = try decoder.decode(LocalPlayer.self, from: toml)
+        _ = try decoder.decode(LocalPlayer.self, from: toml)
     }
 }
