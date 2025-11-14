@@ -303,8 +303,7 @@ struct TOMLKeyedDecodingContainer<K : CodingKey> : KeyedDecodingContainerProtoco
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
 
-        let value: Any = self.container[key.stringValue]! // ?? NSNull() TODO: huh?
-        return TOMLDecoderImpl(referencing: value, at: self.decoder.codingPath, options: self.decoder.options)
+        return TOMLDecoderImpl(referencing: container, at: self.decoder.codingPath, options: self.decoder.options)
     }
 
 
