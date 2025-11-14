@@ -1,5 +1,6 @@
 import TOMLDecoder
 import XCTest
+import Testing
 
 final class ErrorTests: XCTestCase {
     func testSynchronization() {
