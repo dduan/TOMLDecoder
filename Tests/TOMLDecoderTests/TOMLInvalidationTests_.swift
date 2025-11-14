@@ -13,7 +13,7 @@ final class TOMLInvalidationTests_: XCTestCase {
         (
             (#filePath.first == "/" ? [""] : [])
                 + #filePath.split(separator: kSeparator).dropLast()
-                + ["invalid_fixtures"]
+                + ["invalid_fixtures_"]
         )
             .joined(separator: "\(kSeparator)")
     }
