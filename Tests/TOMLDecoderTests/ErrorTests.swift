@@ -1,4 +1,4 @@
-import Deserializer
+import TOMLDecoder
 import XCTest
 
 final class ErrorTests: XCTestCase {

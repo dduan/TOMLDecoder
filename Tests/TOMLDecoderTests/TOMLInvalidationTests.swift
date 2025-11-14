@@ -1,5 +1,5 @@
 import XCTest
-import Deserializer
+import TOMLDecoder
 import Foundation
 
 #if os(Windows)
