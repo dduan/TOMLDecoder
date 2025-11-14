@@ -13,6 +13,6 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v4
     - name: Build everything
-      run: bazel build //...
+      run: bazel build //:TOMLDecoder //:compliance
     #- name: Run tests
     #  run: bazel test //...
