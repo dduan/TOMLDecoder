@@ -1,5 +1,12 @@
 ## Development
 
+## 0.3.2
+
+- Improved runtime performance for decoding by using less containers while
+  assembling decoded values (#65)
+- Fixed a leep year calculation bug (#66)
+- Fixed .superDecoder (#68)
+
 ## 0.3.1
 
 - Fixed a bug where extending table via dotted key was not allowed (#54)
