@@ -9,7 +9,7 @@ struct RawKeyValuePair: Equatable {
     let value: TOMLValue
 }
 
-struct KeyValuePair: Equatable {
+struct _KeyValuePair: Equatable {
     let key: TOMLValue
     let value: TOMLValue
 }
@@ -64,20 +64,20 @@ extension TopLevel.Reason: CustomStringConvertible {
 /// Explicitly declared array table. This is distinct from a array that happens
 /// to have tables.
 struct TOMLArrayTable {
-    var storage: [TOMLTable]
+    var storage: [_TOMLTable]
 
-    subscript(_ index: Int) -> TOMLTable {
+    subscript(_ index: Int) -> _TOMLTable {
         get { storage[index] }
         set { storage[index] = newValue }
     }
 
-    init(storage: [TOMLTable] = []) {
+    init(storage: [_TOMLTable] = []) {
         self.storage = storage
     }
 }
 
 func stripInternal(_ value: Any) -> Any {
-    if let valueTable = value as? TOMLTable {
+    if let valueTable = value as? _TOMLTable {
         var result = [String: Any]()
         for (key, value) in valueTable.storage {
             result[key] = stripInternal(value)
@@ -91,7 +91,7 @@ func stripInternal(_ value: Any) -> Any {
         return value
     }
 }
-struct TOMLTable {
+struct _TOMLTable {
     var isMutable: Bool
     var storage: [String: Any]
 
@@ -248,7 +248,7 @@ func unquotedKey(_ input: inout Substring) -> String? {
     return String(utf8[utf8.startIndex ..< index])
 }
 
-enum Constants {
+enum _Constants {
     static let backslashScalar = "\\".unicodeScalars.first!
     static let lfScalar = "\n".unicodeScalars
     static let crlfScalar = "\r\n".unicodeScalars
@@ -310,7 +310,7 @@ func isBasicUnescapedChar(_ c: UnicodeScalar) -> Bool {
 
 func escaped(_ index: inout Substring.UnicodeScalarView.Index, _ input: Substring.UnicodeScalarView) -> UnicodeScalar?? {
     let originalIndex = index
-    guard input[index] == Constants.backslashScalar else {
+    guard input[index] == _Constants.backslashScalar else {
         return nil
     }
 
@@ -326,9 +326,9 @@ func escaped(_ index: inout Substring.UnicodeScalarView.Index, _ input: Substrin
     case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
     case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
     case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
-    case Constants.lowercaseUScalarValue:
+    case _Constants.lowercaseUScalarValue:
         is4Digit = true
-    case Constants.uppercaseUScalarValue:
+    case _Constants.uppercaseUScalarValue:
         is4Digit = false
     case 0x20, 0x0A, 0x0D, 0x09:
         index = originalIndex
@@ -375,7 +375,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
     var result = [UTF32.CodeUnit]()
     var index = scalars.startIndex
     var hasEscaped = false
-    guard scalars.first == Constants.doubleQuoteScalar else {
+    guard scalars.first == _Constants.doubleQuoteScalar else {
         return nil
     }
 
@@ -395,7 +395,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
             break
         }
 
-        if c == Constants.doubleQuoteScalar {
+        if c == _Constants.doubleQuoteScalar {
             let contentEnd = index
             scalars.formIndex(after: &index)
             input = Substring(scalars[index...])
@@ -415,7 +415,7 @@ func basicString(_ input: inout Substring) -> TOMLValue? {
     return .error(input.startIndex, .basicStringMissingClosing)
 }
 
-func toTimestamp(year: Int, month: Int, day: Int, hour: Int, minute: Int, seconds: Int, nanoseconds: Int, offsetInSeconds: Int) -> Double {
+func _toTimestamp(year: Int, month: Int, day: Int, hour: Int, minute: Int, seconds: Int, nanoseconds: Int, offsetInSeconds: Int) -> Double {
     var year = year
     year -= month <= 2 ? 1 : 0
     let era = (year >= 0 ? year : year - 399) / 400
@@ -450,7 +450,7 @@ func isLiteralChar(_ c: UnicodeScalar) -> Bool {
 func literalString(_ input: inout Substring) -> TOMLValue? {
     let scalars = input.unicodeScalars
     var index = scalars.startIndex
-    guard scalars.first == Constants.singleQuoteScalar else {
+    guard scalars.first == _Constants.singleQuoteScalar else {
         return nil
     }
 
@@ -459,7 +459,7 @@ func literalString(_ input: inout Substring) -> TOMLValue? {
     while index < input.endIndex {
         let c = scalars[index]
 
-        if c == Constants.singleQuoteScalar {
+        if c == _Constants.singleQuoteScalar {
             let bodyEndIndex = index
             scalars.formIndex(after: &index)
             input = Substring(scalars[index...])
@@ -481,11 +481,11 @@ func literalString(_ input: inout Substring) -> TOMLValue? {
 func simpleKey(_ input: inout Substring) -> TOMLValue? {
     whitespace(&input)
     let utf8 = input.utf8
-    if utf8.first == Constants.singleQuoteUTF8 {
+    if utf8.first == _Constants.singleQuoteUTF8 {
         return literalString(&input)
     }
 
-    if utf8.first == Constants.doubleQuoteUTF8 {
+    if utf8.first == _Constants.doubleQuoteUTF8 {
         return basicString(&input)
     }
 
@@ -524,14 +524,14 @@ func key(_ input: inout Substring) -> TOMLValue? {
 
 func boolean(_ input: inout Substring) -> TOMLValue? {
     var utf8 = input.utf8
-    if utf8.starts(with: Constants.trueUTF8Sequence) {
+    if utf8.starts(with: _Constants.trueUTF8Sequence) {
         utf8.removeFirst(4)
         input = Substring(utf8)
 
         return .boolean(true)
     }
 
-    if utf8.starts(with: Constants.falseUTF8Sequence) {
+    if utf8.starts(with: _Constants.falseUTF8Sequence) {
         utf8.removeFirst(5)
         input = Substring(utf8)
 
@@ -545,15 +545,15 @@ func decIntTextUTF8(_ utf8: inout Substring.UTF8View, afterDec: Bool = false) ->
     var index = utf8.startIndex
     var result = [UTF8.CodeUnit]()
 
-    if utf8.first == Constants.plusUTF8 || utf8.first == Constants.minusUTF8 {
+    if utf8.first == _Constants.plusUTF8 || utf8.first == _Constants.minusUTF8 {
         result.append(utf8.first!)
         utf8.formIndex(after: &index)
     }
 
-    if !afterDec && index < utf8.endIndex && utf8[index] == Constants.zeroUTF8 {
+    if !afterDec && index < utf8.endIndex && utf8[index] == _Constants.zeroUTF8 {
         utf8.formIndex(after: &index)
         utf8 = utf8[index...]
-        result.append(Constants.zeroUTF8)
+        result.append(_Constants.zeroUTF8)
         return result
     }
 
@@ -573,7 +573,7 @@ func decIntTextUTF8(_ utf8: inout Substring.UTF8View, afterDec: Bool = false) ->
         let value = utf8[index]
         if isDigit(value) {
             result.append(utf8[index])
-        } else if value == Constants.underscoreUTF8 { // TODO: report trailing '_' as value error
+        } else if value == _Constants.underscoreUTF8 { // TODO: report trailing '_' as value error
             utf8.formIndex(after: &index)
             if index >= utf8.endIndex || (utf8[index] < 0x30 || utf8[index] > 0x39) {
                 return nil
@@ -626,7 +626,7 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
     let utf8 = input.utf8
     var index = utf8.startIndex
     var body = [UTF8.CodeUnit]()
-    guard utf8.starts(with: Constants.hexPrefixUTF8Sequence) else {
+    guard utf8.starts(with: _Constants.hexPrefixUTF8Sequence) else {
         return nil
     }
 
@@ -638,7 +638,7 @@ func hexInt(_ input: inout Substring) -> TOMLValue? {
         if isHexDigit(c) {
             body.append(c)
             previousWasDigit = true
-        } else if c == Constants.underscoreUTF8 {
+        } else if c == _Constants.underscoreUTF8 {
             guard previousWasDigit else {
                 return TOMLValue.error(index, .invalidHexadecimal)
             }
@@ -674,7 +674,7 @@ func octInt(_ input: inout Substring) -> TOMLValue? {
     let utf8 = input.utf8
     var index = utf8.startIndex
     var body = [UTF8.CodeUnit]()
-    guard utf8.starts(with: Constants.octPrefixUTF8Sequence) else {
+    guard utf8.starts(with: _Constants.octPrefixUTF8Sequence) else {
         return nil
     }
 
@@ -687,7 +687,7 @@ func octInt(_ input: inout Substring) -> TOMLValue? {
         if isOctDigit(c) {
             body.append(c)
             previousWasDigit = true
-        } else if c == Constants.underscoreUTF8 {
+        } else if c == _Constants.underscoreUTF8 {
             guard previousWasDigit else {
                 return TOMLValue.error(index, .invalidOctal)
             }
@@ -723,7 +723,7 @@ func binInt(_ input: inout Substring) -> TOMLValue? {
     let utf8 = input.utf8
     var index = utf8.startIndex
     var body = [UTF8.CodeUnit]()
-    guard utf8.starts(with: Constants.binPrefixUTF8Sequence) else {
+    guard utf8.starts(with: _Constants.binPrefixUTF8Sequence) else {
         return nil
     }
 
@@ -736,7 +736,7 @@ func binInt(_ input: inout Substring) -> TOMLValue? {
         if isBinDigit(c) {
             body.append(c)
             previousWasDigit = true
-        } else if c == Constants.underscoreUTF8 {
+        } else if c == _Constants.underscoreUTF8 {
             guard previousWasDigit else {
                 return TOMLValue.error(index, .invalidBinary)
             }
@@ -775,20 +775,20 @@ func value(_ input: inout Substring) -> TOMLValue? {
     }
 
     switch first {
-    case Constants.doubleQuoteUTF8:
+    case _Constants.doubleQuoteUTF8:
         return multilineBasicString(&input) ?? basicString(&input)
-    case Constants.singleQuoteUTF8:
+    case _Constants.singleQuoteUTF8:
         return multilineLiteralString(&input) ?? literalString(&input)
-    case Constants.openBraceUTF8:
+    case _Constants.openBraceUTF8:
         return inlineTable(&input)
-    case Constants.openBracketUTF8:
+    case _Constants.openBracketUTF8:
         return array(&input)
     default:
         return dateTime(&input) ?? float(&input) ?? integer(&input) ?? boolean(&input)
     }
 }
 
-func keyValuePair(_ input: inout Substring) -> KeyValuePair? {
+func keyValuePair(_ input: inout Substring) -> _KeyValuePair? {
     let originalInput = input
     guard let key = key(&input) else {
         return nil
@@ -837,7 +837,7 @@ func inlineTableSep(_ input: inout Substring) -> Bool {
 }
 
 /// Returns: .inlineTable or .error
-func inlineTableKeyValues(_ input: inout Substring) -> [KeyValuePair]? {
+func inlineTableKeyValues(_ input: inout Substring) -> [_KeyValuePair]? {
     let originalInput = input
     guard let first = keyValuePair(&input) else {
         return nil
@@ -911,7 +911,7 @@ func zeroPrefixableInt(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
         let c = utf8[index]
         if isDigit(c) {
             result.append(c)
-        } else if c == Constants.underscoreUTF8 {
+        } else if c == _Constants.underscoreUTF8 {
             utf8.formIndex(after: &index)
             if index >= utf8.endIndex {
                 return nil
@@ -935,13 +935,13 @@ func zeroPrefixableInt(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
 
 func exp(_ utf8: inout Substring.UTF8View) -> [UTF8.CodeUnit]? {
     let originalInput = utf8
-    guard let first = utf8.first, first == Constants.lowerEUTF8 || first == Constants.upperEUTF8 else {
+    guard let first = utf8.first, first == _Constants.lowerEUTF8 || first == _Constants.upperEUTF8 else {
         return nil
     }
 
     var result = [first]
     utf8.removeFirst()
-    if let sign = utf8.first, (sign == Constants.plusUTF8 || sign == Constants.minusUTF8) {
+    if let sign = utf8.first, (sign == _Constants.plusUTF8 || sign == _Constants.minusUTF8) {
         result.append(sign)
         utf8.removeFirst()
     }
@@ -963,11 +963,11 @@ func normalFloat(_ input: inout Substring) -> TOMLValue? {
     if let exp = exp(&utf8) {
         result += exp
     } else {
-        guard utf8.first == Constants.periodUTF8 else {
+        guard utf8.first == _Constants.periodUTF8 else {
             return nil
         }
 
-        result.append(Constants.periodUTF8)
+        result.append(_Constants.periodUTF8)
         utf8.removeFirst()
         guard let frac = decIntTextUTF8(&utf8, afterDec: true) else {
             let location = input.startIndex
@@ -993,21 +993,21 @@ func float(_ input: inout Substring) -> TOMLValue? {
 
     var utf8 = input.utf8
     var sign = 1.0
-    if let first = utf8.first, (first == Constants.plusUTF8 || first == Constants.minusUTF8) {
-        if first == Constants.minusUTF8 {
+    if let first = utf8.first, (first == _Constants.plusUTF8 || first == _Constants.minusUTF8) {
+        if first == _Constants.minusUTF8 {
             sign = -1.0
         }
 
         utf8.removeFirst()
     }
 
-    if utf8.starts(with: Constants.nanUTF8Sequence) {
+    if utf8.starts(with: _Constants.nanUTF8Sequence) {
         utf8.removeFirst(3)
         input = Substring(utf8)
         return .float(Double.nan)
     }
 
-    if utf8.starts(with: Constants.infUTF8Sequence) {
+    if utf8.starts(with: _Constants.infUTF8Sequence) {
         utf8.removeFirst(3)
         input = Substring(utf8)
         return .float(sign * Double.infinity)
@@ -1018,7 +1018,7 @@ func float(_ input: inout Substring) -> TOMLValue? {
 
 func escapedScalar(_ index: inout Substring.UnicodeScalarView.Index, _ input: Substring.UnicodeScalarView) -> UnicodeScalar?? {
     let originalIndex = index
-    guard input[index] == Constants.backslashScalar else {
+    guard input[index] == _Constants.backslashScalar else {
         return nil
     }
 
@@ -1034,9 +1034,9 @@ func escapedScalar(_ index: inout Substring.UnicodeScalarView.Index, _ input: Su
     case 0x6E: result = UnicodeScalar(0x0A) // n    line feed       U+000A
     case 0x72: result = UnicodeScalar(0x0D) // r    carriage return U+000D
     case 0x74: result = UnicodeScalar(0x09) // t    tab             U+0009
-    case Constants.lowercaseUScalarValue:
+    case _Constants.lowercaseUScalarValue:
         is4Digit = true
-    case Constants.uppercaseUScalarValue:
+    case _Constants.uppercaseUScalarValue:
         is4Digit = false
     case 0x20, 0x0A, 0x0D, 0x09:
         index = originalIndex
@@ -1082,15 +1082,15 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     let scalars = input.unicodeScalars
     var index = scalars.startIndex
     var hasEscaped = false
-    guard scalars.starts(with: Constants.tripleDoubleQuoteScalar) else {
+    guard scalars.starts(with: _Constants.tripleDoubleQuoteScalar) else {
         return nil
     }
 
     index = scalars.index(index, offsetBy: 3)
 
-    if scalars[index...].starts(with: Constants.lfScalar) {
+    if scalars[index...].starts(with: _Constants.lfScalar) {
         scalars.formIndex(after: &index)
-    } else if scalars[index...].starts(with: Constants.crlfScalar) {
+    } else if scalars[index...].starts(with: _Constants.crlfScalar) {
         scalars.formIndex(after: &index)
         scalars.formIndex(after: &index)
     }
@@ -1103,10 +1103,10 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
     while index < input.endIndex {
         let c = scalars[index]
         if escapingNewline {
-            if scalars[index...].starts(with: Constants.crlfScalar) {
+            if scalars[index...].starts(with: _Constants.crlfScalar) {
                 input.formIndex(after: &index)
                 seenNewlineSinceEscapingStarted = true
-            } else if scalars[index...].starts(with: Constants.lfScalar) {
+            } else if scalars[index...].starts(with: _Constants.lfScalar) {
                 input.formIndex(after: &index)
                 seenNewlineSinceEscapingStarted = true
             } else if c.value == 0x20 || c.value == 0x0D || c.value == 0x09 {
@@ -1133,7 +1133,7 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             break
         }
 
-        if c == Constants.backslashScalar {
+        if c == _Constants.backslashScalar {
             input.formIndex(after: &index)
             escapingNewline = true
             hasEscaped = true
@@ -1142,12 +1142,12 @@ func multilineBasicString(_ input: inout Substring) -> TOMLValue? {
             continue
         }
 
-        if c == Constants.doubleQuoteScalar {
+        if c == _Constants.doubleQuoteScalar {
             let quotesStart = index
             var contentEnd = index
             var consecutiveQuotes = 0
 
-            while index < scalars.endIndex, scalars[index] == Constants.doubleQuoteScalar {
+            while index < scalars.endIndex, scalars[index] == _Constants.doubleQuoteScalar {
                 consecutiveQuotes += 1
                 scalars.formIndex(after: &index)
             }
@@ -1214,14 +1214,14 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
 
     let scalars = input.unicodeScalars
     var index = scalars.startIndex
-    guard scalars.starts(with: Constants.tripleSingleQuoteScalar) else {
+    guard scalars.starts(with: _Constants.tripleSingleQuoteScalar) else {
         return nil
     }
 
     index = scalars.index(index, offsetBy: 3)
-    if scalars[index...].starts(with: Constants.lfScalar) {
+    if scalars[index...].starts(with: _Constants.lfScalar) {
         scalars.formIndex(after: &index)
-    } else if scalars[index...].starts(with: Constants.crlfScalar) {
+    } else if scalars[index...].starts(with: _Constants.crlfScalar) {
         scalars.formIndex(after: &index)
         scalars.formIndex(after: &index)
     }
@@ -1233,9 +1233,9 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
         if escapingNewline {
             if c.value == 0x0A || c.value == 0x0D {
                 scalars.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.lfScalar) {
+            } else if scalars[index...].starts(with: _Constants.lfScalar) {
                 scalars.formIndex(after: &index)
-            } else if scalars[index...].starts(with: Constants.crlfScalar) {
+            } else if scalars[index...].starts(with: _Constants.crlfScalar) {
                 scalars.formIndex(after: &index)
                 scalars.formIndex(after: &index)
             } else {
@@ -1245,17 +1245,17 @@ func multilineLiteralString(_ input: inout Substring) -> TOMLValue? {
             continue
         }
 
-        if c == Constants.backslashScalar {
+        if c == _Constants.backslashScalar {
             scalars.formIndex(after: &index)
             escapingNewline = true
             continue
         }
 
-        if c == Constants.singleQuoteScalar {
+        if c == _Constants.singleQuoteScalar {
             var contentEnd = index
             var consecutiveQuotes = 0
 
-            while index < scalars.endIndex, scalars[index] == Constants.singleQuoteScalar {
+            while index < scalars.endIndex, scalars[index] == _Constants.singleQuoteScalar {
                 consecutiveQuotes += 1
                 scalars.formIndex(after: &index)
             }
@@ -1303,11 +1303,11 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
             return nil
         }
 
-        year = year * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        year = year * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
-    guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
+    guard index < utf8.endIndex, utf8[index] == _Constants.dashUTF8 else {
         return nil
     }
 
@@ -1319,7 +1319,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
             return nil
         }
 
-        month = month * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        month = month * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
@@ -1327,7 +1327,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
         return .some(nil)
     }
 
-    guard index < utf8.endIndex, utf8[index] == Constants.dashUTF8 else {
+    guard index < utf8.endIndex, utf8[index] == _Constants.dashUTF8 else {
         return nil
     }
 
@@ -1339,7 +1339,7 @@ func localDateUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int)?? {
             return nil
         }
 
-        day = day * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        day = day * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
@@ -1368,11 +1368,11 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
             return nil
         }
 
-        hour = hour * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        hour = hour * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
-    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+    guard index < utf8.endIndex, utf8[index] == _Constants.colonUTF8 else {
         return nil
     }
 
@@ -1385,12 +1385,12 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
             return nil
         }
 
-        minute = minute * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        minute = minute * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
 
-    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+    guard index < utf8.endIndex, utf8[index] == _Constants.colonUTF8 else {
         return nil
     }
 
@@ -1402,7 +1402,7 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
             return nil
         }
 
-        second = second * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        second = second * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
@@ -1410,11 +1410,11 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
         return .some(nil)
     }
 
-    if index < utf8.endIndex, utf8[index] == Constants.periodUTF8 {
+    if index < utf8.endIndex, utf8[index] == _Constants.periodUTF8 {
         utf8.formIndex(after: &index)
     }
 
-    var fractionText = [Constants.zeroUTF8, Constants.periodUTF8]
+    var fractionText = [_Constants.zeroUTF8, _Constants.periodUTF8]
     while index < utf8.endIndex, isDigit(utf8[index]) {
         fractionText.append(utf8[index])
         utf8.formIndex(after: &index)
@@ -1431,16 +1431,16 @@ func localTimeUTF8(_ utf8: inout Substring.UTF8View) -> (Int, Int, Int, Int?)?? 
 
 /// Returns: seconds from GMT
 func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
-    if utf8.first == Constants.upperZUTF8 || utf8.first == Constants.lowerZUTF8 {
+    if utf8.first == _Constants.upperZUTF8 || utf8.first == _Constants.lowerZUTF8 {
         utf8.removeFirst()
         return 0
     }
 
     var sign = 1
     switch utf8.first {
-    case Constants.plusUTF8:
+    case _Constants.plusUTF8:
         break
-    case Constants.minusUTF8:
+    case _Constants.minusUTF8:
         sign = -1
     default:
         return nil
@@ -1455,11 +1455,11 @@ func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
             return nil
         }
 
-        hour = hour * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        hour = hour * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
-    guard index < utf8.endIndex, utf8[index] == Constants.colonUTF8 else {
+    guard index < utf8.endIndex, utf8[index] == _Constants.colonUTF8 else {
         return nil
     }
 
@@ -1471,7 +1471,7 @@ func timeOffset(_ utf8: inout Substring.UTF8View) -> Int?? {
             return nil
         }
 
-        minute = minute * 10 + Int(utf8[index] - Constants.zeroUTF8)
+        minute = minute * 10 + Int(utf8[index] - _Constants.zeroUTF8)
         utf8.formIndex(after: &index)
     }
 
@@ -1493,7 +1493,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
     switch parsedDateParts {
     case .some(.some(let parsed)):
         dateParts = parsed
-        if (utf8.first == Constants.lowerTUTF8 || utf8.first == Constants.upperTUTF8 || utf8.first == Constants.spaceUTF8) {
+        if (utf8.first == _Constants.lowerTUTF8 || utf8.first == _Constants.upperTUTF8 || utf8.first == _Constants.spaceUTF8) {
             sep = utf8.removeFirst()
         }
     case .some(.none):
@@ -1513,7 +1513,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
         break
     }
 
-    if dateParts != nil && timeParts == nil && sep != nil && sep != Constants.spaceUTF8 {
+    if dateParts != nil && timeParts == nil && sep != nil && sep != _Constants.spaceUTF8 {
         input = originalInput
         return nil
     }
@@ -1544,7 +1544,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
             return nil
         }
 
-        let secs = toTimestamp(
+        let secs = _toTimestamp(
             year: dateParts.0,
             month: dateParts.1,
             day: dateParts.2,
@@ -1578,7 +1578,7 @@ func dateTime(_ input: inout Substring) -> TOMLValue? {
 
 func comment(_ input: inout Substring) throws -> Bool {
     let scalars = input.unicodeScalars
-    guard scalars.first == Constants.poundScalar else {
+    guard scalars.first == _Constants.poundScalar else {
         return false
     }
 
@@ -1606,12 +1606,12 @@ func newline(_ input: inout Substring) throws -> Bool {
 
     while index < utf8.endIndex {
         let c = utf8[index]
-        if c == Constants.lfUTF8 {
+        if c == _Constants.lfUTF8 {
           utf8.formIndex(after: &index)
           continue
-        } else if c == Constants.crUTF8 {
+        } else if c == _Constants.crUTF8 {
             let nextIndex = utf8.index(after: index)
-            if nextIndex < utf8.endIndex, utf8[nextIndex] == Constants.lfUTF8 {
+            if nextIndex < utf8.endIndex, utf8[nextIndex] == _Constants.lfUTF8 {
                 utf8.formIndex(after: &index)
                 utf8.formIndex(after: &index)
                 continue
@@ -1865,14 +1865,14 @@ extension TOMLValue {
     }
 }
 
-func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> TOMLTable {
-    var result = TOMLTable()
+func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> _TOMLTable {
+    var result = _TOMLTable()
     var context = [Traced<String>]()
     var errors = [Error]()
     var headersSeen = Set<String>()
 
     func insert(
-        table: inout TOMLTable,
+        table: inout _TOMLTable,
         reference: String,
         header: Array<Traced<String>>.SubSequence,
         key: Array<Traced<String>> = [],
@@ -1911,7 +1911,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 headersSeen.insert(keysDescription)
             }
         case (_, nil):
-            var newTable = TOMLTable()
+            var newTable = _TOMLTable()
             try insert(
                 table: &newTable,
                 reference: reference,
@@ -1927,10 +1927,10 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 headersSeen.insert(keysDescription)
             }
         case (1, var existing as TOMLArrayTable) where isArrayTable && !existing.storage.isEmpty:
-            existing.storage.append(TOMLTable())
+            existing.storage.append(_TOMLTable())
             table[key.value] = existing
 
-        case (_, var existing as TOMLTable) where keys.count > 1:
+        case (_, var existing as _TOMLTable) where keys.count > 1:
             if !existing.isMutable {
                 throw DeserializationError.structural(.init(reference, key.index, "Cannot mutate inline table"))
             }
@@ -1946,7 +1946,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                 isTable: isTable
             )
             table[key.value] = existing
-        case (1, _ as TOMLTable) where isTable && context.isEmpty:
+        case (1, _ as _TOMLTable) where isTable && context.isEmpty:
             if headersSeen.contains(keysDescription) {
                 throw DeserializationError.conflictingValue(
                     .init(
@@ -2018,7 +2018,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                     reference: referenceInput,
                     header: tableKey[...],
                     context: [],
-                    value: TOMLTable(),
+                    value: _TOMLTable(),
                     isTable: true
                 )
             } catch {
@@ -2033,7 +2033,7 @@ func assembleTable(from entries: [TopLevel], referenceInput: String) throws -> T
                     reference: referenceInput,
                     header: arrayTableKey[...],
                     context: [],
-                    value: TOMLArrayTable(storage: [TOMLTable()]),
+                    value: TOMLArrayTable(storage: [_TOMLTable()]),
                     isArrayTable: true
                 )
             } catch {
