@@ -19,7 +19,9 @@ let package = Package(
             dependencies: ["TOMLDecoder"],
             exclude: [
                 "invalid_fixtures",
+                "invalid_fixtures_",
                 "valid_fixtures",
+                "valid_fixtures_",
             ]
         ),
     ]

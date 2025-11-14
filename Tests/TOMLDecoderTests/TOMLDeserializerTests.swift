@@ -15,7 +15,7 @@ final class TOMLDeserializerTests: XCTestCase {
         (
             (#filePath.first == "/" ? [""] : [])
                 + #filePath.split(separator: kSeparator).dropLast()
-                + ["valid_fixtures"]
+                + ["valid_fixtures_"]
         )
             .joined(separator: "\(kSeparator)")
     }

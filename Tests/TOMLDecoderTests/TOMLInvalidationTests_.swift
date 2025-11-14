@@ -8,7 +8,7 @@ private let kSeparator: Character = "\\"
 private let kSeparator: Character = "/"
 #endif
 
-final class TOMLInvalidationTests: XCTestCase {
+final class TOMLInvalidationTests_: XCTestCase {
     private var directory: String {
         (
             (#filePath.first == "/" ? [""] : [])

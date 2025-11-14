@@ -2,10 +2,6 @@
 /.build
 /Packages
 xcuserdata
-Carthage
-TOMLDecoder.framework.zip
-Dependencies/NetTime
-Dependencies/TOMLDeserializer
 .swiftpm
 tmp
 /result
