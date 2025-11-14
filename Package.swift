@@ -12,11 +12,18 @@ let package = Package(
     targets: [
         .executableTarget(name: "compliance", dependencies: ["TOMLDecoder"]),
         .target(
-            name: "TOMLDecoder",
+            name: "TOMLDecoder"
+        ),
+        .target(
+            name: "ProlepticGregorianTestHelpers",
+            publicHeadersPath: "include"
         ),
         .testTarget(
             name: "TOMLDecoderTests",
-            dependencies: ["TOMLDecoder"],
+            dependencies: [
+                "TOMLDecoder",
+                "ProlepticGregorianTestHelpers",
+            ],
             exclude: [
                 "invalid_fixtures",
                 "invalid_fixtures_",
@@ -24,5 +31,6 @@ let package = Package(
                 "valid_fixtures_",
             ]
         ),
-    ]
+    ],
+    cxxLanguageStandard: .cxx20
 )

@@ -1,46 +1,18 @@
 import Foundation
 import TOMLDecoder
 import Testing
-import SQLite3
-
-enum EpochCalcError: Error {
-    case openFailed
-    case prepareFailed
-    case stepFailed
-    case columnNull
-}
+import ProlepticGregorianTestHelpers
 
 // The Foundation does not use a gregorian calendar for dates prior to the cutoff on 1582-10-04.
-// To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use a external system
-// like sqlite!
-func epochSecondsViaSQLite(
+// To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use the ProlepticGregorianTestHelpers module
+func epochSecondsViaProlepticHelper(
     year: Int, month: Int = 1, day: Int = 1,
     hour: Int = 0, minute: Int = 0, second: Int = 0
-) throws -> Int64 {
-    var db: OpaquePointer?
-    guard sqlite3_open(":memory:", &db) == SQLITE_OK else { throw EpochCalcError.openFailed }
-    defer { sqlite3_close(db) }
-
-    // Build an ISO-like UTC string. SQLite treats this as UTC (no TZ offset).
-    // Example: "0800-01-01 00:00:00"
-    let s = String(format: "%04d-%02d-%02d %02d:%02d:%02d",
-                   year, month, day, hour, minute, second)
-
-    // 2440587.5 is the Julian day number for 1970-01-01 00:00:00 UTC.
-    // Multiply the day difference by 86400 to get seconds.
-    let sql = """
-      SELECT CAST(ROUND( (julianday(?) - 2440587.5) * 86400.0 ) AS INTEGER);
-    """
-
-    var stmt: OpaquePointer?
-    guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { throw EpochCalcError.prepareFailed }
-    defer { sqlite3_finalize(stmt) }
-
-    sqlite3_bind_text(stmt, 1, s, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
-
-    guard sqlite3_step(stmt) == SQLITE_ROW else { throw EpochCalcError.stepFailed }
-    let v = sqlite3_column_int64(stmt, 0)
-    return v
+) -> Int64 {
+    return hh_proleptic_seconds_since_unix_epoch(
+        Int32(year), Int32(month), Int32(day),
+        Int32(hour), Int32(minute), Int32(second)
+    )
 }
 
 enum DateTimeType {
@@ -361,7 +333,7 @@ enum TOMLComplianceSupport {
             from: date!
         )
 
-        var seconds = Double(try! epochSecondsViaSQLite(
+        var seconds = Double(epochSecondsViaProlepticHelper(
             year: components.year!,
             month: components.month!,
             day: components.day!,
