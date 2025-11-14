@@ -13,16 +13,11 @@ swift_binary(
 swift_library(
     name = "TOMLDecoder",
     srcs = glob(["Sources/TOMLDecoder/**/*.swift"]),
-    deps = [
-        ":Deserializer",
+    data = [
+        ":valid_fixtures",
+        ":invalid_fixtures",
     ],
     visibility = ["//visibility:public"],
-)
-
-swift_library(
-    name = "Deserializer",
-    srcs = glob(["Sources/Deserializer/**/*.swift"]),
-    visibility = ["//visibility:private"],
 )
 
 swift_test(
@@ -32,27 +27,16 @@ swift_test(
     visibility = ["//visibility:private"],
 )
 
-swift_test(
-    name = "DeserializerTests",
-    srcs = glob(["Tests/DeserializerTests/**/*.swift"]),
-    deps = [":Deserializer"],
-    data = [
-        ":valid_fixtures",
-        ":invalid_fixtures",
-    ],
-    visibility = ["//visibility:private"],
-)
-
 copy_directory(
     name = "valid_fixtures",
-    src = "Tests/DeserializerTests/valid_fixtures",
-    out = "Tests/DeserializerTests/valid_fixtures",
+    src = "Tests/TOMLDecoderTests/valid_fixtures",
+    out = "Tests/TOMLDecoderTests/valid_fixtures",
     visibility = ["//visibility:private"],
 )
 
 copy_directory(
     name = "invalid_fixtures",
-    src = "Tests/DeserializerTests/invalid_fixtures",
-    out = "Tests/DeserializerTests/invalid_fixtures",
+    src = "Tests/TOMLDecoderTests/invalid_fixtures",
+    out = "Tests/TOMLDecoderTests/invalid_fixtures",
     visibility = ["//visibility:private"],
 )
