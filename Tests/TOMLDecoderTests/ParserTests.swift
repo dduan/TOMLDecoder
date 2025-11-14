@@ -1,4 +1,4 @@
-@testable import Deserializer
+@testable import TOMLDecoder
 import XCTest
 import Foundation
 

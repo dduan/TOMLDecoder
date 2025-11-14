@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 
 import PackageDescription
 
@@ -11,12 +11,12 @@ let package = Package(
     ],
     targets: [
         .executableTarget(name: "compliance", dependencies: ["TOMLDecoder"]),
-        .target(name: "TOMLDecoder", dependencies: ["Deserializer"]),
-        .target(name: "Deserializer"),
-        .testTarget(name: "TOMLDecoderTests", dependencies: ["TOMLDecoder"]),
+        .target(
+            name: "TOMLDecoder",
+        ),
         .testTarget(
-            name: "DeserializerTests",
-            dependencies: ["Deserializer"],
+            name: "TOMLDecoderTests",
+            dependencies: ["TOMLDecoder"],
             exclude: [
                 "invalid_fixtures",
                 "valid_fixtures",
