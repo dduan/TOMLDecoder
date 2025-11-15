@@ -315,10 +315,19 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
     var resultCodeUnits: [UTF8.CodeUnit] = []
     var consecutiveQuotes = 0
 
-    for codeUnit in source {
+    for index in source.indices {
+        let codeUnit = source[index]
         if codeUnit >= 0 && codeUnit <= 0x08 || codeUnit >= 0x0a && codeUnit <= 0x1f || codeUnit == 0x7f {
             if multiline && codeUnit == CodeUnits.lf {
                 // Allow LF in multiline literal strings
+            } else if multiline && codeUnit == CodeUnits.cr {
+                // Only allow CR if followed by LF (CRLF sequence)
+                let nextIndex = source.index(after: index)
+                if nextIndex < source.endIndex && source[nextIndex] == CodeUnits.lf {
+                    // Allow CRLF sequence - will be processed as separate characters
+                } else {
+                    throw TOMLError.invalidCharacter(codeUnit)
+                }
             } else {
                 throw TOMLError.invalidCharacter(codeUnit)
             }
@@ -369,8 +378,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
                     // Allow LF in multiline basic strings
                 } else if multiline && ch == CodeUnits.cr {
                     // Only allow CR if followed by LF (CRLF sequence)
-                    let nextIndex = source.index(after: index)
-                    if nextIndex < source.endIndex && source[nextIndex] == CodeUnits.lf {
+                    if index < source.endIndex && source[index] == CodeUnits.lf {
                         // Allow CRLF sequence - will be processed as separate characters
                     } else {
                         throw TOMLError.invalidCharacter(ch)

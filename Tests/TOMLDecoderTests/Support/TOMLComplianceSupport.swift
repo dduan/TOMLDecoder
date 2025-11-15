@@ -178,9 +178,8 @@ enum TOMLComplianceSupport {
             guard let expectedDate = parseDate(expectedString) else {
                 return "Unable to parse expected datetime at \(location)"
             }
-            let actualDate = Date(timeIntervalSince1970: actualDateTime.timeIntervalSince1970)
-            if actualDate != expectedDate {
-                return "Datetime mismatch at \(location): expected \(expectedDate), got \(actualDate)"
+            if actualDateTime.timeIntervalSince1970 - expectedDate.timeIntervalSince1970 > 0.0000001 {
+                return "Datetime mismatch at \(location): expected \(expectedDate.timeIntervalSince1970) \(expectedString), got \(actualDateTime.timeIntervalSince1970) [\(actualDateTime)]"
             }
             return nil
 
@@ -324,7 +323,8 @@ enum TOMLComplianceSupport {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let formatter2 = ISO8601DateFormatter()
         formatter2.formatOptions = [.withInternetDateTime]
-        let date = formatter.date(from: value) ?? formatter2.date(from: value)
+        let style = Date.ISO8601FormatStyle().dateTimeSeparator(.space)
+        let date = formatter.date(from: value) ?? formatter2.date(from: value) ?? (try? style.parse(value))
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 

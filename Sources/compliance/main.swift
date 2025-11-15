@@ -54,5 +54,5 @@ func translate(value: Any) -> Any {
 
 
 let json = try JSONSerialization.data(withJSONObject: translate(value: table))
-print(String(data: json, encoding: .utf8)!)
+    print(String(data: json, encoding: .utf8)!)
 }

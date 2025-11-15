@@ -20,11 +20,15 @@ int64_t hh_proleptic_seconds_since_unix_epoch(
     const std::chrono::day   d{static_cast<unsigned>(day)};
 
     const std::chrono::year_month_day ymd{y / m / d};
-
     const std::chrono::sys_days days{ymd};
 
-    const std::chrono::sys_seconds tp =
-        days + hours{hour} + minutes{minute} + seconds{second};
-
-    return tp.time_since_epoch().count(); // seconds since 1970-01-01T00:00:00Z
+    // WINDOWS FIX: Manually compute seconds to avoid chrono addition overflow
+    // Get days as 64-bit count and manually add time components
+    const int64_t days_count = days.time_since_epoch().count();
+    const int64_t total_seconds = days_count * 86400LL + 
+                                  static_cast<int64_t>(hour) * 3600LL +
+                                  static_cast<int64_t>(minute) * 60LL +
+                                  static_cast<int64_t>(second);
+    
+    return total_seconds;
 }
