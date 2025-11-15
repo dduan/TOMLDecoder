@@ -2,8 +2,6 @@
 
 #include <chrono>
 
-#include <chrono>
-
 int64_t hh_proleptic_seconds_since_unix_epoch(
     int32_t year,
     int32_t month,
@@ -25,10 +23,10 @@ int64_t hh_proleptic_seconds_since_unix_epoch(
     // WINDOWS FIX: Manually compute seconds to avoid chrono addition overflow
     // Get days as 64-bit count and manually add time components
     const int64_t days_count = days.time_since_epoch().count();
-    const int64_t total_seconds = days_count * 86400LL + 
+    const int64_t total_seconds = days_count * 86400LL +
                                   static_cast<int64_t>(hour) * 3600LL +
                                   static_cast<int64_t>(minute) * 60LL +
                                   static_cast<int64_t>(second);
-    
+
     return total_seconds;
 }
