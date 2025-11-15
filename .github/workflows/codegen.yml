@@ -1,20 +1,18 @@
-name: Code Generation Test
+name: Code Generation
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
   test-codegen:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Make script executable
       run: chmod +x Scripts/test-generate.sh
-    
+
     - name: Run code generation test
       run: Scripts/test-generate.sh
