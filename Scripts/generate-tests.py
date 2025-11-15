@@ -8,6 +8,8 @@ import os
 import shutil
 import subprocess
 import sys
+import urllib.request
+import zipfile
 from collections import defaultdict
 from pathlib import Path
 import textwrap
@@ -46,12 +48,22 @@ def _ensure_toml_test_checkout() -> Path:
     TMP_ROOT.mkdir(parents=True, exist_ok=True)
 
     if not TOML_TEST_DIR.exists():
-        subprocess.run(["git", "clone", TOML_TEST_REPO_URL, str(TOML_TEST_DIR)], check=True)
-    else:
-        subprocess.run(["git", "-C", str(TOML_TEST_DIR), "fetch", "--tags", "--prune", "--prune-tags"], check=True)
-
-    subprocess.run(["git", "-C", str(TOML_TEST_DIR), "checkout", TOML_TEST_COMMIT], check=True)
-    subprocess.run(["git", "-C", str(TOML_TEST_DIR), "reset", "--hard", TOML_TEST_COMMIT], check=True)
+        archive_url = f"https://github.com/toml-lang/toml-test/archive/{TOML_TEST_COMMIT}.zip"
+        archive_path = TMP_ROOT / f"toml-test-{TOML_TEST_COMMIT}.zip"
+        
+        print(f"Downloading toml-test archive from {archive_url}")
+        urllib.request.urlretrieve(archive_url, archive_path)
+        
+        print(f"Extracting archive to {TOML_TEST_DIR}")
+        with zipfile.ZipFile(archive_path, 'r') as zip_ref:
+            zip_ref.extractall(TMP_ROOT)
+        
+        # The extracted folder will be named toml-test-{commit}
+        extracted_dir = TMP_ROOT / f"toml-test-{TOML_TEST_COMMIT}"
+        extracted_dir.rename(TOML_TEST_DIR)
+        
+        # Clean up the archive
+        archive_path.unlink()
 
     return TOML_TEST_DIR
 
@@ -272,16 +284,8 @@ def main(argv: List[str]) -> int:
     if not list_file.exists():
         raise SystemExit(f"spec version {args.spec_version} is not available (missing {list_file})")
 
-    try:
-        commit = subprocess.check_output(
-            ["git", "-C", str(toml_test_dir), "rev-parse", "HEAD"],
-            text=True,
-        ).strip()
-    except subprocess.CalledProcessError as exc:
-        raise SystemExit(f"failed to determine toml-test revision: {exc}") from exc
-
-    if commit != TOML_TEST_COMMIT:
-        raise SystemExit(f"toml-test checkout is at {commit}, expected {TOML_TEST_COMMIT}.")
+    # Use the known commit hash since we downloaded the archive for this specific commit
+    commit = TOML_TEST_COMMIT
 
     lines = _read_lines(list_file)
 
