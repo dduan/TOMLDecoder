@@ -26,10 +26,8 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
-          git fetch origin
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
-          Scripts/generate-docs.sh
           rm -rf /tmp/public
           cp -r Docs /tmp/public
           git checkout gh-pages
