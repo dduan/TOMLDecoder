@@ -26,6 +26,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
+          rm -rf .build
           git fetch origin gh-pages:gh-pages
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
