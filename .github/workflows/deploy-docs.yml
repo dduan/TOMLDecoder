@@ -2,6 +2,9 @@ name: Deploy Documentation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -16,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Make script executable
         run: chmod +x Scripts/generate-docs.sh
