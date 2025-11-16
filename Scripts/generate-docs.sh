@@ -11,5 +11,5 @@ xcrun docc convert Sources/TOMLDecoder/TOMLDecoder.docc \
   --fallback-bundle-version 1.0 \
   --additional-symbol-graph-dir .build/symbol-graphs \
   --transform-for-static-hosting \
-  --hosting-base-path / \
+  --hosting-base-path /TOMLDecoder/ \
   --output-path Docs
