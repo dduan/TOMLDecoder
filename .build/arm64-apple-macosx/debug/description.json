@@ -1,0 +1,1278 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.xctest/Contents/MacOS/TOMLDecoderPackageTests",
+      "packagePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder",
+      "productName" : "TOMLDecoderPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.TOMLDecoder-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/sources",
+      "importPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/DateTime.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/KeyDecodingStrategy.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/Parsing.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLArray.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLError.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKey.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKeyedDecodingContainer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLTable.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLUnkeyedDecodingContainer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/_TOMLDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TOMLDecoder",
+      "moduleOutputPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoder.swiftmodule",
+      "objects" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/DateTime.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/KeyDecodingStrategy.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/Parsing.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLArray.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLError.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKey.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKeyedDecodingContainer.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLTable.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLUnkeyedDecodingContainer.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/_TOMLDecoder.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j3",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder-Swift.h",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-emit-symbol-graph",
+        "-emit-symbol-graph-dir",
+        ".build/symbol-graphs",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "tomldecoder"
+      ],
+      "outputFileMapPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/DateTime.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/KeyDecodingStrategy.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/Parsing.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLArray.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLError.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKey.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLTable.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLUnkeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/_TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoder.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/DateTime.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/KeyDecodingStrategy.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/Parsing.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLArray.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLDecoder.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLError.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKey.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKeyedDecodingContainer.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLTable.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLUnkeyedDecodingContainer.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/_TOMLDecoder.swift"
+      ],
+      "tempsPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TOMLDecoderPackageTests-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/sources",
+      "importPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoderTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TOMLDecoderPackageTests",
+      "moduleOutputPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoderPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j3",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-Xcc",
+        "-fmodule-map-file=/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/ProlepticGregorianTestHelpers/include",
+        "-module-cache-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/TOMLDecoderPackageTests-Swift.h",
+        "-sdk",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-emit-symbol-graph",
+        "-emit-symbol-graph-dir",
+        ".build/symbol-graphs",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "tomldecoder"
+      ],
+      "outputFileMapPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoderPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.TOMLDecoderTests-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/sources",
+      "importPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/ArrayTypeConversionTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateStrategyTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateTimeDescriptionTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLComplianceSupport.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLTestTags.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLDecoderTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLInvalidationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLTableKeyMembershipTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLValidationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TableTypeConversionTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoder.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/DateRef.cpp.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "TOMLDecoderTests",
+      "moduleOutputPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoderTests.swiftmodule",
+      "objects" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/ArrayTypeConversionTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateStrategyTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateTimeDescriptionTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLComplianceSupport.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTestTags.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLDecoderTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLInvalidationTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTableKeyMembershipTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLValidationTests.swift.o",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TableTypeConversionTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j3",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-Xcc",
+        "-fmodule-map-file=/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/ProlepticGregorianTestHelpers/include",
+        "-module-cache-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-emit-symbol-graph",
+        "-emit-symbol-graph-dir",
+        ".build/symbol-graphs",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "tomldecoder"
+      ],
+      "outputFileMapPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/ArrayTypeConversionTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateStrategyTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateTimeDescriptionTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLComplianceSupport.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTestTags.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLDecoderTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLInvalidationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTableKeyMembershipTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLValidationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TableTypeConversionTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoderTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/ArrayTypeConversionTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateStrategyTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateTimeDescriptionTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLComplianceSupport.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLTestTags.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLDecoderTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLInvalidationTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLTableKeyMembershipTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLValidationTests.swift",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TableTypeConversionTests.swift"
+      ],
+      "tempsPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.compliance-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/sources",
+      "importPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/compliance/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/TOMLDecoder.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "compliance",
+      "moduleOutputPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/compliance.swiftmodule",
+      "objects" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/main.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j3",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "compliance_main",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-emit-symbol-graph",
+        "-emit-symbol-graph-dir",
+        ".build/symbol-graphs",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "tomldecoder"
+      ],
+      "outputFileMapPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules/compliance.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/compliance/main.swift"
+      ],
+      "tempsPath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "TOMLDecoder" : [
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TOMLDecoder",
+      "-package-name",
+      "tomldecoder",
+      "-incremental",
+      "-c",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/DateTime.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/KeyDecodingStrategy.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/Parsing.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLArray.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLDecoder.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLError.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKey.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKeyedDecodingContainer.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLTable.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLUnkeyedDecodingContainer.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/_TOMLDecoder.swift",
+      "-I",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j3",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder-Swift.h",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-emit-symbol-graph",
+      "-emit-symbol-graph-dir",
+      ".build/symbol-graphs",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "tomldecoder",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "TOMLDecoderPackageTests" : [
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TOMLDecoderPackageTests",
+      "-package-name",
+      "tomldecoder",
+      "-incremental",
+      "-c",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j3",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-Xcc",
+      "-fmodule-map-file=/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/ProlepticGregorianTestHelpers/include",
+      "-module-cache-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/TOMLDecoderPackageTests-Swift.h",
+      "-sdk",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-emit-symbol-graph",
+      "-emit-symbol-graph-dir",
+      ".build/symbol-graphs",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "tomldecoder",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "TOMLDecoderTests" : [
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "TOMLDecoderTests",
+      "-package-name",
+      "tomldecoder",
+      "-incremental",
+      "-c",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/ArrayTypeConversionTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateStrategyTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateTimeDescriptionTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLComplianceSupport.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLTestTags.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLDecoderTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLInvalidationTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLTableKeyMembershipTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLValidationTests.swift",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TableTypeConversionTests.swift",
+      "-I",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j3",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-Xcc",
+      "-fmodule-map-file=/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/ProlepticGregorianTestHelpers/include",
+      "-module-cache-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-emit-symbol-graph",
+      "-emit-symbol-graph-dir",
+      ".build/symbol-graphs",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "tomldecoder",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "compliance" : [
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "compliance",
+      "-package-name",
+      "tomldecoder",
+      "-incremental",
+      "-c",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/compliance/main.swift",
+      "-I",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j3",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "compliance_main",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-emit-symbol-graph",
+      "-emit-symbol-graph-dir",
+      ".build/symbol-graphs",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "tomldecoder",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "ProlepticGregorianTestHelpers" : [
+
+    ],
+    "TOMLDecoder" : [
+
+    ],
+    "TOMLDecoderPackageTests" : [
+      "TOMLDecoderTests",
+      "ProlepticGregorianTestHelpers",
+      "TOMLDecoder"
+    ],
+    "TOMLDecoderTests" : [
+      "ProlepticGregorianTestHelpers",
+      "TOMLDecoder"
+    ],
+    "compliance" : [
+      "TOMLDecoder"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "enableAllTraits" : false
+  },
+  "writeCommands" : {
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/DateTime.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/KeyDecodingStrategy.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/Parsing.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLArray.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLError.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKey.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLKeyedDecodingContainer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLTable.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/TOMLUnkeyedDecodingContainer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/TOMLDecoder/_TOMLDecoder.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/sources"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/sources"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/ProlepticGregorianTestHelpers.build/DateRef.cpp.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/DateTime.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/KeyDecodingStrategy.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/Parsing.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLArray.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLError.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKey.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLTable.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLUnkeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/_TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/ArrayTypeConversionTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateStrategyTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/DateTimeDescriptionTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLComplianceSupport.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLDecoderTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLInvalidationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTableKeyMembershipTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLTestTags.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TOMLValidationTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/TableTypeConversionTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/ArrayTypeConversionTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateStrategyTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/DateTimeDescriptionTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLComplianceSupport.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/Support/TOMLTestTags.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLDecoderTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLInvalidationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLTableKeyMembershipTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TOMLValidationTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Tests/TOMLDecoderTests/TableTypeConversionTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderTests.build/sources"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance-entitlement.plist"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/Sources/compliance/main.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/sources"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/DateTime.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/KeyDecodingStrategy.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/Parsing.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLArray.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLError.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKey.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLKeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLTable.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/TOMLUnkeyedDecodingContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoder.build/_TOMLDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.build/main.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/compliance.product/Objects.LinkFileList"
+    },
+    "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/swift-version--79AA4F9932D1E87A.txt"
+    }
+  }
+}
