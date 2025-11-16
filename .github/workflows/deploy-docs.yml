@@ -36,9 +36,15 @@ jobs:
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
           cp -r Docs /tmp/public
+          echo "===== Contents of /tmp/public ====="
+          ls /tmp/public
           git checkout gh-pages
           rm -rf ./*
+          echo "===== Current directory contents ====="
+          ls
           cp -r /tmp/public/. ./
+          echo "===== New contents ====="
+          ls
           git add .
           git commit -m "Deploy $GITHUB_SHA" || true
           git push origin gh-pages || true
