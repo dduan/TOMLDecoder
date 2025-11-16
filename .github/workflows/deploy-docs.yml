@@ -19,7 +19,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Make script executable
         run: chmod +x Scripts/generate-docs.sh
@@ -29,8 +31,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
-          rm -rf .build
-          git fetch origin gh-pages:gh-pages
+          git fetch origin
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
