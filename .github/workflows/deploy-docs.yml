@@ -20,31 +20,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Clear old docs
-        run: rm -rf Docs
 
       - name: Generate documentation
         run: Scripts/generate-docs.sh
 
       - name: Deploy to GitHub Pages
         run: |
+          git fetch origin gh-pages:gh-pages
           git checkout $GITHUB_SHA
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
           cp -r Docs /tmp/public
-          echo "===== Contents of /tmp/public/documentation ====="
-          ls /tmp/public/documentation
           git checkout gh-pages
           rm -rf ./*
-          echo "===== Current directory contents ====="
-          ls
           cp -r /tmp/public/. ./
-          echo "===== New contents ====="
-          ls documentation
           git add .
           git commit -m "Deploy $GITHUB_SHA" || true
           git push origin gh-pages || true
