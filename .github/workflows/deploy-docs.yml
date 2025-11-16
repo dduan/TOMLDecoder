@@ -29,7 +29,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
-          git fetch origin
+          git fetch origin gh-pages:gh-pages
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           Scripts/generate-docs.sh
