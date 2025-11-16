@@ -39,5 +39,5 @@ jobs:
           rm -rf ./*
           cp -r /tmp/public/. ./
           git add .
-          git commit -m "Deploy $GITHUB_SHA"
-          git push origin gh-pages
+          git commit -m "Deploy $GITHUB_SHA" || true
+          git push origin gh-pages || true
