@@ -16,18 +16,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Make script executable
-        run: chmod +x Scripts/generate-docs.sh
+        uses: actions/checkout@v5
 
       - name: Generate documentation
         run: Scripts/generate-docs.sh
 
       - name: Deploy to GitHub Pages
         run: |
-          rm -rf .build
           git fetch origin gh-pages:gh-pages
+          git checkout $GITHUB_SHA
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
@@ -36,5 +33,5 @@ jobs:
           rm -rf ./*
           cp -r /tmp/public/. ./
           git add .
-          git commit -m "Deploy $GITHUB_SHA"
-          git push origin gh-pages
+          git commit -m "Deploy $GITHUB_SHA" || true
+          git push origin gh-pages || true
