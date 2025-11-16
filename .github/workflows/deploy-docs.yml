@@ -23,15 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Make script executable
-        run: chmod +x Scripts/generate-docs.sh
-
       - name: Generate documentation
         run: Scripts/generate-docs.sh
 
       - name: Deploy to GitHub Pages
         run: |
-          git fetch origin
+          git checkout $GITHUB_SHA
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
