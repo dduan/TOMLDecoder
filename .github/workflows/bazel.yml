@@ -3,7 +3,9 @@ on: [push]
 jobs:
   bazel-test:
     name: Bazel tests
-    runs-on: macos-latest
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.app/Contents/Developer
     steps:
     - uses: bazel-contrib/setup-bazel@0.15.0
       with:
