@@ -3,15 +3,15 @@ on: [push]
 jobs:
   bazel-test:
     name: Bazel tests
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-    - uses: bazel-contrib/setup-bazel@0.9.1
+    - uses: bazel-contrib/setup-bazel@0.15.0
       with:
         bazelisk-cache: true
         disk-cache: ${{ github.workflow }}
         repository-cache: true
     - name: Checkout source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Build everything
       run: bazel build //:TOMLDecoder //:compliance
     - name: Run tests
