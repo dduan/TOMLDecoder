@@ -4,6 +4,8 @@ jobs:
   bazel-test:
     name: Bazel tests
     runs-on: ubuntu-latest
+    env:
+      CC: clang
     steps:
     - uses: bazel-contrib/setup-bazel@0.15.0
       with:
