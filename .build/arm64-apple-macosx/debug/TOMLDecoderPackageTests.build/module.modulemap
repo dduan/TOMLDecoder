@@ -1,4 +1,0 @@
-module TOMLDecoderPackageTests {
-    header "/Users/runner/work/TOMLDecoder/TOMLDecoder/.build/arm64-apple-macosx/debug/TOMLDecoderPackageTests.build/TOMLDecoderPackageTests-Swift.h"
-    requires objc
-}
