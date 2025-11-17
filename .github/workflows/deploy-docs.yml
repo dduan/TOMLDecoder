@@ -2,6 +2,9 @@ name: Documentation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -22,12 +25,11 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
-          git fetch origin gh-pages:gh-pages
-          git checkout $GITHUB_SHA
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"
           rm -rf /tmp/public
           cp -r Docs /tmp/public
+          git fetch origin feature:refs/remotes/origin/gh-pages --depth=1
           git checkout gh-pages
           rm -rf ./*
           rm -rf .build
