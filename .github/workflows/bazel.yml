@@ -17,4 +17,4 @@ jobs:
     - name: Build everything
       run: bazel build //:TOMLDecoder //:compliance
     - name: Run tests
-      run: bazel test //...
+      run: bazel test //... --test_output=all
