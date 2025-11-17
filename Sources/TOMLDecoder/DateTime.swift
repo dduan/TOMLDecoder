@@ -417,11 +417,11 @@ extension String {
 
 import Foundation
 extension DateComponents {
-    public init(offsetDateTime: OffsetDateTime) {
+    init(offsetDateTime: OffsetDateTime) {
         self.init(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
     }
 
-    public init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
+    init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
         self.init(
             calendar: calendar,
             timeZone: TimeZone(secondsFromGMT: Int(offsetDateTime.offset) * 60),
@@ -437,11 +437,11 @@ extension DateComponents {
 }
 
 extension Date {
-    public init(offsetDateTime: OffsetDateTime) {
+    init(offsetDateTime: OffsetDateTime) {
         self.init(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
     }
 
-    public init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
+    init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
         let components = DateComponents(offsetDateTime: offsetDateTime, calendar: calendar)
         self = components.date!
     }
