@@ -25,7 +25,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
-          rm -rf .build
           git fetch origin gh-pages:gh-pages
           git checkout $GITHUB_SHA
           git config user.email "$(git show -s --format='%ae' HEAD)"
@@ -34,6 +33,7 @@ jobs:
           cp -r Docs /tmp/public
           git checkout gh-pages
           rm -rf ./*
+          rm -rf .build
           cp -r /tmp/public/. ./
           git add .
           git commit -m "Deploy $GITHUB_SHA" || true
