@@ -11,3 +11,4 @@ MODULE.bazel.lock
 .claude
 tmp
 Docs
+Package.resolved
