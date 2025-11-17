@@ -1,3 +1,4 @@
+@Sendable
 func snakeCasify(_ stringKey: String) -> String {
     guard !stringKey.isEmpty else { return stringKey }
 
