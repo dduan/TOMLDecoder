@@ -21,7 +21,10 @@ swift_library(
 cc_library(
     name = "ProlepticGregorianTestHelpers",
     srcs = ["Sources/ProlepticGregorianTestHelpers/DateRef.cpp"],
-    hdrs = ["Sources/ProlepticGregorianTestHelpers/include/DateRef.h"],
+    hdrs = [
+        "Sources/ProlepticGregorianTestHelpers/include/DateRef.h",
+        "Sources/ProlepticGregorianTestHelpers/include/module.modulemap",
+    ],
     includes = ["Sources/ProlepticGregorianTestHelpers/include"],
     copts = ["-std=c++20"],
     visibility = ["//visibility:public"],
