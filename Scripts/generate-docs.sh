@@ -9,7 +9,7 @@ BUILD_DOCS=1 swift package --allow-writing-to-directory Docs \
     generate-documentation --target TOMLDecoder \
     --disable-indexing \
     --transform-for-static-hosting \
-    --hosting-base-path /TOMLDecoder \
+    --hosting-base-path /TOMLDecoder/ \
     --output-path Docs
 
 rm Package.resolved
