@@ -1,5 +1,4 @@
 load("@rules_swift//swift:swift.bzl", "swift_binary", "swift_library", "swift_test")
-load("@bazel_skylib//rules:copy_directory.bzl", "copy_directory")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 swift_binary(
@@ -44,16 +43,14 @@ swift_test(
     visibility = ["//visibility:private"],
 )
 
-copy_directory(
+filegroup(
     name = "valid_fixtures",
-    src = "Tests/TOMLDecoderTests/valid_fixtures",
-    out = "Tests/TOMLDecoderTests/valid_fixtures",
+    srcs = glob(["Tests/TOMLDecoderTests/valid_fixtures/**/*"]),
     visibility = ["//visibility:private"],
 )
 
-copy_directory(
+filegroup(
     name = "invalid_fixtures",
-    src = "Tests/TOMLDecoderTests/invalid_fixtures",
-    out = "Tests/TOMLDecoderTests/invalid_fixtures",
+    srcs = glob(["Tests/TOMLDecoderTests/invalid_fixtures/**/*"]),
     visibility = ["//visibility:private"],
 )
