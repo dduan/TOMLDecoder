@@ -264,14 +264,14 @@ struct TOMLDecoderTests {
 
         #expect(result == expectation)
     }
-    
+
     @Test func `array of strings parsing`() throws {
         struct AppConfig: Codable, Equatable {
             let name: String
             let version: String
             let features: [String]
             let database: DatabaseConfig
-            
+
             struct DatabaseConfig: Codable, Equatable {
                 let host: String
                 let port: Int
@@ -281,7 +281,7 @@ struct TOMLDecoderTests {
 
         let expectation = AppConfig(
             name: "Sample App",
-            version: "1.0.0", 
+            version: "1.0.0",
             features: ["logging", "monitoring", "caching"],
             database: AppConfig.DatabaseConfig(
                 host: "localhost",
@@ -294,7 +294,7 @@ struct TOMLDecoderTests {
         name = "Sample App"
         version = "1.0.0"
         features = ["logging", "monitoring", "caching"]
-        
+
         [database]
         host = "localhost"
         port = 5432
@@ -306,7 +306,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    func testSuperDecoder() throws {
+    @Test func `super decoder`() throws {
         class Player: Codable {
             let id: String
             let health: Int

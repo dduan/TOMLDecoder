@@ -4,15 +4,20 @@ export LC_CTYPE     = en_US.UTF-8
 
 .DEFAULT_GOAL := build
 
-build:
-	@Scripts/gyb
+.PHONY: build test generate-code generate-tests benchmark
+
+generate-code:
+	@Scripts/generate-code.sh
+
+generate-tests:
+	@Scripts/generate-tests.py
+
+build: generate-code
+	@Scripts/generate-code.sh
 	@swift build -c release -Xswiftc -warnings-as-errors > /dev/null
 
-test-SwiftPM:
+test: generate-tests
 	@swift test -Xswiftc -warnings-as-errors
-
-test-docker:
-	@Scripts/docker.sh TOMLDecoder 'swift test -Xswiftc -warnings-as-errors --enable-test-discovery' 6.0.1 focal
 
 benchmark:
 	@cd Benchmarks; swift run -c release

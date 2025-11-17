@@ -80,7 +80,7 @@ public struct TOMLDecoder {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid TOML.", underlyingError: error))
         }
 
-        let decoder = _TOMLDecoder(referencing: .keyed(topLevel), at: [], strategy: strategy, isLenient: self.isLenient)
+        let decoder = _TOMLDecoder(referencing: .keyed(topLevel), at: [], strategy: strategy, isLenient: isLenient)
         return try type.init(from: decoder)
     }
 }
