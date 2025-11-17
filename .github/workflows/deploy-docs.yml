@@ -1,4 +1,4 @@
-name: Deploy Documentation
+name: Documentation
 
 on:
   workflow_dispatch:
@@ -11,9 +11,8 @@ permissions:
 
 jobs:
   deploy-docs:
-    name: Generate and Deploy Documentation
+    name: Generate and Deploy
     runs-on: macos-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -31,6 +30,7 @@ jobs:
           cp -r Docs /tmp/public
           git checkout gh-pages
           rm -rf ./*
+          rm -rf .build
           cp -r /tmp/public/. ./
           git add .
           git commit -m "Deploy $GITHUB_SHA" || true
