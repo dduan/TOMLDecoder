@@ -75,7 +75,6 @@ extension UTF8.CodeUnit {
 
 struct Token {
     enum Kind {
-        case invalid
         case dot
         case comma
         case equal
@@ -276,7 +275,6 @@ struct Deserializer {
 
     let originalSource: String
     let sourceUTF8: String.UTF8View
-    var errors: [String]
     var token: Token
     var currentTable: Int
     var tablePath: [(String, Token)] = []
@@ -286,7 +284,6 @@ struct Deserializer {
         self.tables = [TOMLTableImplementation()]
         self.originalSource = source
         self.sourceUTF8 = source.utf8
-        self.errors = []
         self.token = Token(kind: .newline, lineNumber: 1, text: "".utf8[...], eof: false)
         self.currentTable = 0
         self.keyTransform = keyTransform
