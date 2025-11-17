@@ -988,26 +988,6 @@ func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) t
     return (offsetHour, offsetMinute, consumedLength)
 }
 
-func toTimestamp(
-    year: Int, month: Int, day: Int,
-    hour: Int, minute: Int, seconds: Int,
-    nanoseconds: Int, offsetInSeconds: Int
-) -> Double {
-    var y = year
-    if month <= 2 { y -= 1 }
-
-    let era = (y >= 0 ? y : y - 399) / 400
-    let yoe = y - era * 400
-    let doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1
-    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
-    let epochOffset = 719_468
-    let dayCounts = Int64(era) * 146_097 + Int64(doe) - Int64(epochOffset)
-    let secondOfDay = Int64(hour) * 3_600 + Int64(minute) * 60 + Int64(seconds)
-    let totalSeconds = dayCounts * 86_400 + secondOfDay - Int64(offsetInSeconds)
-
-    return Double(totalSeconds) + Double(nanoseconds) / 1_000_000_000
-}
-
 extension Deserializer {
     func normalizeKey(token: Token) throws(TOMLError) -> String {
         var start = token.text.startIndex
