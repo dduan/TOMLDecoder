@@ -3,16 +3,18 @@ on: [push]
 jobs:
   bazel-test:
     name: Bazel tests
-    runs-on: macos-latest
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.app/Contents/Developer
     steps:
-    - uses: bazel-contrib/setup-bazel@0.9.1
+    - uses: bazel-contrib/setup-bazel@0.15.0
       with:
         bazelisk-cache: true
         disk-cache: ${{ github.workflow }}
         repository-cache: true
     - name: Checkout source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Build everything
       run: bazel build //:TOMLDecoder //:compliance
-    #- name: Run tests
-    #  run: bazel test //...
+    - name: Run tests
+      run: bazel test //...
