@@ -9,6 +9,7 @@ BUILD_DOCS=1 swift package --allow-writing-to-directory Docs \
     generate-documentation --target TOMLDecoder \
     --disable-indexing \
     --transform-for-static-hosting \
+    --additional-symbol-graph-dir .build/symbol-graphs \
     --hosting-base-path /TOMLDecoder/ \
     --output-path Docs
 
