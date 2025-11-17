@@ -426,27 +426,15 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtoc
         }
     }
 
-    private func _superDecoder(forKey key: CodingKey) throws -> Decoder {
-        var nestedCodingPath = self.codingPath
-        nestedCodingPath.append(key)
-
-        if let nestedTable = try? self.table.table(forKey: key.stringValue) {
-            return _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
-        } else if let nestedArray = try? self.table.array(forKey: key.stringValue) {
-            return _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
-        } else {
-            throw DecodingError.keyNotFound(key, DecodingError.Context(
-                codingPath: self.codingPath,
-                debugDescription: "No value found for key \(key)"
-            ))
-        }
+    func _superDecoder(forKey key: CodingKey) -> Decoder {
+        _TOMLDecoder(referencing: .keyed(table), at: codingPath + [key], strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
     }
 
     func superDecoder() throws -> Decoder {
-        return try self._superDecoder(forKey: TOMLKey.super)
+        _superDecoder(forKey: TOMLKey.super)
     }
 
     func superDecoder(forKey key: Key) throws -> Decoder {
-        return try self._superDecoder(forKey: key)
+        _superDecoder(forKey: key)
     }
 }

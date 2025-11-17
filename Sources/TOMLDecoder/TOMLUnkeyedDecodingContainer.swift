@@ -477,29 +477,6 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func superDecoder() throws -> Decoder {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(
-                Decoder.self,
-                DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                debugDescription: "Cannot get superDecoder() -- unkeyed container is at end."))
-        }
-
-        var nestedCodingPath = self.codingPath
-        nestedCodingPath.append(TOMLKey(intValue: self.currentIndex))
-
-        if let nestedTable = try? self.array.table(atIndex: self.currentIndex) {
-            self.currentIndex += 1
-            return _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
-        } else if let nestedArray = try? self.array.array(atIndex: self.currentIndex) {
-            self.currentIndex += 1
-            return _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
-        } else {
-            throw DecodingError.valueNotFound(
-                Decoder.self,
-                DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                debugDescription: "Cannot get superDecoder() -- element is not a table or array."
-                )
-            )
-        }
+        _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey.super], strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
     }
 }
