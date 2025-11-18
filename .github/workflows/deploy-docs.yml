@@ -26,7 +26,7 @@ jobs:
           path: |
             ~/.swiftpm
             .build
-          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.swift') }}
           restore-keys: |
             ${{ runner.os }}-swiftpm-
 
