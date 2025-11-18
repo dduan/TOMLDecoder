@@ -20,14 +20,12 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
-
+        os: [macos-latest]
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
 
       - name: Homebrew Mac
         if: ${{ runner.os == 'Macos' }}
@@ -35,16 +33,13 @@ jobs:
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
           brew install jemalloc
 
-
       - name: Ubuntu deps
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get install -y libjemalloc-dev
 
-
       - name: Git URL token override and misc
         run: |
-          #git config --global url."https://ordo-ci:${{ secrets.CI_MACHINE_PAT }}@github.com".insteadOf "https://github.com"
           #/usr/bin/ordo-performance
           [ -d Benchmarks ] && echo "hasBenchmark=1" >> $GITHUB_ENV
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
