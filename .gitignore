@@ -12,3 +12,4 @@ MODULE.bazel.lock
 tmp
 Docs
 Package.resolved
+.benchmarkBaselines
