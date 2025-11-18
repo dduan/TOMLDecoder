@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p Docs
+
 TOMLDECODER_DOCS=1 swift package \
   --allow-writing-to-directory Docs \
   generate-documentation \
