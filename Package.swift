@@ -3,12 +3,21 @@
 import PackageDescription
 import Foundation
 
-let includeBenchmarks = ProcessInfo.processInfo.environment["TOMLDECODER_BENCHMARKS"] == "1"
+let env = ProcessInfo.processInfo.environment
+let includeBenchmarks = env["TOMLDECODER_BENCHMARKS"] == "1"
+let includeDocs = env["TOMLDECODER_DOCS"] == "1"
 
-var dependencies: [Package.Dependency] = includeBenchmarks ? [
+var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
     .package(
         url: "https://github.com/ordo-one/package-benchmark",
-        .upToNextMajor(from: "1.4.0")
+        exact: "1.29.6"
+    ),
+] : []
+
+var docsDeps: [Package.Dependency] = includeDocs ? [
+    .package(
+        url: "https://github.com/apple/swift-docc-plugin",
+        exact: "1.4.5"
     ),
 ] : []
 
@@ -64,7 +73,7 @@ let package = Package(
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),
     ],
-    dependencies: dependencies,
+    dependencies: benchmarksDeps + docsDeps,
     targets: targets + testTargets + benchmarkTargets,
     cxxLanguageStandard: .cxx20
 )

@@ -1,14 +1,9 @@
 #!/bin/bash
 
-swift build --target TOMLDecoder \
-  -Xswiftc -emit-symbol-graph \
-  -Xswiftc -emit-symbol-graph-dir \
-  -Xswiftc .build/symbol-graphs
-
-xcrun docc convert Sources/TOMLDecoder/TOMLDecoder.docc \
-  --fallback-display-name TOMLDecoder \
-  --fallback-bundle-version 1.0 \
-  --additional-symbol-graph-dir .build/symbol-graphs \
+TOMLDECODER_DOCS=1 swift package \
+  --allow-writing-to-directory Docs \
+  generate-documentation \
+  --target TOMLDecoder \
   --transform-for-static-hosting \
   --output-path Docs
 
