@@ -20,4 +20,4 @@ test: generate-tests
 	@swift test -Xswiftc -warnings-as-errors
 
 benchmark:
-	@cd Benchmarks; swift run -c release
+	@TOMLDECODER_BENCHMARKS=1 swift package -c release benchmark
