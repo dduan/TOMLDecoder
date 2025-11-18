@@ -9,8 +9,17 @@ let package = Package(
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/ordo-one/package-benchmark",
+            .upToNextMajor(from: "1.4.0")
+        ),
+    ],
     targets: [
-        .executableTarget(name: "compliance", dependencies: ["TOMLDecoder"]),
+        .executableTarget(
+            name: "compliance",
+            dependencies: ["TOMLDecoder"]
+        ),
         .target(
             name: "TOMLDecoder",
             exclude: [
@@ -30,6 +39,17 @@ let package = Package(
             exclude: [
                 "invalid_fixtures",
                 "valid_fixtures",
+            ]
+        ),
+        .executableTarget(
+            name: "TOMLDecoderBenchmarks",
+            dependencies: [
+                "TOMLDecoder",
+                .product(name: "Benchmark", package: "package-benchmark"),
+            ],
+            path: "Benchmarks/TOMLDecoderBenchmarks",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
             ]
         ),
     ],
