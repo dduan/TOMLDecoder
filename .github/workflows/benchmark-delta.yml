@@ -63,6 +63,17 @@ jobs:
           echo '## Summary' >> $GITHUB_STEP_SUMMARY
           echo $(date) >> $GITHUB_STEP_SUMMARY
           echo "exitStatus=1" >> $GITHUB_ENV
+          
+          # Capture benchmark results for PR comment
+          echo 'BENCHMARK_RESULTS<<EOF' >> $GITHUB_ENV
+          swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_ENV
+          echo '' >> $GITHUB_ENV
+          echo '---' >> $GITHUB_ENV
+          echo '' >> $GITHUB_ENV
+          swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          
+          # Also add to step summary
           swift package benchmark baseline check main pull_request --format markdown >> $GITHUB_STEP_SUMMARY
           echo '---' >> $GITHUB_STEP_SUMMARY
           swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> $GITHUB_STEP_SUMMARY
@@ -73,15 +84,28 @@ jobs:
         id: prtestsuccess
         run: |
           echo 'PRTEST<<EOF' >> $GITHUB_ENV
-          echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/dduan/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+          echo "## Benchmark Results ✅" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "${{ env.BENCHMARK_RESULTS }}" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "[View full details](https://github.com/dduan/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - if: ${{ env.exitStatus == '1' }}
         name: Pull request comment text failure
         id: prtestfailure
         run: |
           echo 'PRTEST<<EOF' >> $GITHUB_ENV
-          echo "[Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)](https://github.com/dduan/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
+          echo "## Benchmark Results ⚠️" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "Pull request benchmark comparison [${{ matrix.os }}] with 'main' run at $(date -Iseconds)" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
           echo "_Pull request had performance regressions_" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "${{ env.BENCHMARK_RESULTS }}" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "[View full details](https://github.com/dduan/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }})" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - name: Comment PR
         if: ${{ env.hasBenchmark == '1' }}
