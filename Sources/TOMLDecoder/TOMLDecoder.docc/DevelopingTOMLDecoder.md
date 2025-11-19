@@ -29,6 +29,7 @@ Tests must pass on macOS, Ubuntu, and Windows for any changes to land.
 * The script `Scripts/test-generate.sh` should be run to verify that the
   generated code and tests are up to date. It exists with a non-zero exit code
   if new code is generated.
+* Generated source files should have `.Generated.swift` suffix in the filename.
 
 ## Benchmarking
 
