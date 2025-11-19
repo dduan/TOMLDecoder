@@ -441,4 +441,31 @@ struct TOMLDecoderTests {
 
         #expect(result.numbers == [[1, 2], [3, 4]])
     }
+
+    @Test func `optional fields`() throws {
+        struct Test: Codable, Equatable {
+            let a: Int64?
+            let b: Double?
+            let c: String?
+        }
+
+        let result1 = try TOMLDecoder()
+            .decode(
+                Test.self,
+                from: """
+                    a = 1
+                    """
+            )
+        #expect(result1 == Test(a: 1, b: nil, c: nil))
+
+        let result2 = try TOMLDecoder()
+            .decode(
+                Test.self,
+                from: """
+                    b = 1.0
+                    c = "claude"
+                    """
+            )
+        #expect(result2 == Test(a: nil, b: 1.0, c: "claude"))
+    }
 }
