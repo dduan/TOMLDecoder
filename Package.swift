@@ -1,43 +1,48 @@
 // swift-tools-version: 6.1
 
-import PackageDescription
 import Foundation
+import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 let includeBenchmarks = env["TOMLDECODER_BENCHMARKS"] == "1"
 let includeDocs = env["TOMLDECODER_DOCS"] == "1"
+let includeFormatting = env["TOMLDECODER_FORMATTING"] == "1"
 
 var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
     .package(
         url: "https://github.com/ordo-one/package-benchmark",
-        exact: "1.29.6"
+        exact: "1.29.6",
     ),
 ] : []
 
 var docsDeps: [Package.Dependency] = includeDocs ? [
     .package(
         url: "https://github.com/apple/swift-docc-plugin",
-        exact: "1.4.5"
+        exact: "1.4.5",
     ),
+] : []
+
+var formattingDeps: [Package.Dependency] = includeFormatting ? [
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.58.6"),
 ] : []
 
 var targets: [Target] = [
     .executableTarget(
         name: "compliance",
-        dependencies: ["TOMLDecoder"]
+        dependencies: ["TOMLDecoder"],
     ),
     .target(
         name: "TOMLDecoder",
         exclude: [
             "gyb",
-        ]
+        ],
     ),
 ]
 
 var testTargets: [Target] = [
     .target(
         name: "ProlepticGregorianTestHelpers",
-        publicHeadersPath: "include"
+        publicHeadersPath: "include",
     ),
     .testTarget(
         name: "TOMLDecoderTests",
@@ -48,7 +53,7 @@ var testTargets: [Target] = [
         exclude: [
             "invalid_fixtures",
             "valid_fixtures",
-        ]
+        ],
     ),
 ]
 
@@ -62,7 +67,7 @@ var benchmarkTargets: [Target] = includeBenchmarks ? [
         path: "Benchmarks/TOMLDecoderBenchmarks",
         plugins: [
             .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
-        ]
+        ],
     ),
 ] : []
 
@@ -73,7 +78,7 @@ let package = Package(
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),
     ],
-    dependencies: benchmarksDeps + docsDeps,
+    dependencies: benchmarksDeps + docsDeps + formattingDeps,
     targets: targets + testTargets + benchmarkTargets,
-    cxxLanguageStandard: .cxx20
+    cxxLanguageStandard: .cxx20,
 )

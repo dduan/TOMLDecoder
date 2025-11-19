@@ -1,0 +1,14 @@
+name: Formatting Code
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  swiftformat:
+    name: Swift
+    runs-on: ubuntu-latest
+    steps:
+    - name: Format code
+      run: Scripts/format.sh --lint

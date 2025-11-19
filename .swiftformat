@@ -1,0 +1,3 @@
+--exclude **/*.Generated.swift
+--extension-acl on-declarations
+--ifdef no-indent

@@ -2,6 +2,13 @@
 
 Notes for TOMLDecoder mainateners.
 
+## Writing code
+
+Use [swiftformat](https://github.com/nicklockwood/SwiftFormat/tree/main),
+ideally, the version specified in `Scripts/format.sh` to format all code.
+Patches containing unformatted code should not be accepted.
+
+
 ## Testing
 
 Write tests with Swift's Testing framework.

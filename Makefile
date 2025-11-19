@@ -19,5 +19,8 @@ build: generate-code
 test: generate-tests
 	@swift test -Xswiftc -warnings-as-errors
 
+format:
+	@swiftformat .
+
 benchmark:
 	@Scripts/benchmark.sh origin/main HEAD

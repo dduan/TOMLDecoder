@@ -75,7 +75,7 @@ struct ArrayTypeConversionTests {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Test.self, from: toml)
 
-        #expect(result.numbers == [1000000, 2000000, 3000000])
+        #expect(result.numbers == [1_000_000, 2_000_000, 3_000_000])
     }
 
     @Test(.tags(.integer, .array))
@@ -135,7 +135,7 @@ struct ArrayTypeConversionTests {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Test.self, from: toml)
 
-        #expect(result.numbers == [100000, 200000, 300000])
+        #expect(result.numbers == [100_000, 200_000, 300_000])
     }
 
     @Test(.tags(.integer, .array))
@@ -150,7 +150,7 @@ struct ArrayTypeConversionTests {
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Test.self, from: toml)
 
-        #expect(result.numbers == [5000000, 6000000, 7000000])
+        #expect(result.numbers == [5_000_000, 6_000_000, 7_000_000])
     }
 
     @Test(.tags(.float, .array))

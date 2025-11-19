@@ -5,7 +5,7 @@ public struct TOMLArray: Equatable, Sendable {
     let index: Int
 
     public var count: Int {
-        source.arrays[self.index].elements.count
+        source.arrays[index].elements.count
     }
 
     @inline(__always)
@@ -19,7 +19,7 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     public func array(atIndex index: Int) throws(TOMLError) -> TOMLArray {
-        guard case .array(let arrayIndex) = try element(atIndex: index) else {
+        guard case let .array(arrayIndex) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "array")
         }
 
@@ -27,63 +27,63 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     public func table(atIndex index: Int) throws(TOMLError) -> TOMLTable {
-        guard case .table(let tableIndex) = try element(atIndex: index) else {
+        guard case let .table(tableIndex) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "table")
         }
         return TOMLTable(source: source, index: tableIndex)
     }
 
     public func string(atIndex index: Int) throws(TOMLError) -> String {
-        guard case .leaf(.string(let text)) = try element(atIndex: index) else {
+        guard case let .leaf(.string(text)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "string")
         }
         return try stringMaybe(text)!
     }
 
     public func bool(atIndex index: Int) throws(TOMLError) -> Bool {
-        guard case .leaf(.bool(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.bool(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "bool")
         }
         return value
     }
 
     public func integer(atIndex index: Int) throws(TOMLError) -> Int64 {
-        guard case .leaf(.int(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.int(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "integer")
         }
         return value
     }
 
     public func float(atIndex index: Int) throws(TOMLError) -> Double {
-        guard case .leaf(.double(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.double(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "float")
         }
         return value
     }
 
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        guard case .leaf(.offsetDateTime(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.offsetDateTime(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
         }
         return value
     }
 
     public func localDateTime(atIndex index: Int) throws(TOMLError) -> LocalDateTime {
-        guard case .leaf(.localDateTime(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.localDateTime(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local datetime")
         }
         return value
     }
 
     public func localDate(atIndex index: Int) throws(TOMLError) -> LocalDate {
-        guard case .leaf(.localDate(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.localDate(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local date")
         }
         return value
     }
 
     public func localTime(atIndex index: Int) throws(TOMLError) -> LocalTime {
-        guard case .leaf(.localTime(let value)) = try element(atIndex: index) else {
+        guard case let .leaf(.localTime(value)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local time")
         }
         return value
@@ -99,17 +99,16 @@ public struct TOMLArray: Equatable, Sendable {
 }
 
 extension TOMLArray: Codable {
-    public init(from decoder: any Decoder) throws(TOMLError) {
+    public init(from _: any Decoder) throws(TOMLError) {
         throw .notReallyCodable
     }
 
-    public func encode(to encoder: any Encoder) throws(TOMLError) {
+    public func encode(to _: any Encoder) throws(TOMLError) {
         throw .notReallyCodable
     }
 }
 
-
-extension Array<Any> {
+extension [Any] {
     public init(_ tomlArray: TOMLArray) throws(TOMLError) {
         self = try tomlArray.array()
     }

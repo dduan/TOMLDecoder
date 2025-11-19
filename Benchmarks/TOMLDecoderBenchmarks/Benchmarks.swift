@@ -12,7 +12,7 @@ let benchmarks: @Sendable () -> Void = {
         a = 2
         """
         benchmark.startMeasurement()
-        blackHole(try TOMLTable(source: toml))
+        try blackHole(TOMLTable(source: toml))
     }
 
     Benchmark("Decode one field") { benchmark in
@@ -25,35 +25,35 @@ let benchmarks: @Sendable () -> Void = {
         """
         let decoder = TOMLDecoder()
         benchmark.startMeasurement()
-        blackHole(try decoder.decode(OneField.self, from: toml))
+        try blackHole(decoder.decode(OneField.self, from: toml))
     }
 
     Benchmark("Parse toml.io example") { benchmark in
         let toml = """
-            # This is a TOML document
+        # This is a TOML document
 
-            title = "TOML Example"
+        title = "TOML Example"
 
-            [owner]
-            name = "Tom Preston-Werner"
-            dob = 1979-05-27T07:32:00-08:00
+        [owner]
+        name = "Tom Preston-Werner"
+        dob = 1979-05-27T07:32:00-08:00
 
-            [database]
-            enabled = true
-            ports = [ 8000, 8001, 8002 ]
-            data = [ ["delta", "phi"], [3.14] ]
-            temp_targets = { cpu = 79.5, case = 72.0 }
+        [database]
+        enabled = true
+        ports = [ 8000, 8001, 8002 ]
+        data = [ ["delta", "phi"], [3.14] ]
+        temp_targets = { cpu = 79.5, case = 72.0 }
 
-            [servers]
+        [servers]
 
-            [servers.alpha]
-            ip = "10.0.0.1"
-            role = "frontend"
+        [servers.alpha]
+        ip = "10.0.0.1"
+        role = "frontend"
 
-            [servers.beta]
-            ip = "10.0.0.2"
-            role = "backend"
-            """
+        [servers.beta]
+        ip = "10.0.0.2"
+        role = "backend"
+        """
         benchmark.startMeasurement()
         let result = try TOMLTable(source: toml)
         blackHole(result)
@@ -89,33 +89,33 @@ let benchmarks: @Sendable () -> Void = {
         }
 
         let toml = """
-            # This is a TOML document
+        # This is a TOML document
 
-            title = "TOML Example"
+        title = "TOML Example"
 
-            [owner]
-            name = "Tom Preston-Werner"
-            dob = 1979-05-27T07:32:00-08:00
+        [owner]
+        name = "Tom Preston-Werner"
+        dob = 1979-05-27T07:32:00-08:00
 
-            [database]
-            enabled = true
-            ports = [ 8000, 8001, 8002 ]
-            data = [ ["delta", "phi"], [3.14] ]
-            temp_targets = { cpu = 79.5, case = 72.0 }
+        [database]
+        enabled = true
+        ports = [ 8000, 8001, 8002 ]
+        data = [ ["delta", "phi"], [3.14] ]
+        temp_targets = { cpu = 79.5, case = 72.0 }
 
-            [servers]
+        [servers]
 
-            [servers.alpha]
-            ip = "10.0.0.1"
-            role = "frontend"
+        [servers.alpha]
+        ip = "10.0.0.1"
+        role = "frontend"
 
-            [servers.beta]
-            ip = "10.0.0.2"
-            role = "backend"
-            """
+        [servers.beta]
+        ip = "10.0.0.2"
+        role = "backend"
+        """
         var decoder = TOMLDecoder()
         decoder.strategy.key = .convertFromSnakeCase
         benchmark.startMeasurement()
-        blackHole(try decoder.decode(Config.self, from: toml))
+        try blackHole(decoder.decode(Config.self, from: toml))
     }
 }

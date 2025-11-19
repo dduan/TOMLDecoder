@@ -13,21 +13,21 @@ enum TOMLKey: CodingKey {
 
     var stringValue: String {
         switch self {
-        case .string(let string):
-            return string
-        case .int(let int):
-            return "Index \(int)"
-        case .`super`:
-            return "super"
+        case let .string(string):
+            string
+        case let .int(int):
+            "Index \(int)"
+        case .super:
+            "super"
         }
     }
 
     var intValue: Int? {
         switch self {
-        case .int(let int):
-            return int
+        case let .int(int):
+            int
         default:
-            return nil
+            nil
         }
     }
 }

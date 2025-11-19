@@ -1,17 +1,17 @@
 import Foundation
-import TOMLDecoder
-import Testing
 import ProlepticGregorianTestHelpers
+import Testing
+import TOMLDecoder
 
 // The Foundation does not use a gregorian calendar for dates prior to the cutoff on 1582-10-04.
 // To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use the ProlepticGregorianTestHelpers module
 func epochSecondsViaProlepticHelper(
     year: Int, month: Int = 1, day: Int = 1,
-    hour: Int = 0, minute: Int = 0, second: Int = 0
+    hour: Int = 0, minute: Int = 0, second: Int = 0,
 ) -> Int64 {
-    return hh_proleptic_seconds_since_unix_epoch(
+    hh_proleptic_seconds_since_unix_epoch(
         Int32(year), Int32(month), Int32(day),
-        Int32(hour), Int32(minute), Int32(second)
+        Int32(hour), Int32(minute), Int32(second),
     )
 }
 
@@ -266,7 +266,8 @@ enum TOMLComplianceSupport {
     private static func parseExpectedLocalDateTime(_ value: String) -> LocalDateTime? {
         guard let (datePart, timePart) = splitDateTime(value),
               let date = parseExpectedLocalDate(String(datePart)),
-              let time = parseExpectedLocalTime(String(timePart)) else {
+              let time = parseExpectedLocalTime(String(timePart))
+        else {
             return nil
         }
         return LocalDateTime(date: date, time: time)
@@ -277,7 +278,8 @@ enum TOMLComplianceSupport {
         guard parts.count == 3,
               let year = UInt16(parts[0]),
               let month = UInt8(parts[1]),
-              let day = UInt8(parts[2]) else {
+              let day = UInt8(parts[2])
+        else {
             return nil
         }
         return LocalDate(year: year, month: month, day: day)
@@ -287,7 +289,8 @@ enum TOMLComplianceSupport {
         let parts = value.split(separator: ":")
         guard parts.count == 3,
               let hour = UInt8(parts[0]),
-              let minute = UInt8(parts[1]) else {
+              let minute = UInt8(parts[1])
+        else {
             return nil
         }
 
@@ -330,7 +333,7 @@ enum TOMLComplianceSupport {
 
         let components = calendar.dateComponents(
             [.year, .month, .day, .hour, .minute, .second, .nanosecond],
-            from: date!
+            from: date!,
         )
 
         var seconds = Double(epochSecondsViaProlepticHelper(
@@ -339,7 +342,7 @@ enum TOMLComplianceSupport {
             day: components.day!,
             hour: components.hour!,
             minute: components.minute!,
-            second: components.second!
+            second: components.second!,
         ))
 
         if let nanoseconds = components.nanosecond {
@@ -348,7 +351,6 @@ enum TOMLComplianceSupport {
 
         return Date(timeIntervalSince1970: TimeInterval(seconds))
     }
-
 
     private static func splitDateTime(_ value: String) -> (Substring, Substring)? {
         guard let index = value.firstIndex(where: { $0 == "T" || $0 == "t" || $0 == " " }) else {
@@ -363,8 +365,6 @@ enum TOMLComplianceSupport {
         let timePart = value[next...]
         return (datePart, timePart)
     }
-
-
 
     private static func pathDescription(_ path: [String]) -> String {
         guard !path.isEmpty else {

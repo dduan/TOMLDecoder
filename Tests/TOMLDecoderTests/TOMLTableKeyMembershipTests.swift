@@ -2,22 +2,22 @@ import Testing
 import TOMLDecoder
 
 private let toml = """
-    a = 1
-    b = 1988-03-29
+a = 1
+b = 1988-03-29
 
-    [c.e.o]
-    first_name = "Tim"
+[c.e.o]
+first_name = "Tim"
 
-    [[players]]
+[[players]]
 
-    id = "abc"
-    health = 123
+id = "abc"
+health = 123
 
-    [[players]]
+[[players]]
 
-    id = "cde"
-    health = 456
-    """
+id = "cde"
+health = 456
+"""
 @Suite
 struct TOMLTableKeyMembershipTests {
     @Test
@@ -25,7 +25,7 @@ struct TOMLTableKeyMembershipTests {
         let table = try TOMLTable(source: toml)
         #expect(table.allKeys == ["a", "b", "players", "c"])
     }
-    
+
     @Test
     func `root table key contains`() throws {
         let table = try TOMLTable(source: toml)
