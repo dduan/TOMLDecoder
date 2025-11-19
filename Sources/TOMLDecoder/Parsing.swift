@@ -184,6 +184,35 @@ struct TOMLArrayImplementation {
     }
 }
 
+ extension TOMLArrayImplementation.Element {
+     func value(from source: Deserializer) throws(TOMLError) -> Any {
+         switch self {
+         case .array(let arrayIndex):
+             return try source.arrays[arrayIndex].array(source: source)
+         case .table(let tableIndex):
+             return try source.tables[tableIndex].dictionary(source: source)
+         case .leaf(.bool(let boolValue)):
+             return boolValue
+         case .leaf(.string(let stringValue)):
+             return try stringMaybe(stringValue)!
+         case .leaf(.offsetDateTime(let offsetDateTime)):
+             return offsetDateTime
+         case .leaf(.localDateTime(let localDateTime)):
+             return localDateTime
+         case .leaf(.localDate(let localDate)):
+             return localDate
+         case .leaf(.localTime(let localTime)):
+             return localTime
+         case .leaf(.double(let doubleValue)):
+             return doubleValue
+         case .leaf(.int(let intValue)):
+             return intValue
+         case .leaf(.mixed):
+             throw TOMLError.typeMismatchInArray(index: 0, expected: "valid value")
+         }
+     }
+ }
+
 struct KeyValuePair {
     let key: String
     var value: String.UTF8View.SubSequence
@@ -1019,7 +1048,7 @@ extension Deserializer {
         if let keyTransform {
             return keyTransform(String(Substring(sourceUTF8[start..<end])))
         }
-        
+
         return String(Substring(sourceUTF8[start..<end]))
     }
 

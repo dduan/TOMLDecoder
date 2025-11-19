@@ -5,7 +5,7 @@ public struct TOMLArray {
     let index: Int
 
     public var count: Int {
-        return source.arrays[self.index].elements.count
+        source.arrays[self.index].elements.count
     }
 
     @inline(__always)
@@ -95,6 +95,23 @@ public struct TOMLArray {
             throw TOMLError.arrayOutOfBound(index: index, bound: count)
         }
         return try source.arrays[index].array(source: source)
+    }
+}
+
+extension TOMLArray: RandomAccessCollection {
+    public typealias Element = Any
+    public typealias Index = Int
+
+    public var startIndex: Int { 0 }
+    public var endIndex: Int { count }
+    public func index(after i: Int) -> Int { i + 1 }
+
+    public subscript(position: Int) -> Any {
+        do {
+            return try element(atIndex: position).value(from: source)
+        } catch {
+            fatalError("Index \(position) is out of bounds")
+        }
     }
 }
 
