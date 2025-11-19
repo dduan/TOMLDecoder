@@ -88,7 +88,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtoc
     % end
     %{
     native_types = [("Int64", "integer"), ("String", "string"), ("Bool", "bool")]
-    datetime_types = [("OffsetDateTime", "offsetDateTime"), ("LocalDateTime", "localDateTime"), ("LocalDate", "localDate"), ("LocalTime", "localTime")]
+    datetime_types = [("OffsetDateTime", "offsetDateTime"), ("LocalDateTime", "localDateTime"), ("LocalDate", "localDate"), ("LocalTime", "localTime"), ("TOMLArray", "array"), ("TOMLTable", "table")]
     }%
     % for type in native_types + datetime_types:
     func decode(_ type: ${type[0]}.Type, forKey key: Key) throws -> ${type[0]} {

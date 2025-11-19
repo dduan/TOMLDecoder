@@ -276,6 +276,20 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtoc
             throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
         }
     }
+    func decode(_ type: TOMLArray.Type, forKey key: Key) throws -> TOMLArray {
+        do {
+            return try self.table.array(forKey: key.stringValue)
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+    func decode(_ type: TOMLTable.Type, forKey key: Key) throws -> TOMLTable {
+        do {
+            return try self.table.table(forKey: key.stringValue)
+        } catch {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: self.codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
 
     func decode(_ type: Date.Type, forKey key: Key) throws -> Date {
         if !self.decoder.isLenient {
@@ -352,6 +366,10 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey> : KeyedDecodingContainerProtoc
             return try decode(LocalDate.self, forKey: key) as! T
         } else if type == LocalTime.self {
             return try decode(LocalTime.self, forKey: key) as! T
+        } else if type == TOMLArray.self {
+            return try decode(TOMLArray.self, forKey: key) as! T
+        } else if type == TOMLTable.self {
+            return try decode(TOMLTable.self, forKey: key) as! T
         } else if type == Int.self {
             return try decode(Int.self, forKey: key) as! T
         } else if type == Int8.self {
