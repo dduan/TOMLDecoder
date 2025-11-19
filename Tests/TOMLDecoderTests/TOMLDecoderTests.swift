@@ -419,4 +419,26 @@ struct TOMLDecoderTests {
 
         #expect(result == expectation)
     }
+
+    @Test func `mixing containers`() throws {
+        struct Test: Decodable, Equatable {
+            let numbers: [[Int64]]
+            let strings: TOMLArray
+            let doubles: [TOMLArray]
+            let tableInArray: [TOMLTable]
+            let tableInTable: [String: TOMLTable]
+        }
+
+        let toml = """
+            numbers = [[1, 2], [3, 4]]
+            strings = [["a", "b"], ["c", "d"]]
+            doubles = [[1.2]]
+            tableInArray = [{a = 1}]
+            tableInTable = { b = { c = "yo" } }
+            """
+
+        let result = try TOMLDecoder().decode(Test.self, from: toml)
+
+        #expect(result.numbers == [[1, 2], [3, 4]])
+    }
 }

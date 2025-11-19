@@ -74,7 +74,7 @@ public struct TOMLDecoder {
     public func decode<T: Decodable>(_ type: T.Type, from text: String) throws -> T {
         let topLevel: TOMLTable
         do {
-            var parser = Deserializer(source: text, keyTransform: strategy.key.converter)
+            let parser = Deserializer(source: text, keyTransform: strategy.key.converter)
             topLevel = try parser.parse()
         } catch {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid TOML.", underlyingError: error))
@@ -106,7 +106,7 @@ extension TOMLDecoder {
     ///            | Array            | `Swift.[Any]`               |
     ///            | Table            | `Swift.[String: Any]`       |
     public static func tomlTable(from text: String) throws -> [String: Any] {
-        var parser = Deserializer(source: text, keyTransform: nil)
+        let parser = Deserializer(source: text, keyTransform: nil)
         let table = try parser.parse()
         return try table.dictionary()
     }
@@ -137,7 +137,7 @@ extension TOMLDecoder {
         guard let source = String(bytes: bytes, encoding: .utf8) else {
             throw TOMLError.invalidUTF8
         }
-        var parser = Deserializer(source: source, keyTransform: nil)
+        let parser = Deserializer(source: source, keyTransform: nil)
         let table = try parser.parse()
         return try table.dictionary()
     }

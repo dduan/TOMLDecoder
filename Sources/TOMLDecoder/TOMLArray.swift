@@ -1,6 +1,6 @@
 import Foundation
 
-public struct TOMLArray {
+public struct TOMLArray: Equatable, Sendable {
     let source: Deserializer
     let index: Int
 
@@ -95,6 +95,16 @@ public struct TOMLArray {
             throw TOMLError.arrayOutOfBound(index: index, bound: count)
         }
         return try source.arrays[index].array(source: source)
+    }
+}
+
+extension TOMLArray: Codable {
+    public init(from decoder: any Decoder) throws(TOMLError) {
+        throw .notReallyCodable
+    }
+
+    public func encode(to encoder: any Encoder) throws(TOMLError) {
+        throw .notReallyCodable
     }
 }
 
