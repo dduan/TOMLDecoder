@@ -1,4 +1,39 @@
-## Development
+# Changelog
+
+## In Development
+
+This release introduces source-breaking changes from 0.3.x.
+
+The lower-level parser APIs and architecture are introduced with an
+eye towards an eventual 1.0 release.
+
+### API change overview
+
+At the highest level, TOMLDecoder still serves the role of providing
+a `Swift.Decoder` implementation for the TOML language. A TOML table
+can be transformed directly to a Swift `Codable`, similar to what
+`Foundation.JSONDecoder` does for JSON.
+
+#### Breaking changes
+
+* `TOMLDecoder` is no longer an `open class`. It's now a struct.
+* Decoding strategies are represented and stored differently.
+* `Deserializer` is removed. Its functionalities are subsumed by
+  new APIs.
+
+#### New APIs
+
+* A set of types to represent offset date-time, local date/time.
+* `TOMLArray` and `TOMLTable` represents parsed TOML tables and arrays.
+* Strongly typed access to fields e.g. `.string(forKey: "foo")` or
+  `.integer(atIndex: 0)`.
+
+### Infrastructure improvements
+
+The full toml-lang/toml-test suite are now imported as unit tests.
+
+A new documentation site:
+https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
 
 ## 0.3.2
 
