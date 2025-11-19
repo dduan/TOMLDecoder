@@ -98,22 +98,6 @@ public struct TOMLArray {
     }
 }
 
-extension TOMLArray: RandomAccessCollection {
-    public typealias Element = Any
-    public typealias Index = Int
-
-    public var startIndex: Int { 0 }
-    public var endIndex: Int { count }
-    public func index(after i: Int) -> Int { i + 1 }
-
-    public subscript(position: Int) -> Any {
-        do {
-            return try element(atIndex: position).value(from: source)
-        } catch {
-            fatalError("Index \(position) is out of bounds")
-        }
-    }
-}
 
 extension Array<Any> {
     public init(_ tomlArray: TOMLArray) throws(TOMLError) {
