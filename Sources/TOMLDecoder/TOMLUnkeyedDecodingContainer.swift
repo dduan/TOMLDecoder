@@ -325,6 +325,30 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+    mutating func decode(_ type: TOMLArray.Type) throws -> TOMLArray {
+        guard !self.isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        }
+        do {
+            let decoded = try self.array.array(atIndex: self.currentIndex)
+            self.currentIndex += 1
+            return decoded
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+    mutating func decode(_ type: TOMLTable.Type) throws -> TOMLTable {
+        guard !self.isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        }
+        do {
+            let decoded = try self.array.table(atIndex: self.currentIndex)
+            self.currentIndex += 1
+            return decoded
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+        }
+    }
 
     mutating func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         guard !self.isAtEnd else {
@@ -348,6 +372,10 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             return try decode(String.self) as! T
         } else if type == Bool.self {
             return try decode(Bool.self) as! T
+        } else if type == TOMLArray.self {
+            return try decode(TOMLArray.self) as! T
+        } else if type == TOMLTable.self {
+            return try decode(TOMLTable.self) as! T
         } else if type == Int.self {
             return try decode(Int.self) as! T
         } else if type == Int8.self {

@@ -2,7 +2,7 @@ import Foundation
 
 extension TOMLTable {
     public init(source: String) throws(TOMLError) {
-        var parser = Deserializer(source: source, keyTransform: nil)
+        let parser = Deserializer(source: source, keyTransform: nil)
         self = try parser.parse()
     }
 
@@ -14,7 +14,7 @@ extension TOMLTable {
     }
 }
 
-public struct TOMLTable {
+public struct TOMLTable: Sendable, Equatable {
     let source: Deserializer
     let index: Int
 
@@ -154,6 +154,16 @@ public struct TOMLTable {
 
     func dictionary() throws(TOMLError) -> [String: Any] {
         try source.tables[index].dictionary(source: source)
+    }
+}
+
+extension TOMLTable: Codable {
+    public init(from decoder: any Decoder) throws {
+        throw TOMLError.notReallyCodable
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        throw TOMLError.notReallyCodable
     }
 }
 

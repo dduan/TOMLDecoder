@@ -101,7 +101,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     % end
 
     %{
-    native_types = [("Int64", "integer"), ("OffsetDateTime", "offsetDateTime"), ("LocalDateTime", "localDateTime"), ("LocalDate", "localDate"), ("LocalTime", "localTime"), ("String", "string"), ("Bool", "bool")]
+    native_types = [("Int64", "integer"), ("OffsetDateTime", "offsetDateTime"), ("LocalDateTime", "localDateTime"), ("LocalDate", "localDate"), ("LocalTime", "localTime"), ("String", "string"), ("Bool", "bool"), ("TOMLArray", "array"), ("TOMLTable", "table")]
     }%
     % for type in native_types:
     mutating func decode(_ type: ${type[0]}.Type) throws -> ${type[0]} {

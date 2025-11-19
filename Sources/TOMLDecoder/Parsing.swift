@@ -103,7 +103,7 @@ extension Token: CustomDebugStringConvertible {
     }
 }
 
-enum LeafKind {
+enum LeafKind: Equatable {
     case int(Int64)
     case double(Double)
     case bool(Bool)
@@ -156,10 +156,35 @@ enum LeafKind {
             false
         }
     }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.int(let lhsValue), .int(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.double(let lhsValue), .double(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.bool(let lhsValue), .bool(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.string(let lhsValue), .string(let rhsValue)):
+            return lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
+        case (.offsetDateTime(let lhsValue), .offsetDateTime(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.localDateTime(let lhsValue), .localDateTime(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.localDate(let lhsValue), .localDate(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.localTime(let lhsValue), .localTime(let rhsValue)):
+            return lhsValue == rhsValue
+        case (.mixed, .mixed):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
-struct TOMLArrayImplementation {
-    enum Element {
+struct TOMLArrayImplementation: Equatable, Sendable {
+    enum Element: Equatable {
         case leaf(LeafKind)
         case array(Int)
         case table(Int)
@@ -184,12 +209,16 @@ struct TOMLArrayImplementation {
     }
 }
 
-struct KeyValuePair {
+struct KeyValuePair: Equatable {
     let key: String
     var value: String.UTF8View.SubSequence
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.key == rhs.key && lhs.value.startIndex == rhs.value.startIndex && lhs.value.endIndex == rhs.value.endIndex
+    }
 }
 
-struct TOMLTableImplementation {
+struct TOMLTableImplementation: Equatable, Sendable {
     enum Value {
         case keyValue(Int)
         case array(Int)
@@ -268,7 +297,11 @@ struct TOMLTableImplementation {
     }
 }
 
-struct Deserializer {
+final class Deserializer: Equatable, @unchecked Sendable {
+    static func == (lhs: Deserializer, rhs: Deserializer) -> Bool {
+        lhs === rhs
+    }
+
     var tables: [TOMLTableImplementation]
     var arrays: [TOMLArrayImplementation] = []
     var keyValues: [KeyValuePair] = []
@@ -278,9 +311,9 @@ struct Deserializer {
     var token: Token
     var currentTable: Int
     var tablePath: [(String, Token)] = []
-    var keyTransform: ((String) -> String)?
+    var keyTransform: (@Sendable (String) -> String)?
 
-    init(source: String, keyTransform: ((String) -> String)?) {
+    init(source: String, keyTransform: (@Sendable (String) -> String)?) {
         self.tables = [TOMLTableImplementation()]
         self.originalSource = source
         self.sourceUTF8 = source.utf8
@@ -1023,7 +1056,7 @@ extension Deserializer {
         return String(Substring(sourceUTF8[start..<end]))
     }
 
-    mutating func createKeyValue(token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
+    func createKeyValue(token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
         let key = try normalizeKey(token: token)
         if tables[tableIndex][self, key] != nil {
             throw TOMLError.badKey(lineNumber: token.lineNumber)
@@ -1036,7 +1069,7 @@ extension Deserializer {
         return index
     }
 
-    mutating func createKeyTable(token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
+    func createKeyTable(token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(token: token)
 
         // Check if parent table is readOnly (inline table)
@@ -1069,7 +1102,7 @@ extension Deserializer {
         return index
     }
 
-    mutating func createKeyArray(token: Token, inTable tableIndex: Int, kind: TOMLArrayImplementation.Kind? = nil) throws(TOMLError) -> Int {
+    func createKeyArray(token: Token, inTable tableIndex: Int, kind: TOMLArrayImplementation.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(token: token)
         if tables[tableIndex][self, key] != nil {
             throw TOMLError.keyExists(lineNumber: token.lineNumber)
@@ -1081,7 +1114,7 @@ extension Deserializer {
         return index
     }
 
-    mutating func nextToken(isDotSpecial: Bool) throws(TOMLError) {
+    func nextToken(isDotSpecial: Bool) throws(TOMLError) {
         var lineNumber = token.lineNumber
         var position = token.text.startIndex
 
@@ -1221,7 +1254,7 @@ extension Deserializer {
         )
     }
 
-    mutating func scanString(text: String.UTF8View.SubSequence, lineNumber: Int, dotIsSpecial: Bool) throws(TOMLError) {
+    func scanString(text: String.UTF8View.SubSequence, lineNumber: Int, dotIsSpecial: Bool) throws(TOMLError) {
         let start = text.startIndex
 
         if text.starts(with: Constants.tripleSingleQuote) {
@@ -1439,7 +1472,7 @@ extension Deserializer {
         )
     }
 
-    mutating func skipNewlines(isDotSpecial: Bool) throws(TOMLError) {
+    func skipNewlines(isDotSpecial: Bool) throws(TOMLError) {
         while token.kind == .newline {
             try nextToken(isDotSpecial: isDotSpecial)
             if token.eof {
@@ -1448,14 +1481,14 @@ extension Deserializer {
         }
     }
 
-    mutating func eatToken(type: Token.Kind, isDotSpecial: Bool) throws(TOMLError) {
+    func eatToken(type: Token.Kind, isDotSpecial: Bool) throws(TOMLError) {
         if token.kind != type {
             throw TOMLError.internalError(lineNumber: token.lineNumber)
         }
         try nextToken(isDotSpecial: isDotSpecial)
     }
 
-    mutating func parseInlineTable(tableIndex: Int) throws(TOMLError) {
+    func parseInlineTable(tableIndex: Int) throws(TOMLError) {
         try eatToken(type: .lbrace, isDotSpecial: true)
 
         while true {
@@ -1493,7 +1526,7 @@ extension Deserializer {
         tables[tableIndex].readOnly = true
     }
 
-    mutating func parseArray(arrayIndex: Int) throws(TOMLError) {
+    func parseArray(arrayIndex: Int) throws(TOMLError) {
         try eatToken(type: .lbracket, isDotSpecial: false)
 
         var array = arrays[arrayIndex]
@@ -1571,7 +1604,7 @@ extension Deserializer {
         arrays[arrayIndex] = array
     }
 
-    mutating func parseKeyValue(tableIndex: Int) throws(TOMLError) {
+    func parseKeyValue(tableIndex: Int) throws(TOMLError) {
         let table = tables[tableIndex]
         if table.readOnly {
             throw TOMLError.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table")
@@ -1652,7 +1685,7 @@ extension Deserializer {
         return nil
     }
 
-    mutating func fillTablePath() throws(TOMLError) {
+    func fillTablePath() throws(TOMLError) {
         let lineNumber = token.lineNumber
         tablePath.removeAll(keepingCapacity: true)
 
@@ -1680,7 +1713,7 @@ extension Deserializer {
         }
     }
 
-    mutating func walkTablePath() throws(TOMLError) {
+    func walkTablePath() throws(TOMLError) {
         var tableIndex = 0
         for (key, _) in tablePath {
             switch tables[tableIndex][self, key] {
@@ -1718,7 +1751,7 @@ extension Deserializer {
         currentTable = tableIndex
     }
 
-    mutating func parseSelect() throws(TOMLError) {
+    func parseSelect() throws(TOMLError) {
         assert(token.kind == .lbracket)
         let index = token.text.startIndex
         let nextIndex = sourceUTF8.index(after: index)
@@ -1778,7 +1811,7 @@ extension Deserializer {
         }
     }
 
-    mutating func parse() throws(TOMLError) -> TOMLTable {
+    func parse() throws(TOMLError) -> TOMLTable {
         while !token.eof {
             switch token.kind {
             case .newline:

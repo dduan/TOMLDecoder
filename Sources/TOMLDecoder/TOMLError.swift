@@ -1,4 +1,5 @@
 public enum TOMLError: Error {
+    case notReallyCodable
     case invalidUTF8
     case badKey(lineNumber: Int)
     case expectedHexCharacters(UTF8.CodeUnit, Int)
@@ -70,6 +71,8 @@ extension TOMLError: CustomStringConvertible {
             return "Invalid value in table for key '\(key)'."
         case .invalidDateTimeComponents(let components):
             return "Invalid date-time components: \(components)."
+        case .notReallyCodable:
+            return "This type is not generally codable. Use TOMLDecoder to decode it as part of a larger Codable."
         }
     }
 }
