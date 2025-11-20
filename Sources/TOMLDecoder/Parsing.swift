@@ -11,50 +11,50 @@ enum Constants {
 }
 
 enum CodeUnits {
-    static let equal = "=".utf8.first!
-    static let comma = ",".utf8.first!
-    static let lbrace = "{".utf8.first!
-    static let rbrace = "}".utf8.first!
-    static let lbracket = "[".utf8.first!
-    static let rbracket = "]".utf8.first!
-    static let pound = "#".utf8.first!
-    static let backslash = "\\".utf8.first!
-    static let backspace = "\u{0008}".utf8.first!
-    static let cr = "\r".utf8.first!
-    static let colon = ":".utf8.first!
-    static let dot = ".".utf8.first!
-    static let doubleQuote = "\"".utf8.first!
-    static let formfeed = "\u{000c}".utf8.first!
-    static let lf = "\n".utf8.first!
-    static let minus = "-".utf8.first!
-    static let plus = "+".utf8.first!
-    static let singleQuote = "'".utf8.first!
-    static let space = " ".utf8.first!
-    static let tab = "\t".utf8.first!
-    static let underscore = "_".utf8.first!
+    static let equal: UTF8.CodeUnit = 61
+    static let comma: UTF8.CodeUnit = 44
+    static let lbrace: UTF8.CodeUnit = 123
+    static let rbrace: UTF8.CodeUnit = 125
+    static let lbracket: UTF8.CodeUnit = 91
+    static let rbracket: UTF8.CodeUnit = 93
+    static let pound: UTF8.CodeUnit = 35
+    static let backslash: UTF8.CodeUnit = 92
+    static let backspace: UTF8.CodeUnit = 8
+    static let cr: UTF8.CodeUnit = 13
+    static let colon: UTF8.CodeUnit = 58
+    static let dot: UTF8.CodeUnit = 46
+    static let doubleQuote: UTF8.CodeUnit = 34
+    static let formfeed: UTF8.CodeUnit = 12
+    static let lf: UTF8.CodeUnit = 10
+    static let minus: UTF8.CodeUnit = 45
+    static let plus: UTF8.CodeUnit = 43
+    static let singleQuote: UTF8.CodeUnit = 39
+    static let space: UTF8.CodeUnit = 32
+    static let tab: UTF8.CodeUnit = 9
+    static let underscore: UTF8.CodeUnit = 95
 
-    static let number0 = "0".utf8.first!
-    static let number1 = "1".utf8.first!
-    static let number7 = "7".utf8.first!
-    static let number9 = "9".utf8.first!
+    static let number0: UTF8.CodeUnit = 48
+    static let number1: UTF8.CodeUnit = 49
+    static let number7: UTF8.CodeUnit = 55
+    static let number9: UTF8.CodeUnit = 57
 
-    static let lowerA = "a".utf8.first!
-    static let lowerB = "b".utf8.first!
-    static let lowerE = "e".utf8.first!
-    static let lowerF = "f".utf8.first!
-    static let lowerN = "n".utf8.first!
-    static let lowerO = "o".utf8.first!
-    static let lowerR = "r".utf8.first!
-    static let lowerT = "t".utf8.first!
-    static let lowerU = "u".utf8.first!
-    static let lowerX = "x".utf8.first!
-    static let lowerZ = "z".utf8.first!
-    static let upperA = "A".utf8.first!
-    static let upperE = "E".utf8.first!
-    static let upperF = "F".utf8.first!
-    static let upperT = "T".utf8.first!
-    static let upperU = "U".utf8.first!
-    static let upperZ = "Z".utf8.first!
+    static let lowerA: UTF8.CodeUnit = 97
+    static let lowerB: UTF8.CodeUnit = 98
+    static let lowerE: UTF8.CodeUnit = 101
+    static let lowerF: UTF8.CodeUnit = 102
+    static let lowerN: UTF8.CodeUnit = 110
+    static let lowerO: UTF8.CodeUnit = 111
+    static let lowerR: UTF8.CodeUnit = 114
+    static let lowerT: UTF8.CodeUnit = 116
+    static let lowerU: UTF8.CodeUnit = 117
+    static let lowerX: UTF8.CodeUnit = 120
+    static let lowerZ: UTF8.CodeUnit = 122
+    static let upperA: UTF8.CodeUnit = 65
+    static let upperE: UTF8.CodeUnit = 69
+    static let upperF: UTF8.CodeUnit = 70
+    static let upperT: UTF8.CodeUnit = 84
+    static let upperU: UTF8.CodeUnit = 85
+    static let upperZ: UTF8.CodeUnit = 90
 }
 
 extension UTF8.CodeUnit {
@@ -667,7 +667,7 @@ func intMaybe(_ text: String.UTF8View.SubSequence, mustBeInt: Bool) throws(TOMLE
         case 16:
             codeUnit.isHexDigit
         case 2:
-            codeUnit == CodeUnits.number0 || codeUnit == "1".utf8.first!
+            codeUnit == CodeUnits.number0 || codeUnit == CodeUnits.number1
         case 8:
             CodeUnits.number0 <= codeUnit && codeUnit <= CodeUnits.number7
         default:
