@@ -78,13 +78,9 @@ jobs:
 
           COMMENT_FILE="benchmark_comment.md"
 
-          # Header
-          {
-            echo "## Pull request benchmark comparison"
-          } > "$COMMENT_FILE"
-
+          touch "$COMMENT_FILE"
           # Run baseline check and capture exit status (regressions vs ok)
-          if swift package benchmark baseline check main pull_request --format markdown >> "$COMMENT_FILE"; then
+          if swift package benchmark baseline check main pull_request --format markdown; then
             echo >> "$COMMENT_FILE"
             echo "_No performance regressions detected._" >> "$COMMENT_FILE"
             echo "exitStatus=0" >> $GITHUB_ENV
