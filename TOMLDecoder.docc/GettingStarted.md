@@ -12,14 +12,13 @@ Add the folloving to your package dependencies:
 
 ```swift
 .package(url: "https://github.com/dduan/TOMLDecoder", .upToNextMinor(from: "0.3.2")),
-
 ```
 
 
 In a target's dependencies, add:
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", from: "0.3.2")
+.product(name: "TOMLDecoder", package: "TOMLDecoder"),
 ```
 
 Run `swift build`. 
