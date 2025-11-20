@@ -7,7 +7,7 @@ TOMLDECODER_DOCS=1 swift build --target TOMLDecoder \
   -Xswiftc .build/symbol-graphs
 TOMLDECODER_DOCS=1 swift package \
   --allow-writing-to-directory Docs \
-  generate-documentation \
+  generate-documentation TOMLDecoder.docc \
   --target TOMLDecoder \
   --disable-indexing \
   --transform-for-static-hosting \
