@@ -9,10 +9,11 @@ jobs:
   swiftformat:
     name: Swift
     runs-on: ubuntu-latest
+    steps:
     - uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: 6.2
-    steps:
+
     - name: Checkout repository
       uses: actions/checkout@v5
 
