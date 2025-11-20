@@ -11,7 +11,7 @@ if [ -d ".benchmarkBaselines/TOMLDecoderBenchmarks/$baseline" ]; then
 else
     git checkout "$baseline"
     swift package -c release --allow-writing-to-package-directory \
-        benchmark baseline update "$baseline"
+        benchmark baseline update "$baseline" --grouping metric
 fi
 
 git checkout "$target"
