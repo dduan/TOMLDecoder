@@ -94,6 +94,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.benchmark.outputs.comment }}
+          comment-tag: execution
 
       - name: Exit with correct status
         if: ${{ env.hasBenchmark == '1' }}
