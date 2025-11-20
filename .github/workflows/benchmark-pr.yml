@@ -11,26 +11,21 @@ env:
 jobs:
   benchmark-delta:
     name: PR vs main
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
       issues: write
       pull-requests: write
-
-    strategy:
-      matrix:
-        os: [macos-latest]
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Homebrew Mac
-        if: ${{ runner.os == 'macOS' }}
+      - name: Ubuntu deps
         run: |
-          echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
-          brew install jemalloc
+          sudo apt-get update
+          sudo apt-get install -y libjemalloc-dev
 
       - name: Git URL token override and misc
         run: |
