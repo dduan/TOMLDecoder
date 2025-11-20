@@ -3,6 +3,9 @@ name: Code Generation
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/.gyb'
+      - 'Scripts/**'
 
 jobs:
   test-codegen:
