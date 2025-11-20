@@ -26,12 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Homebrew Mac
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
-          brew install jemalloc
-
       - name: Ubuntu deps
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -40,7 +34,6 @@ jobs:
 
       - name: Git URL token override and misc
         run: |
-          #/usr/bin/ordo-performance
           [ -d Benchmarks ] && echo "hasBenchmark=1" >> $GITHUB_ENV
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
 
