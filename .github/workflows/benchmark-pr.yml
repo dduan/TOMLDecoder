@@ -11,15 +11,11 @@ env:
 jobs:
   benchmark-delta:
     name: PR vs main
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
       issues: write
       pull-requests: write
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -27,7 +23,6 @@ jobs:
           fetch-depth: 0
 
       - name: Ubuntu deps
-        if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y libjemalloc-dev
@@ -70,8 +65,7 @@ jobs:
           set -eo pipefail
           COMMENT_FILE="benchmark_comment.md"
           touch "$COMMENT_FILE"
-          swift package benchmark baseline check main pull_request
-          swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> "$COMMENT_FILE"
+          swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown --grouping metric >> "$COMMENT_FILE"
           cat "$COMMENT_FILE" >> "$GITHUB_STEP_SUMMARY"
 
           # Expose full comment as step output
@@ -85,7 +79,7 @@ jobs:
         if: ${{ env.hasBenchmark == '1' }}
         uses: thollander/actions-comment-pull-request@v3
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.benchmark.outputs.comment }}
           comment-tag: execution
 
