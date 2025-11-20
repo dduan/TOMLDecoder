@@ -1,7 +1,6 @@
 import Foundation
 
 enum Constants {
-    static let validBareKeyCharacters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-".utf8
     static let tripleSingleQuote = "'''".utf8
     static let tripleDoubleQuote = #"""""#.utf8
     static let escapeChars = #"btnfr"\\"#.utf8
@@ -1042,7 +1041,13 @@ extension Deserializer {
             return result
         }
 
-        guard sourceUTF8[start ..< end].allSatisfy({ Constants.validBareKeyCharacters.contains($0) }) else {
+        guard sourceUTF8[start ..< end].allSatisfy({ byte in
+            (byte >= 48 && byte <= 57) || // 0-9
+                (byte >= 65 && byte <= 90) || // A-Z
+                (byte >= 97 && byte <= 122) || // a-z
+                byte == 95 || // _
+                byte == 45 // -
+        }) else {
             throw TOMLError.badKey(lineNumber: token.lineNumber)
         }
 
