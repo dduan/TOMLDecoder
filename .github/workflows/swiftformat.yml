@@ -10,14 +10,24 @@ jobs:
     name: Swift
     runs-on: ubuntu-latest
     steps:
-    - uses: SwiftyLab/setup-swift@latest
-      with:
-        swift-version: 6.2
-
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    - name: Check for Swift file changes
+      id: changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          swift:
+            - '**/*.swift'
+
+    - uses: SwiftyLab/setup-swift@latest
+      if: steps.changes.outputs.swift == 'true'
+      with:
+        swift-version: 6.2
+
     - name: Cache SwiftPM artifacts
+      if: steps.changes.outputs.swift == 'true'
       uses: actions/cache@v4
       with:
         path: |
@@ -28,4 +38,5 @@ jobs:
           ${{ runner.os }}-swiftpm-format
 
     - name: Format code
+      if: steps.changes.outputs.swift == 'true'
       run: Scripts/format.sh --lint
