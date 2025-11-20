@@ -2,9 +2,9 @@ SHELL               = /bin/bash
 export LANG         = en_US.UTF-8
 export LC_CTYPE     = en_US.UTF-8
 
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := format
 
-.PHONY: build test generate-code generate-tests benchmark
+.PHONY: build test generate-code generate-tests benchmark format
 
 generate-code:
 	@Scripts/generate-code.sh
