@@ -13,7 +13,9 @@
 ///
 /// > Important: Offset date-time in TOML is defined by RFC 3339,
 /// > which intepret the date with proleptic Gregorian calendar.
-/// > This is different from Foundation's usage of the Gregorian calendar.
+/// > This is different from Foundation's usage of the Gregorian calendar,
+/// > which follows the Julian calendar up to 1582-10-04,
+/// > then transitions to the Gregorian calendar after that.
 /// > This means for ancient dates,
 /// > ``OffsetDateTime`` may disagree with `Foundation.Date` on how much time has passed since a reference date.
 /// > For modern dates, there's no difference between the two.
@@ -416,13 +418,13 @@ extension String {
 import Foundation
 
 extension DateComponents {
-    init(offsetDateTime: OffsetDateTime) {
-        self.init(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
-    }
-
-    init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
+    /// Create a new `Foundation.DateComponents` from an offset date-time.
+    /// Only the literal components of a offset date-time will be in the components.
+    /// the calendar component, for example, is not set.
+    ///
+    /// - Parameter offsetDateTime: The offset date-time to convert.
+    public init(offsetDateTime: OffsetDateTime) {
         self.init(
-            calendar: calendar,
             timeZone: TimeZone(secondsFromGMT: Int(offsetDateTime.offset) * 60),
             year: Int(offsetDateTime.date.year),
             month: Int(offsetDateTime.date.month),
@@ -436,12 +438,26 @@ extension DateComponents {
 }
 
 extension Date {
-    init(offsetDateTime: OffsetDateTime) {
-        self.init(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
-    }
-
-    init(offsetDateTime: OffsetDateTime, calendar: Calendar) {
-        let components = DateComponents(offsetDateTime: offsetDateTime, calendar: calendar)
+    /// Create a new `Foundation.Date` from an offset date-time.
+    ///
+    /// - Parameter offsetDateTime: The offset date-time to convert.
+    /// - Parameter calendar: The calendar based on which the date is constructed.
+    ///   Defaults to the Gregorian calendar.
+    ///   Note that Foundation's Gregorian calendar is NOT proleptic.
+    ///   It follows the Julian calendar up to 1582-10-04,
+    ///   then the Gregorian calendar after that.
+    ///   According to the TOML specification,
+    ///   an offset date-time should follow the proleptic Gregorian calendar,
+    ///   which extends the Gregorian calendar backwards to year 1.
+    ///   Therefore,
+    ///   for ancient dates,
+    ///   the resulting `Date`'s `.timeIntervalSince1970` or `.timeIntervalSinceReferenceDate` may have a different value as defined in the TOML specification,
+    ///   which follows RFC 3339.
+    ///   To get the proleptic Gregorian time interval,
+    ///   use ``OffsetDateTime/timeIntervalSince2001`` or ``OffsetDateTime/timeIntervalSince1970``.
+    public init(offsetDateTime: OffsetDateTime, calendar: Calendar = Calendar(identifier: .gregorian)) {
+        var components = DateComponents(offsetDateTime: offsetDateTime)
+        components.calendar = calendar
         self = components.date!
     }
 }
