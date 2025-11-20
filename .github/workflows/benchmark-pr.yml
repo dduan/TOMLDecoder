@@ -80,14 +80,7 @@ jobs:
 
           # Header
           {
-            echo "## Pull request benchmark comparison [${{ matrix.os }}]"
-            echo
-            echo "_Run at $(date -Iseconds)_"
-            echo
-            echo "Baseline: \`main\`"
-            echo "Candidate: \`pull_request\`"
-            echo
-            echo "### Baseline check"
+            echo "## Pull request benchmark comparison"
           } > "$COMMENT_FILE"
 
           # Run baseline check and capture exit status (regressions vs ok)
@@ -100,11 +93,6 @@ jobs:
             echo "_Pull request had performance regressions._" >> "$COMMENT_FILE"
             echo "exitStatus=1" >> $GITHUB_ENV
           fi
-
-          echo >> "$COMMENT_FILE"
-          echo "---" >> "$COMMENT_FILE"
-          echo >> "$COMMENT_FILE"
-          echo "### Baseline comparison" >> "$COMMENT_FILE"
 
           # Detailed comparison
           swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> "$COMMENT_FILE"
