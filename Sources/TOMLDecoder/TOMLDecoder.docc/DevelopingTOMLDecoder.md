@@ -6,7 +6,8 @@ Notes for TOMLDecoder mainateners.
 
 Use [swiftformat](https://github.com/nicklockwood/SwiftFormat/tree/main),
 ideally, the version specified in `Scripts/format.sh` to format all code.
-Patches containing unformatted code should not be accepted.
+Patches containing unformatted code should not be accepted. We recommend
+adding `swiftformat --lint .` in git pre-commit hooks.
 
 
 ## Testing
