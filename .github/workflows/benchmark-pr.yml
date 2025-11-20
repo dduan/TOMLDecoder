@@ -6,6 +6,7 @@ on:
     branches: [ main ]
     paths:
       - 'Sources/TOMLDecoder/**/*.swift'
+      - 'Sources/TOMLDecoder/**/*.gyb'
 
 env:
   TOMLDECODER_BENCHMARKS: "1"
