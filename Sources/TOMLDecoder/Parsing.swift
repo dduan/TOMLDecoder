@@ -55,6 +55,10 @@ enum CodeUnits {
     static let upperT: UTF8.CodeUnit = 84
     static let upperU: UTF8.CodeUnit = 85
     static let upperZ: UTF8.CodeUnit = 90
+
+    static let null: UTF8.CodeUnit = 0x00
+    static let unitSeparator: UTF8.CodeUnit = 0x1F
+    static let delete: UTF8.CodeUnit = 0x7F
 }
 
 extension UTF8.CodeUnit {
@@ -345,7 +349,7 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
 
     for index in source.indices {
         let codeUnit = source[index]
-        if codeUnit >= 0 && codeUnit <= 0x08 || codeUnit >= 0x0A && codeUnit <= 0x1F || codeUnit == 0x7F {
+        if codeUnit >= CodeUnits.null && codeUnit <= CodeUnits.backspace || codeUnit >= CodeUnits.lf && codeUnit <= CodeUnits.unitSeparator || codeUnit == CodeUnits.delete {
             if multiline, codeUnit == CodeUnits.lf {
                 // Allow LF in multiline literal strings
             } else if multiline, codeUnit == CodeUnits.cr {
@@ -401,7 +405,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
         var ch = source[index]
         index = source.index(after: index)
         if ch != CodeUnits.backslash {
-            if ch >= 0 && ch <= 0x08 || ch >= 0x0A && ch <= 0x1F || ch == 0x7F {
+            if ch >= CodeUnits.null && ch <= CodeUnits.backspace || ch >= CodeUnits.lf && ch <= CodeUnits.unitSeparator || ch == CodeUnits.delete {
                 if multiline, ch == CodeUnits.lf {
                     // Allow LF in multiline basic strings
                 } else if multiline, ch == CodeUnits.cr {
@@ -1068,11 +1072,11 @@ extension Deserializer {
         }
 
         guard sourceUTF8[start ..< end].allSatisfy({ byte in
-            (byte >= 48 && byte <= 57) || // 0-9
-                (byte >= 65 && byte <= 90) || // A-Z
-                (byte >= 97 && byte <= 122) || // a-z
-                byte == 95 || // _
-                byte == 45 // -
+            (byte >= CodeUnits.number0 && byte <= CodeUnits.number9) || // 0-9
+                (byte >= CodeUnits.upperA && byte <= CodeUnits.upperZ) || // A-Z
+                (byte >= CodeUnits.lowerA && byte <= CodeUnits.lowerZ) || // a-z
+                byte == CodeUnits.underscore || // _
+                byte == CodeUnits.minus // -
         }) else {
             throw TOMLError.badKey(lineNumber: token.lineNumber)
         }
@@ -1162,9 +1166,9 @@ extension Deserializer {
                 while position < sourceUTF8.endIndex, sourceUTF8[position] != CodeUnits.lf {
                     let commentChar = sourceUTF8[position]
                     // Validate comment characters - control characters are not allowed except CR when followed by LF (CRLF)
-                    if (commentChar >= 0x00 && commentChar <= 0x08)
-                        || (commentChar >= 0x0A && commentChar <= 0x1F)
-                        || commentChar == 0x7F
+                    if (commentChar >= CodeUnits.null && commentChar <= CodeUnits.backspace)
+                        || (commentChar >= CodeUnits.lf && commentChar <= CodeUnits.unitSeparator)
+                        || commentChar == CodeUnits.delete
                     {
                         if commentChar == CodeUnits.cr {
                             let nextPosition = sourceUTF8.index(after: position)
