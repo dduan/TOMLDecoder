@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.swift'
+      - 'Scripts/format.sh'
 
 jobs:
   swiftformat:
