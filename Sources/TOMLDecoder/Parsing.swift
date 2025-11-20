@@ -110,10 +110,7 @@ enum LeafKind: Equatable {
     case double(Double)
     case bool(Bool)
     case string(String.UTF8View.SubSequence)
-    case offsetDateTime(OffsetDateTime)
-    case localDateTime(LocalDateTime)
-    case localDate(LocalDate)
-    case localTime(LocalTime)
+    case dateTimeComponents(DateTimeComponents)
     case mixed
 
     init?(token: Token) {
@@ -126,18 +123,7 @@ enum LeafKind: Equatable {
         } else if let doubleValue = token.parseAsFloat() {
             self = .double(doubleValue)
         } else if let result = token.parseAsDateTime() {
-            switch (result.date, result.time, result.offset) {
-            case let (.some(date), .some(time), .some(offset)):
-                self = .offsetDateTime(.init(date: date, time: time, offset: offset, features: result.features))
-            case let (.some(date), .some(time), .none):
-                self = .localDateTime(.init(date: date, time: time))
-            case let (.some(date), .none, .none):
-                self = .localDate(date)
-            case let (.none, .some(time), .none):
-                self = .localTime(time)
-            default:
-                return nil
-            }
+            self = .dateTimeComponents(result)
         } else {
             return nil
         }
@@ -149,10 +135,7 @@ enum LeafKind: Equatable {
              (.double, .double),
              (.bool, .bool),
              (.string, .string),
-             (.offsetDateTime, .offsetDateTime),
-             (.localDateTime, .localDateTime),
-             (.localDate, .localDate),
-             (.localTime, .localTime):
+             (.dateTimeComponents, .dateTimeComponents):
             true
         default:
             false
@@ -169,13 +152,7 @@ enum LeafKind: Equatable {
             lhsValue == rhsValue
         case let (.string(lhsValue), .string(rhsValue)):
             lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
-        case let (.offsetDateTime(lhsValue), .offsetDateTime(rhsValue)):
-            lhsValue == rhsValue
-        case let (.localDateTime(lhsValue), .localDateTime(rhsValue)):
-            lhsValue == rhsValue
-        case let (.localDate(lhsValue), .localDate(rhsValue)):
-            lhsValue == rhsValue
-        case let (.localTime(lhsValue), .localTime(rhsValue)):
+        case let (.dateTimeComponents(lhsValue), .dateTimeComponents(rhsValue)):
             lhsValue == rhsValue
         case (.mixed, .mixed):
             true
@@ -592,11 +569,62 @@ func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int, String.UTF
     return (hour, minute, second, index)
 }
 
-struct DateTimeComponents {
+struct DateTimeComponents: Equatable {
     let date: LocalDate?
     let time: LocalTime?
     let offset: Int16?
     let features: OffsetDateTime.Features
+
+    var crystalized: Any {
+        switch (date, time, offset) {
+        case let (.some(date), .some(time), .some(offset)):
+            OffsetDateTime(date: date, time: time, offset: offset, features: features)
+        case let (.some(date), .some(time), .none):
+            LocalDateTime(date: date, time: time)
+        case let (.some(date), .none, .none):
+            date
+        case let (.none, .some(time), .none):
+            time
+        default:
+            fatalError("unreachable")
+        }
+    }
+
+    @inline(__always)
+    func localDate(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalDate {
+        switch (date, time, offset) {
+        case let (.some(date), .none, .none):
+            return date
+        case let (.some(date), _, _) where !exactMatch:
+            return date
+        default:
+            throw error()
+        }
+    }
+
+    @inline(__always)
+    func localTime(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalTime {
+        switch (date, time, offset) {
+        case let (.none, .some(time), .none):
+            return time
+        case let (_, .some(time), _) where !exactMatch:
+            return time
+        default:
+            throw error()
+        }
+    }
+
+    @inline(__always)
+    func localDateTime(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalDateTime {
+        switch (date, time, offset) {
+        case let (.some(date), .some(time), .none):
+            return LocalDateTime(date: date, time: time)
+        case let (.some(date), .some(time), .some) where !exactMatch:
+            return LocalDateTime(date: date, time: time)
+        default:
+            throw error()
+        }
+    }
 }
 
 func parseNanoSeconds(source: String.UTF8View.SubSequence, updatedIndex: inout String.UTF8View.Index) -> UInt32 {
@@ -1923,14 +1951,8 @@ extension TOMLArrayImplementation {
             case let .leaf(.string(stringValue)):
                 guard let string = try stringMaybe(stringValue) else { continue }
                 result.append(string)
-            case let .leaf(.offsetDateTime(offsetDateTime)):
-                result.append(offsetDateTime)
-            case let .leaf(.localDateTime(localDateTime)):
-                result.append(localDateTime)
-            case let .leaf(.localDate(localDate)):
-                result.append(localDate)
-            case let .leaf(.localTime(localTime)):
-                result.append(localTime)
+            case let .leaf(.dateTimeComponents(components)):
+                result.append(components.crystalized)
             case let .leaf(.double(doubleValue)):
                 result.append(doubleValue)
             case let .leaf(.int(intValue)):

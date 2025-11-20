@@ -62,31 +62,40 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        guard case let .leaf(.offsetDateTime(value)) = try element(atIndex: index) else {
+        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
         }
-        return value
+
+        switch (components.date, components.time, components.offset, components.features) {
+        case let (.some(date), .some(time), .some(offset), features):
+            return OffsetDateTime(date: date, time: time, offset: offset, features: features)
+        default:
+            throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
+        }
     }
 
-    public func localDateTime(atIndex index: Int) throws(TOMLError) -> LocalDateTime {
-        guard case let .leaf(.localDateTime(value)) = try element(atIndex: index) else {
+    public func localDateTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
+        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local datetime")
         }
-        return value
+
+        return try components.localDateTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local datetime"))
     }
 
-    public func localDate(atIndex index: Int) throws(TOMLError) -> LocalDate {
-        guard case let .leaf(.localDate(value)) = try element(atIndex: index) else {
+    public func localDate(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
+        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local date")
         }
-        return value
+
+        return try components.localDate(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local date"))
     }
 
-    public func localTime(atIndex index: Int) throws(TOMLError) -> LocalTime {
-        guard case let .leaf(.localTime(value)) = try element(atIndex: index) else {
+    public func localTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
+        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local time")
         }
-        return value
+
+        return try components.localTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local time"))
     }
 
     func array() throws(TOMLError) -> [Any] {

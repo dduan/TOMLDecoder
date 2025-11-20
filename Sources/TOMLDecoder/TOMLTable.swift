@@ -90,59 +90,34 @@ public struct TOMLTable: Sendable, Equatable {
 
     public func offsetDateTime(forKey key: String) throws(TOMLError) -> OffsetDateTime {
         try value(forKey: key) { text throws(TOMLError) in
-            let datetime = try datetimeMaybe(lineNumber: nil, text)
-            switch (datetime.date, datetime.time, datetime.offset) {
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            switch (components.date, components.time, components.offset) {
             case let (.some(date), .some(time), .some(offset)):
-                return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
+                return OffsetDateTime(date: date, time: time, offset: offset, features: components.features)
             default:
                 throw TOMLError.keyNotFoundInTable(key: key, type: "offset date-time")
             }
         }
     }
 
-    public func localDateTime(forKey key: String, strict: Bool = false) throws(TOMLError) -> LocalDateTime {
+    public func localDateTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         try value(forKey: key) { text throws(TOMLError) in
-            let datetime = try datetimeMaybe(lineNumber: nil, text)
-            switch (datetime.date, datetime.time, datetime.offset) {
-            case let (.some(date), .some(time), .some) where !strict:
-                return LocalDateTime(date: date, time: time)
-            case let (.some(date), .some(time), .none):
-                return LocalDateTime(date: date, time: time)
-            default:
-                throw TOMLError.keyNotFoundInTable(key: key, type: "local date-time")
-            }
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localDateTime(exactMatch: exactMatch, error: TOMLError.keyNotFoundInTable(key: key, type: "local date-time"))
         }
     }
 
-    public func localDate(forKey key: String, strict: Bool = false) throws(TOMLError) -> LocalDate {
+    public func localDate(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         try value(forKey: key) { text throws(TOMLError) in
-            let datetime = try datetimeMaybe(lineNumber: nil, text)
-            switch (datetime.date, datetime.time, datetime.offset) {
-            case let (.some(date), .some, .some) where !strict:
-                return date
-            case let (.some(date), .some, .none) where !strict:
-                return date
-            case let (.some(date), .none, .none):
-                return date
-            default:
-                throw TOMLError.keyNotFoundInTable(key: key, type: "local date")
-            }
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localDate(exactMatch: exactMatch, error: TOMLError.keyNotFoundInTable(key: key, type: "local date"))
         }
     }
 
-    public func localTime(forKey key: String, strict: Bool = false) throws(TOMLError) -> LocalTime {
+    public func localTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         try value(forKey: key) { text throws(TOMLError) in
-            let datetime = try datetimeMaybe(lineNumber: nil, text)
-            switch (datetime.date, datetime.time, datetime.offset) {
-            case let (.some, .some(time), .some) where !strict:
-                return time
-            case let (.some, .some(time), .none) where !strict:
-                return time
-            case let (.none, .some(time), .none):
-                return time
-            default:
-                throw TOMLError.keyNotFoundInTable(key: key, type: "local time")
-            }
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localTime(exactMatch: exactMatch, error: TOMLError.keyNotFoundInTable(key: key, type: "local time"))
         }
     }
 
