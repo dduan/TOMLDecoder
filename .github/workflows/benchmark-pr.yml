@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Sources/TOMLDecoder/**/*.swift'
+      - 'Sources/TOMLDecoder/**/*.gyb'
 
 env:
   TOMLDECODER_BENCHMARKS: "1"
