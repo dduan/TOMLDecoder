@@ -275,7 +275,7 @@ public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringCon
     ///   - minute: The minute component of the local time.
     ///   - second: The second component of the local time.
     ///   - nanosecond: The fractional second component of the local time in nanoseconds.
-    public init(validatingHour hour: UInt8, minute: UInt8, second: UInt8, nanosecond: UInt32) throws(TOMLError) {
+    public init(validatingHour hour: UInt8, minute: UInt8, second: UInt8, nanosecond: UInt32 = 0) throws(TOMLError) {
         self.init(hour: hour, minute: minute, second: second, nanosecond: nanosecond)
         guard isValid else {
             throw TOMLError.invalidDateTimeComponents("Invalid local time components: \(hour):\(minute):\(second).\(nanosecond)")
@@ -292,7 +292,7 @@ public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringCon
     ///   - minute: The minute component of the local time.
     ///   - second: The second component of the local time.
     ///   - nanosecond: The fractional second component of the local time in nanoseconds.
-    public init(hour: UInt8, minute: UInt8, second: UInt8, nanosecond: UInt32) {
+    public init(hour: UInt8, minute: UInt8, second: UInt8, nanosecond: UInt32 = 0) {
         self.hour = hour
         self.minute = minute
         self.second = second
