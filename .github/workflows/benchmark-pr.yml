@@ -44,6 +44,16 @@ jobs:
           [ -d Benchmarks ] && echo "hasBenchmark=1" >> $GITHUB_ENV
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
 
+      - name: Cache SwiftPM artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.swiftpm
+            .build
+          key: ${{ runner.os }}-swiftpm-benchmark-${{ hashFiles('**/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-benchmark
+
       - name: Run benchmarks for PR branch
         if: ${{ env.hasBenchmark == '1' }}
         run: |
