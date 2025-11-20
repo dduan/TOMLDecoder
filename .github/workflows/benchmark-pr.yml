@@ -19,18 +19,18 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Ubuntu deps
-        if: ${{ runner.os == 'Linux' }}
+      - name: Homebrew Mac
+        if: ${{ runner.os == 'macOS' }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libjemalloc-dev
+          echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
+          brew install jemalloc
 
       - name: Git URL token override and misc
         run: |
