@@ -71,7 +71,7 @@ jobs:
           COMMENT_FILE="benchmark_comment.md"
           touch "$COMMENT_FILE"
           swift package benchmark baseline check main pull_request
-          swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown --grouping metric >> "$COMMENT_FILE" || true
+          swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown --grouping metric || true >> "$COMMENT_FILE"
           cat "$COMMENT_FILE" >> "$GITHUB_STEP_SUMMARY"
 
           # Expose full comment as step output
