@@ -17,5 +17,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    - name: Cache SwiftPM artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.swiftpm
+          .build
+        key: ${{ runner.os }}-swiftpm-${{ hashFiles('Scripts/format.sh') }}
+        restore-keys: |
+          ${{ runner.os }}-swiftpm-
+
     - name: Format code
       run: Scripts/format.sh --lint
