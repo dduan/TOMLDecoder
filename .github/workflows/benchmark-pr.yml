@@ -26,12 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Homebrew Mac
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
-          brew install jemalloc
-
       - name: Ubuntu deps
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -40,7 +34,6 @@ jobs:
 
       - name: Git URL token override and misc
         run: |
-          #/usr/bin/ordo-performance
           [ -d Benchmarks ] && echo "hasBenchmark=1" >> $GITHUB_ENV
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
 
@@ -75,22 +68,10 @@ jobs:
         id: benchmark
         run: |
           set -eo pipefail
-
           COMMENT_FILE="benchmark_comment.md"
-
           touch "$COMMENT_FILE"
-          if swift package benchmark baseline check main pull_request --format markdown; then
-            echo >> "$COMMENT_FILE"
-            echo "_No performance regressions detected._" >> "$COMMENT_FILE"
-          else
-            echo >> "$COMMENT_FILE"
-            echo "_Pull request had performance regressions._" >> "$COMMENT_FILE"
-          fi
-
-          # Detailed comparison
+          swift package benchmark baseline check main pull_request
           swift package benchmark baseline compare main pull_request --no-progress --quiet --format markdown >> "$COMMENT_FILE"
-
-          # Also show in the job summary
           cat "$COMMENT_FILE" >> "$GITHUB_STEP_SUMMARY"
 
           # Expose full comment as step output
@@ -102,11 +83,11 @@ jobs:
 
       - name: Comment PR with benchmark result
         if: ${{ env.hasBenchmark == '1' }}
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.benchmark.outputs.comment }}
-          comment_includes: "Pull request benchmark comparison [${{ matrix.os }}]"
+          comment-tag: execution
 
       - name: Exit with correct status
         if: ${{ env.hasBenchmark == '1' }}
