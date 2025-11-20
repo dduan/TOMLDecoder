@@ -4,7 +4,10 @@ export LC_CTYPE     = en_US.UTF-8
 
 .DEFAULT_GOAL := format
 
-.PHONY: build test generate-code generate-tests benchmark format
+.PHONY: build test generate-code generate-tests benchmark format docs
+
+docs:
+	@Scripts/generate-docs.sh /
 
 generate-code:
 	@Scripts/generate-code.sh
