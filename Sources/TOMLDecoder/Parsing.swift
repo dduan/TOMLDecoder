@@ -125,13 +125,13 @@ enum LeafKind: Equatable {
             self = .double(doubleValue)
         } else if let result = token.parseAsDateTime() {
             switch (result.date, result.time, result.offset) {
-            case (.some(let date), .some(let time), .some(let offset)):
+            case let (.some(date), .some(time), .some(offset)):
                 self = .offsetDateTime(.init(date: date, time: time, offset: offset, features: result.features))
-            case (.some(let date), .some(let time), .none):
+            case let (.some(date), .some(time), .none):
                 self = .localDateTime(.init(date: date, time: time))
-            case (.some(let date), .none, .none):
+            case let (.some(date), .none, .none):
                 self = .localDate(date)
-            case (.none, .some(let time), .none):
+            case let (.none, .some(time), .none):
                 self = .localTime(time)
             default:
                 return nil
@@ -144,13 +144,13 @@ enum LeafKind: Equatable {
     func isSameKind(as other: LeafKind) -> Bool {
         switch (self, other) {
         case (.int, .int),
-            (.double, .double),
-            (.bool, .bool),
-            (.string, .string),
-            (.offsetDateTime, .offsetDateTime),
-            (.localDateTime, .localDateTime),
-            (.localDate, .localDate),
-            (.localTime, .localTime):
+             (.double, .double),
+             (.bool, .bool),
+             (.string, .string),
+             (.offsetDateTime, .offsetDateTime),
+             (.localDateTime, .localDateTime),
+             (.localDate, .localDate),
+             (.localTime, .localTime):
             true
         default:
             false
@@ -159,26 +159,26 @@ enum LeafKind: Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
-        case (.int(let lhsValue), .int(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.double(let lhsValue), .double(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.bool(let lhsValue), .bool(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.string(let lhsValue), .string(let rhsValue)):
-            return lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
-        case (.offsetDateTime(let lhsValue), .offsetDateTime(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.localDateTime(let lhsValue), .localDateTime(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.localDate(let lhsValue), .localDate(let rhsValue)):
-            return lhsValue == rhsValue
-        case (.localTime(let lhsValue), .localTime(let rhsValue)):
-            return lhsValue == rhsValue
+        case let (.int(lhsValue), .int(rhsValue)):
+            lhsValue == rhsValue
+        case let (.double(lhsValue), .double(rhsValue)):
+            lhsValue == rhsValue
+        case let (.bool(lhsValue), .bool(rhsValue)):
+            lhsValue == rhsValue
+        case let (.string(lhsValue), .string(rhsValue)):
+            lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
+        case let (.offsetDateTime(lhsValue), .offsetDateTime(rhsValue)):
+            lhsValue == rhsValue
+        case let (.localDateTime(lhsValue), .localDateTime(rhsValue)):
+            lhsValue == rhsValue
+        case let (.localDate(lhsValue), .localDate(rhsValue)):
+            lhsValue == rhsValue
+        case let (.localTime(lhsValue), .localTime(rhsValue)):
+            lhsValue == rhsValue
         case (.mixed, .mixed):
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
@@ -314,11 +314,11 @@ final class Deserializer: Equatable, @unchecked Sendable {
     var keyTransform: (@Sendable (String) -> String)?
 
     init(source: String, keyTransform: (@Sendable (String) -> String)?) {
-        self.tables = [TOMLTableImplementation()]
-        self.originalSource = source
-        self.sourceUTF8 = source.utf8
-        self.token = Token(kind: .newline, lineNumber: 1, text: "".utf8[...], eof: false)
-        self.currentTable = 0
+        tables = [TOMLTableImplementation()]
+        originalSource = source
+        sourceUTF8 = source.utf8
+        token = Token(kind: .newline, lineNumber: 1, text: "".utf8[...], eof: false)
+        currentTable = 0
         self.keyTransform = keyTransform
     }
 }
@@ -347,13 +347,13 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
 
     for index in source.indices {
         let codeUnit = source[index]
-        if codeUnit >= 0 && codeUnit <= 0x08 || codeUnit >= 0x0a && codeUnit <= 0x1f || codeUnit == 0x7f {
-            if multiline && codeUnit == CodeUnits.lf {
+        if codeUnit >= 0 && codeUnit <= 0x08 || codeUnit >= 0x0A && codeUnit <= 0x1F || codeUnit == 0x7F {
+            if multiline, codeUnit == CodeUnits.lf {
                 // Allow LF in multiline literal strings
-            } else if multiline && codeUnit == CodeUnits.cr {
+            } else if multiline, codeUnit == CodeUnits.cr {
                 // Only allow CR if followed by LF (CRLF sequence)
                 let nextIndex = source.index(after: index)
-                if nextIndex < source.endIndex && source[nextIndex] == CodeUnits.lf {
+                if nextIndex < source.endIndex, source[nextIndex] == CodeUnits.lf {
                     // Allow CRLF sequence - will be processed as separate characters
                 } else {
                     throw TOMLError.invalidCharacter(codeUnit)
@@ -363,7 +363,7 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
             }
         }
 
-        if multiline && codeUnit == CodeUnits.singleQuote {
+        if multiline, codeUnit == CodeUnits.singleQuote {
             consecutiveQuotes += 1
             if consecutiveQuotes > 2 {
                 throw TOMLError.syntax(lineNumber: 0, message: "literal multiline strings cannot contain more than 2 consecutive single quotes")
@@ -380,7 +380,7 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
 extension String.UTF8View.SubSequence {
     func indexAfterSkippingCharacters(start: Index, characters: [UTF8.CodeUnit]) -> Index {
         var index = start
-        while index < self.endIndex {
+        while index < endIndex {
             if characters.contains(self[index]) {
                 index = self.index(after: index)
             } else {
@@ -403,12 +403,12 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
         var ch = source[index]
         index = source.index(after: index)
         if ch != CodeUnits.backslash {
-            if ch >= 0 && ch <= 0x08 || ch >= 0x0a && ch <= 0x1f || ch == 0x7f {
-                if multiline && ch == CodeUnits.lf {
+            if ch >= 0 && ch <= 0x08 || ch >= 0x0A && ch <= 0x1F || ch == 0x7F {
+                if multiline, ch == CodeUnits.lf {
                     // Allow LF in multiline basic strings
-                } else if multiline && ch == CodeUnits.cr {
+                } else if multiline, ch == CodeUnits.cr {
                     // Only allow CR if followed by LF (CRLF sequence)
-                    if index < source.endIndex && source[index] == CodeUnits.lf {
+                    if index < source.endIndex, source[index] == CodeUnits.lf {
                         // Allow CRLF sequence - will be processed as separate characters
                     } else {
                         throw TOMLError.invalidCharacter(ch)
@@ -418,7 +418,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
                 }
             }
 
-            if multiline && ch == CodeUnits.doubleQuote {
+            if multiline, ch == CodeUnits.doubleQuote {
                 consecutiveQuotes += 1
                 if consecutiveQuotes > 2 {
                     throw TOMLError.syntax(lineNumber: 0, message: "basic multiline strings cannot contain more than 2 consecutive double quotes")
@@ -437,7 +437,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
 
         if multiline {
             let afterWhitespace = source.indexAfterSkippingCharacters(start: index, characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr])
-            if afterWhitespace < source.endIndex && source[afterWhitespace] == CodeUnits.lf {
+            if afterWhitespace < source.endIndex, source[afterWhitespace] == CodeUnits.lf {
                 index = source.indexAfterSkippingCharacters(start: index, characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr, CodeUnits.lf])
                 continue
             }
@@ -449,7 +449,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
         if ch == CodeUnits.lowerU || ch == CodeUnits.upperU {
             let hexCount = (ch == CodeUnits.lowerU ? 4 : 8)
             var ucs: UInt32 = 0
-            for _ in 0..<hexCount {
+            for _ in 0 ..< hexCount {
                 if index >= source.endIndex {
                     throw TOMLError.expectedHexCharacters(ch, hexCount)
                 }
@@ -482,11 +482,11 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
             ch = CodeUnits.cr
         } else if ch == CodeUnits.lowerN {
             ch = CodeUnits.lf
-        } else if ch != CodeUnits.doubleQuote && ch != CodeUnits.backslash {
+        } else if ch != CodeUnits.doubleQuote, ch != CodeUnits.backslash {
             throw TOMLError.illegalEscapeCharacter(ch)
         }
 
-        consecutiveQuotes = 0  // Reset count after escape sequence
+        consecutiveQuotes = 0 // Reset count after escape sequence
         resultCodeUnits.append(ch)
     }
     return String(decoding: resultCodeUnits, as: UTF8.self)
@@ -541,7 +541,7 @@ func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
     var index = source.startIndex
 
     source.formIndex(&index, offsetBy: 2)
-    guard index < source.endIndex && source[index] == CodeUnits.colon else {
+    guard index < source.endIndex, source[index] == CodeUnits.colon else {
         return nil
     }
 
@@ -551,7 +551,7 @@ func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
     }
 
     source.formIndex(&index, offsetBy: 2)
-    guard index < source.endIndex && source[index] == CodeUnits.colon else {
+    guard index < source.endIndex, source[index] == CodeUnits.colon else {
         return nil
     }
 
@@ -571,10 +571,10 @@ struct DateTimeComponents {
 }
 
 func parseNanoSeconds(source: String.UTF8View.SubSequence, updatedIndex: inout String.UTF8View.Index) -> UInt32 {
-    var unit: Double = 100000000
+    var unit: Double = 100_000_000
     var result: Double = 0
     var index = source.startIndex
-    while index < source.endIndex && source[index].isHexDigit {
+    while index < source.endIndex, source[index].isHexDigit {
         result += Double(source[index] - CodeUnits.number0) * unit
         index = source.index(after: index)
         unit /= 10
@@ -624,9 +624,9 @@ func stringMaybe(_ text: String.UTF8View.SubSequence) throws(TOMLError) -> Strin
 }
 
 func boolMaybe(_ text: String.UTF8View.SubSequence) throws(TOMLError) -> Bool {
-    if text.count == 4 && text.starts(with: Constants.true) {
+    if text.count == 4, text.starts(with: Constants.true) {
         return true
-    } else if text.count == 5 && text.starts(with: Constants.false) {
+    } else if text.count == 5, text.starts(with: Constants.false) {
         return false
     }
 
@@ -638,15 +638,15 @@ func intMaybe(_ text: String.UTF8View.SubSequence, mustBeInt: Bool) throws(TOMLE
     func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
         switch base {
         case 10:
-            return codeUnit.isDecimalDigit
+            codeUnit.isDecimalDigit
         case 16:
-            return codeUnit.isHexDigit
+            codeUnit.isHexDigit
         case 2:
-            return codeUnit == CodeUnits.number0 || codeUnit == "1".utf8.first!
+            codeUnit == CodeUnits.number0 || codeUnit == "1".utf8.first!
         case 8:
-            return CodeUnits.number0 <= codeUnit && codeUnit <= CodeUnits.number7
+            CodeUnits.number0 <= codeUnit && codeUnit <= CodeUnits.number7
         default:
-            return false
+            false
         }
     }
 
@@ -700,7 +700,6 @@ func intMaybe(_ text: String.UTF8View.SubSequence, mustBeInt: Bool) throws(TOMLE
         }
         // Single zero is allowed to continue to the main loop
     }
-
 
     while index < text.endIndex {
         let ch = text[index]
@@ -757,15 +756,15 @@ func floatMaybe(_ text: String.UTF8View.SubSequence, mustBeFloat: Bool) throws(T
     }
 
     if isdigit(Int32(text[index])) == 0 {
-        guard (text[index...].starts(with: Constants.nan) || text[index...].starts(with: Constants.inf)) else {
+        guard text[index...].starts(with: Constants.nan) || text[index...].starts(with: Constants.inf) else {
             throw error(mustBeFloat, "Expected 0-9, nan or inf, found \(text[index])")
         }
-        resultCodeUnits.append(contentsOf: text[index..<text.index(index, offsetBy: 3)])
+        resultCodeUnits.append(contentsOf: text[index ..< text.index(index, offsetBy: 3)])
     } else {
         if text[index] == CodeUnits.number0,
            index < text.endIndex,
            case let next = text[text.index(after: index)],
-           (next != CodeUnits.dot && next != CodeUnits.lowerE && next != CodeUnits.upperE)
+           next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
         {
             throw error(mustBeFloat, "Float begins with 0 must be followed by a '.', 'e' or 'E'")
         }
@@ -807,7 +806,7 @@ func floatMaybe(_ text: String.UTF8View.SubSequence, mustBeFloat: Bool) throws(T
                 mustBeFloat = true
             } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
                 mustBeFloat = true
-            } else if !ch.isDecimalDigit && ch != CodeUnits.plus && ch != CodeUnits.minus {
+            } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
                 throw error(mustBeFloat, "invalid character for float")
             }
 
@@ -839,20 +838,19 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
 
         // Validate days per month and leap years
         let isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
-        let maxDaysInMonth: Int
-        switch month {
+        let maxDaysInMonth: Int = switch month {
         case 2:
-            maxDaysInMonth = isLeapYear ? 29 : 28
+            isLeapYear ? 29 : 28
         case 4, 6, 9, 11:
-            maxDaysInMonth = 30
+            30
         default:
-            maxDaysInMonth = 31
+            31
         }
 
         if day > maxDaysInMonth {
-            if month == 2 && !isLeapYear {
+            if month == 2, !isLeapYear {
                 throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "February only has 28 days in non-leap years")
-            } else if month == 2 && isLeapYear {
+            } else if month == 2, isLeapYear {
                 throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "February only has 29 days in leap years")
             } else {
                 throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "day \(day) is invalid for month \(month)")
@@ -912,7 +910,7 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
         }
     }
 
-    if mustParseTime && time == nil {
+    if mustParseTime, time == nil {
         throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "expected valid time")
     }
 
@@ -941,7 +939,7 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
             }
 
             // Extract and validate the complete offset string
-            let offsetString = text[index..<endIndex]
+            let offsetString = text[index ..< endIndex]
             let (offsetHour, offsetMinute, consumedLength) = try parseTimezoneOffset(offsetString, lineNumber: lineNumber ?? 0)
 
             // Validate timezone offset ranges
@@ -965,9 +963,9 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
     }
     return DateTimeComponents(
         date: date.map { LocalDate(year: .init($0.year), month: .init($0.month), day: .init($0.day)) },
-        time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) } ,
+        time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) },
         offset: timeOffset,
-        features: features
+        features: features,
     )
 }
 
@@ -996,7 +994,7 @@ func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) t
     var consumedLength = 2
 
     // Parse required minute digits (timezone offset must include minutes)
-    guard index < text.endIndex && text[index] == CodeUnits.colon else {
+    guard index < text.endIndex, text[index] == CodeUnits.colon else {
         throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must include minutes (format: ±HH:MM)")
     }
 
@@ -1028,7 +1026,7 @@ extension Deserializer {
         let ch = sourceUTF8[start]
         var result = ""
         if ch == CodeUnits.doubleQuote || ch == CodeUnits.singleQuote {
-            if sourceUTF8[sourceUTF8.index(start, offsetBy: 1)] == ch && sourceUTF8[sourceUTF8.index(start, offsetBy: 2)] == ch {
+            if sourceUTF8[sourceUTF8.index(start, offsetBy: 1)] == ch, sourceUTF8[sourceUTF8.index(start, offsetBy: 2)] == ch {
                 // Keys cannot be multiline
                 throw TOMLError.badKey(lineNumber: token.lineNumber)
             } else {
@@ -1036,24 +1034,23 @@ extension Deserializer {
                 end = sourceUTF8.index(end, offsetBy: -1)
             }
             if ch == CodeUnits.singleQuote {
-                result = String(Substring(sourceUTF8[start..<end]))
+                result = String(Substring(sourceUTF8[start ..< end]))
             } else {
-                result = try basicString(source: sourceUTF8[start..<end], multiline: false)
+                result = try basicString(source: sourceUTF8[start ..< end], multiline: false)
             }
-
 
             return result
         }
 
-        guard sourceUTF8[start..<end].allSatisfy({ Constants.validBareKeyCharacters.contains($0) }) else {
+        guard sourceUTF8[start ..< end].allSatisfy({ Constants.validBareKeyCharacters.contains($0) }) else {
             throw TOMLError.badKey(lineNumber: token.lineNumber)
         }
 
         if let keyTransform {
-            return keyTransform(String(Substring(sourceUTF8[start..<end])))
+            return keyTransform(String(Substring(sourceUTF8[start ..< end])))
         }
 
-        return String(Substring(sourceUTF8[start..<end]))
+        return String(Substring(sourceUTF8[start ..< end]))
     }
 
     func createKeyValue(token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
@@ -1078,7 +1075,7 @@ extension Deserializer {
         }
 
         switch tables[tableIndex][self, key] {
-        case .table(let existingTableIndex):
+        case let .table(existingTableIndex):
             if tables[existingTableIndex].implicit {
                 if tables[existingTableIndex].definedByDottedKey {
                     throw TOMLError.keyExists(lineNumber: token.lineNumber)
@@ -1131,7 +1128,7 @@ extension Deserializer {
             if ch == CodeUnits.pound {
                 // skip comment, stop just before the \n.
                 position = sourceUTF8.index(after: position)
-                while position < sourceUTF8.endIndex && sourceUTF8[position] != CodeUnits.lf {
+                while position < sourceUTF8.endIndex, sourceUTF8[position] != CodeUnits.lf {
                     let commentChar = sourceUTF8[position]
                     // Validate comment characters - control characters are not allowed except CR when followed by LF (CRLF)
                     if (commentChar >= 0x00 && commentChar <= 0x08)
@@ -1140,7 +1137,7 @@ extension Deserializer {
                     {
                         if commentChar == CodeUnits.cr {
                             let nextPosition = sourceUTF8.index(after: position)
-                            if nextPosition < sourceUTF8.endIndex && sourceUTF8[nextPosition] == CodeUnits.lf {
+                            if nextPosition < sourceUTF8.endIndex, sourceUTF8[nextPosition] == CodeUnits.lf {
                                 // Allow CRLF sequence
                             } else {
                                 throw TOMLError.syntax(lineNumber: lineNumber, message: "control characters are not allowed in comments")
@@ -1158,8 +1155,8 @@ extension Deserializer {
                 token = Token(
                     kind: .dot,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             }
@@ -1168,68 +1165,68 @@ extension Deserializer {
                 token = Token(
                     kind: .comma,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.equal {
                 token = Token(
                     kind: .equal,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.lbrace {
                 token = Token(
                     kind: .lbrace,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.rbrace {
                 token = Token(
                     kind: .rbrace,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.lbracket {
                 token = Token(
                     kind: .lbracket,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.rbracket {
                 token = Token(
                     kind: .rbracket,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.lf {
                 token = Token(
                     kind: .newline,
                     lineNumber: lineNumber,
-                    text: sourceUTF8[position..<sourceUTF8.index(after: position)],
-                    eof: false
+                    text: sourceUTF8[position ..< sourceUTF8.index(after: position)],
+                    eof: false,
                 )
                 return
             } else if ch == CodeUnits.cr {
                 // Check if this is part of a CRLF sequence
                 let nextPosition = sourceUTF8.index(after: position)
-                if nextPosition < sourceUTF8.endIndex && sourceUTF8[nextPosition] == CodeUnits.lf {
+                if nextPosition < sourceUTF8.endIndex, sourceUTF8[nextPosition] == CodeUnits.lf {
                     // This is CRLF, treat as newline
                     token = Token(
                         kind: .newline,
                         lineNumber: lineNumber,
-                        text: sourceUTF8[position..<sourceUTF8.index(nextPosition, offsetBy: 1)],
-                        eof: false
+                        text: sourceUTF8[position ..< sourceUTF8.index(nextPosition, offsetBy: 1)],
+                        eof: false,
                     )
                     return
                 } else {
@@ -1250,7 +1247,7 @@ extension Deserializer {
             kind: .newline,
             lineNumber: lineNumber,
             text: sourceUTF8[position...],
-            eof: true
+            eof: true,
         )
     }
 
@@ -1278,8 +1275,8 @@ extension Deserializer {
             token = Token(
                 kind: .string,
                 lineNumber: lineNumber,
-                text: text[start..<end],
-                eof: false
+                text: text[start ..< end],
+                eof: false,
             )
             return
         }
@@ -1292,7 +1289,7 @@ extension Deserializer {
                     let afterTriple = text.index(i, offsetBy: 3)
                     if afterTriple >= text.endIndex || text[afterTriple] != CodeUnits.doubleQuote {
                         // Also check if this quote sequence is escaped
-                        if i > start && text[text.index(before: i)] == CodeUnits.backslash {
+                        if i > start, text[text.index(before: i)] == CodeUnits.backslash {
                             i = text.index(after: i)
                             continue
                         }
@@ -1310,8 +1307,8 @@ extension Deserializer {
             token = Token(
                 kind: .string,
                 lineNumber: lineNumber,
-                text: text[start..<end],
-                eof: false
+                text: text[start ..< end],
+                eof: false,
             )
             return
         }
@@ -1334,8 +1331,8 @@ extension Deserializer {
             token = Token(
                 kind: .string,
                 lineNumber: lineNumber,
-                text: text[start...i],
-                eof: false
+                text: text[start ... i],
+                eof: false,
             )
             return
         }
@@ -1402,13 +1399,13 @@ extension Deserializer {
             token = Token(
                 kind: .string,
                 lineNumber: lineNumber,
-                text: text[start...i],
-                eof: false
+                text: text[start ... i],
+                eof: false,
             )
             return
         }
 
-        if !dotIsSpecial && (scanDate(source: text) != nil || scanTime(source: text) != nil) {
+        if !dotIsSpecial, scanDate(source: text) != nil || scanTime(source: text) != nil {
             // forward thru the timestamp
             var index = text.startIndex
             while index < text.endIndex, Constants.dateTimeCharacters.contains(text[index]) {
@@ -1424,8 +1421,8 @@ extension Deserializer {
             token = Token(
                 kind: .string,
                 lineNumber: lineNumber,
-                text: text[start..<index],
-                eof: false
+                text: text[start ..< index],
+                eof: false,
             )
             return
         }
@@ -1467,8 +1464,8 @@ extension Deserializer {
         token = Token(
             kind: .string,
             lineNumber: lineNumber,
-            text: text[start..<index],
-            eof: false
+            text: text[start ..< index],
+            eof: false,
         )
     }
 
@@ -1558,7 +1555,6 @@ extension Deserializer {
                 }
 
                 try eatToken(type: .string, isDotSpecial: true)
-                break
 
             case .lbracket: // Nested array
                 if array.kind == nil {
@@ -1572,7 +1568,7 @@ extension Deserializer {
                 array.elements.append(.array(newArrayIndex))
 
                 try parseArray(arrayIndex: newArrayIndex)
-                break
+
             case .lbrace: // Nested table
                 if array.kind == nil {
                     array.kind = .table
@@ -1717,9 +1713,9 @@ extension Deserializer {
         var tableIndex = 0
         for (key, _) in tablePath {
             switch tables[tableIndex][self, key] {
-            case .table(let index):
+            case let .table(index):
                 tableIndex = index
-            case .array(let arrayIndex):
+            case let .array(arrayIndex):
                 let array = arrays[arrayIndex]
                 guard case .table = array.kind else {
                     throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array element is not a table")
@@ -1729,7 +1725,7 @@ extension Deserializer {
                     throw TOMLError.syntax(lineNumber: token.lineNumber, message: "empty array")
                 }
 
-                guard case .table(let index) = array.elements.last else {
+                guard case let .table(index) = array.elements.last else {
                     throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array element is not a table")
                 }
 
@@ -1863,26 +1859,26 @@ extension TOMLArrayImplementation {
 
         for element in elements {
             switch element {
-            case .array(let arrayIndex):
-                result.append(try source.arrays[arrayIndex].array(source: source))
-            case .table(let tableIndex):
-                result.append(try source.tables[tableIndex].dictionary(source: source))
-            case .leaf(.bool(let boolValue)):
+            case let .array(arrayIndex):
+                try result.append(source.arrays[arrayIndex].array(source: source))
+            case let .table(tableIndex):
+                try result.append(source.tables[tableIndex].dictionary(source: source))
+            case let .leaf(.bool(boolValue)):
                 result.append(boolValue)
-            case .leaf(.string(let stringValue)):
+            case let .leaf(.string(stringValue)):
                 guard let string = try stringMaybe(stringValue) else { continue }
                 result.append(string)
-            case .leaf(.offsetDateTime(let offsetDateTime)):
+            case let .leaf(.offsetDateTime(offsetDateTime)):
                 result.append(offsetDateTime)
-            case .leaf(.localDateTime(let localDateTime)):
+            case let .leaf(.localDateTime(localDateTime)):
                 result.append(localDateTime)
-            case .leaf(.localDate(let localDate)):
+            case let .leaf(.localDate(localDate)):
                 result.append(localDate)
-            case .leaf(.localTime(let localTime)):
+            case let .leaf(.localTime(localTime)):
                 result.append(localTime)
-            case .leaf(.double(let doubleValue)):
+            case let .leaf(.double(doubleValue)):
                 result.append(doubleValue)
-            case .leaf(.int(let intValue)):
+            case let .leaf(.int(intValue)):
                 result.append(intValue)
             case .leaf(.mixed):
                 continue
@@ -1897,7 +1893,7 @@ extension KeyValuePair {
     func unpackedValue() throws(TOMLError) -> (String, Any?) {
         let first = value.first
         if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
-            return (key, try stringMaybe(value))
+            return try (key, stringMaybe(value))
         }
 
         // more likely values gets parsed first
@@ -1907,7 +1903,7 @@ extension KeyValuePair {
         }
 
         do {
-            return (key, try intMaybe(value, mustBeInt: false))
+            return try (key, intMaybe(value, mustBeInt: false))
         } catch {
             if case TOMLError.invalidInteger = error {
                 throw error
@@ -1915,7 +1911,7 @@ extension KeyValuePair {
         }
 
         do {
-            return (key, try floatMaybe(value, mustBeFloat: false))
+            return try (key, floatMaybe(value, mustBeFloat: false))
         } catch {
             if case TOMLError.invalidFloat = error {
                 throw error
@@ -1929,13 +1925,13 @@ extension KeyValuePair {
         let datetime = try datetimeMaybe(lineNumber: nil, value)
 
         switch (datetime.date, datetime.time, datetime.offset) {
-        case (.some(let date), .some(let time), .some(let offset)):
-            return (key,  OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features))
-        case (.some(let date), .some(let time), .none):
+        case let (.some(date), .some(time), .some(offset)):
+            return (key, OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features))
+        case let (.some(date), .some(time), .none):
             return (key, LocalDateTime(date: date, time: time))
-        case (.some(let date), .none, .none):
+        case let (.some(date), .none, .none):
             return (key, date)
-        case (.none, .some(let time), .none):
+        case let (.none, .some(time), .none):
             return (key, time)
         default:
             throw TOMLError.invalidDateTimeComponents("Failed to parse value as date or time for \(key)")

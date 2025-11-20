@@ -1,6 +1,6 @@
+import Foundation
 import Testing
 @testable import TOMLDecoder
-import Foundation
 
 @Suite
 struct TOMLDecoderTests {
@@ -55,9 +55,9 @@ struct TOMLDecoderTests {
 
             init(from decoder: Decoder) throws {
                 let values = try decoder.container(keyedBy: PlayerKeys.self)
-                self.id = try values.decode(String.self, forKey: .id)
-                self.health = try values.decode(Int64.self, forKey: .health)
-                self.pi = try values.decode(Double.self, forKey: .pi)
+                id = try values.decode(String.self, forKey: .id)
+                health = try values.decode(Int64.self, forKey: .health)
+                pi = try values.decode(Double.self, forKey: .pi)
             }
         }
 
@@ -286,8 +286,8 @@ struct TOMLDecoderTests {
             database: AppConfig.DatabaseConfig(
                 host: "localhost",
                 port: 5432,
-                username: "admin"
-            )
+                username: "admin",
+            ),
         )
 
         let toml = """
@@ -321,7 +321,7 @@ struct TOMLDecoderTests {
 
             required init(from decoder: Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
-                self.ip = try container.decode(String.self, forKey: .ip)
+                ip = try container.decode(String.self, forKey: .ip)
                 let superDecoder = try container.superDecoder()
                 try super.init(from: superDecoder)
             }
@@ -339,29 +339,29 @@ struct TOMLDecoderTests {
 
     @Test func `toml.io example`() throws {
         let toml = """
-            # This is a TOML document
+        # This is a TOML document
 
-            title = "TOML Example"
+        title = "TOML Example"
 
-            [owner]
-            name = "Tom Preston-Werner"
-            dob = 1979-05-27T07:32:00-08:00
+        [owner]
+        name = "Tom Preston-Werner"
+        dob = 1979-05-27T07:32:00-08:00
 
-            [database]
-            enabled = true
-            ports = [ 8000, 8001, 8002 ]
-            temp_targets = { cpu = 79.5, case = 72.0 }
+        [database]
+        enabled = true
+        ports = [ 8000, 8001, 8002 ]
+        temp_targets = { cpu = 79.5, case = 72.0 }
 
-            [servers]
+        [servers]
 
-            [servers.alpha]
-            ip = "10.0.0.1"
-            role = "frontend"
+        [servers.alpha]
+        ip = "10.0.0.1"
+        role = "frontend"
 
-            [servers.beta]
-            ip = "10.0.0.2"
-            role = "backend"
-            """
+        [servers.beta]
+        ip = "10.0.0.2"
+        role = "backend"
+        """
 
         struct Config: Codable, Equatable {
             let title: String
@@ -399,18 +399,18 @@ struct TOMLDecoderTests {
                     date: LocalDate(year: 1979, month: 5, day: 27),
                     time: LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0),
                     offset: -480,
-                    features: [.uppercaseT]
+                    features: [.uppercaseT],
                 ),
             ),
             database: .init(
                 enabled: true,
                 ports: [8000, 8001, 8002],
-                tempTargets: ["cpu": 79.5, "case": 72.0]
+                tempTargets: ["cpu": 79.5, "case": 72.0],
             ),
             servers: .init(
                 alpha: .init(ip: "10.0.0.1", role: "frontend"),
-                beta: .init(ip: "10.0.0.2", role: "backend")
-            )
+                beta: .init(ip: "10.0.0.2", role: "backend"),
+            ),
         )
 
         var decoder = TOMLDecoder()
@@ -430,12 +430,12 @@ struct TOMLDecoderTests {
         }
 
         let toml = """
-            numbers = [[1, 2], [3, 4]]
-            strings = [["a", "b"], ["c", "d"]]
-            doubles = [[1.2]]
-            tableInArray = [{a = 1}]
-            tableInTable = { b = { c = "yo" } }
-            """
+        numbers = [[1, 2], [3, 4]]
+        strings = [["a", "b"], ["c", "d"]]
+        doubles = [[1.2]]
+        tableInArray = [{a = 1}]
+        tableInTable = { b = { c = "yo" } }
+        """
 
         let result = try TOMLDecoder().decode(Test.self, from: toml)
 
@@ -453,8 +453,8 @@ struct TOMLDecoderTests {
             .decode(
                 Test.self,
                 from: """
-                    a = 1
-                    """
+                a = 1
+                """,
             )
         #expect(result1 == Test(a: 1, b: nil, c: nil))
 
@@ -462,9 +462,9 @@ struct TOMLDecoderTests {
             .decode(
                 Test.self,
                 from: """
-                    b = 1.0
-                    c = "claude"
-                    """
+                b = 1.0
+                c = "claude"
+                """,
             )
         #expect(result2 == Test(a: nil, b: 1.0, c: "claude"))
     }

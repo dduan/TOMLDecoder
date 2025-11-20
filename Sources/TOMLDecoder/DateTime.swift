@@ -74,7 +74,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
 
     /// Check if the offset date-time is valid.
     public var isValid: Bool {
-        guard date.isValid && time.isValid && offsetIsValid else {
+        guard date.isValid, time.isValid, offsetIsValid else {
             return false
         }
 
@@ -82,7 +82,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
     }
 
     private var offsetIsValid: Bool {
-        offset >= -1_440 && offset <= 1_440
+        offset >= -1440 && offset <= 1440
     }
 
     private var featuresAreValid: Bool {
@@ -132,12 +132,11 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
         let epochOffset = Int64(719_468)
         let dayCounts = era * 146_097 + doe - epochOffset
-        let secondOfDay = hour * 3_600 + minute * 60 + second
-        let totalSeconds = dayCounts * 86_400 + secondOfDay - offsetInSeconds
+        let secondOfDay = hour * 3600 + minute * 60 + second
+        let totalSeconds = dayCounts * 86400 + secondOfDay - offsetInSeconds
 
         return Double(totalSeconds) + Double(nanosecond) / 1_000_000_000
     }
-
 
     /// The string representation of the offset date-time.
     ///
@@ -147,13 +146,12 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
     public var description: String {
         let dateString = date.description
         let timeString = time.description
-        let separator: String
-        if features.contains(.lowercaseT) {
-            separator = "t"
+        let separator = if features.contains(.lowercaseT) {
+            "t"
         } else if features.contains(.uppercaseT) {
-            separator = "T"
+            "T"
         } else {
-            separator = " "
+            " "
         }
 
         if features.contains(.lowercaseZ) {
@@ -248,7 +246,7 @@ public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStrin
 
     /// The string representation of the local date-time.
     public var description: String {
-        return "\(date.description)T\(time.description)"
+        "\(date.description)T\(time.description)"
     }
 }
 
@@ -301,7 +299,7 @@ public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringCon
 
     /// Check if the local time is valid.
     public var isValid: Bool {
-        return hour < 24 && minute < 60 && second < 60 && nanosecond < 1_000_000_000
+        hour < 24 && minute < 60 && second < 60 && nanosecond < 1_000_000_000
     }
 
     /// The string representation of the local time.
@@ -370,7 +368,7 @@ public struct LocalDate: Equatable, Hashable, Sendable, Codable, CustomStringCon
 
     /// Check if the local date is valid.
     public var isValid: Bool {
-        guard month >= 1 && month <= 12 else { return false }
+        guard month >= 1, month <= 12 else { return false }
         guard day >= 1 else { return false }
 
         let daysInMonth: UInt8
@@ -400,10 +398,10 @@ public struct LocalDate: Equatable, Hashable, Sendable, Codable, CustomStringCon
 
 extension String {
     fileprivate func padded(to length: Int, with character: Character) -> String {
-        if self.count >= length {
+        if count >= length {
             return self
         }
-        return String(repeating: character, count: length - self.count) + self
+        return String(repeating: character, count: length - count) + self
     }
 
     fileprivate func trimmingSuffix(_ suffix: Character) -> String {
@@ -416,6 +414,7 @@ extension String {
 }
 
 import Foundation
+
 extension DateComponents {
     init(offsetDateTime: OffsetDateTime) {
         self.init(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
@@ -431,7 +430,7 @@ extension DateComponents {
             hour: Int(offsetDateTime.time.hour),
             minute: Int(offsetDateTime.time.minute),
             second: Int(offsetDateTime.time.second),
-            nanosecond: Int(offsetDateTime.time.nanosecond)
+            nanosecond: Int(offsetDateTime.time.nanosecond),
         )
     }
 }

@@ -48,16 +48,16 @@ public struct TOMLDecoder {
             /// Provide a custom conversion from the key in the encoded JSON to the keys specified by the decoded types.
             /// The full path to the current decoding position is provided for context (in case you need to locate this key within the payload). The returned key is used in place of the last component in the coding path before decoding.
             /// If the result of the conversion is a duplicate key, then only one value will be present in the container for the type to decode from.
-            case custom(@Sendable(String) -> String)
+            case custom(@Sendable (String) -> String)
 
             var converter: (@Sendable (String) -> String)? {
                 switch self {
                 case .useOriginalKeys:
-                    return nil
+                    nil
                 case .convertFromSnakeCase:
-                    return snakeCasify(_:)
-                case .custom(let custom):
-                    return custom
+                    snakeCasify(_:)
+                case let .custom(custom):
+                    custom
                 }
             }
         }
@@ -68,7 +68,7 @@ public struct TOMLDecoder {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid UTF8.", underlyingError: nil))
         }
 
-        return try self.decode(type, from: text)
+        return try decode(type, from: text)
     }
 
     public func decode<T: Decodable>(_ type: T.Type, from text: String) throws -> T {
@@ -131,9 +131,7 @@ extension TOMLDecoder {
     ///            | Offset Date-Time | `Foundation.Date`           |
     ///            | Array            | `Swift.[Any]`               |
     ///            | Table            | `Swift.[String: Any]`       |
-    public static func tomlTable<Bytes>(from bytes: Bytes) throws -> [String: Any]
-        where Bytes: Collection, Bytes.Element == Unicode.UTF8.CodeUnit
-    {
+    public static func tomlTable(from bytes: some Collection<Unicode.UTF8.CodeUnit>) throws -> [String: Any] {
         guard let source = String(bytes: bytes, encoding: .utf8) else {
             throw TOMLError.invalidUTF8
         }

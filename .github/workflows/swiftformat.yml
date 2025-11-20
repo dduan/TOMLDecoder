@@ -1,0 +1,31 @@
+name: Formatting Code
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  swiftformat:
+    name: Swift
+    runs-on: ubuntu-latest
+    steps:
+    - uses: SwiftyLab/setup-swift@latest
+      with:
+        swift-version: 6.2
+
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Cache SwiftPM artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.swiftpm
+          .build
+        key: ${{ runner.os }}-swiftpm-format-${{ hashFiles('**/Package.swift') }}
+        restore-keys: |
+          ${{ runner.os }}-swiftpm-format
+
+    - name: Format code
+      run: Scripts/format.sh --lint

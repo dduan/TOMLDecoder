@@ -10,36 +10,34 @@ func snakeCasify(_ stringKey: String) -> String {
 
     // Find the last non-underscore character
     var lastNonUnderscore = stringKey.index(before: stringKey.endIndex)
-    while lastNonUnderscore > firstNonUnderscore && stringKey[lastNonUnderscore] == "_" {
+    while lastNonUnderscore > firstNonUnderscore, stringKey[lastNonUnderscore] == "_" {
         stringKey.formIndex(before: &lastNonUnderscore)
     }
 
-    let keyRange = firstNonUnderscore...lastNonUnderscore
-    let leadingUnderscoreRange = stringKey.startIndex..<firstNonUnderscore
-    let trailingUnderscoreRange = stringKey.index(after: lastNonUnderscore)..<stringKey.endIndex
+    let keyRange = firstNonUnderscore ... lastNonUnderscore
+    let leadingUnderscoreRange = stringKey.startIndex ..< firstNonUnderscore
+    let trailingUnderscoreRange = stringKey.index(after: lastNonUnderscore) ..< stringKey.endIndex
 
     let components = stringKey[keyRange].split(separator: "_")
-    let joinedString : String
-    if components.count == 1 {
+    let joinedString: String = if components.count == 1 {
         // No underscores in key, leave the word as is - maybe already camel cased
-        joinedString = String(stringKey[keyRange])
+        String(stringKey[keyRange])
     } else {
-        joinedString = ([components[0].lowercased()] + components[1...].map { $0.capitalized }).joined()
+        ([components[0].lowercased()] + components[1...].map(\.capitalized)).joined()
     }
 
     // Do a cheap isEmpty check before creating and appending potentially empty strings
-    let result : String
-    if (leadingUnderscoreRange.isEmpty && trailingUnderscoreRange.isEmpty) {
-        result = joinedString
-    } else if (!leadingUnderscoreRange.isEmpty && !trailingUnderscoreRange.isEmpty) {
+    let result: String = if leadingUnderscoreRange.isEmpty, trailingUnderscoreRange.isEmpty {
+        joinedString
+    } else if !leadingUnderscoreRange.isEmpty, !trailingUnderscoreRange.isEmpty {
         // Both leading and trailing underscores
-        result = String(stringKey[leadingUnderscoreRange]) + joinedString + String(stringKey[trailingUnderscoreRange])
-    } else if (!leadingUnderscoreRange.isEmpty) {
+        String(stringKey[leadingUnderscoreRange]) + joinedString + String(stringKey[trailingUnderscoreRange])
+    } else if !leadingUnderscoreRange.isEmpty {
         // Just leading
-        result = String(stringKey[leadingUnderscoreRange]) + joinedString
+        String(stringKey[leadingUnderscoreRange]) + joinedString
     } else {
         // Just trailing
-        result = joinedString + String(stringKey[trailingUnderscoreRange])
+        joinedString + String(stringKey[trailingUnderscoreRange])
     }
     return result
 }

@@ -6,7 +6,7 @@ extension TOMLTable {
         self = try parser.parse()
     }
 
-    public init<Bytes: Collection>(source: Bytes) throws(TOMLError) where Bytes.Element == Unicode.UTF8.CodeUnit {
+    public init(source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
         guard let source = String(bytes: source, encoding: .utf8) else {
             throw TOMLError.invalidUTF8
         }
@@ -92,7 +92,7 @@ public struct TOMLTable: Sendable, Equatable {
         try value(forKey: key) { text throws(TOMLError) in
             let datetime = try datetimeMaybe(lineNumber: nil, text)
             switch (datetime.date, datetime.time, datetime.offset) {
-            case (.some(let date), .some(let time), .some(let offset)):
+            case let (.some(date), .some(time), .some(offset)):
                 return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
             default:
                 throw TOMLError.keyNotFoundInTable(key: key, type: "offset date-time")
@@ -104,9 +104,9 @@ public struct TOMLTable: Sendable, Equatable {
         try value(forKey: key) { text throws(TOMLError) in
             let datetime = try datetimeMaybe(lineNumber: nil, text)
             switch (datetime.date, datetime.time, datetime.offset) {
-            case (.some(let date), .some(let time), .some) where !strict:
+            case let (.some(date), .some(time), .some) where !strict:
                 return LocalDateTime(date: date, time: time)
-            case (.some(let date), .some(let time), .none):
+            case let (.some(date), .some(time), .none):
                 return LocalDateTime(date: date, time: time)
             default:
                 throw TOMLError.keyNotFoundInTable(key: key, type: "local date-time")
@@ -118,11 +118,11 @@ public struct TOMLTable: Sendable, Equatable {
         try value(forKey: key) { text throws(TOMLError) in
             let datetime = try datetimeMaybe(lineNumber: nil, text)
             switch (datetime.date, datetime.time, datetime.offset) {
-            case (.some(let date), .some, .some) where !strict:
+            case let (.some(date), .some, .some) where !strict:
                 return date
-            case (.some(let date), .some, .none) where !strict:
+            case let (.some(date), .some, .none) where !strict:
                 return date
-            case (.some(let date), .none, .none):
+            case let (.some(date), .none, .none):
                 return date
             default:
                 throw TOMLError.keyNotFoundInTable(key: key, type: "local date")
@@ -134,11 +134,11 @@ public struct TOMLTable: Sendable, Equatable {
         try value(forKey: key) { text throws(TOMLError) in
             let datetime = try datetimeMaybe(lineNumber: nil, text)
             switch (datetime.date, datetime.time, datetime.offset) {
-            case (.some, .some(let time), .some) where !strict:
+            case let (.some, .some(time), .some) where !strict:
                 return time
-            case (.some, .some(let time), .none) where !strict:
+            case let (.some, .some(time), .none) where !strict:
                 return time
-            case (.none, .some(let time), .none):
+            case let (.none, .some(time), .none):
                 return time
             default:
                 throw TOMLError.keyNotFoundInTable(key: key, type: "local time")
@@ -158,18 +158,17 @@ public struct TOMLTable: Sendable, Equatable {
 }
 
 extension TOMLTable: Codable {
-    public init(from decoder: any Decoder) throws {
+    public init(from _: any Decoder) throws {
         throw TOMLError.notReallyCodable
     }
 
-    public func encode(to encoder: any Encoder) throws {
+    public func encode(to _: any Encoder) throws {
         throw TOMLError.notReallyCodable
     }
 }
 
-extension Dictionary<String, Any> {
+extension [String: Any] {
     public init(_ tomlTable: TOMLTable) throws(TOMLError) {
         self = try tomlTable.dictionary()
     }
 }
-

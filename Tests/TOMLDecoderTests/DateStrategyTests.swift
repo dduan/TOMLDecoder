@@ -1,6 +1,6 @@
+import Foundation
 import Testing
 @testable import TOMLDecoder
-import Foundation
 
 @Suite
 struct DateStrategyTests {
@@ -28,7 +28,7 @@ struct DateStrategyTests {
             date: LocalDate(year: 2021, month: 1, day: 1),
             time: LocalTime(hour: 0, minute: 0, second: 0, nanosecond: 567_000),
             offset: -754, // minutes
-            features: [.uppercaseT]
+            features: [.uppercaseT],
         )
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetime == expected)
@@ -63,7 +63,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .intervalSince1970
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetime == 1609504440.000567)
+        #expect(result.datetime == 1_609_504_440.000567)
     }
 
     @Test(.tags(.datetime))
@@ -79,7 +79,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .intervalSince2001
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetime == 631197240.000567)
+        #expect(result.datetime == 631_197_240.000567)
     }
 
     @Test(.tags(.datetime))
@@ -95,7 +95,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .dateFromProlepticGregorianCalendar
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetime.timeIntervalSince1970 == -61504399559.999435)
+        #expect(result.datetime.timeIntervalSince1970 == -61_504_399_559.999435)
     }
 
     @Test(.tags(.datetime))
@@ -111,7 +111,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .dateFromCalendar(identifiedBy: .gregorian)
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetime.timeIntervalSince1970 == 1609504440.000567)
+        #expect(result.datetime.timeIntervalSince1970 == 1_609_504_440.000567)
     }
 
     @Test(.tags(.datetime))
@@ -147,7 +147,7 @@ struct DateStrategyTests {
             date: LocalDate(year: 2021, month: 1, day: 1),
             time: LocalTime(hour: 0, minute: 0, second: 0, nanosecond: 567_000),
             offset: -754, // minutes
-            features: [.uppercaseT]
+            features: [.uppercaseT],
         )
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetimes == [expected])
@@ -182,7 +182,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .intervalSince1970
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetimes == [1609504440.000567])
+        #expect(result.datetimes == [1_609_504_440.000567])
     }
 
     @Test(.tags(.datetime))
@@ -198,7 +198,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .intervalSince2001
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetimes == [631197240.000567])
+        #expect(result.datetimes == [631_197_240.000567])
     }
 
     @Test(.tags(.datetime))
@@ -214,7 +214,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .dateFromProlepticGregorianCalendar
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetimes.map { $0.timeIntervalSince1970 } == [-61504399559.999435])
+        #expect(result.datetimes.map(\.timeIntervalSince1970) == [-61_504_399_559.999435])
     }
 
     @Test(.tags(.datetime))
@@ -230,7 +230,7 @@ struct DateStrategyTests {
         var decoder = TOMLDecoder()
         decoder.strategy.offsetDateTime = .dateFromCalendar(identifiedBy: .gregorian)
         let result = try decoder.decode(Test.self, from: toml)
-        #expect(result.datetimes.map { $0.timeIntervalSince1970 } == [1609504440.000567])
+        #expect(result.datetimes.map(\.timeIntervalSince1970) == [1_609_504_440.000567])
     }
 
     @Test(.tags(.datetime))
@@ -247,7 +247,7 @@ struct DateStrategyTests {
         decoder.isLenient = false
 
         #expect(throws: (any Error).self) {
-            try decoder.decode(Test.self, from: toml).datetimes.map { $0.timeIntervalSince1970 } == [1609504440.000567]
+            try decoder.decode(Test.self, from: toml).datetimes.map(\.timeIntervalSince1970) == [1_609_504_440.000567]
         }
     }
 }

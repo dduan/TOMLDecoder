@@ -10,31 +10,33 @@ struct _TOMLDecoder: Decoder {
     let codingPath: [CodingKey]
     let strategy: TOMLDecoder.Strategy
     let isLenient: Bool
-    let userInfo: [CodingUserInfoKey : Any] = [:]
+    let userInfo: [CodingUserInfoKey: Any] = [:]
 
-    func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
-        guard case .keyed(let table) = container else {
+    func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
+        guard case let .keyed(table) = container else {
             throw DecodingError.valueNotFound(
                 KeyedDecodingContainer<Key>.self,
                 DecodingError.Context(
-                    codingPath: self.codingPath,
+                    codingPath: codingPath,
                     debugDescription:
-                        "Cannot get keyed decoding container -- found \(Swift.type(of: self.container)) instead."
-                ))
+                    "Cannot get keyed decoding container -- found \(Swift.type(of: container)) instead.",
+                ),
+            )
         }
 
         return KeyedDecodingContainer(TOMLKeyedDecodingContainer(referencing: self, wrapping: table))
     }
 
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        guard case .unkeyed(let array) = container else {
+        guard case let .unkeyed(array) = container else {
             throw DecodingError.valueNotFound(
                 UnkeyedDecodingContainer.self,
                 DecodingError.Context(
-                    codingPath: self.codingPath,
+                    codingPath: codingPath,
                     debugDescription:
-                        "Cannot get unkeyed decoding container -- found \(Swift.type(of: self.container)) instead."
-                ))
+                    "Cannot get unkeyed decoding container -- found \(Swift.type(of: container)) instead.",
+                ),
+            )
         }
 
         return TOMLUnkeyedDecodingContainer(referencing: self, wrapping: array)
@@ -44,10 +46,11 @@ struct _TOMLDecoder: Decoder {
         throw DecodingError.typeMismatch(
             SingleValueDecodingContainer.self,
             DecodingError.Context(
-                codingPath: self.codingPath,
+                codingPath: codingPath,
                 debugDescription:
-                    "Top level TOML container is always a table (keyed container), not a single value."
-            ))
+                "Top level TOML container is always a table (keyed container), not a single value.",
+            ),
+        )
     }
 
     init(referencing container: Container, at codingPath: [CodingKey] = [], strategy: TOMLDecoder.Strategy, isLenient: Bool) {
@@ -68,7 +71,7 @@ extension TimeInterval {
         default:
             throw DecodingError.dataCorrupted(DecodingError.Context(
                 codingPath: [],
-                debugDescription: "Invalid strategy \(strategy) for OffsetDateTime conversion to TimeInterval"
+                debugDescription: "Invalid strategy \(strategy) for OffsetDateTime conversion to TimeInterval",
             ))
         }
     }

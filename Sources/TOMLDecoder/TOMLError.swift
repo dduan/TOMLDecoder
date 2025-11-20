@@ -28,51 +28,51 @@ extension TOMLError: CustomStringConvertible {
     public var description: String {
         switch self {
         case .invalidUTF8:
-            return "The given data was not valid UTF8."
-        case .badKey(let lineNumber):
-            return "Ill-formed key at line \(lineNumber)."
-        case .expectedHexCharacters(let codeUnit, let hexCount):
-            return "Expected \(hexCount) hexadecimal characters after '\(String(UnicodeScalar(codeUnit))).'."
-        case .illegalEscapeCharacter(let codeUnit):
-            return "Illegal escape character '\(String(UnicodeScalar(codeUnit)))'."
-        case .illegalUCSCode(let ucs):
-            return "Illegal UCS code '\(ucs)'."
-        case .internalError(let lineNumber):
-            return "Internal error at line \(lineNumber)."
-        case .invalidCharacter(let codeUnit):
-            return "Invalid character '\(String(UnicodeScalar(codeUnit)))'."
-        case .invalidHexCharacters(let codeUnit):
-            return "Invalid hexadecimal characters '\(String(UnicodeScalar(codeUnit)))'."
-        case .keyExists(let lineNumber):
-            return "Key at line \(lineNumber) already exists."
-        case .syntax(let lineNumber, let message):
-            return "Syntax error at line \(lineNumber): \(message)."
-        case .stringMissingClosingQuote(let single):
-            return "String missing closing quote\(single ? " (single quoted)" : " (double quoted)") character."
-        case .arrayOutOfBound(let index, let bound):
-            return "Array index \(index) is out of bounds (0..<\(bound))."
-        case .typeMismatchInArray(let index, let expected):
-            return "Type mismatch at array index \(index): expected \(expected)."
-        case .keyNotFoundInTable(let key, let type):
-            return "Key '\(key)' not found in table of type \(type)."
-        case .typeMismatchInTable(let key, let expected):
-            return "Type mismatch at table key '\(key)': expected \(expected)."
-        case .invalidNumber(let reason):
-            return "Invalid number: \(reason)."
-        case .invalidInteger(let reason):
-            return "Invalid integer: \(reason)."
-        case .invalidFloat(let reason):
-            return "Invalid float: \(reason)."
-        case .invalidBool(let value):
-            return "Invalid boolean value: \(value)."
-        case .invalidDateTime(let lineNumber, let reason):
-            return "Invalid date-time\(lineNumber.map { " at line \($0)" } ?? ""): \(reason)."
-        case .invalidValueInTable(let key):
-            return "Invalid value in table for key '\(key)'."
-        case .invalidDateTimeComponents(let components):
-            return "Invalid date-time components: \(components)."
+            "The given data was not valid UTF8."
+        case let .badKey(lineNumber):
+            "Ill-formed key at line \(lineNumber)."
+        case let .expectedHexCharacters(codeUnit, hexCount):
+            "Expected \(hexCount) hexadecimal characters after '\(String(UnicodeScalar(codeUnit))).'."
+        case let .illegalEscapeCharacter(codeUnit):
+            "Illegal escape character '\(String(UnicodeScalar(codeUnit)))'."
+        case let .illegalUCSCode(ucs):
+            "Illegal UCS code '\(ucs)'."
+        case let .internalError(lineNumber):
+            "Internal error at line \(lineNumber)."
+        case let .invalidCharacter(codeUnit):
+            "Invalid character '\(String(UnicodeScalar(codeUnit)))'."
+        case let .invalidHexCharacters(codeUnit):
+            "Invalid hexadecimal characters '\(String(UnicodeScalar(codeUnit)))'."
+        case let .keyExists(lineNumber):
+            "Key at line \(lineNumber) already exists."
+        case let .syntax(lineNumber, message):
+            "Syntax error at line \(lineNumber): \(message)."
+        case let .stringMissingClosingQuote(single):
+            "String missing closing quote\(single ? " (single quoted)" : " (double quoted)") character."
+        case let .arrayOutOfBound(index, bound):
+            "Array index \(index) is out of bounds (0..<\(bound))."
+        case let .typeMismatchInArray(index, expected):
+            "Type mismatch at array index \(index): expected \(expected)."
+        case let .keyNotFoundInTable(key, type):
+            "Key '\(key)' not found in table of type \(type)."
+        case let .typeMismatchInTable(key, expected):
+            "Type mismatch at table key '\(key)': expected \(expected)."
+        case let .invalidNumber(reason):
+            "Invalid number: \(reason)."
+        case let .invalidInteger(reason):
+            "Invalid integer: \(reason)."
+        case let .invalidFloat(reason):
+            "Invalid float: \(reason)."
+        case let .invalidBool(value):
+            "Invalid boolean value: \(value)."
+        case let .invalidDateTime(lineNumber, reason):
+            "Invalid date-time\(lineNumber.map { " at line \($0)" } ?? ""): \(reason)."
+        case let .invalidValueInTable(key):
+            "Invalid value in table for key '\(key)'."
+        case let .invalidDateTimeComponents(components):
+            "Invalid date-time components: \(components)."
         case .notReallyCodable:
-            return "This type is not generally codable. Use TOMLDecoder to decode it as part of a larger Codable."
+            "This type is not generally codable. Use TOMLDecoder to decode it as part of a larger Codable."
         }
     }
 }

@@ -42,7 +42,7 @@ struct TableTypeConversionTests {
         """
         let result = try TOMLDecoder().decode(Test.self, from: toml)
 
-        #expect(result.number == 1234567)
+        #expect(result.number == 1_234_567)
     }
 
     @Test(.tags(.integer, .table))
@@ -84,7 +84,7 @@ struct TableTypeConversionTests {
         """
         let result = try TOMLDecoder().decode(Test.self, from: toml)
 
-        #expect(result.number == 3000000)
+        #expect(result.number == 3_000_000)
     }
 
     @Test(.tags(.integer, .table))
@@ -98,7 +98,7 @@ struct TableTypeConversionTests {
         """
         let result = try TOMLDecoder().decode(Test.self, from: toml)
 
-        #expect(result.number == 9223372036854775807)
+        #expect(result.number == 9_223_372_036_854_775_807)
     }
 
     @Test(.tags(.float, .table))
