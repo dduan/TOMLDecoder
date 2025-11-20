@@ -3,9 +3,7 @@ import Foundation
 enum Constants {
     static let tripleSingleQuote = "'''".utf8
     static let tripleDoubleQuote = #"""""#.utf8
-    static let escapeChars = #"btnfr"\\"#.utf8
     static let anonymousArryKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
-    static let dateTimeCharacters = "0123456789.:+-Tt Zz".utf8
     static let nan = "nan".utf8
     static let inf = "inf".utf8
     static let `true` = "true".utf8
@@ -36,6 +34,7 @@ enum CodeUnits {
     static let underscore = "_".utf8.first!
 
     static let number0 = "0".utf8.first!
+    static let number1 = "1".utf8.first!
     static let number7 = "7".utf8.first!
     static let number9 = "9".utf8.first!
 
@@ -503,7 +502,7 @@ func scanDigits(source: String.UTF8View.SubSequence, n: Int) -> Int? {
     return n != 0 ? nil : result
 }
 
-func scanDate(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
+func scanDate(source: String.UTF8View.SubSequence) -> (Int, Int, Int, String.UTF8View.SubSequence.Index)? {
     guard let year = scanDigits(source: source, n: 4) else {
         return nil
     }
@@ -529,10 +528,36 @@ func scanDate(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
     guard let day = scanDigits(source: source[index...], n: 2) else {
         return nil
     }
-    return (year, month, day)
+
+    source.formIndex(&index, offsetBy: 2)
+    return (year, month, day, index)
 }
 
-func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
+func scanTimezoneOffset(source: String.UTF8View.SubSequence) -> String.UTF8View.SubSequence.Index? {
+    var index = source.startIndex
+    guard index < source.endIndex, source[index] == CodeUnits.plus || source[index] == CodeUnits.minus else {
+        return nil
+    }
+
+    source.formIndex(&index, offsetBy: 1)
+    guard let _ = scanDigits(source: source[index...], n: 2) else {
+        return nil
+    }
+
+    source.formIndex(&index, offsetBy: 2)
+    guard index < source.endIndex, source[index] == CodeUnits.colon else {
+        return nil
+    }
+
+    source.formIndex(&index, offsetBy: 1)
+    guard let _ = scanDigits(source: source[index...], n: 2) else {
+        return nil
+    }
+    source.formIndex(&index, offsetBy: 2)
+    return index
+}
+
+func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int, String.UTF8View.SubSequence.Index)? {
     guard let hour = scanDigits(source: source, n: 2) else {
         return nil
     }
@@ -559,7 +584,8 @@ func scanTime(source: String.UTF8View.SubSequence) -> (Int, Int, Int)? {
         return nil
     }
 
-    return (hour, minute, second)
+    source.formIndex(&index, offsetBy: 2)
+    return (hour, minute, second, index)
 }
 
 struct DateTimeComponents {
@@ -826,7 +852,7 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
     var time: (hour: Int, minute: Int, second: Int)?
 
     var index = text.startIndex
-    if let (year, month, day) = scanDate(source: text) {
+    if let (year, month, day, _) = scanDate(source: text) {
         // Validate date components
         if month < 1 || month > 12 {
             throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "month must be between 01 and 12")
@@ -883,7 +909,7 @@ func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws
     var nanoseconds: UInt32?
     var timeOffset: Int16?
 
-    if index < text.endIndex, let (hour, minute, second) = scanTime(source: text[index...]) {
+    if index < text.endIndex, let (hour, minute, second, _) = scanTime(source: text[index...]) {
         // Validate time components
         if hour > 23 {
             throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "hour must be between 00 and 23")
@@ -1351,7 +1377,7 @@ extension Deserializer {
                 let ch = text[i]
                 if escape {
                     escape = false
-                    if Constants.escapeChars.contains(ch) {
+                    if ch == CodeUnits.lowerB || ch == CodeUnits.lowerT || ch == CodeUnits.lowerN || ch == CodeUnits.lowerF || ch == CodeUnits.lowerR || ch == CodeUnits.doubleQuote || ch == CodeUnits.backslash {
                         text.formIndex(after: &i)
                         continue
                     }
@@ -1410,26 +1436,46 @@ extension Deserializer {
             return
         }
 
-        if !dotIsSpecial, scanDate(source: text) != nil || scanTime(source: text) != nil {
-            // forward thru the timestamp
+        if !dotIsSpecial {
             var index = text.startIndex
-            while index < text.endIndex, Constants.dateTimeCharacters.contains(text[index]) {
-                text.formIndex(after: &index)
+            let dateEnder = scanDate(source: text)?.3
+            if let dateEnder, dateEnder < text.endIndex, text[dateEnder] == CodeUnits.upperT || text[dateEnder] == CodeUnits.lowerT || text[dateEnder] == CodeUnits.space {
+                let timeStarter = text.index(after: dateEnder)
+                if let timeEnder = scanTime(source: text[timeStarter...])?.3 {
+                    index = timeEnder
+                }
+            } else if let dateEnder {
+                index = dateEnder
+            } else if let timeEnder = scanTime(source: text)?.3 {
+                index = timeEnder
             }
-
-            // squeeze out any spaces at end of string
-            while index >= text.startIndex, text[text.index(before: index)] == CodeUnits.space {
-                text.formIndex(before: &index)
+            if index > text.startIndex {
+                if index < text.endIndex {
+                    if text[index] == CodeUnits.dot {
+                        text.formIndex(after: &index)
+                        while index < text.endIndex, text[index] >= CodeUnits.number0, text[index] <= CodeUnits.number9 {
+                            text.formIndex(after: &index)
+                        }
+                    }
+                    if text[index] == CodeUnits.upperZ || text[index] == CodeUnits.lowerZ {
+                        text.formIndex(after: &index)
+                    } else if let timzoneEnder = scanTimezoneOffset(source: text[index...]) {
+                        index = timzoneEnder
+                    }
+                }
+                // squeeze out any spaces at end of string
+                while index >= text.startIndex, text[text.index(before: index)] == CodeUnits.space {
+                    text.formIndex(before: &index)
+                }
+                // tokenize
+                token = Token(
+                    kind: .string,
+                    lineNumber: lineNumber,
+                    text: text[start ..< index],
+                    eof: false,
+                )
+                return
             }
-
-            // tokenize
-            token = Token(
-                kind: .string,
-                lineNumber: lineNumber,
-                text: text[start ..< index],
-                eof: false,
-            )
-            return
         }
 
         var index = text.startIndex
