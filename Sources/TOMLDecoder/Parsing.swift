@@ -105,52 +105,24 @@ extension Token: CustomDebugStringConvertible {
     }
 }
 
-enum LeafKind: Equatable {
-    case int(Int64)
-    case double(Double)
-    case bool(Bool)
-    case string(String.UTF8View.SubSequence)
-    case dateTimeComponents(DateTimeComponents)
-
-    init?(token: Token) {
-        if token.text.first == CodeUnits.singleQuote || token.text.first == CodeUnits.doubleQuote {
-            self = .string(token.text)
-        } else if let boolValue = token.parseAsBool() {
-            self = .bool(boolValue)
-        } else if let integerValue = token.parseAsInt() {
-            self = .int(integerValue)
-        } else if let doubleValue = token.parseAsFloat() {
-            self = .double(doubleValue)
-        } else if let result = token.parseAsDateTime() {
-            self = .dateTimeComponents(result)
-        } else {
-            return nil
-        }
-    }
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        switch (lhs, rhs) {
-        case let (.int(lhsValue), .int(rhsValue)):
-            lhsValue == rhsValue
-        case let (.double(lhsValue), .double(rhsValue)):
-            lhsValue == rhsValue
-        case let (.bool(lhsValue), .bool(rhsValue)):
-            lhsValue == rhsValue
-        case let (.string(lhsValue), .string(rhsValue)):
-            lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
-        case let (.dateTimeComponents(lhsValue), .dateTimeComponents(rhsValue)):
-            lhsValue == rhsValue
-        default:
-            false
-        }
-    }
-}
-
 struct TOMLArrayImplementation: Equatable, Sendable {
     enum Element: Equatable {
-        case leaf(LeafKind)
+        case leaf(String.UTF8View.SubSequence)
         case array(Int)
         case table(Int)
+
+        static func == (lhs: Element, rhs: Element) -> Bool {
+            switch (lhs, rhs) {
+            case let (.leaf(lhsText), .leaf(rhsText)):
+                lhsText.startIndex == rhsText.startIndex && lhsText.endIndex == rhsText.endIndex
+            case let (.array(lhsIndex), .array(rhsIndex)):
+                lhsIndex == rhsIndex
+            case let (.table(lhsIndex), .table(rhsIndex)):
+                lhsIndex == rhsIndex
+            default:
+                false
+            }
+        }
     }
 
     enum Kind {
@@ -1608,11 +1580,7 @@ extension Deserializer {
                     array.kind = .mixed
                 }
 
-                guard let newValueKind = LeafKind(token: token) else {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "Unknown array element type")
-                }
-
-                array.elements.append(.leaf(newValueKind))
+                array.elements.append(.leaf(token.text))
 
                 try eatToken(type: .string, isDotSpecial: true)
 
@@ -1917,23 +1885,66 @@ extension TOMLArrayImplementation {
     func array(source: Deserializer) throws(TOMLError) -> [Any] {
         var result = [Any]()
 
-        for element in elements {
+        for (index, element) in zip(0..., elements) {
             switch element {
             case let .array(arrayIndex):
                 try result.append(source.arrays[arrayIndex].array(source: source))
             case let .table(tableIndex):
                 try result.append(source.tables[tableIndex].dictionary(source: source))
-            case let .leaf(.bool(boolValue)):
-                result.append(boolValue)
-            case let .leaf(.string(stringValue)):
-                guard let string = try stringMaybe(stringValue) else { continue }
-                result.append(string)
-            case let .leaf(.dateTimeComponents(components)):
-                result.append(components.crystalized)
-            case let .leaf(.double(doubleValue)):
-                result.append(doubleValue)
-            case let .leaf(.int(intValue)):
-                result.append(intValue)
+            case let .leaf(text):
+                let first = text.first
+                if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
+                    guard let string = try stringMaybe(text) else {
+                        throw TOMLError.invalidValueInArray(index: index)
+                    }
+                    result.append(string)
+                    continue
+                }
+
+                // Try parsing as bool first (more common)
+                if let boolValue = try? boolMaybe(text) {
+                    result.append(boolValue)
+                    continue
+                }
+
+                do {
+                    try result.append(intMaybe(text, mustBeInt: false))
+                    continue
+                } catch {
+                    if case TOMLError.invalidInteger = error {
+                        throw error
+                    }
+                }
+
+                // Try float
+                do {
+                    let floatValue = try floatMaybe(text, mustBeFloat: false)
+                    result.append(floatValue)
+                    continue
+                } catch {
+                    if case TOMLError.invalidFloat = error {
+                        throw error
+                    }
+                }
+
+                // Try datetime if it starts with a digit
+                guard first?.isDecimalDigit == true else {
+                    throw TOMLError.invalidValueInArray(index: index)
+                }
+
+                let datetime = try datetimeMaybe(lineNumber: nil, text)
+                switch (datetime.date, datetime.time, datetime.offset) {
+                case let (.some(date), .some(time), .some(offset)):
+                    result.append(OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features))
+                case let (.some(date), .some(time), .none):
+                    result.append(LocalDateTime(date: date, time: time))
+                case let (.some(date), .none, .none):
+                    result.append(date)
+                case let (.none, .some(time), .none):
+                    result.append(time)
+                default:
+                    throw TOMLError.invalidDateTimeComponents("Failed to parse value as date or time at index \(index)")
+                }
             }
         }
 

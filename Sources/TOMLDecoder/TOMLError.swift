@@ -21,6 +21,7 @@ public enum TOMLError: Error {
     case invalidBool(String.UTF8View.SubSequence)
     case invalidDateTime(lineNumber: Int?, reason: String)
     case invalidValueInTable(key: String)
+    case invalidValueInArray(index: Int)
     case invalidDateTimeComponents(String)
 }
 
@@ -69,6 +70,8 @@ extension TOMLError: CustomStringConvertible {
             "Invalid date-time\(lineNumber.map { " at line \($0)" } ?? ""): \(reason)."
         case let .invalidValueInTable(key):
             "Invalid value in table for key '\(key)'."
+        case let .invalidValueInArray(index):
+            "Invalid value in array at index \(index)."
         case let .invalidDateTimeComponents(components):
             "Invalid date-time components: \(components)."
         case .notReallyCodable:
