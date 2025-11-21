@@ -26,12 +26,10 @@ extension TOMLTable {
     }
 }
 
-/// A parsed TOML table. Entry point for  parsing TOML data.
+/// A parsed TOML table. Entry point for parsing TOML data.
 /// The root of a TOML document is always a table.
 ///
-/// This type reperesents the result of parsing a TOML table.
-/// It's the only type that the parser produces
-/// as a result of parsing a TOML document.
+/// This is a structural type that contains TOML fields accessible by key.
 ///
 /// The root of a TOML document is always a table,
 /// therefore this type could also represent an entire TOML document.
@@ -59,7 +57,7 @@ extension TOMLTable {
 /// To access content of the table of a given type as defined by TOML,
 /// use a corresponding method for that type.
 /// If the key does not exist in the table,
-/// or if the value for the key is the wrong type,
+/// or if the value for the key is of the wrong type,
 /// the methods will throw an ``TOMLError``.
 ///
 ///     let integer = try tomlTable.integer(forKey: "baz")
@@ -87,13 +85,32 @@ extension TOMLTable {
 ///     // get a [String: Any]
 ///     let swiftDictionary: [String: Any] = try Dictionary(tomlTable)
 ///
-/// ... doing this can be slow.
-/// It also erases the type of the values to `Any`.
+/// This causes all fields to be validated,
+/// and replaces all intermidiate ``TOMLArray``s with `[Any]`,
+/// and all ``TOMLTable``s with `[String: Any]`.
+/// If any fields are invalid, a ``TOMLError`` is thrown.
+/// This can be slow.
+///
+/// ``TOMLTable`` declares conformance to `Codable`,
+/// so you can us it as part of a larger Codable structure.
+///
+///    struct Config: Codable {
+///        let owner: TOMLTable // This works.
+///    }
+///    let config = try TOMLDecoder().decode(Config.self, from: tomlString)
+///
+/// > Warning: ``TOMLTable`` declares conformance to `Codable`
+///   but it is not a full `Codable` conformance.
+///   The decoding logic is only implemented in ``TOMLDecoder``.
+///   Attempting to use it with other encoder or decoder
+///   will result in a `TOMLError.notReallyCodable` error.
+///
+/// Read <doc:DeserializingTOML> to learn more about ``TOMLTable``.
 public struct TOMLTable: Sendable, Equatable {
     let source: Deserializer
     let index: Int
 
-    // All keys available in the table.
+    /// All keys available in the table.
     public var keys: [String] {
         source.tables[index].allKeys(parser: source)
     }
@@ -341,26 +358,57 @@ public struct TOMLTable: Sendable, Equatable {
 }
 
 extension TOMLTable: Codable {
+    /// Makes ``TOMLTable`` eligible for `Codable`.
+    ///
+    ///    struct Config: Codable {
+    ///        let owner: TOMLTable // This works.
+    ///    }
+    ///    let config = try TOMLDecoder().decode(Config.self, from: tomlString)
+    ///
+    /// > Warning: This is not a full `Codable` conformance.
+    ///   The decoding logic is only implemented in ``TOMLDecoder``.
+    ///   Attempting to use it with other encoder or decoder
+    ///   will result in a `TOMLError.notReallyCodable` error.
+    ///
+    /// - Parameter _: The decoder to decode from.
+    /// - Throws: `TOMLError.notReallyCodable`, always.
     public init(from _: any Decoder) throws {
         throw TOMLError.notReallyCodable
     }
 
+    /// Makes ``TOMLTable`` eligible for `Codable`.
+    ///
+    ///    struct Config: Codable {
+    ///        let owner: TOMLTable // This works.
+    ///    }
+    ///    let config = try TOMLDecoder().decode(Config.self, from: tomlString)
+    ///
+    /// > Warning: This is not a full `Codable` conformance.
+    ///   The decoding logic is only implemented in ``TOMLDecoder``.
+    ///   Attempting to use it with other encoder or decoder
+    ///   will result in a `TOMLError.notReallyCodable` error.
+    ///
+    /// - Parameter _: The encoder to encode to.
+    /// - Throws: `TOMLError.notReallyCodable`, always.
     public func encode(to _: any Encoder) throws {
         throw TOMLError.notReallyCodable
     }
 }
 
 extension [String: Any] {
-    /// Create a `Dictionary<String, Any>` from a `TOMLTable`.
+    /// Create a `[String: Any]` from a `TOMLTable`.
     /// Validating all fields along the way.
     /// Throw a ``TOMLError`` if any of the fields are invalid.
-    /// All values will have the definitive,
+    /// All values will have their definitive,
     /// corresponding Swift type.
+    /// All intermediate `TOMLArray`s are replaced with `[Any]`.
+    /// All intermediate `TOMLTable`s are replaced with `[String: Any]`.
     ///
-    /// - Parameter tomlTable: The `TOMLTable` to convert to a `Dictionary<String, Any>`.
-    /// - Returns: A `Dictionary<String, Any>` with the values converted to the definitive,
-    ///   corresponding Swift type.
+    /// - Parameter tomlTable: The `TOMLTable` to convert to a `[String: Any]`.
+    /// - Returns: A `[String: Any]` with the values converted to their definitive,
+    ///   corresponding Swift type, recursively.
     /// - Throws: A ``TOMLError`` if any of the fields are invalid.
+    ///   if any of the fields are invalid.
     public init(_ tomlTable: TOMLTable) throws(TOMLError) {
         self = try tomlTable.dictionary()
     }
