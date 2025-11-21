@@ -27,7 +27,7 @@ enum TOMLComplianceSupport {
             let jsonData = try Data(contentsOf: jsonURL)
             let expected = try JSONSerialization.jsonObject(with: jsonData)
             let tomlData = try Data(contentsOf: tomlURL)
-            let actual = try TOMLDecoder.tomlTable(from: tomlData)
+            let actual = try Dictionary(TOMLTable(source: tomlData))
             let failure = compare(expected: expected, actual: actual)
             #expect(failure == nil, "\(failure ?? "")", sourceLocation: sourceLocation)
         } catch {
@@ -38,7 +38,7 @@ enum TOMLComplianceSupport {
     static func verifyInvalidFixture(tomlURL: URL, sourceLocation: SourceLocation) throws {
         let tomlData = try Data(contentsOf: tomlURL)
         #expect(throws: (any Error).self, sourceLocation: sourceLocation) {
-            try TOMLDecoder.tomlTable(from: tomlData)
+            try Dictionary(TOMLTable(source: tomlData))
         }
     }
 
