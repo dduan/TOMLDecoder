@@ -14,7 +14,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
     private let table: TOMLTable
 
     var codingPath: [CodingKey] {
-        self.decoder.codingPath
+        decoder.codingPath
     }
 
     init(referencing decoder: _TOMLDecoder, wrapping table: TOMLTable) {
@@ -23,11 +23,11 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
     }
 
     var allKeys: [Key] {
-        self.table.allKeys.compactMap { Key(stringValue: $0) }
+        table.keys.compactMap { Key(stringValue: $0) }
     }
 
     func contains(_ key: Key) -> Bool {
-        self.table.contains(key: key.stringValue)
+        table.contains(key: key.stringValue)
     }
 
     func decodeNil(forKey _: Key) throws -> Bool {

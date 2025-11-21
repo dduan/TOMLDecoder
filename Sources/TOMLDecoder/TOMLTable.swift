@@ -14,11 +14,13 @@ extension TOMLTable {
     }
 }
 
+/// A parsed TOML table. Use ``TOMLTable.init(source:)`` to parse TOML data.
+/// The root of a TOML document is always a table.
 public struct TOMLTable: Sendable, Equatable {
     let source: Deserializer
     let index: Int
 
-    public var allKeys: [String] {
+    public var keys: [String] {
         source.tables[index].allKeys(parser: source)
     }
 
