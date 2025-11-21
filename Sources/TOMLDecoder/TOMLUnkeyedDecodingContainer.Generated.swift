@@ -516,7 +516,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
                     debugDescription: "Cannot get nested unkeyed container -- element is not an array.",
                 ),
-            ),
+            )
         }
 
         var nestedCodingPath = codingPath
