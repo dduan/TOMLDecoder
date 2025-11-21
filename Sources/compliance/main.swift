@@ -5,7 +5,9 @@ import TOMLDecoder
 
 if #available(macOS 12, *) {
     let input = FileHandle.standardInput.availableData
-    guard let table = try? TOMLDecoder.tomlTable(from: input) else {
+    guard let tomlTable = try? TOMLTable(source: input),
+          let table = try? Dictionary(tomlTable)
+    else {
         exit(1)
     }
 
