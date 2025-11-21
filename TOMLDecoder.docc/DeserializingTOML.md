@@ -23,6 +23,10 @@ TOML decoder picks a set of Swift types to represent each TOML data type.
 It also handles the parsing/deseralizing/de-marsheling for you.
 This article explains both aspects of the library.
 
+_This may sound overly complicated.
+and you only care about getting your `Codeble`s.
+In that case, checkout <doc:DecodingTOML>_.
+
 ## Representing TOML data types
 
 `TOMLDecoder` has two separate layers of APIs.
