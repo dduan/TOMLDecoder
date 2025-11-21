@@ -1,9 +1,79 @@
 import Foundation
 
+/// A parsed TOML array.
+///
+/// This is a structural type that contains TOML fields accessible by index.
+///
+/// The content of the array is strongly-typed.
+/// Each TOML type has a definitive, corresponding Swift type,
+/// * integer: `Swift.Int64`
+/// * float: `Swift.Double`
+/// * boolean: `Swift.Bool`
+/// * string: `Swift.String`
+/// * offset date-time: `OffsetDateTime`
+/// * local date-time: `LocalDateTime`
+/// * local date: `LocalDate`
+/// * local time: `LocalTime`
+/// * array: `TOMLArray`
+/// * table: `TOMLTable`
+///
+/// To access content of the array of a given type as defined by TOML,
+/// use a corresponding method for that type.
+/// If the index is out of bounds,
+/// or if the value at the index is of the wrong type,
+/// the methods will throw an ``TOMLError``.
+///
+///     let integer = try tomlArray.integer(atIndex: 0)
+///
+/// Local date / time may be retrieved from a value that's "fuller".
+/// For example, a local time can be retrieved
+/// when the value is a offset date-time, or lacal date-time.
+/// Pass `exactMatch` as `false` to relax the requirement.
+///
+///     // Will not throw error if `time` is an offset date-time or local date-time.
+///     let localTime1 = try tomlArray.localTime(atIndex: 0, exactMatch: false)
+///
+///     // Will throw `TOMLError.typeMismatchInArray` error
+///     // if `time` is an offset date-time or local date-time.
+///     let localTime2 = try tomlArray.localTime(atIndex: 0, exactMatch: true)
+///
+/// To check if an index is in range of an array,
+/// use the `count` property.
+///
+///     let indexIsValid = myIndex < tomlArray.count
+///
+/// You may also convert the entire array into a Swift array
+/// with the `Array` initializer.
+///
+///     // get a [Any]
+///     let swiftArray: [Any] = try Array(tomlArray)
+///
+/// This causes all fields to be validated,
+/// and replaces all intermidiate ``TOMLArray``s with `[Any]`,
+/// and all ``TOMLTable``s with `[String: Any]`.
+/// If any fields are invalid, a ``TOMLError`` is thrown.
+/// This can be slow.
+///
+/// ``TOMLArray`` declares conformance to `Codable`,
+/// so you can us it as part of a larger Codable structure.
+///
+///    struct Config: Codable {
+///        let servers: TOMLArray // This works.
+///    }
+///    let config = try TOMLDecoder().decode(Config.self, from: tomlString)
+///
+/// > Warning: ``TOMLArray`` declares conformance to `Codable`
+///   but it is not a full `Codable` conformance.
+///   The decoding logic is only implemented in ``TOMLDecoder``.
+///   Attempting to use it with other encoder or decoder
+///   will result in a `TOMLError.notReallyCodable` error.
+///
+/// Read <doc:DeserializingTOML> to learn more about ``TOMLArray``.
 public struct TOMLArray: Equatable, Sendable {
     let source: Deserializer
     let index: Int
 
+    /// Number of elements in the array.
     public var count: Int {
         source.arrays[index].elements.count
     }
@@ -35,6 +105,16 @@ public struct TOMLArray: Equatable, Sendable {
         return TOMLTable(source: source, index: tableIndex)
     }
 
+    /// Access a string value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a string,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: A string value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a string.
     public func string(atIndex index: Int) throws(TOMLError) -> String {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -46,6 +126,16 @@ public struct TOMLArray: Equatable, Sendable {
         return result
     }
 
+    /// Access a boolean value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a boolean,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: A boolean value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a boolean.
     public func bool(atIndex index: Int) throws(TOMLError) -> Bool {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -58,6 +148,16 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access an integer value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not an integer,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: An integer value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not an integer.
     public func integer(atIndex index: Int) throws(TOMLError) -> Int64 {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -70,6 +170,16 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access a float value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a float,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: A float value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a float.
     public func float(atIndex index: Int) throws(TOMLError) -> Double {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -82,6 +192,16 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access an offset date-time value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not an offset date-time,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: An offset date-time value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not an offset date-time.
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -101,6 +221,24 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access a local date-time value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a local date-time,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    /// If the corresponding value is an offset date-time,
+    /// and `exactMatch` is `false`,
+    /// the method will return a local date-time,
+    /// dropping the time offset.
+    /// Otherwise, if the corresponding value is not a local date-time,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameters:
+    ///   - index: The index to access.
+    ///   - exactMatch: Whether to require an exact match for the local date-time.
+    /// - Returns: A local date-time value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a local date-time.
     public func localDateTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -115,6 +253,25 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access a local date value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a local date,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    /// If the corresponding value is an offset date-time,
+    /// or a local date-time,
+    /// and `exactMatch` is `false`,
+    /// the method will return a local date,
+    /// dropping the time and offset.
+    /// Otherwise, if the corresponding value is not a local date,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameters:
+    ///   - index: The index to access.
+    ///   - exactMatch: Whether to require an exact match for the local date.
+    /// - Returns: A local date value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a local date.
     public func localDate(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -129,6 +286,25 @@ public struct TOMLArray: Equatable, Sendable {
         }
     }
 
+    /// Access a local time value at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a local time,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    /// If the corresponding value is an offset date-time,
+    /// or a local date-time,
+    /// and `exactMatch` is `false`,
+    /// the method will return a local time,
+    /// dropping the date and offset.
+    /// Otherwise, if the corresponding value is not a local time,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameters:
+    ///   - index: The index to access.
+    ///   - exactMatch: Whether to require an exact match for the local time.
+    /// - Returns: A local time value for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a local time.
     public func localTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         let element = try element(atIndex: index)
         guard case let .leaf(token) = element else {
@@ -153,16 +329,49 @@ public struct TOMLArray: Equatable, Sendable {
 }
 
 extension TOMLArray: Codable {
+    /// Makes ``TOMLArray`` eligible for `Codable`.
+    ///
+    ///    struct Config: Codable {
+    ///        let servers: TOMLArray // This works.
+    ///    }
+    ///
+    /// > Warning: This is not a full `Codable` conformance.
+    ///   It only works with ``TOMLDecoder``.
+    ///
+    /// - Parameter _: The decoder to decode from.
+    /// - Throws: `TOMLError.notReallyCodable`
     public init(from _: any Decoder) throws(TOMLError) {
         throw .notReallyCodable
     }
 
+    /// Makes ``TOMLArray`` eligible for `Codable`.
+    ///
+    ///    struct Config: Codable {
+    ///        let servers: TOMLArray // This works.
+    ///    }
+    ///
+    /// > Warning: This is not a full `Codable` conformance.
+    ///   It only works with ``TOMLDecoder``.
+    ///
+    /// - Parameter _: The encoder to encode to.
+    /// - Throws: `TOMLError.notReallyCodable`
     public func encode(to _: any Encoder) throws(TOMLError) {
         throw .notReallyCodable
     }
 }
 
 extension [Any] {
+    /// Create a `[Any]` from a `TOMLArray`.
+    /// Validating all fields recursively.
+    /// Throw a ``TOMLError`` if any of the fields are invalid.
+    /// All intermediate `TOMLArray`s are replaced with `[Any]`.
+    /// All intermediate `TOMLTable`s are replaced with `[String: Any]`.
+    ///
+    /// - Parameter tomlArray: The `TOMLArray` to convert to a `[Any]`.
+    /// - Returns: A `[Any]` with the values converted to their definitive,
+    ///   corresponding Swift type, recursively.
+    /// - Throws: A ``TOMLError`` if any of the fields are invalid.
+    ///   if any of the fields are invalid.
     public init(_ tomlArray: TOMLArray) throws(TOMLError) {
         self = try tomlArray.array()
     }
