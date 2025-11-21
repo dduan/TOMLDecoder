@@ -64,6 +64,8 @@ There's no special Swift type for "inline tables"
 (it's just a ``TOMLTable``), or
 "arrays of tables" (an ``TOMLArray`` can contain ``TOMLTables``).
 
+The Swift types representing date and time are provided by TOMLDecoder.
+
 ``OffsetDateTime``, and ``LocalDateTime`` are composed of
 ``LocalDate`` and ``LocalTime``.
 Therefore, the APIs allows retieving a ``LocalDate`` or a ``LocalDate``
@@ -151,6 +153,17 @@ In practice,
 the boundary between the 2 aren't as clear cut as stated.
 But, it helps.
 
+Since both phase contains failure points,
+the APIs for them requres you to `try`.
+
+```swift
+// Phase 1
+let rootTable = try TOMLTable(source: tomlStrign)
+// Phase 2
+let answer = try rootTable.integer(forKey: "answer")
+```
+
+If anything goes wrong, a ``TOMLError` is thrown.
 
 ## Forget your types! I want Swift!
 
