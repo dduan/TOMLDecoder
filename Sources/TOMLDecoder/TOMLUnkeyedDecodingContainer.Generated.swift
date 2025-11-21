@@ -8,7 +8,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     /// The path of coding keys taken to get to this point in decoding.
     var codingPath: [CodingKey] {
-        self.decoder.codingPath
+        decoder.codingPath
     }
 
     /// The index of the element we're about to decode.
@@ -17,346 +17,362 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     // MARK: - UnkeyedDecodingContainer Methods
 
     var count: Int? {
-        return self.array.count
+        array.count
     }
 
     var isAtEnd: Bool {
-        return self.currentIndex >= self.count!
+        currentIndex >= count!
     }
 
     init(referencing decoder: _TOMLDecoder, wrapping array: TOMLArray) {
         self.decoder = decoder
         self.array = array
-        self.currentIndex = 0
+        currentIndex = 0
     }
 
     mutating func decodeNil() throws -> Bool {
-        return false
+        false
     }
 
     mutating func decode(_ type: Double.Type) throws -> Double {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         do {
-            let decoded = try self.array.float(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.float(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
-                return try TimeInterval(from: offsetDateTime, strategy: self.decoder.strategy.offsetDateTime)
+                return try TimeInterval(from: offsetDateTime, strategy: decoder.strategy.offsetDateTime)
             } catch let error as DecodingError {
                 throw error
             } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No float found at index \(self.currentIndex)."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No float found at index \(currentIndex)."))
             }
         }
     }
 
-   mutating func decode(_ type: Float.Type) throws -> Float {
-       if !self.decoder.isLenient {
-           throw DecodingError.typeMismatch(type, DecodingError.Context(
-               codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-               debugDescription: "Use Double or lenient number decoding strategy."
-           ))
-       }
-       do {
-            return Float(try decode(Double.self))
-        } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+    mutating func decode(_ type: Float.Type) throws -> Float {
+        if !decoder.isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
+                debugDescription: "Use Double or lenient number decoding strategy.",
+            ))
         }
-   }
+        do {
+            return try Float(decode(Double.self))
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
+        }
+    }
 
     mutating func decode(_ type: Int.Type) throws -> Int {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = Int(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: Int8.Type) throws -> Int8 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = Int8(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int8."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int8."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: Int16.Type) throws -> Int16 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = Int16(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int16."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int16."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: Int32.Type) throws -> Int32 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = Int32(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int32."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to Int32."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: UInt.Type) throws -> UInt {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = UInt(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: UInt8.Type) throws -> UInt8 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = UInt8(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt8."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt8."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: UInt16.Type) throws -> UInt16 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = UInt16(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt16."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt16."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: UInt32.Type) throws -> UInt32 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = UInt32(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt32."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt32."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: UInt64.Type) throws -> UInt64 {
         let index = currentIndex - 1
-        if !self.decoder.isLenient {
+        if !decoder.isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
-                codingPath: self.codingPath + [TOMLKey(intValue: index)],
-                debugDescription: "Use Int64 or lenient number decoding strategy."
+                codingPath: codingPath + [TOMLKey(intValue: index)],
+                debugDescription: "Use Int64 or lenient number decoding strategy.",
             ))
         }
 
         let integer = try decode(Int64.self)
         do {
             guard let result = UInt64(exactly: integer) else {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt64."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to UInt64."))
             }
             return result
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: index)], debugDescription: "Failed to convert integer \(integer) to \(type).", underlyingError: error))
         }
     }
 
     mutating func decode(_ type: Int64.Type) throws -> Int64 {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.integer(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.integer(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: OffsetDateTime.Type) throws -> OffsetDateTime {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.offsetDateTime(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.offsetDateTime(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: LocalDateTime.Type) throws -> LocalDateTime {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.localDateTime(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.localDateTime(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: LocalDate.Type) throws -> LocalDate {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.localDate(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.localDate(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: LocalTime.Type) throws -> LocalTime {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.localTime(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.localTime(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: String.Type) throws -> String {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.string(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.string(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: Bool.Type) throws -> Bool {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.bool(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.bool(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: TOMLArray.Type) throws -> TOMLArray {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.array(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.array(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
+
     mutating func decode(_ type: TOMLTable.Type) throws -> TOMLTable {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try self.array.table(atIndex: self.currentIndex)
-            self.currentIndex += 1
+            let decoded = try array.table(atIndex: currentIndex)
+            currentIndex += 1
             return decoded
         } catch {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "\(error)", underlyingError: error))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
         }
     }
 
     mutating func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
-        guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        var nestedCodingPath = self.codingPath
-        nestedCodingPath.append(TOMLKey(intValue: self.currentIndex))
+        var nestedCodingPath = codingPath
+        nestedCodingPath.append(TOMLKey(intValue: currentIndex))
 
         if type == Int64.self {
             return try decode(Int64.self) as! T
@@ -403,108 +419,115 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         // Try to get nested table or array
-        if let nestedTable = try? self.array.table(atIndex: self.currentIndex) {
-            let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        if let nestedTable = try? array.table(atIndex: currentIndex) {
+            let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
             let decoded = try T(from: nestedDecoder)
-            self.currentIndex += 1
+            currentIndex += 1
             return decoded
-        } else if let nestedArray = try? self.array.array(atIndex: self.currentIndex) {
-            let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        } else if let nestedArray = try? array.array(atIndex: currentIndex) {
+            let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
             let decoded = try T(from: nestedDecoder)
-            self.currentIndex += 1
+            currentIndex += 1
             return decoded
         } else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "Expected \(type) but found unsupported type instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Expected \(type) but found unsupported type instead."))
         }
     }
 
     mutating func decode(_ type: Date.Type) throws -> Date {
-        if !self.decoder.isLenient {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+        if !decoder.isLenient {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
         }
 
-        switch self.decoder.strategy.offsetDateTime {
+        switch decoder.strategy.offsetDateTime {
         case .intervalSince1970:
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
         case .intervalSince2001:
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
         case .dateFromGregorianCalendar:
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
             } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
             }
-        case .dateFromCalendar(let identifier):
+        case let .dateFromCalendar(identifier):
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: identifier))
             } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
             }
         case .dateFromProlepticGregorianCalendar:
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(timeIntervalSinceReferenceDate: offsetDateTime.timeIntervalSince2001)
             } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)], debugDescription: "No date found at index \(self.currentIndex)."))
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
             }
         }
     }
 
-    mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
-        guard !self.isAtEnd else {
+    mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
+        guard !isAtEnd else {
             throw DecodingError.valueNotFound(
                 KeyedDecodingContainer<NestedKey>.self,
                 DecodingError.Context(
-                    codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                    debugDescription: "Unkeyed container is at end."
-                )
+                    codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
+                    debugDescription: "Unkeyed container is at end.",
+                ),
             )
         }
 
-        guard let nestedTable = try? self.array.table(atIndex: self.currentIndex) else {
+        guard let nestedTable = try? array.table(atIndex: currentIndex) else {
             throw DecodingError.typeMismatch(
                 KeyedDecodingContainer<NestedKey>.self,
                 DecodingError.Context(
-                    codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                    debugDescription: "Element is not a table."
-                )
+                    codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
+                    debugDescription: "Element is not a table.",
+                ),
             )
         }
 
-        var nestedCodingPath = self.codingPath
-        nestedCodingPath.append(TOMLKey(intValue: self.currentIndex))
-        let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        var nestedCodingPath = codingPath
+        nestedCodingPath.append(TOMLKey(intValue: currentIndex))
+        let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
 
-        self.currentIndex += 1
+        currentIndex += 1
         let container = TOMLKeyedDecodingContainer<NestedKey>(referencing: nestedDecoder, wrapping: nestedTable)
         return KeyedDecodingContainer(container)
     }
 
     mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
-        guard !self.isAtEnd else {
+        guard !isAtEnd else {
             throw DecodingError.valueNotFound(
                 UnkeyedDecodingContainer.self,
-                DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                                      debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end."))
+                DecodingError.Context(
+                    codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
+                    debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end.",
+                ),
+            )
         }
 
-        guard let nestedArray = try? self.array.array(atIndex: self.currentIndex) else {
-            throw DecodingError.typeMismatch(UnkeyedDecodingContainer.self,
-                                           DecodingError.Context(codingPath: self.codingPath + [TOMLKey(intValue: self.currentIndex)],
-                                                               debugDescription: "Cannot get nested unkeyed container -- element is not an array."))
+        guard let nestedArray = try? array.array(atIndex: currentIndex) else {
+            throw DecodingError.typeMismatch(
+                UnkeyedDecodingContainer.self,
+                DecodingError.Context(
+                    codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
+                    debugDescription: "Cannot get nested unkeyed container -- element is not an array.",
+                ),
+            ),
         }
 
-        var nestedCodingPath = self.codingPath
-        nestedCodingPath.append(TOMLKey(intValue: self.currentIndex))
-        let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        var nestedCodingPath = codingPath
+        nestedCodingPath.append(TOMLKey(intValue: currentIndex))
+        let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
 
-        self.currentIndex += 1
+        currentIndex += 1
         return TOMLUnkeyedDecodingContainer(referencing: nestedDecoder, wrapping: nestedArray)
     }
 
     mutating func superDecoder() throws -> Decoder {
-        _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey.super], strategy: self.decoder.strategy, isLenient: self.decoder.isLenient)
+        _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey.super], strategy: decoder.strategy, isLenient: decoder.isLenient)
     }
 }
