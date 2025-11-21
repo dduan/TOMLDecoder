@@ -111,7 +111,6 @@ enum LeafKind: Equatable {
     case bool(Bool)
     case string(String.UTF8View.SubSequence)
     case dateTimeComponents(DateTimeComponents)
-    case mixed
 
     init?(token: Token) {
         if token.text.first == CodeUnits.singleQuote || token.text.first == CodeUnits.doubleQuote {
@@ -129,19 +128,6 @@ enum LeafKind: Equatable {
         }
     }
 
-    func isSameKind(as other: LeafKind) -> Bool {
-        switch (self, other) {
-        case (.int, .int),
-             (.double, .double),
-             (.bool, .bool),
-             (.string, .string),
-             (.dateTimeComponents, .dateTimeComponents):
-            true
-        default:
-            false
-        }
-    }
-
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.int(lhsValue), .int(rhsValue)):
@@ -154,8 +140,6 @@ enum LeafKind: Equatable {
             lhsValue.startIndex == rhsValue.startIndex && lhsValue.endIndex == rhsValue.endIndex
         case let (.dateTimeComponents(lhsValue), .dateTimeComponents(rhsValue)):
             lhsValue == rhsValue
-        case (.mixed, .mixed):
-            true
         default:
             false
         }
@@ -178,7 +162,6 @@ struct TOMLArrayImplementation: Equatable, Sendable {
 
     var key: String?
     var kind: Kind?
-    var elementType: LeafKind?
     var elements: [Element]
 
     init(key: String? = nil, kind: Kind? = nil, elements: [Element] = []) {
@@ -1631,12 +1614,6 @@ extension Deserializer {
 
                 array.elements.append(.leaf(newValueKind))
 
-                if array.elements.count == 1 {
-                    array.elementType = newValueKind
-                } else if array.elementType?.isSameKind(as: newValueKind) == false {
-                    array.elementType = .mixed
-                }
-
                 try eatToken(type: .string, isDotSpecial: true)
 
             case .lbracket: // Nested array
@@ -1957,8 +1934,6 @@ extension TOMLArrayImplementation {
                 result.append(doubleValue)
             case let .leaf(.int(intValue)):
                 result.append(intValue)
-            case .leaf(.mixed):
-                continue
             }
         }
 
