@@ -66,7 +66,7 @@ After deserialization,
 the structures all end up becoming ``TOMLArray``s or ``TOMLTable``s.
 There's no special Swift type for "inline tables"
 (it's just a ``TOMLTable``), or
-"arrays of tables" (an ``TOMLArray`` can contain ``TOMLTables``).
+"arrays of tables" (an ``TOMLArray`` can contain ``TOMLTable``s).
 
 The Swift types representing date and time are provided by TOMLDecoder.
 
@@ -138,7 +138,8 @@ It's *kind of* like lexical scope analysis,
 if you know what that is.
 If anything is obviously wrong,
 then an error will be thrown.
-This process happens when you call ``TOMLTable.init(source:)-(String)``.
+This process happens when you call
+``/TOMLDecoder/TOMLTable/init(source:)-(String)``.
 
 Phase 2 is the final validation of individual leaf values.
 During this phase,
