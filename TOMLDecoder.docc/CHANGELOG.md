@@ -1,5 +1,7 @@
 # Changelog
 
+Kids call this "release notes" these days.
+
 ## In Development
 
 This release introduces source-breaking changes from 0.3.x.
