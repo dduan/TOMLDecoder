@@ -468,4 +468,23 @@ struct TOMLDecoderTests {
             )
         #expect(result2 == Test(a: nil, b: 1.0, c: "claude"))
     }
+
+    @Test func `single value container`() throws {
+        enum Language: String, Codable {
+            case swift
+            case mojo
+            case zig
+        }
+
+        struct Team: Codable, Equatable {
+            let language: Language
+        }
+
+        let toml = """
+        language = "swift"
+        """
+
+        let result = try TOMLDecoder().decode(Team.self, from: toml)
+        #expect(result == Team(language: .swift))
+    }
 }
