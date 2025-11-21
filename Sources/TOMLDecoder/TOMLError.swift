@@ -12,7 +12,7 @@ public enum TOMLError: Error {
     case syntax(lineNumber: Int, message: String)
     case stringMissingClosingQuote(single: Bool)
     case arrayOutOfBound(index: Int, bound: Int)
-    case typeMismatchInArray(index: Int, expected: String)
+    case typeMismatchInArray(lineNumber: Int, index: Int, expected: String)
     case keyNotFoundInTable(key: String, type: String)
     case typeMismatchInTable(key: String, expected: String)
     case invalidNumber(reason: String)
@@ -20,8 +20,8 @@ public enum TOMLError: Error {
     case invalidFloat(reason: String)
     case invalidBool(String.UTF8View.SubSequence)
     case invalidDateTime(lineNumber: Int?, reason: String)
-    case invalidValueInTable(key: String)
-    case invalidValueInArray(index: Int)
+    case invalidValueInTable(lineNumber: Int, key: String)
+    case invalidValueInArray(lineNumber: Int, index: Int)
     case invalidDateTimeComponents(String)
 }
 
@@ -52,8 +52,8 @@ extension TOMLError: CustomStringConvertible {
             "String missing closing quote\(single ? " (single quoted)" : " (double quoted)") character."
         case let .arrayOutOfBound(index, bound):
             "Array index \(index) is out of bounds (0..<\(bound))."
-        case let .typeMismatchInArray(index, expected):
-            "Type mismatch at array index \(index): expected \(expected)."
+        case let .typeMismatchInArray(lineNumber, index, expected):
+            "Type mismatch at array index \(index) at line \(lineNumber): expected \(expected)."
         case let .keyNotFoundInTable(key, type):
             "Key '\(key)' not found in table of type \(type)."
         case let .typeMismatchInTable(key, expected):
@@ -68,10 +68,10 @@ extension TOMLError: CustomStringConvertible {
             "Invalid boolean value: \(value)."
         case let .invalidDateTime(lineNumber, reason):
             "Invalid date-time\(lineNumber.map { " at line \($0)" } ?? ""): \(reason)."
-        case let .invalidValueInTable(key):
-            "Invalid value in table for key '\(key)'."
-        case let .invalidValueInArray(index):
-            "Invalid value in array at index \(index)."
+        case let .invalidValueInTable(lineNumber, key):
+            "Invalid value in table for key '\(key)' at line \(lineNumber)."
+        case let .invalidValueInArray(lineNumber, index):
+            "Invalid value in array at index \(index) at line \(lineNumber)."
         case let .invalidDateTimeComponents(components):
             "Invalid date-time components: \(components)."
         case .notReallyCodable:

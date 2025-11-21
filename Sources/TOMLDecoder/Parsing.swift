@@ -75,7 +75,7 @@ extension UTF8.CodeUnit {
     }
 }
 
-struct Token {
+struct Token: Equatable {
     enum Kind {
         case dot
         case comma
@@ -93,6 +93,15 @@ struct Token {
     let text: String.UTF8View.SubSequence
     let eof: Bool
 
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.kind == rhs.kind &&
+            lhs.lineNumber == rhs.lineNumber &&
+            lhs.text.startIndex == rhs.text.startIndex && lhs.text.endIndex == rhs.text.endIndex &&
+            lhs.eof == rhs.eof
+    }
+
+    static let empty = Token(kind: .newline, lineNumber: 1, text: "".utf8[...], eof: false)
+
     func parseAsBool() -> Bool? { try? boolMaybe(text) }
     func parseAsInt() -> Int64? { try? intMaybe(text, mustBeInt: false) }
     func parseAsFloat() -> Double? { try? floatMaybe(text, mustBeFloat: false) }
@@ -107,18 +116,29 @@ extension Token: CustomDebugStringConvertible {
 
 struct TOMLArrayImplementation: Equatable, Sendable {
     enum Element: Equatable {
-        case leaf(String.UTF8View.SubSequence)
-        case array(Int)
-        case table(Int)
+        case leaf(Token)
+        case array(lineNumber: Int, Int)
+        case table(lineNumber: Int, Int)
+
+        var lineNumber: Int {
+            switch self {
+            case let .leaf(token):
+                token.lineNumber
+            case let .array(lineNumber, _):
+                lineNumber
+            case let .table(lineNumber, _):
+                lineNumber
+            }
+        }
 
         static func == (lhs: Element, rhs: Element) -> Bool {
             switch (lhs, rhs) {
-            case let (.leaf(lhsText), .leaf(rhsText)):
-                lhsText.startIndex == rhsText.startIndex && lhsText.endIndex == rhsText.endIndex
-            case let (.array(lhsIndex), .array(rhsIndex)):
-                lhsIndex == rhsIndex
-            case let (.table(lhsIndex), .table(rhsIndex)):
-                lhsIndex == rhsIndex
+            case let (.leaf(lhsToken), .leaf(rhsToken)):
+                lhsToken == rhsToken
+            case let (.array(lhsLineNumber, lhsIndex), .array(rhsLineNumber, rhsIndex)):
+                lhsLineNumber == rhsLineNumber && lhsIndex == rhsIndex
+            case let (.table(lhsLineNumber, lhsIndex), .table(rhsLineNumber, rhsIndex)):
+                lhsLineNumber == rhsLineNumber && lhsIndex == rhsIndex
             default:
                 false
             }
@@ -145,10 +165,10 @@ struct TOMLArrayImplementation: Equatable, Sendable {
 
 struct KeyValuePair: Equatable {
     let key: String
-    var value: String.UTF8View.SubSequence
+    var value: Token
 
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.key == rhs.key && lhs.value.startIndex == rhs.value.startIndex && lhs.value.endIndex == rhs.value.endIndex
+        lhs.key == rhs.key && lhs.value == rhs.value
     }
 }
 
@@ -1076,7 +1096,7 @@ extension Deserializer {
         if tables[tableIndex][self, key] != nil {
             throw TOMLError.badKey(lineNumber: token.lineNumber)
         }
-        let kv = KeyValuePair(key: key, value: "".utf8[...])
+        let kv = KeyValuePair(key: key, value: .empty)
         let index = keyValues.count
         keyValues.append(kv)
 
@@ -1580,7 +1600,7 @@ extension Deserializer {
                     array.kind = .mixed
                 }
 
-                array.elements.append(.leaf(token.text))
+                array.elements.append(.leaf(token))
 
                 try eatToken(type: .string, isDotSpecial: true)
 
@@ -1593,7 +1613,7 @@ extension Deserializer {
 
                 let newArrayIndex = arrays.count
                 arrays.append(TOMLArrayImplementation())
-                array.elements.append(.array(newArrayIndex))
+                array.elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
 
                 try parseArray(arrayIndex: newArrayIndex)
 
@@ -1606,7 +1626,7 @@ extension Deserializer {
 
                 let newTableIndex = tables.count
                 tables.append(TOMLTableImplementation())
-                array.elements.append(.table(newTableIndex))
+                array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
                 try parseInlineTable(tableIndex: newTableIndex)
 
@@ -1671,7 +1691,7 @@ extension Deserializer {
                 _ = try datetimeMaybe(lineNumber: token.lineNumber, value.text)
             }
 
-            keyValues[index].value = value.text
+            keyValues[index].value = value
             try nextToken(isDotSpecial: false)
             return
         }
@@ -1753,7 +1773,7 @@ extension Deserializer {
                     throw TOMLError.syntax(lineNumber: token.lineNumber, message: "empty array")
                 }
 
-                guard case let .table(index) = array.elements.last else {
+                guard case let .table(_, index) = array.elements.last else {
                     throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array element is not a table")
                 }
 
@@ -1813,7 +1833,7 @@ extension Deserializer {
             // add to z[]
             let newTableIndex = tables.count
             tables.append(TOMLTableImplementation(key: Constants.anonymousArryKey))
-            arrays[arrayIndex].elements.append(.table(newTableIndex))
+            arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
         }
 
@@ -1887,15 +1907,17 @@ extension TOMLArrayImplementation {
 
         for (index, element) in zip(0..., elements) {
             switch element {
-            case let .array(arrayIndex):
+            case let .array(_, arrayIndex):
                 try result.append(source.arrays[arrayIndex].array(source: source))
-            case let .table(tableIndex):
+            case let .table(_, tableIndex):
                 try result.append(source.tables[tableIndex].dictionary(source: source))
-            case let .leaf(text):
+            case let .leaf(token):
+                let line = token.lineNumber
+                let text = token.text
                 let first = text.first
                 if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
                     guard let string = try stringMaybe(text) else {
-                        throw TOMLError.invalidValueInArray(index: index)
+                        throw TOMLError.invalidValueInArray(lineNumber: line, index: index)
                     }
                     result.append(string)
                     continue
@@ -1929,7 +1951,7 @@ extension TOMLArrayImplementation {
 
                 // Try datetime if it starts with a digit
                 guard first?.isDecimalDigit == true else {
-                    throw TOMLError.invalidValueInArray(index: index)
+                    throw TOMLError.invalidValueInArray(lineNumber: line, index: index)
                 }
 
                 let datetime = try datetimeMaybe(lineNumber: nil, text)
@@ -1954,19 +1976,20 @@ extension TOMLArrayImplementation {
 
 extension KeyValuePair {
     func unpackedValue() throws(TOMLError) -> (String, Any?) {
-        let first = value.first
+        let text = value.text
+        let first = text.first
         if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
-            return try (key, stringMaybe(value))
+            return try (key, stringMaybe(text))
         }
 
         // more likely values gets parsed first
 
-        if let boolValue = try? boolMaybe(value) {
+        if let boolValue = try? boolMaybe(text) {
             return (key, boolValue)
         }
 
         do {
-            return try (key, intMaybe(value, mustBeInt: false))
+            return try (key, intMaybe(text, mustBeInt: false))
         } catch {
             if case TOMLError.invalidInteger = error {
                 throw error
@@ -1974,7 +1997,7 @@ extension KeyValuePair {
         }
 
         do {
-            return try (key, floatMaybe(value, mustBeFloat: false))
+            return try (key, floatMaybe(text, mustBeFloat: false))
         } catch {
             if case TOMLError.invalidFloat = error {
                 throw error
@@ -1982,10 +2005,10 @@ extension KeyValuePair {
         }
 
         guard first?.isDecimalDigit == true else {
-            throw TOMLError.invalidValueInTable(key: key)
+            throw TOMLError.invalidValueInTable(lineNumber: value.lineNumber, key: key)
         }
 
-        let datetime = try datetimeMaybe(lineNumber: nil, value)
+        let datetime = try datetimeMaybe(lineNumber: value.lineNumber, value.text)
 
         switch (datetime.date, datetime.time, datetime.offset) {
         case let (.some(date), .some(time), .some(offset)):
