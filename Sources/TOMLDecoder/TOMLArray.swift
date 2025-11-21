@@ -88,6 +88,16 @@ public struct TOMLArray: Equatable, Sendable {
         return elements[index]
     }
 
+    /// Access a TOML array at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a TOML array,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: A TOML array for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a TOML array.
     public func array(atIndex index: Int) throws(TOMLError) -> TOMLArray {
         let element = try element(atIndex: index)
         guard case let .array(_, arrayIndex) = element else {
@@ -97,6 +107,16 @@ public struct TOMLArray: Equatable, Sendable {
         return TOMLArray(source: source, index: arrayIndex)
     }
 
+    /// Access a TOML table at a given index.
+    ///
+    /// The index must be within bounds of the array,
+    /// If the corresponding value is not a TOML table,
+    /// the method will throw a `TOMLError.typeMismatchInArray` error.
+    ///
+    /// - Parameter index: The index to access.
+    /// - Returns: A TOML table for the given index, if it exists.
+    /// - Throws: `TOMLError.arrayOutOfBound`
+    ///   if the index is out of bounds or is not a TOML table.
     public func table(atIndex index: Int) throws(TOMLError) -> TOMLTable {
         let element = try element(atIndex: index)
         guard case let .table(_, tableIndex) = element else {
