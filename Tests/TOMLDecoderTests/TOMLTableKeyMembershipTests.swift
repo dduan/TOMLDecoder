@@ -23,13 +23,13 @@ struct TOMLTableKeyMembershipTests {
     @Test
     func `all keys for root table`() throws {
         let table = try TOMLTable(source: toml)
-        #expect(table.allKeys == ["a", "b", "players", "c"])
+        #expect(table.keys == ["a", "b", "players", "c"])
     }
 
     @Test
     func `root table key contains`() throws {
         let table = try TOMLTable(source: toml)
-        #expect(table.allKeys == ["a", "b", "players", "c"])
+        #expect(table.keys == ["a", "b", "players", "c"])
         #expect(table.contains(key: "a"))
         #expect(table.contains(key: "players"))
         #expect(table.contains(key: "c"))
