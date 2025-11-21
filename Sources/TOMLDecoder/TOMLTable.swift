@@ -157,7 +157,7 @@ public struct TOMLTable: Sendable, Equatable {
         let allPairs = source.keyValues
         for i in pairIndices {
             if allPairs[i].key == key {
-                return try parse(allPairs[i].value)
+                return try parse(allPairs[i].value.text)
             }
         }
 
