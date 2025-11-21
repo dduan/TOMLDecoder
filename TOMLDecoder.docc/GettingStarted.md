@@ -21,12 +21,12 @@ In a target's dependencies, add:
 .product(name: "TOMLDecoder", package: "TOMLDecoder"),
 ```
 
-Run `swift build`. 
+Run `swift build`.
 You may have to update your package's `platforms` if you see a related error.
 
 ### Decoding TOML
 
-TOMLDecoder can turn TOML into your types that conforms to ``Swift.Codable``.
+TOMLDecoder can turn TOML into your types that conforms to `Swift.Codable`.
 
 ```swift
 import TOMLDecoder
@@ -83,5 +83,5 @@ let rootTable = try TOMLTable(source: tomlString)
 let owner = try rootTable.table(forKey: "owner")
 
 // Get a string from `owner`
-print(try owner.string(forKey: name)) // Tom Preston-Werner 
+print(try owner.string(forKey: name)) // Tom Preston-Werner
 ```
