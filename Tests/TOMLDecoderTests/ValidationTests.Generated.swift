@@ -2,8 +2,8 @@
 // Source: toml-test commit 8be0db7469af2d97449e0a06075a1a6ecdc60231 (spec 1.0.0)
 
 import Foundation
-import TOMLDecoder
 import Testing
+import TOMLDecoder
 
 @Suite
 struct TOMLValidationTests {
