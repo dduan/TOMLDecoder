@@ -34,68 +34,103 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     public func string(atIndex index: Int) throws(TOMLError) -> String {
-        guard case let .leaf(.string(text)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "string")
         }
-        return try stringMaybe(text)!
+        guard let result = try stringMaybe(text) else {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "string")
+        }
+        return result
     }
 
     public func bool(atIndex index: Int) throws(TOMLError) -> Bool {
-        guard case let .leaf(.bool(value)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "bool")
         }
-        return value
+        do {
+            return try boolMaybe(text)
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "bool")
+        }
     }
 
     public func integer(atIndex index: Int) throws(TOMLError) -> Int64 {
-        guard case let .leaf(.int(value)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "integer")
         }
-        return value
+        do {
+            return try intMaybe(text, mustBeInt: true)
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "integer")
+        }
     }
 
     public func float(atIndex index: Int) throws(TOMLError) -> Double {
-        guard case let .leaf(.double(value)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "float")
         }
-        return value
+        do {
+            return try floatMaybe(text, mustBeFloat: true)
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "float")
+        }
     }
 
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
         }
 
-        switch (components.date, components.time, components.offset, components.features) {
-        case let (.some(date), .some(time), .some(offset), features):
-            return OffsetDateTime(date: date, time: time, offset: offset, features: features)
-        default:
+        do {
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            switch (components.date, components.time, components.offset, components.features) {
+            case let (.some(date), .some(time), .some(offset), features):
+                return OffsetDateTime(date: date, time: time, offset: offset, features: features)
+            default:
+                throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
+            }
+        } catch {
             throw TOMLError.typeMismatchInArray(index: index, expected: "offset datetime")
         }
     }
 
     public func localDateTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
-        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local datetime")
         }
 
-        return try components.localDateTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local datetime"))
+        do {
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localDateTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local datetime"))
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "local datetime")
+        }
     }
 
     public func localDate(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
-        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local date")
         }
 
-        return try components.localDate(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local date"))
+        do {
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localDate(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local date"))
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "local date")
+        }
     }
 
     public func localTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
-        guard case let .leaf(.dateTimeComponents(components)) = try element(atIndex: index) else {
+        guard case let .leaf(text) = try element(atIndex: index) else {
             throw TOMLError.typeMismatchInArray(index: index, expected: "local time")
         }
 
-        return try components.localTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local time"))
+        do {
+            let components = try datetimeMaybe(lineNumber: nil, text)
+            return try components.localTime(exactMatch: exactMatch, error: TOMLError.typeMismatchInArray(index: index, expected: "local time"))
+        } catch {
+            throw TOMLError.typeMismatchInArray(index: index, expected: "local time")
+        }
     }
 
     func array() throws(TOMLError) -> [Any] {
