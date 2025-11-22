@@ -125,6 +125,15 @@ public struct TOMLArray: Equatable, Sendable {
         return TOMLTable(source: source, index: tableIndex)
     }
 
+    @inline(__always)
+    func token(forIndex index: Int, type: String) throws(TOMLError) -> Token {
+        let element = try element(atIndex: index)
+        guard case let .leaf(token) = element else {
+            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: type))
+        }
+        return token
+    }
+
     /// Access a string value at a given index.
     ///
     /// The index must be within bounds of the array,
@@ -136,11 +145,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a string.
     public func string(atIndex index: Int) throws(TOMLError) -> String {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "string"))
-        }
-        return try token.unpackString(context: .int(index))
+        try token(forIndex: index, type: "string").unpackString(context: .int(index))
     }
 
     /// Access a boolean value at a given index.
@@ -154,12 +159,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a boolean.
     public func bool(atIndex index: Int) throws(TOMLError) -> Bool {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "bool"))
-        }
-
-        return try token.unpackBool(context: .int(index))
+        try token(forIndex: index, type: "bool").unpackBool(context: .int(index))
     }
 
     /// Access an integer value at a given index.
@@ -173,11 +173,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not an integer.
     public func integer(atIndex index: Int) throws(TOMLError) -> Int64 {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "integer"))
-        }
-        return try token.unpackInt(context: .int(index))
+        try token(forIndex: index, type: "integer").unpackInteger(context: .int(index))
     }
 
     /// Access a float value at a given index.
@@ -191,11 +187,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a float.
     public func float(atIndex index: Int) throws(TOMLError) -> Double {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "float"))
-        }
-        return try token.unpackFloat(context: .int(index))
+        try token(forIndex: index, type: "float").unpackFloat(context: .int(index))
     }
 
     /// Access an offset date-time value at a given index.
@@ -209,10 +201,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not an offset date-time.
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "offset datetime"))
-        }
+        let token = try token(forIndex: index, type: "offset datetime")
 
         do {
             let components = try token.unpackDateTime(context: .int(index))
@@ -246,11 +235,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a local date-time.
     public func localDateTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "local datetime"))
-        }
-
+        let token = try token(forIndex: index, type: "local datetime")
         let components = try token.unpackDateTime(context: .int(index))
         guard let localDateTime = components.localDateTime(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local datetime"))
@@ -278,11 +263,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a local date.
     public func localDate(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "local date"))
-        }
-
+        let token = try token(forIndex: index, type: "local date")
         let components = try token.unpackDateTime(context: .int(index))
         guard let localDate = components.localDate(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local date"))
@@ -310,11 +291,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a local time.
     public func localTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
-        let element = try element(atIndex: index)
-        guard case let .leaf(token) = element else {
-            throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "local time"))
-        }
-
+        let token = try token(forIndex: index, type: "local time")
         let components = try token.unpackDateTime(context: .int(index))
         guard let localTime = components.localTime(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local time"))
