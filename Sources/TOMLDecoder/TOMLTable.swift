@@ -7,8 +7,7 @@ extension TOMLTable {
     /// - Returns: A `TOMLTable` representing the root-level table of the TOML document.
     /// - Throws: A ``TOMLError`` if the document is invalid.
     public init(source: String) throws(TOMLError) {
-        let parser = Deserializer(source: source, keyTransform: nil)
-        self = try parser.parse()
+        self = try Deserializer(source: source, keyTransform: nil).parse()
     }
 
     /// Create a root-level TOML table from a TOML document

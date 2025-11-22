@@ -2,7 +2,7 @@
 
 Notes for TOMLDecoder mainateners.
 
-## Writing code
+## Writing Code
 
 Use [swiftformat](https://github.com/nicklockwood/SwiftFormat/tree/main),
 ideally, the version specified in `Scripts/format.sh` to format all code.
@@ -32,9 +32,9 @@ Run tests with `swift test`, as well as `bazel test //...`.
 Tests must pass on macOS, Ubuntu, and Windows for any changes to land.
 
 
-## Generating code, and tests
+## Generating Code, and Tests
 
-* Parts of code is written using `gyb`. 
+* Parts of code is written using `gyb`.
   Use the script `Scripts/generate-code.sh` to generate the code.
   The generated code is checked into the repo.
   Look for header comments indicating generated code,
@@ -64,7 +64,7 @@ to compare performance between two commits.
     - Instructions for adding TOMLDocoder as a SwiftPM dependency
       in Getting Started.
     - MODULE.bazel
-    - Potentially other places. 
+    - Potentially other places.
       Search for the old version number in the repo.
 * In CHANGLOG.md, create section for the new release.
   Move any content under `Development` to the new section.
@@ -79,3 +79,27 @@ to compare performance between two commits.
   Include the output as a code block in the release notes.
 * Publish the release on GitHub.
 
+## Architecture Overview
+
+TOMLDecoder is a parser with a `Swift.Decoder` implementating sitting on top.
+
+TOML has a spec,
+and a large number of parser implementations in many language.
+Among them,
+TOMLDecoder's parser is of the garden variaty.
+The parsing occurs in 2 stages,
+each triggered by different API calls.
+<doc:DeserializingTOML#The-deserielization-process> describes this at a high level.
+
+When we make a ``TOMLTable`` out of the TOML document,
+we analyze the structure of the document,
+find out where are the key-value pairs,
+the tables, and the arrays.
+Crucially,
+we don't attempt to validate the leaf values in
+tables or arrays.
+This validation is deferred as these leaf values are needed
+by the decoder,
+or requested by the user via,
+for example,
+``/TOMLDecoder/TOMLTable/string(forKey:)``.
