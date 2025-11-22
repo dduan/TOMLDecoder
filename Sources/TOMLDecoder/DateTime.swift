@@ -61,16 +61,16 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
     public init(validatingDate date: LocalDate, time: LocalTime, offset: Int16, features: Features) throws(TOMLError) {
         self.init(date: date, time: time, offset: offset, features: features)
         guard date.isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local date: \(date)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local date: \(date)"))
         }
         guard time.isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local time: \(time)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local time: \(time)"))
         }
         guard offsetIsValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid offset: \(offset)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid offset: \(offset)"))
         }
         guard featuresAreValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid features: \(features)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid features: \(features)"))
         }
     }
 
@@ -234,10 +234,10 @@ public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStrin
     public init(validatingDate date: LocalDate, time: LocalTime) throws(TOMLError) {
         self.init(date: date, time: time)
         guard date.isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local date: \(date)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local date: \(date)"))
         }
         guard time.isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local time: \(time)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local time: \(time)"))
         }
     }
 
@@ -278,7 +278,7 @@ public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringCon
     public init(validatingHour hour: UInt8, minute: UInt8, second: UInt8, nanosecond: UInt32 = 0) throws(TOMLError) {
         self.init(hour: hour, minute: minute, second: second, nanosecond: nanosecond)
         guard isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local time components: \(hour):\(minute):\(second).\(nanosecond)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local time components: \(hour):\(minute):\(second).\(nanosecond)"))
         }
     }
 
@@ -349,7 +349,7 @@ public struct LocalDate: Equatable, Hashable, Sendable, Codable, CustomStringCon
     public init(validatingYear year: UInt16, month: UInt8, day: UInt8) throws(TOMLError) {
         self.init(year: year, month: month, day: day)
         guard isValid else {
-            throw TOMLError.invalidDateTimeComponents("Invalid local date components: \(year)-\(month)-\(day)")
+            throw TOMLError(.invalidDateTimeComponents("Invalid local date components: \(year)-\(month)-\(day)"))
         }
     }
 

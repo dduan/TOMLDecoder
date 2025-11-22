@@ -305,17 +305,17 @@ func literalString(source: String.UTF8View.SubSequence, multiline: Bool) throws(
                 if nextIndex < source.endIndex, source[nextIndex] == CodeUnits.lf {
                     // Allow CRLF sequence - will be processed as separate characters
                 } else {
-                    throw TOMLError.invalidCharacter(codeUnit)
+                    throw TOMLError(.invalidCharacter(codeUnit))
                 }
             } else {
-                throw TOMLError.invalidCharacter(codeUnit)
+                throw TOMLError(.invalidCharacter(codeUnit))
             }
         }
 
         if multiline, codeUnit == CodeUnits.singleQuote {
             consecutiveQuotes += 1
             if consecutiveQuotes > 2 {
-                throw TOMLError.syntax(lineNumber: 0, message: "literal multiline strings cannot contain more than 2 consecutive single quotes")
+                throw TOMLError(.syntax(lineNumber: 0, message: "literal multiline strings cannot contain more than 2 consecutive single quotes"))
             }
         } else {
             consecutiveQuotes = 0
@@ -360,17 +360,17 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
                     if index < source.endIndex, source[index] == CodeUnits.lf {
                         // Allow CRLF sequence - will be processed as separate characters
                     } else {
-                        throw TOMLError.invalidCharacter(ch)
+                        throw TOMLError(.invalidCharacter(ch))
                     }
                 } else {
-                    throw TOMLError.invalidCharacter(ch)
+                    throw TOMLError(.invalidCharacter(ch))
                 }
             }
 
             if multiline, ch == CodeUnits.doubleQuote {
                 consecutiveQuotes += 1
                 if consecutiveQuotes > 2 {
-                    throw TOMLError.syntax(lineNumber: 0, message: "basic multiline strings cannot contain more than 2 consecutive double quotes")
+                    throw TOMLError(.syntax(lineNumber: 0, message: "basic multiline strings cannot contain more than 2 consecutive double quotes"))
                 }
             } else {
                 consecutiveQuotes = 0
@@ -381,7 +381,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
         }
 
         if index >= source.endIndex {
-            throw TOMLError.invalidCharacter(CodeUnits.backslash)
+            throw TOMLError(.invalidCharacter(CodeUnits.backslash))
         }
 
         if multiline {
@@ -400,7 +400,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
             var ucs: UInt32 = 0
             for _ in 0 ..< hexCount {
                 if index >= source.endIndex {
-                    throw TOMLError.expectedHexCharacters(ch, hexCount)
+                    throw TOMLError(.expectedHexCharacters(ch, hexCount))
                 }
                 ch = source[index]
                 index = source.index(after: index)
@@ -412,12 +412,12 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
                     ? Int32(ch - CodeUnits.lowerA + 10)
                     : -1
                 if v == -1 {
-                    throw TOMLError.invalidHexCharacters(ch)
+                    throw TOMLError(.invalidHexCharacters(ch))
                 }
                 ucs = ucs * 16 + UInt32(v)
             }
             guard let scalar = Unicode.Scalar(ucs) else {
-                throw TOMLError.illegalUCSCode(ucs)
+                throw TOMLError(.illegalUCSCode(ucs))
             }
             resultCodeUnits.append(contentsOf: scalar.utf8)
             continue
@@ -432,7 +432,7 @@ func basicString(source: String.UTF8View.SubSequence, multiline: Bool) throws(TO
         } else if ch == CodeUnits.lowerN {
             ch = CodeUnits.lf
         } else if ch != CodeUnits.doubleQuote, ch != CodeUnits.backslash {
-            throw TOMLError.illegalEscapeCharacter(ch)
+            throw TOMLError(.illegalEscapeCharacter(ch))
         }
 
         consecutiveQuotes = 0 // Reset count after escape sequence
@@ -561,38 +561,38 @@ struct DateTimeComponents: Equatable {
     }
 
     @inline(__always)
-    func localDate(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalDate {
+    func localDate(exactMatch: Bool = true) -> LocalDate? {
         switch (date, time, offset) {
         case let (.some(date), .none, .none):
-            return date
+            date
         case let (.some(date), _, _) where !exactMatch:
-            return date
+            date
         default:
-            throw error()
+            nil
         }
     }
 
     @inline(__always)
-    func localTime(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalTime {
+    func localTime(exactMatch: Bool = true) -> LocalTime? {
         switch (date, time, offset) {
         case let (.none, .some(time), .none):
-            return time
+            time
         case let (_, .some(time), _) where !exactMatch:
-            return time
+            time
         default:
-            throw error()
+            nil
         }
     }
 
     @inline(__always)
-    func localDateTime(exactMatch: Bool = true, error: @autoclosure () -> TOMLError) throws(TOMLError) -> LocalDateTime {
+    func localDateTime(exactMatch: Bool = true) -> LocalDateTime? {
         switch (date, time, offset) {
         case let (.some(date), .some(time), .none):
-            return LocalDateTime(date: date, time: time)
+            LocalDateTime(date: date, time: time)
         case let (.some(date), .some(time), .some) where !exactMatch:
-            return LocalDateTime(date: date, time: time)
+            LocalDateTime(date: date, time: time)
         default:
-            throw error()
+            nil
         }
     }
 }
@@ -610,395 +610,9 @@ func parseNanoSeconds(source: String.UTF8View.SubSequence, updatedIndex: inout S
     return UInt32(result)
 }
 
-// `nil` signals this isn't a string. Errors indicates ill-formed strings
-func stringMaybe(_ text: String.UTF8View.SubSequence) throws(TOMLError) -> String? {
-    var multiline = false
-
-    if text.isEmpty {
-        return nil
-    }
-
-    let quoteChar = text[text.startIndex]
-    var index = text.startIndex
-    var endIndex = text.endIndex
-    guard quoteChar == CodeUnits.doubleQuote || quoteChar == CodeUnits.singleQuote else {
-        return nil
-    }
-
-    if text.starts(with: Constants.tripleDoubleQuote) || text.starts(with: Constants.tripleSingleQuote) {
-        multiline = true
-        index = text.index(index, offsetBy: 3)
-        endIndex = text.index(endIndex, offsetBy: -3)
-
-        if index < endIndex, text[index] == CodeUnits.lf {
-            index = text.index(after: index)
-        } else if text[index...].starts(with: [CodeUnits.cr, CodeUnits.lf]) {
-            index = text.index(index, offsetBy: 2)
-        }
-    } else {
-        index = text.index(after: index)
-        endIndex = text.index(before: endIndex)
-        guard text[endIndex] == quoteChar else {
-            throw TOMLError.stringMissingClosingQuote(single: quoteChar == CodeUnits.singleQuote)
-        }
-    }
-
-    if quoteChar == CodeUnits.singleQuote {
-        return try literalString(source: text[index ..< endIndex], multiline: multiline)
-    } else {
-        return try basicString(source: text[index ..< endIndex], multiline: multiline)
-    }
-}
-
-func boolMaybe(_ text: String.UTF8View.SubSequence) throws(TOMLError) -> Bool {
-    if text.count == 4, text.starts(with: Constants.true) {
-        return true
-    } else if text.count == 5, text.starts(with: Constants.false) {
-        return false
-    }
-
-    throw TOMLError.invalidBool(text)
-}
-
-func intMaybe(_ text: String.UTF8View.SubSequence, mustBeInt: Bool) throws(TOMLError) -> Int64 {
-    @_transparent
-    func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
-        switch base {
-        case 10:
-            codeUnit.isDecimalDigit
-        case 16:
-            codeUnit.isHexDigit
-        case 2:
-            codeUnit == CodeUnits.number0 || codeUnit == CodeUnits.number1
-        case 8:
-            CodeUnits.number0 <= codeUnit && codeUnit <= CodeUnits.number7
-        default:
-            false
-        }
-    }
-
-    @_transparent
-    func error(_ mustBeInt: Bool, _ reason: String) -> TOMLError {
-        mustBeInt ? .invalidInteger(reason: reason) : .invalidNumber(reason: reason)
-    }
-
-    var mustBeInt = mustBeInt
-    var resultCodeUnits: [UTF8.CodeUnit] = []
-    var index = text.startIndex
-    var base = 10
-    var hasSign = false
-    if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
-        hasSign = true
-        resultCodeUnits.append(text[index])
-        index = text.index(after: index)
-    }
-
-    if text[index] == CodeUnits.underscore {
-        throw error(mustBeInt, "cannot start with a '_'")
-    }
-
-    if text[index] == CodeUnits.number0 {
-        let nextIndex = text.index(after: index)
-        if nextIndex < text.endIndex {
-            if text[nextIndex] == CodeUnits.lowerX {
-                if hasSign {
-                    throw TOMLError.invalidInteger(reason: "hexadecimal integers cannot have explicit signs")
-                }
-                base = 16
-                text.formIndex(&index, offsetBy: 2)
-                mustBeInt = true
-            } else if text[nextIndex] == CodeUnits.lowerO {
-                if hasSign {
-                    throw TOMLError.invalidInteger(reason: "octal integers cannot have explicit signs")
-                }
-                base = 8
-                text.formIndex(&index, offsetBy: 2)
-                mustBeInt = true
-            } else if text[nextIndex] == CodeUnits.lowerB {
-                if hasSign {
-                    throw TOMLError.invalidInteger(reason: "binary integers cannot have explicit signs")
-                }
-                base = 2
-                text.formIndex(&index, offsetBy: 2)
-                mustBeInt = true
-            } else if text[nextIndex].isDecimalDigit || text[nextIndex] == CodeUnits.underscore {
-                throw error(mustBeInt, "decimal integers cannot have leading zeros")
-            }
-        }
-        // Single zero is allowed to continue to the main loop
-    }
-
-    while index < text.endIndex {
-        let ch = text[index]
-        index = text.index(after: index)
-
-        if ch == CodeUnits.underscore {
-            guard
-                let last = resultCodeUnits.last,
-                isValidDigit(last, base: base)
-            else {
-                throw error(mustBeInt, "cannot use '_' adjacent to a non-digit")
-            }
-
-            if index >= text.endIndex {
-                throw error(mustBeInt, "cannot end with a '_'")
-            }
-
-            let next = text[index]
-            if next == CodeUnits.underscore {
-                throw error(mustBeInt, "cannot contain consecutive '_'")
-            }
-            guard isValidDigit(next, base: base) else {
-                throw error(mustBeInt, "cannot use '_' adjacent to a non-digit")
-            }
-            continue
-        }
-
-        guard isValidDigit(ch, base: base) else {
-            throw error(mustBeInt, "invalid digit for base \(base)")
-        }
-
-        resultCodeUnits.append(ch)
-    }
-
-    let s = String(decoding: resultCodeUnits, as: UTF8.self)
-    guard let i = Int64(s, radix: base) else {
-        throw error(mustBeInt, "\(s) is a invalid integer of base \(base)")
-    }
-    return i
-}
-
-func floatMaybe(_ text: String.UTF8View.SubSequence, mustBeFloat: Bool) throws(TOMLError) -> Double {
-    @_transparent
-    func error(_ mustBeFloat: Bool, _ reason: String) -> TOMLError {
-        mustBeFloat ? .invalidFloat(reason: reason) : .invalidNumber(reason: reason)
-    }
-
-    var mustBeFloat = mustBeFloat
-    var resultCodeUnits: [UTF8.CodeUnit] = []
-    var index = text.startIndex
-    if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
-        resultCodeUnits.append(text[index])
-        index = text.index(after: index)
-    }
-
-    if isdigit(Int32(text[index])) == 0 {
-        guard text[index...].starts(with: Constants.nan) || text[index...].starts(with: Constants.inf) else {
-            throw error(mustBeFloat, "Expected 0-9, nan or inf, found \(text[index])")
-        }
-        resultCodeUnits.append(contentsOf: text[index ..< text.index(index, offsetBy: 3)])
-    } else {
-        if text[index] == CodeUnits.number0,
-           index < text.endIndex,
-           case let next = text[text.index(after: index)],
-           next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
-        {
-            throw error(mustBeFloat, "Float begins with 0 must be followed by a '.', 'e' or 'E'")
-        }
-
-        while index < text.endIndex {
-            let ch = text[index]
-            index = text.index(after: index)
-
-            if ch == CodeUnits.underscore {
-                guard
-                    let last = resultCodeUnits.last,
-                    isdigit(Int32(last)) != 0
-                else {
-                    throw error(mustBeFloat, "'_' must be preceded by a digit")
-                }
-
-                guard
-                    index < text.endIndex,
-                    case let next = text[index],
-                    isdigit(Int32(next)) != 0
-                else {
-                    throw error(mustBeFloat, "'_' must be follewed by a digit")
-                }
-
-                continue
-            } else if ch == CodeUnits.dot {
-                if resultCodeUnits.isEmpty {
-                    throw error(mustBeFloat, "First digit of floats cannot be '.'")
-                }
-
-                if !resultCodeUnits.last!.isDecimalDigit {
-                    throw error(mustBeFloat, "'.' must be preceded by a decimal digit")
-                }
-
-                guard index < text.endIndex, isdigit(Int32(text[index])) != 0 else {
-                    throw error(mustBeFloat, "A digit must follow '.'")
-                }
-
-                mustBeFloat = true
-            } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
-                mustBeFloat = true
-            } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
-                throw error(mustBeFloat, "invalid character for float")
-            }
-
-            resultCodeUnits.append(ch)
-        }
-    }
-
-    guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
-        throw error(mustBeFloat, "not a float")
-    }
-
-    return double
-}
-
-func datetimeMaybe(lineNumber: Int?, _ text: String.UTF8View.SubSequence) throws(TOMLError) -> DateTimeComponents {
-    var mustParseTime = false
-    var date: (year: Int, month: Int, day: Int)?
-    var time: (hour: Int, minute: Int, second: Int)?
-
-    var index = text.startIndex
-    if let (year, month, day, _) = scanDate(source: text) {
-        // Validate date components
-        if month < 1 || month > 12 {
-            throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "month must be between 01 and 12")
-        }
-        if day < 1 {
-            throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "day must be between 01 and 31")
-        }
-
-        // Validate days per month and leap years
-        let isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
-        let maxDaysInMonth: Int = switch month {
-        case 2:
-            isLeapYear ? 29 : 28
-        case 4, 6, 9, 11:
-            30
-        default:
-            31
-        }
-
-        if day > maxDaysInMonth {
-            if month == 2, !isLeapYear {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "February only has 28 days in non-leap years")
-            } else if month == 2, isLeapYear {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "February only has 29 days in leap years")
-            } else {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "day \(day) is invalid for month \(month)")
-            }
-        }
-
-        date = (year, month, day)
-        text.formIndex(&index, offsetBy: 10)
-    }
-
-    var features: OffsetDateTime.Features = []
-    if index < text.endIndex {
-        if date != nil {
-            let isSeparatorLowerT = text[index] == CodeUnits.lowerT
-            let isSeparatorUpperT = text[index] == CodeUnits.upperT
-            guard isSeparatorLowerT || isSeparatorUpperT || text[index] == CodeUnits.space else {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "expected 'T' or 't' or space to separate date and time")
-            }
-            if isSeparatorLowerT {
-                features.insert(.lowercaseT)
-            } else if isSeparatorUpperT {
-                features.insert(.uppercaseT)
-            }
-            mustParseTime = true
-            text.formIndex(&index, offsetBy: 1)
-        } else {
-            // For standalone time values, don't advance index
-            mustParseTime = true
-        }
-    }
-    var nanoseconds: UInt32?
-    var timeOffset: Int16?
-
-    if index < text.endIndex, let (hour, minute, second, _) = scanTime(source: text[index...]) {
-        // Validate time components
-        if hour > 23 {
-            throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "hour must be between 00 and 23")
-        }
-        if minute > 59 {
-            throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "minute must be between 00 and 59")
-        }
-        if second > 59 {
-            throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "second must be between 00 and 59")
-        }
-
-        time = (hour, minute, second)
-
-        text.formIndex(&index, offsetBy: 8)
-        if index < text.endIndex, text[index] == CodeUnits.dot {
-            text.formIndex(&index, offsetBy: 1)
-            let beforeNanoIndex = index
-            nanoseconds = parseNanoSeconds(source: text[index...], updatedIndex: &index)
-            // Must have at least one digit after decimal point
-            if index == beforeNanoIndex {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "decimal point must be followed by digits")
-            }
-        }
-    }
-
-    if mustParseTime, time == nil {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "expected valid time")
-    }
-
-    if index < text.endIndex {
-        if text[index] == CodeUnits.lowerZ {
-            features.insert(.lowercaseZ)
-            text.formIndex(&index, offsetBy: 1)
-            timeOffset = 0
-        } else if text[index] == CodeUnits.upperZ {
-            features.insert(.uppercaseZ)
-            text.formIndex(&index, offsetBy: 1)
-            timeOffset = 0
-        } else if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
-            let offsetIsNegative = text[index] == CodeUnits.minus
-            text.formIndex(&index, offsetBy: 1)
-
-            // Scan ahead to find the end of the timezone offset
-            var endIndex = index
-            while endIndex < text.endIndex {
-                let ch = text[endIndex]
-                if isdigit(Int32(ch)) != 0 || ch == CodeUnits.colon {
-                    endIndex = text.index(after: endIndex)
-                } else {
-                    break
-                }
-            }
-
-            // Extract and validate the complete offset string
-            let offsetString = text[index ..< endIndex]
-            let (offsetHour, offsetMinute, consumedLength) = try parseTimezoneOffset(offsetString, lineNumber: lineNumber ?? 0)
-
-            // Validate timezone offset ranges
-            if offsetHour > 24 {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset hour must be between 00 and 24")
-            }
-            if offsetMinute > 59 {
-                throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset minute must be between 00 and 59")
-            }
-
-            // Advance index by actual consumed length
-            text.formIndex(&index, offsetBy: consumedLength)
-
-            let offset = Int16(offsetHour * 60 + offsetMinute)
-            timeOffset = offsetIsNegative ? -offset : offset
-        }
-    }
-
-    if index < text.endIndex {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "extra character after date time")
-    }
-    return DateTimeComponents(
-        date: date.map { LocalDate(year: .init($0.year), month: .init($0.month), day: .init($0.day)) },
-        time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) },
-        offset: timeOffset,
-        features: features,
-    )
-}
-
 func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard text.count >= 2 else {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must have at least 2 digits for hour")
+        throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must have at least 2 digits for hour"))
     }
 
     var index = text.startIndex
@@ -1013,7 +627,7 @@ func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) t
         isdigit(Int32(text[nextIndex])) != 0,
         case let secondHourDigit = text[nextIndex]
     else {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset hour must be exactly 2 digits")
+        throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset hour must be exactly 2 digits"))
     }
 
     let offsetHour = Int(firstHourDigit - CodeUnits.number0) * 10 + Int(secondHourDigit - CodeUnits.number0)
@@ -1022,7 +636,7 @@ func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) t
 
     // Parse required minute digits (timezone offset must include minutes)
     guard index < text.endIndex, text[index] == CodeUnits.colon else {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must include minutes (format: ±HH:MM)")
+        throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must include minutes (format: ±HH:MM)"))
     }
 
     index = text.index(after: index)
@@ -1037,7 +651,7 @@ func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) t
         isdigit(Int32(text[nextMinuteIndex])) != 0,
         case let secondMinuteDigit = text[nextMinuteIndex]
     else {
-        throw TOMLError.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset minute must be exactly 2 digits")
+        throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset minute must be exactly 2 digits"))
     }
 
     let offsetMinute = Int(firstMinuteDigit - CodeUnits.number0) * 10 + Int(secondMinuteDigit - CodeUnits.number0)
@@ -1055,7 +669,7 @@ extension Deserializer {
         if ch == CodeUnits.doubleQuote || ch == CodeUnits.singleQuote {
             if sourceUTF8[sourceUTF8.index(start, offsetBy: 1)] == ch, sourceUTF8[sourceUTF8.index(start, offsetBy: 2)] == ch {
                 // Keys cannot be multiline
-                throw TOMLError.badKey(lineNumber: token.lineNumber)
+                throw TOMLError(.badKey(lineNumber: token.lineNumber))
             } else {
                 start = sourceUTF8.index(start, offsetBy: 1)
                 end = sourceUTF8.index(end, offsetBy: -1)
@@ -1076,7 +690,7 @@ extension Deserializer {
                 byte == CodeUnits.underscore || // _
                 byte == CodeUnits.minus // -
         }) else {
-            throw TOMLError.badKey(lineNumber: token.lineNumber)
+            throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
 
         if let keyTransform {
@@ -1089,7 +703,7 @@ extension Deserializer {
     func createKeyValue(token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
         let key = try normalizeKey(token: token)
         if tables[tableIndex][self, key] != nil {
-            throw TOMLError.badKey(lineNumber: token.lineNumber)
+            throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
         let kv = KeyValuePair(key: key, value: .empty)
         let index = keyValues.count
@@ -1104,21 +718,21 @@ extension Deserializer {
 
         // Check if parent table is readOnly (inline table)
         if tables[tableIndex].readOnly {
-            throw TOMLError.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table")
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
         }
 
         switch tables[tableIndex][self, key] {
         case let .table(existingTableIndex):
             if tables[existingTableIndex].implicit {
                 if tables[existingTableIndex].definedByDottedKey {
-                    throw TOMLError.keyExists(lineNumber: token.lineNumber)
+                    throw TOMLError(.keyExists(lineNumber: token.lineNumber))
                 }
                 tables[existingTableIndex].implicit = false
                 return existingTableIndex
             }
-            throw TOMLError.keyExists(lineNumber: token.lineNumber)
+            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         case .keyValue, .array:
-            throw TOMLError.keyExists(lineNumber: token.lineNumber)
+            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         case nil:
             break
         }
@@ -1135,7 +749,7 @@ extension Deserializer {
     func createKeyArray(token: Token, inTable tableIndex: Int, kind: TOMLArrayImplementation.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(token: token)
         if tables[tableIndex][self, key] != nil {
-            throw TOMLError.keyExists(lineNumber: token.lineNumber)
+            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         }
 
         let index = arrays.count
@@ -1173,10 +787,10 @@ extension Deserializer {
                             if nextPosition < sourceUTF8.endIndex, sourceUTF8[nextPosition] == CodeUnits.lf {
                                 // Allow CRLF sequence
                             } else {
-                                throw TOMLError.syntax(lineNumber: lineNumber, message: "control characters are not allowed in comments")
+                                throw TOMLError(.syntax(lineNumber: lineNumber, message: "control characters are not allowed in comments"))
                             }
                         } else {
-                            throw TOMLError.syntax(lineNumber: lineNumber, message: "control characters are not allowed in comments")
+                            throw TOMLError(.syntax(lineNumber: lineNumber, message: "control characters are not allowed in comments"))
                         }
                     }
                     position = sourceUTF8.index(after: position)
@@ -1264,7 +878,7 @@ extension Deserializer {
                     return
                 } else {
                     // Bare CR is invalid
-                    throw TOMLError.syntax(lineNumber: lineNumber, message: "bare carriage return is not allowed")
+                    throw TOMLError(.syntax(lineNumber: lineNumber, message: "bare carriage return is not allowed"))
                 }
             } else if ch == CodeUnits.space || ch == CodeUnits.tab {
                 // ignore white spaces
@@ -1301,7 +915,7 @@ extension Deserializer {
             }
 
             guard i < text.endIndex else {
-                throw TOMLError.syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote")
+                throw TOMLError(.syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote"))
             }
 
             let end = text.index(i, offsetBy: 3)
@@ -1333,7 +947,7 @@ extension Deserializer {
             }
 
             guard i < text.endIndex else {
-                throw TOMLError.syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote")
+                throw TOMLError(.syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote"))
             }
 
             let end = text.index(i, offsetBy: 3)
@@ -1358,7 +972,7 @@ extension Deserializer {
             }
 
             if i >= text.endIndex || text[i] != CodeUnits.singleQuote {
-                throw TOMLError.syntax(lineNumber: lineNumber, message: "unterminated s-quote")
+                throw TOMLError(.syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
             }
 
             token = Token(
@@ -1396,7 +1010,7 @@ extension Deserializer {
                         continue
                     }
 
-                    throw TOMLError.syntax(lineNumber: lineNumber, message: "expected escape char")
+                    throw TOMLError(.syntax(lineNumber: lineNumber, message: "expected escape char"))
                 }
 
                 if expectedHexDigit > 0 {
@@ -1405,7 +1019,7 @@ extension Deserializer {
                         text.formIndex(after: &i)
                         continue
                     }
-                    throw TOMLError.syntax(lineNumber: lineNumber, message: "expect hex char")
+                    throw TOMLError(.syntax(lineNumber: lineNumber, message: "expect hex char"))
                 }
 
                 if ch == CodeUnits.backslash {
@@ -1426,7 +1040,7 @@ extension Deserializer {
             }
 
             if i >= text.endIndex || text[i] != CodeUnits.doubleQuote {
-                throw TOMLError.syntax(lineNumber: lineNumber, message: "unterminated quote")
+                throw TOMLError(.syntax(lineNumber: lineNumber, message: "unterminated quote"))
             }
 
             token = Token(
@@ -1533,7 +1147,7 @@ extension Deserializer {
 
     func eatToken(type: Token.Kind, isDotSpecial: Bool) throws(TOMLError) {
         if token.kind != type {
-            throw TOMLError.internalError(lineNumber: token.lineNumber)
+            throw TOMLError(.internalError(lineNumber: token.lineNumber))
         }
         try nextToken(isDotSpecial: isDotSpecial)
     }
@@ -1543,7 +1157,7 @@ extension Deserializer {
 
         while true {
             if token.kind == .newline {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
             }
 
             if token.kind == .rbrace {
@@ -1551,20 +1165,20 @@ extension Deserializer {
             }
 
             if token.kind != .string {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "expect a string")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
             try parseKeyValue(tableIndex: tableIndex)
 
             if token.kind == .newline {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
             }
 
             if token.kind == .comma {
                 try eatToken(type: .comma, isDotSpecial: true)
                 // Check for trailing comma - if next token is rbrace, it's a trailing comma error
                 if token.kind == .rbrace {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
                 }
                 continue
             }
@@ -1626,7 +1240,7 @@ extension Deserializer {
                 try parseInlineTable(tableIndex: newTableIndex)
 
             default:
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "syntax error")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
             }
 
             try skipNewlines(isDotSpecial: false)
@@ -1646,7 +1260,7 @@ extension Deserializer {
     func parseKeyValue(tableIndex: Int) throws(TOMLError) {
         let table = tables[tableIndex]
         if table.readOnly {
-            throw TOMLError.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table")
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table"))
         }
 
         let key = token
@@ -1659,7 +1273,7 @@ extension Deserializer {
             if let existingTableIndex = lookupTable(in: table, key: subTableKey) {
                 // Check if the existing table is explicitly defined (not implicit)
                 if !tables[existingTableIndex].implicit {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "cannot add to explicitly defined table using dotted keys")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to explicitly defined table using dotted keys"))
                 }
                 subTableIndex = existingTableIndex
             } else {
@@ -1672,7 +1286,7 @@ extension Deserializer {
         }
 
         if token.kind != .equal {
-            throw TOMLError.syntax(lineNumber: token.lineNumber, message: "missing =")
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "missing ="))
         }
 
         try nextToken(isDotSpecial: false)
@@ -1683,7 +1297,7 @@ extension Deserializer {
 
             // Check if this looks like a datetime but fails to parse
             if scanDate(source: value.text) != nil {
-                _ = try datetimeMaybe(lineNumber: token.lineNumber, value.text)
+                _ = try value.unpackDateTime(context: .string(""))
             }
 
             keyValues[index].value = value
@@ -1703,7 +1317,7 @@ extension Deserializer {
             return
         }
 
-        throw TOMLError.syntax(lineNumber: token.lineNumber, message: "syntax error")
+        throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
     }
 
     func lookupTable(in table: TOMLTableImplementation, key: String) -> Int? {
@@ -1730,7 +1344,7 @@ extension Deserializer {
 
         while true {
             if token.kind != .string {
-                throw TOMLError.syntax(lineNumber: lineNumber, message: "invalid or missing key")
+                throw TOMLError(.syntax(lineNumber: lineNumber, message: "invalid or missing key"))
             }
 
             let key = try normalizeKey(token: token)
@@ -1742,13 +1356,13 @@ extension Deserializer {
             }
 
             if token.kind != .dot {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "invalid key")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
             }
 
             try nextToken(isDotSpecial: true)
         }
         if tablePath.isEmpty {
-            throw TOMLError.syntax(lineNumber: lineNumber, message: "empty table selector")
+            throw TOMLError(.syntax(lineNumber: lineNumber, message: "empty table selector"))
         }
     }
 
@@ -1761,20 +1375,20 @@ extension Deserializer {
             case let .array(arrayIndex):
                 let array = arrays[arrayIndex]
                 guard case .table = array.kind else {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array element is not a table")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
                 }
 
                 if array.elements.isEmpty {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "empty array")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "empty array"))
                 }
 
                 guard case let .table(_, index) = array.elements.last else {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array element is not a table")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
                 }
 
                 tableIndex = index
             case .keyValue:
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "key-value already exists")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "key-value already exists"))
             default:
                 let newTableAddress = tables.count
                 var newTable = TOMLTableImplementation(key: key)
@@ -1822,7 +1436,7 @@ extension Deserializer {
             }
             let arrayIndex = maybeArrayIndex!
             if arrays[arrayIndex].kind != .table {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "array mismatch")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
             }
 
             // add to z[]
@@ -1833,20 +1447,20 @@ extension Deserializer {
         }
 
         if token.kind != .rbracket {
-            throw TOMLError.syntax(lineNumber: token.lineNumber, message: "expects ]")
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expects ]"))
         }
 
         if llb {
             let nextIndex = token.text.index(after: token.text.startIndex)
             guard nextIndex < sourceUTF8.endIndex, sourceUTF8[nextIndex] == CodeUnits.rbracket else {
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "expects ]]")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expects ]]"))
             }
             try eatToken(type: .rbracket, isDotSpecial: true)
         }
         try eatToken(type: .rbracket, isDotSpecial: true)
 
         if token.kind != .newline {
-            throw TOMLError.syntax(lineNumber: token.lineNumber, message: "extra chars after ] or ]]")
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after ] or ]]"))
         }
     }
 
@@ -1858,13 +1472,13 @@ extension Deserializer {
             case .string:
                 try parseKeyValue(tableIndex: currentTable)
                 if token.kind != .newline {
-                    throw TOMLError.syntax(lineNumber: token.lineNumber, message: "extra chars after value")
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after value"))
                 }
                 try eatToken(type: .newline, isDotSpecial: true)
             case .lbracket:
                 try parseSelect()
             default:
-                throw TOMLError.syntax(lineNumber: token.lineNumber, message: "syntax error")
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
             }
         }
 
@@ -1889,7 +1503,7 @@ extension TOMLTableImplementation {
 
         for kvIndex in keyValues {
             let pair = source.keyValues[kvIndex]
-            result[pair.key] = try pair.value.unpackValue(errorForInvalidValue: TOMLError.invalidValueInTable(lineNumber: pair.value.lineNumber, key: pair.key))
+            result[pair.key] = try pair.value.unpackValue(context: .string(pair.key))
         }
 
         return result
@@ -1907,8 +1521,7 @@ extension TOMLArrayImplementation {
             case let .table(_, tableIndex):
                 try result.append(source.tables[tableIndex].dictionary(source: source))
             case let .leaf(token):
-                let error = TOMLError.invalidValueInArray(lineNumber: token.lineNumber, index: index)
-                try result.append(token.unpackValue(errorForInvalidValue: error))
+                try result.append(token.unpackValue(context: .int(index)))
             }
         }
 
@@ -1917,43 +1530,415 @@ extension TOMLArrayImplementation {
 }
 
 extension Token {
-    func unpackValue(errorForInvalidValue: @autoclosure () -> TOMLError) throws(TOMLError) -> Any {
-        let firstChar = text.first
-        if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
-            do {
-                if let text = try stringMaybe(text) {
-                    return text
+    func unpackBool(context: TOMLKey) throws(TOMLError) -> Bool {
+        if text.count == 4, text.starts(with: Constants.true) {
+            return true
+        } else if text.count == 5, text.starts(with: Constants.false) {
+            return false
+        }
+
+        throw TOMLError(.invalidBool2(context: context, value: self))
+    }
+
+    func unpackFloat(context: TOMLKey) throws(TOMLError) -> Double {
+        var resultCodeUnits: [UTF8.CodeUnit] = []
+        var index = text.startIndex
+        if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
+            resultCodeUnits.append(text[index])
+            index = text.index(after: index)
+        }
+
+        if isdigit(Int32(text[index])) == 0 {
+            guard text[index...].starts(with: Constants.nan) || text[index...].starts(with: Constants.inf) else {
+                throw TOMLError(.invalidFloat2(context: context, value: self, reason: "Expected 0-9, nan or inf, found \(text[index])"))
+            }
+            resultCodeUnits.append(contentsOf: text[index ..< text.index(index, offsetBy: 3)])
+        } else {
+            if text[index] == CodeUnits.number0,
+               index < text.endIndex,
+               case let next = text[text.index(after: index)],
+               next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
+            {
+                throw TOMLError(.invalidFloat2(context: context, value: self, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
+            }
+
+            while index < text.endIndex {
+                let ch = text[index]
+                index = text.index(after: index)
+
+                if ch == CodeUnits.underscore {
+                    guard
+                        let last = resultCodeUnits.last,
+                        isdigit(Int32(last)) != 0
+                    else {
+                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'_' must be preceded by a digit"))
+                    }
+
+                    guard
+                        index < text.endIndex,
+                        case let next = text[index],
+                        isdigit(Int32(next)) != 0
+                    else {
+                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'_' must be follewed by a digit"))
+                    }
+
+                    continue
+                } else if ch == CodeUnits.dot {
+                    if resultCodeUnits.isEmpty {
+                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "First digit of floats cannot be '.'"))
+                    }
+
+                    if !resultCodeUnits.last!.isDecimalDigit {
+                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'.' must be preceded by a decimal digit"))
+                    }
+
+                    guard index < text.endIndex, isdigit(Int32(text[index])) != 0 else {
+                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "A digit must follow '.'"))
+                    }
+
+                } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
+                } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
+                    throw TOMLError(.invalidFloat2(context: context, value: self, reason: "invalid character for float"))
                 }
-            } catch {
-                throw error
+
+                resultCodeUnits.append(ch)
             }
         }
 
-        if let boolValue = try? boolMaybe(text) {
+        guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
+            throw TOMLError(.invalidFloat2(context: context, value: self, reason: "not a float"))
+        }
+
+        return double
+    }
+
+    func unpackString(context: TOMLKey) throws(TOMLError) -> String {
+        var multiline = false
+
+        if text.isEmpty {
+            throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+        }
+
+        let quoteChar = text[text.startIndex]
+        var index = text.startIndex
+        var endIndex = text.endIndex
+
+        assert(quoteChar == CodeUnits.doubleQuote || quoteChar == CodeUnits.singleQuote)
+
+        if text.starts(with: Constants.tripleDoubleQuote) || text.starts(with: Constants.tripleSingleQuote) {
+            multiline = true
+            index = text.index(index, offsetBy: 3)
+            endIndex = text.index(endIndex, offsetBy: -3)
+
+            if index < endIndex, text[index] == CodeUnits.lf {
+                index = text.index(after: index)
+            } else if text[index...].starts(with: [CodeUnits.cr, CodeUnits.lf]) {
+                index = text.index(index, offsetBy: 2)
+            }
+        } else {
+            index = text.index(after: index)
+            endIndex = text.index(before: endIndex)
+            guard text[endIndex] == quoteChar else {
+                throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+            }
+        }
+
+        if quoteChar == CodeUnits.singleQuote {
+            do {
+                return try literalString(source: text[index ..< endIndex], multiline: multiline)
+            } catch {
+                // Convert the specific string parsing error to our context-aware version
+                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+            }
+        } else {
+            do {
+                return try basicString(source: text[index ..< endIndex], multiline: multiline)
+            } catch {
+                // Convert the specific string parsing error to our context-aware version
+                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+            }
+        }
+    }
+
+    func unpackInt(context: TOMLKey) throws(TOMLError) -> Int64 {
+        @_transparent
+        func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
+            switch base {
+            case 10:
+                codeUnit.isDecimalDigit
+            case 16:
+                codeUnit.isHexDigit
+            case 2:
+                codeUnit == CodeUnits.number0 || codeUnit == CodeUnits.number1
+            case 8:
+                CodeUnits.number0 <= codeUnit && codeUnit <= CodeUnits.number7
+            default:
+                false
+            }
+        }
+
+        var resultCodeUnits: [UTF8.CodeUnit] = []
+        var index = text.startIndex
+        var base = 10
+        var hasSign = false
+        if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
+            hasSign = true
+            resultCodeUnits.append(text[index])
+            index = text.index(after: index)
+        }
+
+        if text[index] == CodeUnits.underscore {
+            throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot start with a '_'"))
+        }
+
+        if text[index] == CodeUnits.number0 {
+            let nextIndex = text.index(after: index)
+            if nextIndex < text.endIndex {
+                if text[nextIndex] == CodeUnits.lowerX {
+                    if hasSign {
+                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "hexadecimal integers cannot have explicit signs"))
+                    }
+                    base = 16
+                    text.formIndex(&index, offsetBy: 2)
+                } else if text[nextIndex] == CodeUnits.lowerO {
+                    if hasSign {
+                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "octal integers cannot have explicit signs"))
+                    }
+                    base = 8
+                    text.formIndex(&index, offsetBy: 2)
+                } else if text[nextIndex] == CodeUnits.lowerB {
+                    if hasSign {
+                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "binary integers cannot have explicit signs"))
+                    }
+                    base = 2
+                    text.formIndex(&index, offsetBy: 2)
+                } else if text[nextIndex].isDecimalDigit || text[nextIndex] == CodeUnits.underscore {
+                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "decimal integers cannot have leading zeros"))
+                }
+            }
+            // Single zero is allowed to continue to the main loop
+        }
+
+        while index < text.endIndex {
+            let ch = text[index]
+            index = text.index(after: index)
+
+            if ch == CodeUnits.underscore {
+                guard
+                    let last = resultCodeUnits.last,
+                    isValidDigit(last, base: base)
+                else {
+                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                }
+
+                if index >= text.endIndex {
+                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot end with a '_'"))
+                }
+
+                let next = text[index]
+                if next == CodeUnits.underscore {
+                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot contain consecutive '_'"))
+                }
+                guard isValidDigit(next, base: base) else {
+                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                }
+                continue
+            }
+
+            guard isValidDigit(ch, base: base) else {
+                throw TOMLError(.invalidInteger(context: context, value: self, reason: "invalid digit for base \(base)"))
+            }
+
+            resultCodeUnits.append(ch)
+        }
+
+        let s = String(decoding: resultCodeUnits, as: UTF8.self)
+        guard let i = Int64(s, radix: base) else {
+            throw TOMLError(.invalidInteger(context: context, value: self, reason: "\(s) is a invalid integer of base \(base)"))
+        }
+        return i
+    }
+
+    func unpackDateTime(context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
+        var mustParseTime = false
+        var date: (year: Int, month: Int, day: Int)?
+        var time: (hour: Int, minute: Int, second: Int)?
+
+        var index = text.startIndex
+        if let (year, month, day, _) = scanDate(source: text) {
+            // Validate date components
+            if month < 1 || month > 12 {
+                throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "month must be between 01 and 12"))
+            }
+            if day < 1 {
+                throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "day must be between 01 and 31"))
+            }
+
+            // Validate days per month and leap years
+            let isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+            let maxDaysInMonth: Int = switch month {
+            case 2:
+                isLeapYear ? 29 : 28
+            case 4, 6, 9, 11:
+                30
+            default:
+                31
+            }
+
+            if day > maxDaysInMonth {
+                if month == 2, !isLeapYear {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "February only has 28 days in non-leap years"))
+                } else if month == 2, isLeapYear {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "February only has 29 days in leap years"))
+                } else {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "day \(day) is invalid for month \(month)"))
+                }
+            }
+
+            date = (year, month, day)
+            text.formIndex(&index, offsetBy: 10)
+        }
+
+        var features: OffsetDateTime.Features = []
+        var nanoseconds: UInt32?
+        if index < text.endIndex {
+            if date != nil {
+                let isSeparatorLowerT = text[index] == CodeUnits.lowerT
+                let isSeparatorUpperT = text[index] == CodeUnits.upperT
+                guard isSeparatorLowerT || isSeparatorUpperT || text[index] == CodeUnits.space else {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "expected 'T' or 't' or space to separate date and time"))
+                }
+                if isSeparatorLowerT {
+                    features.insert(.lowercaseT)
+                } else if isSeparatorUpperT {
+                    features.insert(.uppercaseT)
+                }
+                mustParseTime = true
+                text.formIndex(&index, offsetBy: 1)
+            } else {
+                // For standalone time values, don't advance index
+                mustParseTime = true
+            }
+            if let (hour, minute, second, _) = scanTime(source: text[index...]) {
+                // Validate time components
+                if hour > 23 {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "hour must be between 00 and 23"))
+                }
+                if minute > 59 {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "minute must be between 00 and 59"))
+                }
+                if second > 59 {
+                    throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "second must be between 00 and 59"))
+                }
+
+                time = (hour, minute, second)
+
+                text.formIndex(&index, offsetBy: 8)
+                if index < text.endIndex, text[index] == CodeUnits.dot {
+                    text.formIndex(&index, offsetBy: 1)
+                    let beforeNanoIndex = index
+                    nanoseconds = parseNanoSeconds(source: text[index...], updatedIndex: &index)
+                    // Must have at least one digit after decimal point
+                    if index == beforeNanoIndex {
+                        throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "decimal point must be followed by digits"))
+                    }
+                }
+            }
+        }
+
+        if mustParseTime, time == nil {
+            throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "expected valid time"))
+        }
+
+        var timeOffset: Int16?
+        if index < text.endIndex {
+            if text[index] == CodeUnits.lowerZ {
+                features.insert(.lowercaseZ)
+                text.formIndex(&index, offsetBy: 1)
+                timeOffset = 0
+            } else if text[index] == CodeUnits.upperZ {
+                features.insert(.uppercaseZ)
+                text.formIndex(&index, offsetBy: 1)
+                timeOffset = 0
+            } else if text[index] == CodeUnits.plus || text[index] == CodeUnits.minus {
+                let offsetIsNegative = text[index] == CodeUnits.minus
+                text.formIndex(&index, offsetBy: 1)
+
+                // Scan ahead to find the end of the timezone offset
+                var endIndex = index
+                while endIndex < text.endIndex {
+                    let ch = text[endIndex]
+                    if isdigit(Int32(ch)) != 0 || ch == CodeUnits.colon {
+                        endIndex = text.index(after: endIndex)
+                    } else {
+                        break
+                    }
+                }
+
+                do {
+                    let (offsetHour, offsetMinute, consumedLength) = try parseTimezoneOffset(text[index ..< endIndex], lineNumber: lineNumber)
+
+                    // Validate timezone offset ranges
+                    if offsetHour > 24 {
+                        throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "timezone offset hour must be between 00 and 24"))
+                    }
+                    if offsetMinute > 59 {
+                        throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "timezone offset minute must be between 00 and 59"))
+                    }
+
+                    let offsetInMinutes = offsetHour * 60 + offsetMinute
+                    timeOffset = Int16(offsetIsNegative ? -offsetInMinutes : offsetInMinutes)
+                    text.formIndex(&index, offsetBy: consumedLength)
+                } catch let parseError {
+                    if let tomlError = parseError as? TOMLError {
+                        switch tomlError.reason {
+                        case let .invalidDateTime(_, reason):
+                            throw TOMLError(.invalidDateTime2(context: context, value: self, reason: reason))
+                        default:
+                            throw tomlError
+                        }
+                    } else {
+                        throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "timezone parsing error"))
+                    }
+                }
+            }
+        }
+
+        if index < text.endIndex {
+            throw TOMLError(.invalidDateTime2(context: context, value: self, reason: "extra character after date time"))
+        }
+
+        return DateTimeComponents(
+            date: date.map { LocalDate(year: .init($0.year), month: .init($0.month), day: .init($0.day)) },
+            time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) },
+            offset: timeOffset,
+            features: features,
+        )
+    }
+
+    func unpackValue(context: TOMLKey) throws(TOMLError) -> Any {
+        let firstChar = text.first
+        if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
+            return try unpackString(context: context)
+        }
+
+        if let boolValue = try? unpackBool(context: context) {
             return boolValue
         }
 
-        do {
-            return try intMaybe(text, mustBeInt: false)
-        } catch {
-            if case TOMLError.invalidInteger = error {
-                throw error
-            }
+        if let intValue = try? unpackInt(context: context) {
+            return intValue
         }
 
-        do {
-            return try floatMaybe(text, mustBeFloat: false)
-        } catch {
-            if case TOMLError.invalidFloat = error {
-                throw error
-            }
+        if let floatValue = try? unpackFloat(context: context) {
+            return floatValue
         }
 
         guard firstChar?.isDecimalDigit == true else {
-            throw errorForInvalidValue()
+            throw TOMLError(.invalidValueInTable(context: context, token: self))
         }
 
-        let datetime = try datetimeMaybe(lineNumber: nil, text)
+        let datetime = try unpackDateTime(context: .string(""))
         switch (datetime.date, datetime.time, datetime.offset) {
         case let (.some(date), .some(time), .some(offset)):
             return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
@@ -1964,7 +1949,7 @@ extension Token {
         case let (.none, .some(time), .none):
             return time
         default:
-            throw errorForInvalidValue()
+            throw TOMLError(.invalidValueInTable(context: context, token: self))
         }
     }
 }
