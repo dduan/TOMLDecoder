@@ -37,7 +37,7 @@ Under no circumstances
 will the correspondence between the TOML and Swift types change.
 TOMLDecoder APIs in this layer reflects this strongly typed relation.
 
-### The definitive list of TOML-to-Swift types
+### The Definitive List of TOML-to-Swift Types
 
 For each data type defined in TOML,
 there's a Swift type,
@@ -120,7 +120,7 @@ let questions: TOMLArray = try rootTable.array(forKey: "questions")
 let question2 = try questions.string(atIndex: 1)
 ```
 
-## The deserielization process
+## The Deserielization Process
 
 Next,
 let's talk a little about the deserialization process.
