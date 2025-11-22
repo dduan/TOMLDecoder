@@ -101,11 +101,6 @@ struct Token: Equatable {
     }
 
     static let empty = Token(kind: .newline, lineNumber: 1, text: "".utf8[...], eof: false)
-
-    func parseAsBool() -> Bool? { try? boolMaybe(text) }
-    func parseAsInt() -> Int64? { try? intMaybe(text, mustBeInt: false) }
-    func parseAsFloat() -> Double? { try? floatMaybe(text, mustBeFloat: false) }
-    func parseAsDateTime() -> DateTimeComponents? { try? datetimeMaybe(lineNumber: nil, text) }
 }
 
 extension Token: CustomDebugStringConvertible {
@@ -1893,8 +1888,8 @@ extension TOMLTableImplementation {
         }
 
         for kvIndex in keyValues {
-            let (key, value) = try source.keyValues[kvIndex].unpackedValue()
-            result[key] = value
+            let pair = source.keyValues[kvIndex]
+            result[pair.key] = try pair.value.unpackValue(errorForInvalidValue: TOMLError.invalidValueInTable(lineNumber: pair.value.lineNumber, key: pair.key))
         }
 
         return result
@@ -1912,61 +1907,8 @@ extension TOMLArrayImplementation {
             case let .table(_, tableIndex):
                 try result.append(source.tables[tableIndex].dictionary(source: source))
             case let .leaf(token):
-                let line = token.lineNumber
-                let text = token.text
-                let first = text.first
-                if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
-                    guard let string = try stringMaybe(text) else {
-                        throw TOMLError.invalidValueInArray(lineNumber: line, index: index)
-                    }
-                    result.append(string)
-                    continue
-                }
-
-                // Try parsing as bool first (more common)
-                if let boolValue = try? boolMaybe(text) {
-                    result.append(boolValue)
-                    continue
-                }
-
-                do {
-                    try result.append(intMaybe(text, mustBeInt: false))
-                    continue
-                } catch {
-                    if case TOMLError.invalidInteger = error {
-                        throw error
-                    }
-                }
-
-                // Try float
-                do {
-                    let floatValue = try floatMaybe(text, mustBeFloat: false)
-                    result.append(floatValue)
-                    continue
-                } catch {
-                    if case TOMLError.invalidFloat = error {
-                        throw error
-                    }
-                }
-
-                // Try datetime if it starts with a digit
-                guard first?.isDecimalDigit == true else {
-                    throw TOMLError.invalidValueInArray(lineNumber: line, index: index)
-                }
-
-                let datetime = try datetimeMaybe(lineNumber: nil, text)
-                switch (datetime.date, datetime.time, datetime.offset) {
-                case let (.some(date), .some(time), .some(offset)):
-                    result.append(OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features))
-                case let (.some(date), .some(time), .none):
-                    result.append(LocalDateTime(date: date, time: time))
-                case let (.some(date), .none, .none):
-                    result.append(date)
-                case let (.none, .some(time), .none):
-                    result.append(time)
-                default:
-                    throw TOMLError.invalidDateTimeComponents("Failed to parse value as date or time at index \(index)")
-                }
+                let error = TOMLError.invalidValueInArray(lineNumber: token.lineNumber, index: index)
+                try result.append(token.unpackValue(errorForInvalidValue: error))
             }
         }
 
@@ -1974,22 +1916,25 @@ extension TOMLArrayImplementation {
     }
 }
 
-extension KeyValuePair {
-    func unpackedValue() throws(TOMLError) -> (String, Any?) {
-        let text = value.text
-        let first = text.first
-        if first == CodeUnits.singleQuote || first == CodeUnits.doubleQuote {
-            return try (key, stringMaybe(text))
+extension Token {
+    func unpackValue(errorForInvalidValue: @autoclosure () -> TOMLError) throws(TOMLError) -> Any {
+        let firstChar = text.first
+        if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
+            do {
+                if let text = try stringMaybe(text) {
+                    return text
+                }
+            } catch {
+                throw error
+            }
         }
 
-        // more likely values gets parsed first
-
         if let boolValue = try? boolMaybe(text) {
-            return (key, boolValue)
+            return boolValue
         }
 
         do {
-            return try (key, intMaybe(text, mustBeInt: false))
+            return try intMaybe(text, mustBeInt: false)
         } catch {
             if case TOMLError.invalidInteger = error {
                 throw error
@@ -1997,30 +1942,29 @@ extension KeyValuePair {
         }
 
         do {
-            return try (key, floatMaybe(text, mustBeFloat: false))
+            return try floatMaybe(text, mustBeFloat: false)
         } catch {
             if case TOMLError.invalidFloat = error {
                 throw error
             }
         }
 
-        guard first?.isDecimalDigit == true else {
-            throw TOMLError.invalidValueInTable(lineNumber: value.lineNumber, key: key)
+        guard firstChar?.isDecimalDigit == true else {
+            throw errorForInvalidValue()
         }
 
-        let datetime = try datetimeMaybe(lineNumber: value.lineNumber, value.text)
-
+        let datetime = try datetimeMaybe(lineNumber: nil, text)
         switch (datetime.date, datetime.time, datetime.offset) {
         case let (.some(date), .some(time), .some(offset)):
-            return (key, OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features))
+            return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
         case let (.some(date), .some(time), .none):
-            return (key, LocalDateTime(date: date, time: time))
+            return LocalDateTime(date: date, time: time)
         case let (.some(date), .none, .none):
-            return (key, date)
+            return date
         case let (.none, .some(time), .none):
-            return (key, time)
+            return time
         default:
-            throw TOMLError.invalidDateTimeComponents("Failed to parse value as date or time for \(key)")
+            throw errorForInvalidValue()
         }
     }
 }
