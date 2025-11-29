@@ -79,7 +79,7 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     @inline(__always)
-    func element(atIndex index: Int) throws(TOMLError) -> TOMLArrayImplementation.Element {
+    func element(atIndex index: Int) throws(TOMLError) -> InternalTOMLArray.Element {
         let elements = source.arrays[self.index].elements
         guard index < elements.count else {
             throw TOMLError(.arrayOutOfBound(index: index, bound: elements.count))
@@ -201,19 +201,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not an offset date-time.
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        let token = try token(forIndex: index, type: "offset datetime")
-
-        do {
-            let components = try token.unpackDateTime(context: .int(index))
-            switch (components.date, components.time, components.offset, components.features) {
-            case let (.some(date), .some(time), .some(offset), features):
-                return OffsetDateTime(date: date, time: time, offset: offset, features: features)
-            default:
-                throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "offset datetime"))
-            }
-        } catch {
-            throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "offset datetime"))
-        }
+        try token(forIndex: index, type: "offset date-time").unpackOffsetDateTime(context: .int(index))
     }
 
     /// Access a local date-time value at a given index.

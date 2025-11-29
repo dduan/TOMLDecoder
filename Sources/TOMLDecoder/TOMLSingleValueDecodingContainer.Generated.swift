@@ -3,19 +3,10 @@
 
 import Foundation
 
-struct TOMLSingleValueDecodingContainer: SingleValueDecodingContainer {
-    let decoder: _TOMLDecoder
-    let token: Token
-    let context: TOMLKey
-
-    init(decoder: _TOMLDecoder, token: Token, context: TOMLKey) {
-        assert(!decoder.codingPath.isEmpty)
-        self.token = token
-        self.decoder = decoder
-        self.context = context
+extension _TOMLDecoder: SingleValueDecodingContainer {
+    var context: TOMLKey {
+        codingPath.last as! TOMLKey
     }
-
-    var codingPath: [CodingKey] { decoder.codingPath }
 
     @inline(__always)
     func decode(_: Bool.Type) throws -> Bool {
@@ -28,70 +19,320 @@ struct TOMLSingleValueDecodingContainer: SingleValueDecodingContainer {
     }
 
     @inline(__always)
-    func decode(_: Double.Type) throws -> Double {
-        try token.unpackFloat(context: context)
-    }
-
-    @inline(__always)
     func decode(_: Int64.Type) throws -> Int64 {
         try token.unpackInteger(context: context)
     }
 
-    func decode(_: Float.Type) throws -> Float {
-        fatalError()
+    @inline(__always)
+    func decode(_ type: Int.Type) throws -> Int {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = Int(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: Int.Type) throws -> Int {
-        fatalError()
+    func decode(_ type: Int8.Type) throws -> Int8 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = Int8(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: Int8.Type) throws -> Int8 {
-        fatalError()
+    func decode(_ type: Int16.Type) throws -> Int16 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = Int16(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: Int16.Type) throws -> Int16 {
-        fatalError()
+    func decode(_ type: Int32.Type) throws -> Int32 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = Int32(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: Int32.Type) throws -> Int32 {
-        fatalError()
+    func decode(_ type: UInt.Type) throws -> UInt {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = UInt(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: UInt.Type) throws -> UInt {
-        fatalError()
+    func decode(_ type: UInt8.Type) throws -> UInt8 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = UInt8(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: UInt8.Type) throws -> UInt8 {
-        fatalError()
+    func decode(_ type: UInt16.Type) throws -> UInt16 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = UInt16(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: UInt16.Type) throws -> UInt16 {
-        fatalError()
+    func decode(_ type: UInt32.Type) throws -> UInt32 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = UInt32(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: UInt32.Type) throws -> UInt32 {
-        fatalError()
+    func decode(_ type: UInt64.Type) throws -> UInt64 {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Int64 or lenient decoding strategy.",
+            ))
+        }
+
+        do {
+            let integer = try decode(Int64.self)
+            guard let result = UInt64(exactly: integer) else {
+                throw DecodingError.typeMismatch(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(integer) cannot be represented by type Int."))
+            }
+            return result
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+
+    func decode(_ type: Double.Type) throws -> Double {
+        do {
+            return try token.unpackFloat(context: context)
+        } catch let floatError {
+            do {
+                return try Double(from: decode(OffsetDateTime.self), strategy: strategy.offsetDateTime)
+            } catch let error as DecodingError {
+                throw error
+            } catch {
+                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(floatError)", underlyingError: floatError))
+            }
+        }
+    }
+
+    func decode(_ type: Float.Type) throws -> Float {
+        if !isLenient {
+            throw DecodingError.typeMismatch(type, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Use Double or lenient decoding strategy.",
+            ))
+        }
+        do {
+            return try Float(decode(Double.self))
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+        }
     }
 
     @inline(__always)
-    func decode(_: UInt64.Type) throws -> UInt64 {
-        fatalError()
-    }
-
-    @inline(__always)
-    func decode<T>(_: T.Type) throws -> T where T: Decodable {
+    func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+        if type == LocalDate.self {
+            return try decode(LocalDate.self) as! T
+        } else if type == LocalDateTime.self {
+            return try decode(LocalDateTime.self) as! T
+        } else if type == LocalTime.self {
+            return try decode(LocalTime.self) as! T
+        } else if type == OffsetDateTime.self {
+            return try decode(OffsetDateTime.self) as! T
+        } else if type == Date.self {
+            return try decode(Date.self) as! T
+        } else if type == DateComponents.self {
+            return try decode(DateComponents.self) as! T
+        }
         fatalError()
     }
 
     func decodeNil() -> Bool {
         false
+    }
+}
+
+extension _TOMLDecoder {
+    @inline(__always)
+    func decode(_: LocalDate.Type) throws -> LocalDate {
+        try token.unpackLocalDate(context: context)
+    }
+
+    @inline(__always)
+    func decode(_: LocalDateTime.Type) throws -> LocalDateTime {
+        try token.unpackLocalDateTime(context: context)
+    }
+
+    @inline(__always)
+    func decode(_: LocalTime.Type) throws -> LocalTime {
+        try token.unpackLocalTime(context: context)
+    }
+
+    @inline(__always)
+    func decode(_: OffsetDateTime.Type) throws -> OffsetDateTime {
+        try token.unpackOffsetDateTime(context: context)
+    }
+
+    @inline(__always)
+    func decode(_: Date.Type) throws -> Date {
+        if !isLenient {
+            throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "No date found."))
+        }
+
+        switch strategy.offsetDateTime {
+        case .intervalSince1970:
+            let float = try decode(Double.self)
+            return Date(timeIntervalSince1970: float)
+        case .intervalSince2001:
+            let float = try decode(Double.self)
+            return Date(timeIntervalSinceReferenceDate: float)
+        case .dateFromGregorianCalendar:
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self)
+                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
+            } catch {
+                throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        case let .dateFromCalendar(identifier):
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self)
+                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: identifier))
+            } catch {
+                throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        case .dateFromProlepticGregorianCalendar:
+            do {
+                let offsetDateTime = try decode(OffsetDateTime.self)
+                return Date(timeIntervalSinceReferenceDate: offsetDateTime.timeIntervalSince2001)
+            } catch {
+                throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
+            }
+        }
+    }
+
+    @inline(__always)
+    func decode(_: DateComponents.Type) throws -> DateComponents {
+        if !isLenient {
+            throw DecodingError.valueNotFound(DateComponents.self, DecodingError.Context(codingPath: codingPath, debugDescription: "No date components found."))
+        }
+
+        let datetimeComponents = try token.unpackDateTime(context: context)
+        var components = DateComponents()
+        if let date = datetimeComponents.date {
+            components.year = Int(date.year)
+            components.month = Int(date.month)
+            components.day = Int(date.day)
+        }
+        if let time = datetimeComponents.time {
+            components.hour = Int(time.hour)
+            components.minute = Int(time.minute)
+            components.second = Int(time.second)
+        }
+        if let offset = datetimeComponents.offset {
+            components.timeZone = TimeZone(secondsFromGMT: Int(offset) * 60)
+        }
+        return components
     }
 }
