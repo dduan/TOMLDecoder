@@ -1537,7 +1537,7 @@ extension Token {
             return false
         }
 
-        throw TOMLError(.invalidBool2(context: context, value: self))
+        throw TOMLError(.invalidBool(context: context, value: self))
     }
 
     func unpackFloat(context: TOMLKey) throws(TOMLError) -> Double {

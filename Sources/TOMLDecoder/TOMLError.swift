@@ -28,7 +28,7 @@ public struct TOMLError: Error {
         case invalidInteger(context: TOMLKey, value: Token, reason: String)
         case invalidFloat(reason: String)
         case invalidFloat2(context: TOMLKey, value: Token, reason: String)
-        case invalidBool2(context: TOMLKey, value: Token)
+        case invalidBool(context: TOMLKey, value: Token)
         case invalidDateTime(lineNumber: Int?, reason: String)
         case invalidValueInTable(context: TOMLKey, token: Token)
         case invalidValueInArray(context: TOMLKey, token: Token)
@@ -100,7 +100,7 @@ extension TOMLError: CustomStringConvertible {
             case .super:
                 "Invalid float value '\(value.text)' for 'super' on line \(value.lineNumber): \(reason)."
             }
-        case let .invalidBool2(context, value):
+        case let .invalidBool(context, value):
             switch context {
             case let .string(key):
                 "Invalid boolean value '\(value.text)' for key '\(key)' on line \(value.lineNumber)."
