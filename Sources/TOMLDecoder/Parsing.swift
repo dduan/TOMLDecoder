@@ -576,6 +576,7 @@ func parseNanoSeconds(source: String.UTF8View.SubSequence, updatedIndex: inout S
     return UInt32(result)
 }
 
+// TODO: throw .invalidDateTime2 instead
 func parseTimezoneOffset(_ text: String.UTF8View.SubSequence, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard text.count >= 2 else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must have at least 2 digits for hour"))
