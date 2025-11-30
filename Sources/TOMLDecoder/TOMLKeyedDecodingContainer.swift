@@ -1,6 +1,3 @@
-//  WARNING: This file is generated from TOMLKeyedDecodingContainer.swift.gyb
-//  Do not edit TOMLKeyedDecodingContainer.swift directly.
-
 import Foundation
 
 struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtocol {

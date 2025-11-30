@@ -1,11 +1,3 @@
-%{
-# gyb variables available: `__file__` gives the template’s path.
-from pathlib import Path
-template_name = Path(__file__).name
-generated_file = template_name[:-4] if template_name.endswith('.gyb') else template_name
-}%
-//  WARNING: This file is generated from ${template_name}
-//  Do not edit ${generated_file} directly.
 import Foundation
 
 struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
@@ -40,16 +32,12 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         false
     }
 
-    %{
-    container_types = [("TOMLArray", "array"), ("TOMLTable", "table")]
-    }%
-    % for container in container_types:
-    mutating func decode(_ type: ${container[0]}.Type) throws -> ${container[0]} {
+    mutating func decode(_ type: TOMLArray.Type) throws -> TOMLArray {
         guard !isAtEnd else {
             throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
         do {
-            let decoded = try array.${container[1]}(atIndex: currentIndex)
+            let decoded = try array.array(atIndex: currentIndex)
             currentIndex += 1
             return decoded
         } catch {
@@ -57,7 +45,19 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
     }
 
-    % end
+    mutating func decode(_ type: TOMLTable.Type) throws -> TOMLTable {
+        guard !isAtEnd else {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Unkeyed container is at end."))
+        }
+        do {
+            let decoded = try array.table(atIndex: currentIndex)
+            currentIndex += 1
+            return decoded
+        } catch {
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "\(error)", underlyingError: error))
+        }
+    }
+
     mutating func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
         if type == TOMLArray.self {
             return try decode(TOMLArray.self) as! T
