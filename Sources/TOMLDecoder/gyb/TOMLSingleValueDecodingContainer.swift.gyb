@@ -3,6 +3,12 @@
 from pathlib import Path
 template_name = Path(__file__).name
 generated_file = template_name[:-4] if template_name.endswith('.gyb') else template_name
+int_types = ["Int", "Int8", "Int16", "Int32", "UInt", "UInt8", "UInt16", "UInt32", "UInt64"]
+native_types = [
+    ("Bool", "Bool"),
+    ("String", "String"),
+    ("Int64", "Integer"),
+]
 }%
 //  WARNING: This file is generated from ${template_name}
 //  Do not edit ${generated_file} directly.
@@ -14,13 +20,6 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         codingPath.last as! TOMLKey
     }
 
-    %{
-    native_types = [
-        ("Bool", "Bool"),
-        ("String", "String"),
-        ("Int64", "Integer"),
-    ]
-    }%
     % for native_type in native_types:
     @inline(__always)
     func decode(_: ${native_type[0]}.Type) throws -> ${native_type[0]} {
@@ -28,9 +27,6 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
     }
 
     % end
-    %{
-    int_types = ["Int", "Int8", "Int16", "Int32", "UInt", "UInt8", "UInt16", "UInt32", "UInt64"]
-    }%
     % for int_type in int_types:
     @inline(__always)
     func decode(_ type: ${int_type}.Type) throws -> ${int_type} {
@@ -83,7 +79,11 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
 
     @inline(__always)
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
-        if type == LocalDate.self {
+        % for i, type_name in enumerate([t[0] for t in native_types] + int_types + ["Double", "Float"]):
+        ${"if" if i == 0 else "} else if"} type == ${type_name}.self {
+            return try decode(${type_name}.self) as! T
+        % end
+        } else if type == LocalDate.self {
             return try decode(LocalDate.self) as! T
         } else if type == LocalDateTime.self {
             return try decode(LocalDateTime.self) as! T
