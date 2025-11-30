@@ -78,6 +78,14 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
             return try decoder.decode(Date.self) as! T
         } else if type == DateComponents.self {
             return try decoder.decode(DateComponents.self) as! T
+        } else if type == LocalDate.self {
+            return try decoder.decode(LocalDate.self) as! T
+        } else if type == LocalTime.self {
+            return try decoder.decode(LocalTime.self) as! T
+        } else if type == LocalDateTime.self {
+            return try decoder.decode(LocalDateTime.self) as! T
+        } else if type == OffsetDateTime.self {
+            return try decoder.decode(OffsetDateTime.self) as! T
         }
 
         return try T(from: decoder)
