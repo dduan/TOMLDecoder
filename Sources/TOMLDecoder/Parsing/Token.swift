@@ -1,0 +1,139 @@
+import Foundation
+
+struct Token: Equatable {
+    enum Kind {
+        case dot
+        case comma
+        case equal
+        case lbrace
+        case rbrace
+        case newline
+        case lbracket
+        case rbracket
+        case string
+        case eof
+    }
+
+    let kind: Kind
+    let lineNumber: Int
+    let text: Range<Int>
+
+    static let empty = Token(kind: .newline, lineNumber: 1, text: 0 ..< 0)
+}
+
+extension Token {
+    func unpackBool(source: String, context: TOMLKey) throws(TOMLError) -> Bool {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackBool(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackBool(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+
+    func unpackFloat(source: String, context: TOMLKey) throws(TOMLError) -> Double {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackFloat(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackFloat(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+
+    func unpackString(source: String, context: TOMLKey) throws(TOMLError) -> String {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackString(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackString(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+
+    func unpackInteger(source: String, context: TOMLKey) throws(TOMLError) -> Int64 {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackInteger(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackInteger(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+
+    func unpackDateTime(source: String, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackDateTime(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackDateTime(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+
+    func unpackOffsetDateTime(source: String, context: TOMLKey) throws(TOMLError) -> OffsetDateTime {
+        let datetime: DateTimeComponents
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            datetime = try unpackDateTime(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                datetime = try (source.utf8.withContiguousStorageIfAvailable { try unpackDateTime(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+        switch (datetime.date, datetime.time, datetime.offset) {
+        case let (.some(date), .some(time), .some(offset)):
+            return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
+        default:
+            throw TOMLError(.typeMismatch2(context: context, token: self, expected: "offset date-time"))
+        }
+    }
+
+    func unpackLocalDateTime(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
+        let components = try unpackDateTime(source: source, context: context)
+        guard let localDateTime = components.localDateTime(exactMatch: exactMatch) else {
+            throw TOMLError(.typeMismatch2(context: context, token: self, expected: "local date-time"))
+        }
+        return localDateTime
+    }
+
+    func unpackLocalDate(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
+        let components = try unpackDateTime(source: source, context: context)
+        guard let localDate = components.localDate(exactMatch: exactMatch) else {
+            throw TOMLError(.typeMismatch2(context: context, token: self, expected: "local date"))
+        }
+        return localDate
+    }
+
+    func unpackLocalTime(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
+        let components = try unpackDateTime(source: source, context: context)
+        guard let localTime = components.localTime(exactMatch: exactMatch) else {
+            throw TOMLError(.typeMismatch2(context: context, token: self, expected: "local time"))
+        }
+        return localTime
+    }
+
+    func unpackAnyValue(source: String, context: TOMLKey) throws(TOMLError) -> Any {
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            return try unpackAnyValue(bytes: source.utf8Span.span, context: context)
+        } else {
+            do {
+                return try (source.utf8.withContiguousStorageIfAvailable { try unpackAnyValue(bytes: $0, context: context) })!
+            } catch {
+                throw error as! TOMLError
+            }
+        }
+    }
+}
