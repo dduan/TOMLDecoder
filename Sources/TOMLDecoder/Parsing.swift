@@ -1660,7 +1660,7 @@ extension Token {
         }
     }
 
-    func unpackInt(context: TOMLKey) throws(TOMLError) -> Int64 {
+    func unpackInteger(context: TOMLKey) throws(TOMLError) -> Int64 {
         @_transparent
         func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
             switch base {
@@ -1926,7 +1926,7 @@ extension Token {
             return boolValue
         }
 
-        if let intValue = try? unpackInt(context: context) {
+        if let intValue = try? unpackInteger(context: context) {
             return intValue
         }
 

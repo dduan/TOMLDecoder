@@ -244,7 +244,7 @@ public struct TOMLTable: Sendable, Equatable {
         guard let token = token(forKey: key) else {
             throw TOMLError(.keyNotFoundInTable(key: key, type: "integer"))
         }
-        return try token.unpackInt(context: .string(key))
+        return try token.unpackInteger(context: .string(key))
     }
 
     /// Access a float value for a given key.

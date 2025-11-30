@@ -10,7 +10,7 @@ struct _TOMLDecoder: Decoder {
     let codingPath: [CodingKey]
     let strategy: TOMLDecoder.Strategy
     let isLenient: Bool
-    let userInfo: [CodingUserInfoKey: Any] = [:]
+    var userInfo: [CodingUserInfoKey: Any] = [:]
 
     func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
         guard case let .keyed(table) = container else {
@@ -43,14 +43,13 @@ struct _TOMLDecoder: Decoder {
     }
 
     func singleValueContainer() throws -> SingleValueDecodingContainer {
-        throw DecodingError.typeMismatch(
-            SingleValueDecodingContainer.self,
-            DecodingError.Context(
+        guard let token = userInfo[.init(rawValue: "token")!] as? Token else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription:
-                "Top level TOML container is always a table (keyed container), not a single value.",
-            ),
-        )
+                debugDescription: "No token found in userInfo",
+            ))
+        }
+        return TOMLSingleValueDecodingContainer(decoder: self, token: token, context: codingPath.last as! TOMLKey)
     }
 
     init(referencing container: Container, at codingPath: [CodingKey] = [], strategy: TOMLDecoder.Strategy, isLenient: Bool) {

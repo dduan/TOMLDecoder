@@ -16,7 +16,6 @@ generate-tests:
 	@Scripts/generate-tests.py
 
 build: generate-code
-	@Scripts/generate-code.sh
 	@swift build -c release -Xswiftc -warnings-as-errors > /dev/null
 
 test: generate-tests

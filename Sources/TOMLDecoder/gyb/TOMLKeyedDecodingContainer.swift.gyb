@@ -195,7 +195,13 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
             }
         }
 
-        throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "No value associated with key \(key)."))
+        guard let token = table.token(forKey: key.stringValue) else {
+            throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "No value associated with key \(key)."))
+        }
+
+        var decoder = _TOMLDecoder(referencing: .keyed(table), at: codingPath + [TOMLKey(stringValue: key.stringValue)], strategy: decoder.strategy, isLenient: decoder.isLenient)
+        decoder.userInfo[.init(rawValue: "token")!] = token
+        return try T(from: decoder)
     }
 
     func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {

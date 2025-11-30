@@ -154,9 +154,13 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             let decoded = try T(from: nestedDecoder)
             currentIndex += 1
             return decoded
-        } else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "Expected \(type) but found unsupported type instead."))
         }
+
+        let token = try array.token(forIndex: currentIndex, type: String(describing: T.self))
+        var decoder = _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey(intValue: currentIndex)], strategy: decoder.strategy, isLenient: decoder.isLenient)
+        decoder.userInfo[.init(rawValue: "token")!] = token
+        defer { currentIndex += 1 }
+        return try T(from: decoder)
     }
 
     mutating func decode(_ type: Date.Type) throws -> Date {
