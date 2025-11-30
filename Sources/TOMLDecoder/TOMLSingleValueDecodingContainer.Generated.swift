@@ -246,7 +246,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         } else if type == DateComponents.self {
             return try decode(DateComponents.self) as! T
         }
-        fatalError()
+        throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath, debugDescription: "Unsupported type \(type)"))
     }
 
     func decodeNil() -> Bool {
