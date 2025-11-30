@@ -1,13 +1,13 @@
 import Foundation
 
-struct _TOMLDecoder: Decoder {
+final class _TOMLDecoder: Decoder {
     enum Container {
         case keyed(TOMLTable)
         case unkeyed(TOMLArray)
     }
 
     let container: Container
-    let codingPath: [CodingKey]
+    var codingPath: [CodingKey]
     let strategy: TOMLDecoder.Strategy
     let isLenient: Bool
     let userInfo: [CodingUserInfoKey: Any] = [:]
