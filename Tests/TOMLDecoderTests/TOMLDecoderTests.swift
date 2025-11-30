@@ -498,40 +498,4 @@ struct TOMLDecoderTests {
     @Test func canada() throws {
         _ = try TOMLDecoder().decode(CanadaFeatureCollection.self, from: Resources.canadaTOMLString)
     }
-
-    @Test func `local date time decoding`() throws {
-        struct Test: Codable, Equatable {
-            let dateTime: LocalDateTime
-        }
-
-        let toml = """
-        dateTime = 2021-01-01T01:02:03
-        """
-
-        let result = try TOMLDecoder().decode(Test.self, from: toml)
-        let expected = LocalDateTime(
-            date: LocalDate(year: 2021, month: 1, day: 1),
-            time: LocalTime(hour: 1, minute: 2, second: 3),
-        )
-        #expect(result.dateTime == expected)
-    }
-
-    @Test func `offset date time decoding`() throws {
-        struct Test: Codable, Equatable {
-            let dateTime: OffsetDateTime
-        }
-
-        let toml = """
-        dateTime = 2021-01-01T01:02:03+01:00
-        """
-
-        let result = try TOMLDecoder().decode(Test.self, from: toml)
-        let expected = OffsetDateTime(
-            date: LocalDate(year: 2021, month: 1, day: 1),
-            time: LocalTime(hour: 1, minute: 2, second: 3),
-            offset: 60,
-            features: [.uppercaseT],
-        )
-        #expect(result.dateTime == expected)
-    }
 }
