@@ -4,15 +4,15 @@ func stringContent(forResource name: String) -> String {
     let thisFile = URL(fileURLWithPath: #filePath)
     let thisFileDirectory = thisFile.deletingLastPathComponent()
     let resourceURL = thisFileDirectory.appendingPathComponent("fixtures").appendingPathComponent(name)
-    return try! String(contentsOf: resourceURL)
+    return try! String(contentsOf: resourceURL, encoding: .utf8)
 }
 
-package enum Resources {
-    package static var twitterTOMLString: String {
+public enum Resources {
+    public static var twitterTOMLString: String {
         stringContent(forResource: "twitter.toml")
     }
 
-    package static var canadaTOMLString: String {
+    public static var canadaTOMLString: String {
         stringContent(forResource: "canada.toml")
     }
 }

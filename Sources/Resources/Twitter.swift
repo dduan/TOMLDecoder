@@ -1,7 +1,7 @@
-package struct TwitterArchive: Codable, Equatable {
+public struct TwitterArchive: Codable, Equatable {
     let statuses: [Status]
 
-    package struct Status: Codable, Equatable {
+    public struct Status: Codable, Equatable {
         let id: UInt64
         let lang: String
         let text: String
@@ -11,17 +11,17 @@ package struct TwitterArchive: Codable, Equatable {
         let place: String?
     }
 
-    package struct StatusEntities: Codable, Equatable {
+    public struct StatusEntities: Codable, Equatable {
         let hashtags: [Hashtag]
         let media: [MediaItem]
     }
 
-    package struct Hashtag: Codable, Equatable {
+    public struct Hashtag: Codable, Equatable {
         let indices: [UInt64]
         let text: String
     }
 
-    package struct MediaItem: Codable, Equatable {
+    public struct MediaItem: Codable, Equatable {
         let display_url: String
         let expanded_url: String
         let id: UInt64
@@ -31,7 +31,7 @@ package struct TwitterArchive: Codable, Equatable {
         let type: String
         let url: String
 
-        package struct Size: Codable, Equatable {
+        public struct Size: Codable, Equatable {
             let h: UInt64
             let w: UInt64
             let resize: String
@@ -40,7 +40,7 @@ package struct TwitterArchive: Codable, Equatable {
         let sizes: [String: Size]
     }
 
-    package struct User: Codable, Equatable {
+    public struct User: Codable, Equatable {
         let created_at: String
         let default_profile: Bool
         let description: String

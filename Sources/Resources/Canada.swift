@@ -1,31 +1,31 @@
-package struct CanadaFeatureCollection: Codable {
+public struct CanadaFeatureCollection: Codable {
     var type: ObjType
     var features: [Feature]
 
-    package enum ObjType: String, Codable {
+    public enum ObjType: String, Codable {
         case featureCollection = "FeatureCollection"
         case feature = "Feature"
         case polygon = "Polygon"
     }
 
-    package struct Feature: Codable {
+    public struct Feature: Codable {
         var type: ObjType
         var properties: [String: String]
         var geometry: Geometry
     }
 
-    package struct Geometry: Codable {
-        package struct Coordinate: Codable {
+    public struct Geometry: Codable {
+        public struct Coordinate: Codable {
             var latitude: Double
             var longitude: Double
 
-            package init(from decoder: any Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 var container = try decoder.unkeyedContainer()
                 latitude = try container.decode(Double.self)
                 longitude = try container.decode(Double.self)
             }
 
-            package func encode(to encoder: any Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 var container = encoder.unkeyedContainer()
                 try container.encode(latitude)
                 try container.encode(longitude)

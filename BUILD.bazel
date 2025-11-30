@@ -11,6 +11,13 @@ swift_binary(
 )
 
 swift_library(
+    name = "Resources",
+    module_name = "Resources",
+    srcs = glob(["Sources/Resources/**/*.swift"]),
+    data = [":resources_fixtures"],
+)
+
+swift_library(
     name = "TOMLDecoder",
     module_name = "TOMLDecoder",
     srcs = glob(["Sources/TOMLDecoder/**/*.swift"]),
@@ -33,6 +40,7 @@ swift_test(
     name = "TOMLDecoderTests",
     srcs = glob(["Tests/TOMLDecoderTests/**/*.swift"]),
     deps = [
+        ":Resources",
         ":TOMLDecoder",
         ":ProlepticGregorianTestHelpers",
     ],
@@ -40,6 +48,12 @@ swift_test(
         ":invalid_fixtures",
         ":valid_fixtures",
     ],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "resources_fixtures",
+    srcs = glob(["Sources/Resources/fixtures/**/*"]),
     visibility = ["//visibility:private"],
 )
 
