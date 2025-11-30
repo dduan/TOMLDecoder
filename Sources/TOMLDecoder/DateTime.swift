@@ -48,6 +48,14 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         self.features = features
     }
 
+    public init(from decoder: any Decoder) throws {
+        if let decoder = decoder as? _TOMLDecoder {
+            self = try decoder.decode(OffsetDateTime.self)
+        } else {
+            try self.init(from: decoder)
+        }
+    }
+
     /// Create a new offset date-time from it's members.
     ///
     /// This initializer validates the components.
@@ -221,6 +229,14 @@ public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStrin
     public init(date: LocalDate, time: LocalTime) {
         self.date = date
         self.time = time
+    }
+
+    public init(from decoder: any Decoder) throws {
+        if let decoder = decoder as? _TOMLDecoder {
+            self = try decoder.decode(LocalDateTime.self)
+        } else {
+            try self.init(from: decoder)
+        }
     }
 
     /// Create a new local date-time from it's members.

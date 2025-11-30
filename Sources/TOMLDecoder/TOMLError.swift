@@ -22,7 +22,8 @@ public struct TOMLError: Error {
         case invalidDateTime2(context: TOMLKey, value: Token, reason: String)
         case arrayOutOfBound(index: Int, bound: Int)
         case typeMismatchInArray(lineNumber: Int, index: Int, expected: String)
-        case keyNotFoundInTable(key: String, type: String)
+        case keyNotFoundInTable(key: String, expected: String)
+        case typeMismatch(context: TOMLKey, token: Token, expected: String)
         case typeMismatchInTable(key: String, expected: String)
         case invalidNumber(reason: String)
         case invalidInteger(context: TOMLKey, value: Token, reason: String)
@@ -74,8 +75,17 @@ extension TOMLError: CustomStringConvertible {
             "Array index \(index) is out of bounds (0..<\(bound))."
         case let .typeMismatchInArray(lineNumber, index, expected):
             "Type mismatch at array index \(index) at line \(lineNumber): expected \(expected)."
-        case let .keyNotFoundInTable(key, type):
-            "Key '\(key)' not found in table of type \(type)."
+        case let .keyNotFoundInTable(key, expected):
+            "Key '\(key)' not found in table while looking for \(expected)."
+        case let .typeMismatch(context, token, expected):
+            switch context {
+            case let .string(key):
+                "Type mismatch at table key '\(key)' on line \(token.lineNumber): expected \(expected)."
+            case let .int(index):
+                "Type mismatch at array index \(index) at line \(token.lineNumber): expected \(expected)."
+            case .super:
+                "Type mismatch at 'super' on line \(token.lineNumber): expected \(expected)."
+            }
         case let .typeMismatchInTable(key, expected):
             "Type mismatch at table key '\(key)': expected \(expected)."
         case let .invalidNumber(reason):
