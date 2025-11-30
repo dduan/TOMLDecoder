@@ -33,13 +33,15 @@ var targets: [Target] = [
     ),
     .target(
         name: "TOMLDecoder",
-        exclude: [
-            "gyb",
-        ],
+        exclude: ["gyb"],
     ),
 ]
 
 var testTargets: [Target] = [
+    .target(
+        name: "Resources",
+        exclude: ["fixtures"],
+    ),
     .target(
         name: "ProlepticGregorianTestHelpers",
         publicHeadersPath: "include",
@@ -47,8 +49,9 @@ var testTargets: [Target] = [
     .testTarget(
         name: "TOMLDecoderTests",
         dependencies: [
-            "TOMLDecoder",
             "ProlepticGregorianTestHelpers",
+            "Resources",
+            "TOMLDecoder",
         ],
         exclude: [
             "invalid_fixtures",
@@ -62,6 +65,7 @@ var benchmarkTargets: [Target] = includeBenchmarks ? [
         name: "TOMLDecoderBenchmarks",
         dependencies: [
             "TOMLDecoder",
+            "Resources",
             .product(name: "Benchmark", package: "package-benchmark"),
         ],
         path: "Benchmarks/TOMLDecoderBenchmarks",

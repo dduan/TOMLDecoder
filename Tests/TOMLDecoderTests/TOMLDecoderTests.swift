@@ -1,4 +1,5 @@
 import Foundation
+import Resources
 import Testing
 @testable import TOMLDecoder
 
@@ -488,5 +489,13 @@ struct TOMLDecoderTests {
 
         let result = try TOMLDecoder().decode(Team.self, from: toml)
         #expect(result == Team(languages: [.swift, .mojo, .zig], favorite: .swift))
+    }
+
+    @Test func twitter() throws {
+        _ = try TOMLDecoder().decode(TwitterArchive.self, from: Resources.twitterTOMLString)
+    }
+
+    @Test func canada() throws {
+        _ = try TOMLDecoder().decode(CanadaFeatureCollection.self, from: Resources.canadaTOMLString)
     }
 }
