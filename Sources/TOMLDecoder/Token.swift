@@ -57,7 +57,7 @@ extension Token {
 
         if isdigit(Int32(text[index])) == 0 {
             guard text[index...].starts(with: Constants.nan) || text[index...].starts(with: Constants.inf) else {
-                throw TOMLError(.invalidFloat2(context: context, value: self, reason: "Expected 0-9, nan or inf, found \(text[index])"))
+                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Expected 0-9, nan or inf, found \(text[index])"))
             }
             resultCodeUnits.append(contentsOf: text[index ..< text.index(index, offsetBy: 3)])
         } else {
@@ -66,7 +66,7 @@ extension Token {
                case let next = text[text.index(after: index)],
                next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
             {
-                throw TOMLError(.invalidFloat2(context: context, value: self, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
+                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
             }
 
             while index < text.endIndex {
@@ -78,7 +78,7 @@ extension Token {
                         let last = resultCodeUnits.last,
                         isdigit(Int32(last)) != 0
                     else {
-                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'_' must be preceded by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be preceded by a digit"))
                     }
 
                     guard
@@ -86,26 +86,26 @@ extension Token {
                         case let next = text[index],
                         isdigit(Int32(next)) != 0
                     else {
-                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'_' must be follewed by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be follewed by a digit"))
                     }
 
                     continue
                 } else if ch == CodeUnits.dot {
                     if resultCodeUnits.isEmpty {
-                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "First digit of floats cannot be '.'"))
+                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "First digit of floats cannot be '.'"))
                     }
 
                     if !resultCodeUnits.last!.isDecimalDigit {
-                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "'.' must be preceded by a decimal digit"))
+                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'.' must be preceded by a decimal digit"))
                     }
 
                     guard index < text.endIndex, isdigit(Int32(text[index])) != 0 else {
-                        throw TOMLError(.invalidFloat2(context: context, value: self, reason: "A digit must follow '.'"))
+                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "A digit must follow '.'"))
                     }
 
                 } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
                 } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
-                    throw TOMLError(.invalidFloat2(context: context, value: self, reason: "invalid character for float"))
+                    throw TOMLError(.invalidFloat(context: context, value: self, reason: "invalid character for float"))
                 }
 
                 resultCodeUnits.append(ch)
@@ -113,7 +113,7 @@ extension Token {
         }
 
         guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
-            throw TOMLError(.invalidFloat2(context: context, value: self, reason: "not a float"))
+            throw TOMLError(.invalidFloat(context: context, value: self, reason: "not a float"))
         }
 
         return double
