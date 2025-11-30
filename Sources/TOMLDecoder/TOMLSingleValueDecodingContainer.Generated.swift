@@ -233,7 +233,35 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
 
     @inline(__always)
     func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
-        if type == LocalDate.self {
+        if type == Bool.self {
+            return try decode(Bool.self) as! T
+        } else if type == String.self {
+            return try decode(String.self) as! T
+        } else if type == Int64.self {
+            return try decode(Int64.self) as! T
+        } else if type == Int.self {
+            return try decode(Int.self) as! T
+        } else if type == Int8.self {
+            return try decode(Int8.self) as! T
+        } else if type == Int16.self {
+            return try decode(Int16.self) as! T
+        } else if type == Int32.self {
+            return try decode(Int32.self) as! T
+        } else if type == UInt.self {
+            return try decode(UInt.self) as! T
+        } else if type == UInt8.self {
+            return try decode(UInt8.self) as! T
+        } else if type == UInt16.self {
+            return try decode(UInt16.self) as! T
+        } else if type == UInt32.self {
+            return try decode(UInt32.self) as! T
+        } else if type == UInt64.self {
+            return try decode(UInt64.self) as! T
+        } else if type == Double.self {
+            return try decode(Double.self) as! T
+        } else if type == Float.self {
+            return try decode(Float.self) as! T
+        } else if type == LocalDate.self {
             return try decode(LocalDate.self) as! T
         } else if type == LocalDateTime.self {
             return try decode(LocalDateTime.self) as! T
