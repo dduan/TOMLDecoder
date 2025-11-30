@@ -84,7 +84,10 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         let token = try array.token(forIndex: currentIndex, type: String(describing: T.self))
-        var decoder = _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey(intValue: currentIndex)], strategy: decoder.strategy, isLenient: decoder.isLenient)
+        decoder.codingPath.append(TOMLKey(intValue: currentIndex))
+        defer {
+            decoder.codingPath.removeLast()
+        }
         decoder.token = token
 
         // have to intercept these here otherwise Foundation will try to decode it as a float
@@ -95,40 +98,6 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         return try T(from: decoder)
-    }
-
-    mutating func decode(_ type: Date.Type) throws -> Date {
-        if !decoder.isLenient {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-        }
-
-        switch decoder.strategy.offsetDateTime {
-        case .intervalSince1970:
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-        case .intervalSince2001:
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-        case .dateFromGregorianCalendar:
-            do {
-                let offsetDateTime = try decode(OffsetDateTime.self)
-                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
-            } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-            }
-        case let .dateFromCalendar(identifier):
-            do {
-                let offsetDateTime = try decode(OffsetDateTime.self)
-                return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: identifier))
-            } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-            }
-        case .dateFromProlepticGregorianCalendar:
-            do {
-                let offsetDateTime = try decode(OffsetDateTime.self)
-                return Date(timeIntervalSinceReferenceDate: offsetDateTime.timeIntervalSince2001)
-            } catch {
-                throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: codingPath + [TOMLKey(intValue: currentIndex)], debugDescription: "No date found at index \(currentIndex)."))
-            }
-        }
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {

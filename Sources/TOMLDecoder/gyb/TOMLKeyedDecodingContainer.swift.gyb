@@ -74,7 +74,10 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
             throw DecodingError.keyNotFound(key, DecodingError.Context(codingPath: codingPath, debugDescription: "No value associated with key \(key)."))
         }
 
-        var decoder = _TOMLDecoder(referencing: .keyed(table), at: codingPath + [TOMLKey(stringValue: key.stringValue)], strategy: decoder.strategy, isLenient: decoder.isLenient)
+        decoder.codingPath.append(TOMLKey(stringValue: key.stringValue))
+        defer {
+            decoder.codingPath.removeLast()
+        }
         decoder.token = token
         // have to intercept these here otherwise Foundation will try to decode it as a float
         if type == Date.self {
