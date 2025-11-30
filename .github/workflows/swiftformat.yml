@@ -39,4 +39,4 @@ jobs:
 
     - name: Format code
       if: steps.changes.outputs.swift == 'true'
-      run: Scripts/format.sh --lint
+      run: Scripts/format.sh --lint . --reporter github-actions-log
