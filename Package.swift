@@ -54,6 +54,7 @@ var testTargets: [Target] = [
             "TOMLDecoder",
         ],
         exclude: [
+            "gyb",
             "invalid_fixtures",
             "valid_fixtures",
         ],

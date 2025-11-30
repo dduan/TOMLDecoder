@@ -258,7 +258,7 @@ extension _TOMLDecoder {
     @inline(__always)
     func decode(_: LocalDate.Type) throws -> LocalDate {
         do {
-            return try token.unpackLocalDate(context: context)
+            return try token.unpackLocalDate(context: context, exactMatch: !isLenient)
         } catch {
             throw DecodingError.valueNotFound(LocalDate.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
         }
@@ -267,7 +267,7 @@ extension _TOMLDecoder {
     @inline(__always)
     func decode(_: LocalDateTime.Type) throws -> LocalDateTime {
         do {
-            return try token.unpackLocalDateTime(context: context)
+            return try token.unpackLocalDateTime(context: context, exactMatch: !isLenient)
         } catch {
             throw DecodingError.valueNotFound(LocalDateTime.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
         }
@@ -276,7 +276,7 @@ extension _TOMLDecoder {
     @inline(__always)
     func decode(_: LocalTime.Type) throws -> LocalTime {
         do {
-            return try token.unpackLocalTime(context: context)
+            return try token.unpackLocalTime(context: context, exactMatch: !isLenient)
         } catch {
             throw DecodingError.valueNotFound(LocalTime.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
         }

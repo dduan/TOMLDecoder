@@ -193,20 +193,20 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         }
 
         /// Indicates the date-time seprator is a lowercase 't'.
-        static let lowercaseT = Features(rawValue: 1 << 1)
+        public static let lowercaseT = Features(rawValue: 1 << 1)
 
         /// Indicates the date-time seprator is a uppercase 'T'.
-        static let uppercaseT = Features(rawValue: 1 << 2)
+        public static let uppercaseT = Features(rawValue: 1 << 2)
 
         /// Indicates the offset is represented as a lowercase 'z'.
         /// This should not be present if the offset is non-zero,
         /// or if it's +00:00.
-        static let lowercaseZ = Features(rawValue: 1 << 3)
+        public static let lowercaseZ = Features(rawValue: 1 << 3)
 
         /// Indicates the offset is represented as a uppercase 'Z'.
         /// This should not be present if the offset is non-zero,
         /// or if it's +00:00.
-        static let uppercaseZ = Features(rawValue: 1 << 4)
+        public static let uppercaseZ = Features(rawValue: 1 << 4)
     }
 }
 
