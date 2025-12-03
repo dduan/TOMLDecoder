@@ -3247,7 +3247,7 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
     return makeString(bytes: bytes, range: start ..< end)
 }
 
-@available(macOS 26, *)
+@available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
 private func makeString(bytes: Span<UInt8>, range: Range<Int>) -> String {
     String(copying: UTF8Span(unchecked: bytes.extracting(range)))
 }
