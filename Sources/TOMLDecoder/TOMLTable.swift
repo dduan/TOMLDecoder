@@ -295,7 +295,7 @@ public struct TOMLTable: Sendable, Equatable {
         let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localDateTime = components.localDateTime(exactMatch: exactMatch)
         else {
-            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local date-time"))
+            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local date-time"))
         }
         return localDateTime
     }
@@ -321,7 +321,7 @@ public struct TOMLTable: Sendable, Equatable {
         let token = try token(forKey: key, expected: "local date")
         let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localDate = components.localDate(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local date"))
+            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local date"))
         }
         return localDate
     }
@@ -348,7 +348,7 @@ public struct TOMLTable: Sendable, Equatable {
         let token = try token(forKey: key, expected: "local time")
         let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localTime = components.localTime(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local time"))
+            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local time"))
         }
         return localTime
     }
