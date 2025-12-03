@@ -74,7 +74,7 @@ extension TOMLTable {
 ///     // Will not throw error if `time` is an offset date-time or local date-time.
 ///     let localTime1 = try tomlTable.localTime(forKey: "time", exactMatch: false)
 ///
-///     // Will throw `TOMLError.typeMismatchInTable` error
+///     // Will throw `TOMLError` error
 ///     // if `time` is an offset date-time or local date-time.
 ///     let localTime2 = try tomlTable.localTime(forKey: "time", exactMatch: true)
 ///
@@ -107,7 +107,7 @@ extension TOMLTable {
 ///   but it is not a full `Codable` conformance.
 ///   The decoding logic is only implemented in ``TOMLDecoder``.
 ///   Attempting to use it with other encoder or decoder
-///   will result in a `TOMLError.notReallyCodable` error.
+///   will result in a `TOMLError` error.
 ///
 /// Read <doc:DeserializingTOML> to learn more about ``TOMLTable``.
 public struct TOMLTable: Sendable, Equatable {
@@ -131,11 +131,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not a TOML array,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: A TOML array for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not an array.
     public func array(forKey key: String) throws(TOMLError) -> TOMLArray {
         let arrayIndices = source.tables[index].arrays
@@ -154,11 +154,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not a TOML table,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: A TOML table for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a table.
     public func table(forKey key: String) throws(TOMLError) -> TOMLTable {
         let tableIndices = source.tables[index].tables
@@ -207,7 +207,7 @@ public struct TOMLTable: Sendable, Equatable {
     ///
     /// - Parameter key: The key to access.
     /// - Returns: A string value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a string.
     public func string(forKey key: String) throws(TOMLError) -> String {
         try token(forKey: key, expected: "string").unpackString(source: source.source, context: .string(key))
@@ -218,7 +218,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not a boolean,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: A boolean value for the given key, if it exists.
@@ -233,11 +233,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not an integer,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: An integer value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not an integer.
     public func integer(forKey key: String) throws(TOMLError) -> Int64 {
         try token(forKey: key, expected: "integer").unpackInteger(source: source.source, context: .string(key))
@@ -248,11 +248,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not a float,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: A float value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a float.
     public func float(forKey key: String) throws(TOMLError) -> Double {
         try token(forKey: key, expected: "float").unpackFloat(source: source.source, context: .string(key))
@@ -263,11 +263,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// The key must be a key in this table,
     /// not a dotted key.
     /// If the corresponding value is not an offset date-time,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameter key: The key to access.
     /// - Returns: An offset date-time value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not an offset date-time.
     public func offsetDateTime(forKey key: String) throws(TOMLError) -> OffsetDateTime {
         try token(forKey: key, expected: "offset date-time").unpackOffsetDateTime(source: source.source, context: .string(key))
@@ -282,13 +282,13 @@ public struct TOMLTable: Sendable, Equatable {
     /// the method will return a local date-time,
     /// dropping the time offset.
     /// Otherwise, if the corresponding value is not a local date-time,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameters:
     ///   - key: The key to access.
     ///   - exactMatch: Whether to require an exact match for the local date-time.
     /// - Returns: A local date-time value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a local date-time.
     public func localDateTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         let token = try token(forKey: key, expected: "local date-time")
@@ -310,13 +310,13 @@ public struct TOMLTable: Sendable, Equatable {
     /// the method will return a local date,
     /// dropping the time and offset.
     /// Otherwise, if the corresponding value is not a local date,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameters:
     ///   - key: The key to access.
     ///   - exactMatch: Whether to require an exact match for the local date.
     /// - Returns: A local date value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     public func localDate(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         let token = try token(forKey: key, expected: "local date")
         let components = try token.unpackDateTime(source: source.source, context: .string(key))
@@ -336,13 +336,13 @@ public struct TOMLTable: Sendable, Equatable {
     /// the method will return a local time,
     /// dropping the date and offset.
     /// Otherwise, if the corresponding value is not a local time,
-    /// the method will throw a `TOMLError.typeMismatchInTable` error.
+    /// the method will throw a `TOMLError` error.
     ///
     /// - Parameters:
     ///   - key: The key to access.
     ///   - exactMatch: Whether to require an exact match for the local time.
     /// - Returns: A local time value for the given key, if it exists.
-    /// - Throws: `TOMLError.keyNotFoundInTable`
+    /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a local time.
     public func localTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         let token = try token(forKey: key, expected: "local time")
@@ -373,10 +373,10 @@ extension TOMLTable: Codable {
     /// > Warning: This is not a full `Codable` conformance.
     ///   The decoding logic is only implemented in ``TOMLDecoder``.
     ///   Attempting to use it with other encoder or decoder
-    ///   will result in a `TOMLError.notReallyCodable` error.
+    ///   will result in a `TOMLError` error.
     ///
     /// - Parameter _: The decoder to decode from.
-    /// - Throws: `TOMLError.notReallyCodable`, always.
+    /// - Throws: `TOMLError`, always.
     public init(from _: any Decoder) throws {
         throw TOMLError(.notReallyCodable)
     }
@@ -391,10 +391,10 @@ extension TOMLTable: Codable {
     /// > Warning: This is not a full `Codable` conformance.
     ///   The decoding logic is only implemented in ``TOMLDecoder``.
     ///   Attempting to use it with other encoder or decoder
-    ///   will result in a `TOMLError.notReallyCodable` error.
+    ///   will result in a `TOMLError` error.
     ///
     /// - Parameter _: The encoder to encode to.
-    /// - Throws: `TOMLError.notReallyCodable`, always.
+    /// - Throws: `TOMLError`, always.
     public func encode(to _: any Encoder) throws {
         throw TOMLError(.notReallyCodable)
     }
