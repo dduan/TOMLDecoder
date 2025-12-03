@@ -2,12 +2,39 @@ name: Swift Tests
 on: [push]
 jobs:
   swift-test:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        swift: ["6.2"]
+        include:
+          - name: Swift 6.2 on Ubuntu 24.04
+            os: ubuntu-24.04
+            swift: "6.2"
+            test_command: swift test
+          - name: Swift 6.2 on Windows 2022
+            os: windows-2022
+            swift: "6.2"
+            test_command: swift test
+          - name: Swift 6.2 on macOS 15 - macOS
+            os: macos-15
+            swift: "6.2"
+            test_command: swift test
+          - name: Swift 6.2 on macOS 15 - iOS Simulator
+            os: macos-15
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=iOS Simulator,name=iPhone 15"
+          - name: Swift 6.2 on macOS 26 - tvOS Simulator
+            os: macos-26
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=tvOS Simulator,name=Apple TV"
+          - name: Swift 6.2 on macOS 26 - watchOS Simulator
+            os: macos-26
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)"
+          - name: Swift 6.2 on macOS 26 - visionOS Simulator
+            os: macos-26
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=visionOS Simulator,name=Apple Vision Pro"
     steps:
     - uses: SwiftyLab/setup-swift@latest
       with:
@@ -15,4 +42,4 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
     - name: Run tests
-      run: swift test
+      run: ${{ matrix.test_command }}
