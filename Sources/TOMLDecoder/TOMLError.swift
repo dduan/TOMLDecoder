@@ -41,7 +41,7 @@ extension TOMLError: CustomStringConvertible {
         case let .arrayOutOfBound(index, bound):
             "Array index \(index) is out of bounds (0..<\(bound))."
         case let .badKey(lineNumber):
-            "Ill-formed key at line \(lineNumber)."
+            "(Line \(lineNumber)) Ill-formed key."
         case let .expectedHexCharacters(codeUnit, hexCount):
             "Expected \(hexCount) hexadecimal characters after '\(String(UnicodeScalar(codeUnit))).'."
         case let .illegalEscapeCharacter(codeUnit):
@@ -49,92 +49,92 @@ extension TOMLError: CustomStringConvertible {
         case let .illegalUCSCode(ucs):
             "Illegal UCS code '\(ucs)'."
         case let .internalError(lineNumber):
-            "Internal error at line \(lineNumber)."
+            "(Line \(lineNumber)) Internal error."
         case let .invalidBool(context, value):
             switch context {
             case let .string(key):
-                "Invalid boolean value '\(value.text)' for key '\(key)' on line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid boolean value '\(value.text)' for key '\(key)'."
             case let .int(index):
-                "Invalid boolean value '\(value.text)' for index \(index) on line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid boolean value '\(value.text)' for index \(index)."
             case .super:
-                "Invalid boolean value '\(value.text)' for 'super' on line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid boolean value '\(value.text)' for 'super'."
             }
         case let .invalidCharacter(codeUnit):
             "Invalid character '\(String(UnicodeScalar(codeUnit)))'."
         case let .invalidDateTime(lineNumber, reason):
-            "Invalid date-time\(lineNumber.map { " at line \($0)" } ?? ""): \(reason)."
+            "\(lineNumber.map { "(Line \($0)) " } ?? "")Invalid date-time: \(reason)."
         case let .invalidDateTime3(context, value, reason):
             switch context {
             case let .string(key):
-                "Invalid date-time value '\(value.text)' for key '\(key)' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid date-time value '\(value.text)' for key '\(key)': \(reason)."
             case let .int(index):
-                "Invalid date-time value '\(value.text)' for index \(index) on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid date-time value '\(value.text)' for index \(index)': \(reason)."
             case .super:
-                "Invalid date-time value '\(value.text)' for 'super' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid date-time value '\(value.text)' for 'super': \(reason)."
             }
         case let .invalidDateTimeComponents(components):
             "Invalid date-time components: \(components)."
         case let .invalidFloat(context, value, reason):
             switch context {
             case let .string(key):
-                "Invalid float value '\(value.text)' for key '\(key)' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid float value '\(value.text)' for key '\(key)': \(reason)."
             case let .int(index):
-                "Invalid float value '\(value.text)' for index \(index) on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid float value '\(value.text)' for index \(index)': \(reason)."
             case .super:
-                "Invalid float value '\(value.text)' for 'super' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid float value '\(value.text)' for 'super': \(reason)."
             }
         case let .invalidHexCharacters(codeUnit):
             "Invalid hexadecimal characters '\(String(UnicodeScalar(codeUnit)))'."
         case let .invalidInteger(context, value, reason):
             switch context {
             case let .string(key):
-                "Invalid integer value '\(value.text)' for key '\(key)' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid integer value '\(value.text)' for key '\(key)': \(reason)."
             case let .int(index):
-                "Invalid integer value '\(value.text)' for index \(index) on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid integer value '\(value.text)' for index \(index)': \(reason)."
             case .super:
-                "Invalid integer value '\(value.text)' for 'super' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid integer value '\(value.text)' for 'super': \(reason)."
             }
         case let .invalidNumber(reason):
             "Invalid number: \(reason)."
         case let .invalidString(context, value, reason):
             switch context {
             case let .string(key):
-                "Invalid string value '\(value.text)' for key '\(key)' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid string value '\(value.text)' for key '\(key)': \(reason)."
             case let .int(index):
-                "Invalid string value '\(value.text)' for index \(index) on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid string value '\(value.text)' for index \(index)': \(reason)."
             case .super:
-                "Invalid string value '\(value.text)' for 'super' on line \(value.lineNumber): \(reason)."
+                "(Line \(value.lineNumber)) Invalid string value '\(value.text)' for 'super': \(reason)."
             }
         case .invalidUTF8:
             "The given data was not valid UTF8."
         case let .invalidValueInTable(context, value):
             switch context {
             case let .string(key):
-                "Invalid value in table for key '\(key)' at line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid value in table for key '\(key)'."
             case let .int(index):
-                "Invalid value in table for index \(index) at line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid value in table for index \(index)."
             case .super:
-                "Invalid value in table for 'super' at line \(value.lineNumber)."
+                "(Line \(value.lineNumber)) Invalid value in table for 'super'."
             }
         case let .keyExists(lineNumber):
-            "Key at line \(lineNumber) already exists."
+            "(Line \(lineNumber)) Key already exists."
         case let .keyNotFoundInTable(key, expected):
             "Key '\(key)' not found in table while looking for \(expected)."
         case .notReallyCodable:
             "This type is not generally codable. Use TOMLDecoder to decode it as part of a larger Codable."
         case let .syntax(lineNumber, message):
-            "Syntax error at line \(lineNumber): \(message)."
+            "(Line \(lineNumber)) Syntax error: \(message)."
         case let .typeMismatch(context, token, expected):
             switch context {
             case let .string(key):
-                "Type mismatch at table key '\(key)' on line \(token.lineNumber): expected \(expected)."
+                "(Line \(token.lineNumber)) Type mismatch at table key '\(key)': expected \(expected)."
             case let .int(index):
-                "Type mismatch at array index \(index) at line \(token.lineNumber): expected \(expected)."
+                "(Line \(token.lineNumber)) Type mismatch at array index \(index): expected \(expected)."
             case .super:
-                "Type mismatch at 'super' on line \(token.lineNumber): expected \(expected)."
+                "(Line \(token.lineNumber)) Type mismatch at 'super': expected \(expected)."
             }
         case let .typeMismatchInArray(lineNumber, index, expected):
-            "Type mismatch at array index \(index) at line \(lineNumber): expected \(expected)."
+            "(Line \(lineNumber)) Type mismatch at array index \(index): expected \(expected)."
         case let .typeMismatchInTable(key, expected):
             "Type mismatch at table key '\(key)': expected \(expected)."
         }
