@@ -19,22 +19,38 @@ jobs:
             os: macos-15
             swift: "6.2"
             test_command: swift test
-          - name: Swift 6.2 on macOS 15 - iOS Simulator
+          - name: Swift 6.2 on macOS 15 - iOS Simulator (18.x)
             os: macos-15
             swift: "6.2"
             test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=iOS Simulator,name=iPhone 15"
+          - name: Swift 6.2 on macOS 15 - iOS Simulator (16.x)
+            os: macos-15
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=iOS Simulator,OS=16.4,name=iPhone 14"
           - name: Swift 6.2 on macOS 26 - tvOS Simulator
             os: macos-26
             swift: "6.2"
             test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=tvOS Simulator,name=Apple TV"
+          - name: Swift 6.2 on macOS 15 - tvOS Simulator (16.x)
+            os: macos-15
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=tvOS Simulator,OS=16.4,name=Apple TV"
           - name: Swift 6.2 on macOS 26 - watchOS Simulator
             os: macos-26
             swift: "6.2"
             test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)"
+          - name: Swift 6.2 on macOS 15 - watchOS Simulator (9.x)
+            os: macos-15
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=watchOS Simulator,OS=9.4,name=Apple Watch Series 8 (45mm)"
           - name: Swift 6.2 on macOS 26 - visionOS Simulator
             os: macos-26
             swift: "6.2"
             test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=visionOS Simulator,name=Apple Vision Pro"
+          - name: Swift 6.2 on macOS 26 - visionOS Simulator (1.x)
+            os: macos-26
+            swift: "6.2"
+            test_command: xcodebuild test -scheme TOMLDecoder-Package -destination "platform=visionOS Simulator,OS=1.0,name=Apple Vision Pro"
     steps:
     - uses: SwiftyLab/setup-swift@latest
       with:
