@@ -13,6 +13,15 @@ final class _TOMLDecoder: Decoder {
     let userInfo: [CodingUserInfoKey: Any] = [:]
     var token = Token.empty
 
+    var source: String {
+        switch container {
+        case let .keyed(table):
+            table.source.source
+        case let .unkeyed(array):
+            array.source.source
+        }
+    }
+
     func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
         guard case let .keyed(table) = container else {
             throw DecodingError.valueNotFound(

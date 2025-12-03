@@ -1,13 +1,18 @@
 import Foundation
 
 extension TOMLTable {
+    init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
+        self.source = try TOMLDocument(source: source, keyTransform: keyTransform)
+        index = 0
+    }
+
     /// Create a root-level TOML table from a TOML document.
     ///
     /// - Parameter source: The TOML document to parse.
     /// - Returns: A `TOMLTable` representing the root-level table of the TOML document.
     /// - Throws: A ``TOMLError`` if the document is invalid.
     public init(source: String) throws(TOMLError) {
-        self = try Deserializer(source: source, keyTransform: nil).parse()
+        try self.init(source: source, keyTransform: nil)
     }
 
     /// Create a root-level TOML table from a TOML document
@@ -106,19 +111,19 @@ extension TOMLTable {
 ///
 /// Read <doc:DeserializingTOML> to learn more about ``TOMLTable``.
 public struct TOMLTable: Sendable, Equatable {
-    let source: Deserializer
+    let source: TOMLDocument
     let index: Int
 
     /// All keys available in the table.
     public var keys: [String] {
-        source.tables[index].allKeys(parser: source)
+        source.tables[index].allKeys(source)
     }
 
     /// Check if the table contains a given key.
     ///
     /// - Parameter key: The key to check for.
     public func contains(key: String) -> Bool {
-        source.tables[index].contains(parser: source, key: key)
+        source.tables[index].contains(source: source, key: key)
     }
 
     /// Access a TOML array for a given key.
@@ -167,18 +172,18 @@ public struct TOMLTable: Sendable, Equatable {
         throw TOMLError(.keyNotFoundInTable(key: key, expected: "table"))
     }
 
-    @inline(__always)
-    func value<T>(forKey key: String, parse: (String.UTF8View.SubSequence) throws(TOMLError) -> T) throws(TOMLError) -> T {
-        let pairIndices = source.tables[index].keyValues
-        let allPairs = source.keyValues
-        for i in pairIndices {
-            if allPairs[i].key == key {
-                return try parse(allPairs[i].value.text)
-            }
-        }
+    // @inline(__always)
+    // func value<T>(forKey key: String, parse: (String.UTF8View.SubSequence) throws(TOMLError) -> T) throws(TOMLError) -> T {
+    //     let pairIndices = source.tables[index].keyValues
+    //     let allPairs = source.keyValues
+    //     for i in pairIndices {
+    //         if allPairs[i].key == key {
+    //             return try parse(allPairs[i].value.text)
+    //         }
+    //     }
 
-        throw TOMLError(.keyNotFoundInTable(key: key, expected: String(describing: T.self)))
-    }
+    //     throw TOMLError(.keyNotFoundInTable(key: key, expected: String(describing: T.self)))
+    // }
 
     @inline(__always)
     func token(forKey key: String, expected: String) throws(TOMLError) -> Token {
@@ -205,7 +210,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError.keyNotFoundInTable`
     ///   if the key does not exist or is not a string.
     public func string(forKey key: String) throws(TOMLError) -> String {
-        try token(forKey: key, expected: "string").unpackString(context: .string(key))
+        try token(forKey: key, expected: "string").unpackString(source: source.source, context: .string(key))
     }
 
     /// Access a boolean value for a given key.
@@ -220,7 +225,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: A `TOMLError`
     ///   if the key does not exist or is not a boolean.
     public func bool(forKey key: String) throws(TOMLError) -> Bool {
-        try token(forKey: key, expected: "bool").unpackBool(context: .string(key))
+        try token(forKey: key, expected: "bool").unpackBool(source: source.source, context: .string(key))
     }
 
     /// Access an integer value for a given key.
@@ -235,7 +240,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError.keyNotFoundInTable`
     ///   if the key does not exist or is not an integer.
     public func integer(forKey key: String) throws(TOMLError) -> Int64 {
-        try token(forKey: key, expected: "integer").unpackInteger(context: .string(key))
+        try token(forKey: key, expected: "integer").unpackInteger(source: source.source, context: .string(key))
     }
 
     /// Access a float value for a given key.
@@ -250,7 +255,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError.keyNotFoundInTable`
     ///   if the key does not exist or is not a float.
     public func float(forKey key: String) throws(TOMLError) -> Double {
-        try token(forKey: key, expected: "float").unpackFloat(context: .string(key))
+        try token(forKey: key, expected: "float").unpackFloat(source: source.source, context: .string(key))
     }
 
     /// Access an offset date-time value for a given key.
@@ -265,7 +270,7 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError.keyNotFoundInTable`
     ///   if the key does not exist or is not an offset date-time.
     public func offsetDateTime(forKey key: String) throws(TOMLError) -> OffsetDateTime {
-        try token(forKey: key, expected: "offset date-time").unpackOffsetDateTime(context: .string(key))
+        try token(forKey: key, expected: "offset date-time").unpackOffsetDateTime(source: source.source, context: .string(key))
     }
 
     /// Access a local date-time value for a given key.
@@ -287,10 +292,10 @@ public struct TOMLTable: Sendable, Equatable {
     ///   if the key does not exist or is not a local date-time.
     public func localDateTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         let token = try token(forKey: key, expected: "local date-time")
-        let components = try token.unpackDateTime(context: .string(key))
+        let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localDateTime = components.localDateTime(exactMatch: exactMatch)
         else {
-            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local date-time"))
+            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local date-time"))
         }
         return localDateTime
     }
@@ -314,9 +319,9 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError.keyNotFoundInTable`
     public func localDate(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         let token = try token(forKey: key, expected: "local date")
-        let components = try token.unpackDateTime(context: .string(key))
+        let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localDate = components.localDate(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local date"))
+            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local date"))
         }
         return localDate
     }
@@ -341,15 +346,15 @@ public struct TOMLTable: Sendable, Equatable {
     ///   if the key does not exist or is not a local time.
     public func localTime(forKey key: String, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         let token = try token(forKey: key, expected: "local time")
-        let components = try token.unpackDateTime(context: .string(key))
+        let components = try token.unpackDateTime(source: source.source, context: .string(key))
         guard let localTime = components.localTime(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch(context: .string(key), token: token, expected: "local time"))
+            throw TOMLError(.typeMismatch2(context: .string(key), token: token, expected: "local time"))
         }
         return localTime
     }
 
     func datetimeComponents(forKey key: String, expected: String) throws(TOMLError) -> DateTimeComponents {
-        try token(forKey: key, expected: expected).unpackDateTime(context: .string(key))
+        try token(forKey: key, expected: expected).unpackDateTime(source: source.source, context: .string(key))
     }
 
     func dictionary() throws(TOMLError) -> [String: Any] {

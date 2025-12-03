@@ -70,7 +70,7 @@ import Foundation
 ///
 /// Read <doc:DeserializingTOML> to learn more about ``TOMLArray``.
 public struct TOMLArray: Equatable, Sendable {
-    let source: Deserializer
+    let source: TOMLDocument
     let index: Int
 
     /// Number of elements in the array.
@@ -145,7 +145,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a string.
     public func string(atIndex index: Int) throws(TOMLError) -> String {
-        try token(forIndex: index, type: "string").unpackString(context: .int(index))
+        try token(forIndex: index, type: "string").unpackString(source: source.source, context: .int(index))
     }
 
     /// Access a boolean value at a given index.
@@ -159,7 +159,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a boolean.
     public func bool(atIndex index: Int) throws(TOMLError) -> Bool {
-        try token(forIndex: index, type: "bool").unpackBool(context: .int(index))
+        try token(forIndex: index, type: "bool").unpackBool(source: source.source, context: .int(index))
     }
 
     /// Access an integer value at a given index.
@@ -173,7 +173,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not an integer.
     public func integer(atIndex index: Int) throws(TOMLError) -> Int64 {
-        try token(forIndex: index, type: "integer").unpackInteger(context: .int(index))
+        try token(forIndex: index, type: "integer").unpackInteger(source: source.source, context: .int(index))
     }
 
     /// Access a float value at a given index.
@@ -187,7 +187,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not a float.
     public func float(atIndex index: Int) throws(TOMLError) -> Double {
-        try token(forIndex: index, type: "float").unpackFloat(context: .int(index))
+        try token(forIndex: index, type: "float").unpackFloat(source: source.source, context: .int(index))
     }
 
     /// Access an offset date-time value at a given index.
@@ -201,7 +201,7 @@ public struct TOMLArray: Equatable, Sendable {
     /// - Throws: `TOMLError.arrayOutOfBound`
     ///   if the index is out of bounds or is not an offset date-time.
     public func offsetDateTime(atIndex index: Int) throws(TOMLError) -> OffsetDateTime {
-        try token(forIndex: index, type: "offset date-time").unpackOffsetDateTime(context: .int(index))
+        try token(forIndex: index, type: "offset date-time").unpackOffsetDateTime(source: source.source, context: .int(index))
     }
 
     /// Access a local date-time value at a given index.
@@ -224,7 +224,7 @@ public struct TOMLArray: Equatable, Sendable {
     ///   if the index is out of bounds or is not a local date-time.
     public func localDateTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         let token = try token(forIndex: index, type: "local datetime")
-        let components = try token.unpackDateTime(context: .int(index))
+        let components = try token.unpackDateTime(source: source.source, context: .int(index))
         guard let localDateTime = components.localDateTime(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local datetime"))
         }
@@ -252,7 +252,7 @@ public struct TOMLArray: Equatable, Sendable {
     ///   if the index is out of bounds or is not a local date.
     public func localDate(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         let token = try token(forIndex: index, type: "local date")
-        let components = try token.unpackDateTime(context: .int(index))
+        let components = try token.unpackDateTime(source: source.source, context: .int(index))
         guard let localDate = components.localDate(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local date"))
         }
@@ -280,7 +280,7 @@ public struct TOMLArray: Equatable, Sendable {
     ///   if the index is out of bounds or is not a local time.
     public func localTime(atIndex index: Int, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         let token = try token(forIndex: index, type: "local time")
-        let components = try token.unpackDateTime(context: .int(index))
+        let components = try token.unpackDateTime(source: source.source, context: .int(index))
         guard let localTime = components.localTime(exactMatch: exactMatch) else {
             throw TOMLError(.typeMismatchInArray(lineNumber: token.lineNumber, index: index, expected: "local time"))
         }

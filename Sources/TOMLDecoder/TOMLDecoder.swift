@@ -74,8 +74,7 @@ public struct TOMLDecoder {
     public func decode<T: Decodable>(_ type: T.Type, from text: String) throws -> T {
         let topLevel: TOMLTable
         do {
-            let parser = Deserializer(source: text, keyTransform: strategy.key.converter)
-            topLevel = try parser.parse()
+            topLevel = try TOMLTable(source: text, keyTransform: strategy.key.converter)
         } catch {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid TOML.", underlyingError: error))
         }
