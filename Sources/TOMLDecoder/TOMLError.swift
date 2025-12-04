@@ -5,7 +5,6 @@ public struct TOMLError: Error {
         self.reason = reason
     }
 
-    // TODO: the ranges in Token.text is no longer useful as part of error message
     enum Reason {
         case arrayOutOfBound(index: Int, bound: Int)
         case badKey(lineNumber: Int)
