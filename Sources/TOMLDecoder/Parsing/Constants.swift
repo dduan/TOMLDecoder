@@ -1,13 +1,7 @@
 import Foundation
 
 enum Constants {
-    static let tripleSingleQuote = "'''".utf8
-    static let tripleDoubleQuote = #"""""#.utf8
-    static let anonymousArryKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
-    static let nan = "nan".utf8
-    static let inf = "inf".utf8
-    static let `true` = "true".utf8
-    static let `false` = "false".utf8
+    static let anonymousArrayKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
 }
 
 enum CodeUnits {

@@ -353,10 +353,6 @@ public struct TOMLTable: Sendable, Equatable {
         return localTime
     }
 
-    func datetimeComponents(forKey key: String, expected: String) throws(TOMLError) -> DateTimeComponents {
-        try token(forKey: key, expected: expected).unpackDateTime(source: source.source, context: .string(key))
-    }
-
     func dictionary() throws(TOMLError) -> [String: Any] {
         try source.tables[index].dictionary(source: source)
     }

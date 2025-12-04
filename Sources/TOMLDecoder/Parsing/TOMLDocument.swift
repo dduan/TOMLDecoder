@@ -149,21 +149,6 @@ struct DateTimeComponents: Equatable {
     let offset: Int16?
     let features: OffsetDateTime.Features
 
-    var crystalized: Any {
-        switch (date, time, offset) {
-        case let (.some(date), .some(time), .some(offset)):
-            OffsetDateTime(date: date, time: time, offset: offset, features: features)
-        case let (.some(date), .some(time), .none):
-            LocalDateTime(date: date, time: time)
-        case let (.some(date), .none, .none):
-            date
-        case let (.none, .some(time), .none):
-            time
-        default:
-            fatalError("unreachable")
-        }
-    }
-
     @inline(__always)
     func localDate(exactMatch: Bool = true) -> LocalDate? {
         switch (date, time, offset) {
