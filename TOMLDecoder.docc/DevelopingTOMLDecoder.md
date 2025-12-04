@@ -89,7 +89,7 @@ Among them,
 TOMLDecoder's parser is of the garden variaty.
 The parsing occurs in 2 stages,
 each triggered by different API calls.
-<doc:DeserializingTOML#The-Deserielization-Process> describes this at a high level.
+<doc:DeserializingTOML#The-deserielization-Process> describes this at a high level.
 
 When we make a ``TOMLTable`` out of the TOML document,
 we analyze the structure of the document,
