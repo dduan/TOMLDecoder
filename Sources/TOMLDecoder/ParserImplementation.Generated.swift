@@ -1182,12 +1182,12 @@ extension Token {
                     if let tomlError = parseError as? TOMLError {
                         switch tomlError.reason {
                         case let .invalidDateTime(_, reason):
-                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: self.lineNumber, reason: reason))
+                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: reason))
                         default:
                             throw tomlError
                         }
                     } else {
-                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: self.lineNumber, reason: "timezone parsing error"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone parsing error"))
                     }
                 }
             }
@@ -2803,12 +2803,12 @@ extension Token {
                     if let tomlError = parseError as? TOMLError {
                         switch tomlError.reason {
                         case let .invalidDateTime(_, reason):
-                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: self.lineNumber, reason: reason))
+                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: reason))
                         default:
                             throw tomlError
                         }
                     } else {
-                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: self.lineNumber, reason: "timezone parsing error"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone parsing error"))
                     }
                 }
             }
