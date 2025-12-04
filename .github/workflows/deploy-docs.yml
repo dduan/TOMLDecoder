@@ -5,14 +5,37 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 permissions:
   contents: write
 
 jobs:
-  deploy-docs:
-    name: Generate and Deploy
+  generate-docs:
+    name: Generate Documentation
     runs-on: macos-26
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Cache SwiftPM artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.swiftpm
+            .build
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-
+
+      - name: Generate documentation
+        run: Scripts/generate-docs.sh
+
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: macos-26
+    needs: generate-docs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
