@@ -97,14 +97,14 @@ extension Token {
         case let (.some(date), .some(time), .some(offset)):
             return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
         default:
-            throw TOMLError(.typeMismatch(context: context, token: self, expected: "offset date-time"))
+            throw TOMLError(.typeMismatch(context: context, lineNumber: lineNumber, expected: "offset date-time"))
         }
     }
 
     func unpackLocalDateTime(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalDateTime {
         let components = try unpackDateTime(source: source, context: context)
         guard let localDateTime = components.localDateTime(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch(context: context, token: self, expected: "local date-time"))
+            throw TOMLError(.typeMismatch(context: context, lineNumber: lineNumber, expected: "local date-time"))
         }
         return localDateTime
     }
@@ -112,7 +112,7 @@ extension Token {
     func unpackLocalDate(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalDate {
         let components = try unpackDateTime(source: source, context: context)
         guard let localDate = components.localDate(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch(context: context, token: self, expected: "local date"))
+            throw TOMLError(.typeMismatch(context: context, lineNumber: lineNumber, expected: "local date"))
         }
         return localDate
     }
@@ -120,7 +120,7 @@ extension Token {
     func unpackLocalTime(source: String, context: TOMLKey, exactMatch: Bool = true) throws(TOMLError) -> LocalTime {
         let components = try unpackDateTime(source: source, context: context)
         guard let localTime = components.localTime(exactMatch: exactMatch) else {
-            throw TOMLError(.typeMismatch(context: context, token: self, expected: "local time"))
+            throw TOMLError(.typeMismatch(context: context, lineNumber: lineNumber, expected: "local time"))
         }
         return localTime
     }

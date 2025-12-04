@@ -808,7 +808,7 @@ extension Token {
             return false
         }
 
-        throw TOMLError(.invalidBool(context: context, value: self))
+        throw TOMLError(.invalidBool(context: context, lineNumber: lineNumber))
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
@@ -832,7 +832,7 @@ extension Token {
                         bytes[index + 2] == CodeUnits.lowerF
                 )
             else {
-                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Expected nan or inf, found \(bytes[index])"))
+                throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Expected nan or inf, found \(bytes[index])"))
             }
             resultCodeUnits.append(bytes[index])
             resultCodeUnits.append(bytes[index + 1])
@@ -843,7 +843,7 @@ extension Token {
                case let next = bytes[index + 1],
                next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
             {
-                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
+                throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
             }
 
             while index < text.upperBound {
@@ -855,7 +855,7 @@ extension Token {
                         let last = resultCodeUnits.last,
                         isdigit(Int32(last)) != 0
                     else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be preceded by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be preceded by a digit"))
                     }
 
                     guard
@@ -863,26 +863,26 @@ extension Token {
                         case let next = bytes[index],
                         isdigit(Int32(next)) != 0
                     else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be follewed by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be follewed by a digit"))
                     }
 
                     continue
                 } else if ch == CodeUnits.dot {
                     if resultCodeUnits.isEmpty {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "First digit of floats cannot be '.'"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "First digit of floats cannot be '.'"))
                     }
 
                     if !resultCodeUnits.last!.isDecimalDigit {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'.' must be preceded by a decimal digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'.' must be preceded by a decimal digit"))
                     }
 
                     guard index < text.upperBound, isdigit(Int32(bytes[index])) != 0 else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "A digit must follow '.'"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "A digit must follow '.'"))
                     }
 
                 } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
                 } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
-                    throw TOMLError(.invalidFloat(context: context, value: self, reason: "invalid character for float"))
+                    throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "invalid character for float"))
                 }
 
                 resultCodeUnits.append(ch)
@@ -890,7 +890,7 @@ extension Token {
         }
 
         guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
-            throw TOMLError(.invalidFloat(context: context, value: self, reason: "not a float"))
+            throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
         }
 
         return double
@@ -901,7 +901,7 @@ extension Token {
         var multiline = false
 
         if bytes.count == 0 {
-            throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+            throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: "missing closing quote"))
         }
 
         let quoteChar = bytes[text.lowerBound]
@@ -926,7 +926,7 @@ extension Token {
             index = index + 1
             endIndex = endIndex - 1
             guard bytes[endIndex] == quoteChar else {
-                throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: "missing closing quote"))
             }
         }
 
@@ -935,14 +935,14 @@ extension Token {
                 return try literalString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
             } catch {
                 // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
             }
         } else {
             do {
                 return try basicString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
             } catch {
                 // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
             }
         }
     }
@@ -976,7 +976,7 @@ extension Token {
         }
 
         if bytes[index] == CodeUnits.underscore {
-            throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot start with a '_'"))
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot start with a '_'"))
         }
 
         if bytes[index] == CodeUnits.number0 {
@@ -984,24 +984,24 @@ extension Token {
             if nextIndex < text.upperBound {
                 if bytes[nextIndex] == CodeUnits.lowerX {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "hexadecimal integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "hexadecimal integers cannot have explicit signs"))
                     }
                     base = 16
                     index += 2
                 } else if bytes[nextIndex] == CodeUnits.lowerO {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "octal integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "octal integers cannot have explicit signs"))
                     }
                     base = 8
                     index += 2
                 } else if bytes[nextIndex] == CodeUnits.lowerB {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "binary integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "binary integers cannot have explicit signs"))
                     }
                     base = 2
                     index += 2
                 } else if bytes[nextIndex].isDecimalDigit || bytes[nextIndex] == CodeUnits.underscore {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "decimal integers cannot have leading zeros"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "decimal integers cannot have leading zeros"))
                 }
             }
             // Single zero is allowed to continue to the main loop
@@ -1016,25 +1016,25 @@ extension Token {
                     let last = resultCodeUnits.last,
                     isValidDigit(last, base: base)
                 else {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot use '_' adjacent to a non-digit"))
                 }
 
                 if index >= text.endIndex {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot end with a '_'"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot end with a '_'"))
                 }
 
                 let next = bytes[index]
                 if next == CodeUnits.underscore {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot contain consecutive '_'"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot contain consecutive '_'"))
                 }
                 guard isValidDigit(next, base: base) else {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot use '_' adjacent to a non-digit"))
                 }
                 continue
             }
 
             guard isValidDigit(ch, base: base) else {
-                throw TOMLError(.invalidInteger(context: context, value: self, reason: "invalid digit for base \(base)"))
+                throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "invalid digit for base \(base)"))
             }
 
             resultCodeUnits.append(ch)
@@ -1042,7 +1042,7 @@ extension Token {
 
         let s = String(decoding: resultCodeUnits, as: UTF8.self)
         guard let i = Int64(s, radix: base) else {
-            throw TOMLError(.invalidInteger(context: context, value: self, reason: "\(s) is a invalid integer of base \(base)"))
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "\(s) is a invalid integer of base \(base)"))
         }
         return i
     }
@@ -1057,10 +1057,10 @@ extension Token {
         if let (year, month, day, _) = scanDate(bytes: bytes, range: text) {
             // Validate date components
             if month < 1 || month > 12 {
-                throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "month must be between 01 and 12"))
+                throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "month must be between 01 and 12"))
             }
             if day < 1 {
-                throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "day must be between 01 and 31"))
+                throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "day must be between 01 and 31"))
             }
 
             // Validate days per month and leap years
@@ -1076,11 +1076,11 @@ extension Token {
 
             if day > maxDaysInMonth {
                 if month == 2, !isLeapYear {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "February only has 28 days in non-leap years"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "February only has 28 days in non-leap years"))
                 } else if month == 2, isLeapYear {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "February only has 29 days in leap years"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "February only has 29 days in leap years"))
                 } else {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "day \(day) is invalid for month \(month)"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "day \(day) is invalid for month \(month)"))
                 }
             }
 
@@ -1095,7 +1095,7 @@ extension Token {
                 let isSeparatorLowerT = bytes[index] == CodeUnits.lowerT
                 let isSeparatorUpperT = bytes[index] == CodeUnits.upperT
                 guard isSeparatorLowerT || isSeparatorUpperT || bytes[index] == CodeUnits.space else {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "expected 'T' or 't' or space to separate date and time"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "expected 'T' or 't' or space to separate date and time"))
                 }
                 if isSeparatorLowerT {
                     features.insert(.lowercaseT)
@@ -1111,13 +1111,13 @@ extension Token {
             if let (hour, minute, second, _) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
                 // Validate time components
                 if hour > 23 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "hour must be between 00 and 23"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "hour must be between 00 and 23"))
                 }
                 if minute > 59 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "minute must be between 00 and 59"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "minute must be between 00 and 59"))
                 }
                 if second > 59 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "second must be between 00 and 59"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "second must be between 00 and 59"))
                 }
 
                 time = (hour, minute, second)
@@ -1129,14 +1129,14 @@ extension Token {
                     nanoseconds = parseNanoSeconds(bytes: bytes, range: index ..< text.upperBound, updatedIndex: &index)
                     // Must have at least one digit after decimal point
                     if index == beforeNanoIndex {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "decimal point must be followed by digits"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "decimal point must be followed by digits"))
                     }
                 }
             }
         }
 
         if mustParseTime, time == nil {
-            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "expected valid time"))
+            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "expected valid time"))
         }
 
         var timeOffset: Int16?
@@ -1169,10 +1169,10 @@ extension Token {
 
                     // Validate timezone offset ranges
                     if offsetHour > 24 {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone offset hour must be between 00 and 24"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset hour must be between 00 and 24"))
                     }
                     if offsetMinute > 59 {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone offset minute must be between 00 and 59"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset minute must be between 00 and 59"))
                     }
 
                     let offsetInMinutes = offsetHour * 60 + offsetMinute
@@ -1182,19 +1182,19 @@ extension Token {
                     if let tomlError = parseError as? TOMLError {
                         switch tomlError.reason {
                         case let .invalidDateTime(_, reason):
-                            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: reason))
+                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: reason))
                         default:
                             throw tomlError
                         }
                     } else {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone parsing error"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone parsing error"))
                     }
                 }
             }
         }
 
         if index < text.upperBound {
-            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "extra character after date time"))
+            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "extra character after date time"))
         }
 
         return DateTimeComponents(
@@ -1225,7 +1225,7 @@ extension Token {
         }
 
         guard firstChar?.isDecimalDigit == true else {
-            throw TOMLError(.invalidValueInTable(context: context, token: self))
+            throw TOMLError(.invalidValueInTable(context: context, lineNumber: lineNumber))
         }
 
         let datetime = try unpackDateTime(bytes: bytes, context: context)
@@ -1239,12 +1239,11 @@ extension Token {
         case let (.none, .some(time), .none):
             return time
         default:
-            throw TOMLError(.invalidValueInTable(context: context, token: self))
+            throw TOMLError(.invalidValueInTable(context: context, lineNumber: lineNumber))
         }
     }
 }
 
-// TODO: This could be a method on Token
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
 func parseTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard range.count >= 2 else {
@@ -2430,7 +2429,7 @@ extension Token {
             return false
         }
 
-        throw TOMLError(.invalidBool(context: context, value: self))
+        throw TOMLError(.invalidBool(context: context, lineNumber: lineNumber))
     }
 
     @available(iOS 12, macOS 13, watchOS 4, tvOS 12, visionOS 1, *)
@@ -2454,7 +2453,7 @@ extension Token {
                         bytes[index + 2] == CodeUnits.lowerF
                 )
             else {
-                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Expected nan or inf, found \(bytes[index])"))
+                throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Expected nan or inf, found \(bytes[index])"))
             }
             resultCodeUnits.append(bytes[index])
             resultCodeUnits.append(bytes[index + 1])
@@ -2465,7 +2464,7 @@ extension Token {
                case let next = bytes[index + 1],
                next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
             {
-                throw TOMLError(.invalidFloat(context: context, value: self, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
+                throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))
             }
 
             while index < text.upperBound {
@@ -2477,7 +2476,7 @@ extension Token {
                         let last = resultCodeUnits.last,
                         isdigit(Int32(last)) != 0
                     else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be preceded by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be preceded by a digit"))
                     }
 
                     guard
@@ -2485,26 +2484,26 @@ extension Token {
                         case let next = bytes[index],
                         isdigit(Int32(next)) != 0
                     else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'_' must be follewed by a digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be follewed by a digit"))
                     }
 
                     continue
                 } else if ch == CodeUnits.dot {
                     if resultCodeUnits.isEmpty {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "First digit of floats cannot be '.'"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "First digit of floats cannot be '.'"))
                     }
 
                     if !resultCodeUnits.last!.isDecimalDigit {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "'.' must be preceded by a decimal digit"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'.' must be preceded by a decimal digit"))
                     }
 
                     guard index < text.upperBound, isdigit(Int32(bytes[index])) != 0 else {
-                        throw TOMLError(.invalidFloat(context: context, value: self, reason: "A digit must follow '.'"))
+                        throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "A digit must follow '.'"))
                     }
 
                 } else if ch == CodeUnits.upperE || ch == CodeUnits.lowerE {
                 } else if !ch.isDecimalDigit, ch != CodeUnits.plus, ch != CodeUnits.minus {
-                    throw TOMLError(.invalidFloat(context: context, value: self, reason: "invalid character for float"))
+                    throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "invalid character for float"))
                 }
 
                 resultCodeUnits.append(ch)
@@ -2512,7 +2511,7 @@ extension Token {
         }
 
         guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
-            throw TOMLError(.invalidFloat(context: context, value: self, reason: "not a float"))
+            throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
         }
 
         return double
@@ -2523,7 +2522,7 @@ extension Token {
         var multiline = false
 
         if bytes.count == 0 {
-            throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+            throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: "missing closing quote"))
         }
 
         let quoteChar = bytes[text.lowerBound]
@@ -2548,7 +2547,7 @@ extension Token {
             index = index + 1
             endIndex = endIndex - 1
             guard bytes[endIndex] == quoteChar else {
-                throw TOMLError(.invalidString(context: context, value: self, reason: "missing closing quote"))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: "missing closing quote"))
             }
         }
 
@@ -2557,14 +2556,14 @@ extension Token {
                 return try literalString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
             } catch {
                 // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
             }
         } else {
             do {
                 return try basicString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
             } catch {
                 // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, value: self, reason: error.localizedDescription))
+                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
             }
         }
     }
@@ -2598,7 +2597,7 @@ extension Token {
         }
 
         if bytes[index] == CodeUnits.underscore {
-            throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot start with a '_'"))
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot start with a '_'"))
         }
 
         if bytes[index] == CodeUnits.number0 {
@@ -2606,24 +2605,24 @@ extension Token {
             if nextIndex < text.upperBound {
                 if bytes[nextIndex] == CodeUnits.lowerX {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "hexadecimal integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "hexadecimal integers cannot have explicit signs"))
                     }
                     base = 16
                     index += 2
                 } else if bytes[nextIndex] == CodeUnits.lowerO {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "octal integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "octal integers cannot have explicit signs"))
                     }
                     base = 8
                     index += 2
                 } else if bytes[nextIndex] == CodeUnits.lowerB {
                     if hasSign {
-                        throw TOMLError(.invalidInteger(context: context, value: self, reason: "binary integers cannot have explicit signs"))
+                        throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "binary integers cannot have explicit signs"))
                     }
                     base = 2
                     index += 2
                 } else if bytes[nextIndex].isDecimalDigit || bytes[nextIndex] == CodeUnits.underscore {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "decimal integers cannot have leading zeros"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "decimal integers cannot have leading zeros"))
                 }
             }
             // Single zero is allowed to continue to the main loop
@@ -2638,25 +2637,25 @@ extension Token {
                     let last = resultCodeUnits.last,
                     isValidDigit(last, base: base)
                 else {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot use '_' adjacent to a non-digit"))
                 }
 
                 if index >= text.endIndex {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot end with a '_'"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot end with a '_'"))
                 }
 
                 let next = bytes[index]
                 if next == CodeUnits.underscore {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot contain consecutive '_'"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot contain consecutive '_'"))
                 }
                 guard isValidDigit(next, base: base) else {
-                    throw TOMLError(.invalidInteger(context: context, value: self, reason: "cannot use '_' adjacent to a non-digit"))
+                    throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot use '_' adjacent to a non-digit"))
                 }
                 continue
             }
 
             guard isValidDigit(ch, base: base) else {
-                throw TOMLError(.invalidInteger(context: context, value: self, reason: "invalid digit for base \(base)"))
+                throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "invalid digit for base \(base)"))
             }
 
             resultCodeUnits.append(ch)
@@ -2664,7 +2663,7 @@ extension Token {
 
         let s = String(decoding: resultCodeUnits, as: UTF8.self)
         guard let i = Int64(s, radix: base) else {
-            throw TOMLError(.invalidInteger(context: context, value: self, reason: "\(s) is a invalid integer of base \(base)"))
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "\(s) is a invalid integer of base \(base)"))
         }
         return i
     }
@@ -2679,10 +2678,10 @@ extension Token {
         if let (year, month, day, _) = scanDate(bytes: bytes, range: text) {
             // Validate date components
             if month < 1 || month > 12 {
-                throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "month must be between 01 and 12"))
+                throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "month must be between 01 and 12"))
             }
             if day < 1 {
-                throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "day must be between 01 and 31"))
+                throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "day must be between 01 and 31"))
             }
 
             // Validate days per month and leap years
@@ -2698,11 +2697,11 @@ extension Token {
 
             if day > maxDaysInMonth {
                 if month == 2, !isLeapYear {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "February only has 28 days in non-leap years"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "February only has 28 days in non-leap years"))
                 } else if month == 2, isLeapYear {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "February only has 29 days in leap years"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "February only has 29 days in leap years"))
                 } else {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "day \(day) is invalid for month \(month)"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "day \(day) is invalid for month \(month)"))
                 }
             }
 
@@ -2717,7 +2716,7 @@ extension Token {
                 let isSeparatorLowerT = bytes[index] == CodeUnits.lowerT
                 let isSeparatorUpperT = bytes[index] == CodeUnits.upperT
                 guard isSeparatorLowerT || isSeparatorUpperT || bytes[index] == CodeUnits.space else {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "expected 'T' or 't' or space to separate date and time"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "expected 'T' or 't' or space to separate date and time"))
                 }
                 if isSeparatorLowerT {
                     features.insert(.lowercaseT)
@@ -2733,13 +2732,13 @@ extension Token {
             if let (hour, minute, second, _) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
                 // Validate time components
                 if hour > 23 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "hour must be between 00 and 23"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "hour must be between 00 and 23"))
                 }
                 if minute > 59 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "minute must be between 00 and 59"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "minute must be between 00 and 59"))
                 }
                 if second > 59 {
-                    throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "second must be between 00 and 59"))
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "second must be between 00 and 59"))
                 }
 
                 time = (hour, minute, second)
@@ -2751,14 +2750,14 @@ extension Token {
                     nanoseconds = parseNanoSeconds(bytes: bytes, range: index ..< text.upperBound, updatedIndex: &index)
                     // Must have at least one digit after decimal point
                     if index == beforeNanoIndex {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "decimal point must be followed by digits"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "decimal point must be followed by digits"))
                     }
                 }
             }
         }
 
         if mustParseTime, time == nil {
-            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "expected valid time"))
+            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "expected valid time"))
         }
 
         var timeOffset: Int16?
@@ -2791,10 +2790,10 @@ extension Token {
 
                     // Validate timezone offset ranges
                     if offsetHour > 24 {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone offset hour must be between 00 and 24"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset hour must be between 00 and 24"))
                     }
                     if offsetMinute > 59 {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone offset minute must be between 00 and 59"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset minute must be between 00 and 59"))
                     }
 
                     let offsetInMinutes = offsetHour * 60 + offsetMinute
@@ -2804,19 +2803,19 @@ extension Token {
                     if let tomlError = parseError as? TOMLError {
                         switch tomlError.reason {
                         case let .invalidDateTime(_, reason):
-                            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: reason))
+                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: reason))
                         default:
                             throw tomlError
                         }
                     } else {
-                        throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "timezone parsing error"))
+                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone parsing error"))
                     }
                 }
             }
         }
 
         if index < text.upperBound {
-            throw TOMLError(.invalidDateTime3(context: context, value: self, reason: "extra character after date time"))
+            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "extra character after date time"))
         }
 
         return DateTimeComponents(
@@ -2847,7 +2846,7 @@ extension Token {
         }
 
         guard firstChar?.isDecimalDigit == true else {
-            throw TOMLError(.invalidValueInTable(context: context, token: self))
+            throw TOMLError(.invalidValueInTable(context: context, lineNumber: lineNumber))
         }
 
         let datetime = try unpackDateTime(bytes: bytes, context: context)
@@ -2861,12 +2860,11 @@ extension Token {
         case let (.none, .some(time), .none):
             return time
         default:
-            throw TOMLError(.invalidValueInTable(context: context, token: self))
+            throw TOMLError(.invalidValueInTable(context: context, lineNumber: lineNumber))
         }
     }
 }
 
-// TODO: This could be a method on Token
 @available(iOS 12, macOS 13, watchOS 4, tvOS 12, visionOS 1, *)
 func parseTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard range.count >= 2 else {
