@@ -19,6 +19,7 @@ TOMLDECODER_DOCS=1 swift package \
   --target TOMLDecoder \
   --disable-indexing \
   --transform-for-static-hosting \
+  --warnings-as-errors \
   --additional-symbol-graph-dir .build/symbol-graphs \
   --hosting-base-path "$base_path" \
   --output-path Docs

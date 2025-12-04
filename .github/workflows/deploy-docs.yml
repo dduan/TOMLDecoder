@@ -5,12 +5,13 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 permissions:
   contents: write
 
 jobs:
-  deploy-docs:
+  generate-and-deploy-docs:
     name: Generate and Deploy
     runs-on: macos-26
     steps:
@@ -31,6 +32,7 @@ jobs:
         run: Scripts/generate-docs.sh
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config user.email "$(git show -s --format='%ae' HEAD)"
           git config user.name "$(git show -s --format='%an' HEAD)"

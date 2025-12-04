@@ -1,3 +1,9 @@
+/// An error originated from parsing the TOML document.
+///
+/// This error provides details for invalid values,
+/// or formatting issues in the TOML document.
+/// It comes from the parsing phase.
+/// Read <doc:DeserializingTOML#The-Deserielization-Process> to learn more.
 public struct TOMLError: Error {
     let reason: Reason
 
