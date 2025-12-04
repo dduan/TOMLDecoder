@@ -498,15 +498,4 @@ struct TOMLDecoderTests {
     @Test func canada() throws {
         _ = try TOMLDecoder().decode(CanadaFeatureCollection.self, from: Resources.canadaTOMLString)
     }
-
-    @Test func bespoke() throws {
-        let toml = """
-        booleans = [true, false]
-        """
-        try print(
-            TOMLTable(source: toml)
-                .array(forKey: "booleans")
-                .bool(atIndex: 1),
-        )
-    }
 }
