@@ -4,6 +4,7 @@ import Testing
 
 @Suite
 struct DateStrategyTests {
+    @available(iOS 15, *)
     var rfc3339Style: Date.ISO8601FormatStyle {
         Date.ISO8601FormatStyle()
             .year()
@@ -35,6 +36,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
+    @available(iOS 15, *)
     func `datetime as Date`() throws {
         struct Test: Decodable {
             let datetime: Date
@@ -154,6 +156,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
+    @available(iOS 15, *)
     func `datetime as Date in array`() throws {
         struct Test: Decodable {
             let datetimes: [Date]

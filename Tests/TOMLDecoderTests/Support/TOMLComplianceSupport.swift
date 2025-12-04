@@ -322,34 +322,38 @@ enum TOMLComplianceSupport {
     }
 
     private static func parseDate(_ value: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let formatter2 = ISO8601DateFormatter()
-        formatter2.formatOptions = [.withInternetDateTime]
-        let style = Date.ISO8601FormatStyle().dateTimeSeparator(.space)
-        let date = formatter.date(from: value) ?? formatter2.date(from: value) ?? (try? style.parse(value))
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        if #available(iOS 15, *) {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let formatter2 = ISO8601DateFormatter()
+            formatter2.formatOptions = [.withInternetDateTime]
+            let style = Date.ISO8601FormatStyle().dateTimeSeparator(.space)
+            let date = formatter.date(from: value) ?? formatter2.date(from: value) ?? (try? style.parse(value))
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 
-        let components = calendar.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second, .nanosecond],
-            from: date!,
-        )
+            let components = calendar.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second, .nanosecond],
+                from: date!,
+            )
 
-        var seconds = Double(epochSecondsViaProlepticHelper(
-            year: components.year!,
-            month: components.month!,
-            day: components.day!,
-            hour: components.hour!,
-            minute: components.minute!,
-            second: components.second!,
-        ))
+            var seconds = Double(epochSecondsViaProlepticHelper(
+                year: components.year!,
+                month: components.month!,
+                day: components.day!,
+                hour: components.hour!,
+                minute: components.minute!,
+                second: components.second!,
+            ))
 
-        if let nanoseconds = components.nanosecond {
-            seconds += Double(nanoseconds) / 1_000_000_000
+            if let nanoseconds = components.nanosecond {
+                seconds += Double(nanoseconds) / 1_000_000_000
+            }
+
+            return Date(timeIntervalSince1970: TimeInterval(seconds))
+        } else {
+            return nil
         }
-
-        return Date(timeIntervalSince1970: TimeInterval(seconds))
     }
 
     private static func splitDateTime(_ value: String) -> (Substring, Substring)? {
