@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-15, macos-26, windows-2025]
         swift: ["6.2"]
     steps:
     - uses: SwiftyLab/setup-swift@latest
