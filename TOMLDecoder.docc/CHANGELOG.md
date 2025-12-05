@@ -26,13 +26,13 @@ can be transformed directly to a Swift `Codable`, similar to what
 #### New APIs
 
 * A set of types to represent offset date-time, local date/time.
-* `TOMLArray` and `TOMLTable` represents parsed TOML tables and arrays.
+* `TOMLArray` and `TOMLTable` represent parsed TOML tables and arrays.
 * Strongly typed access to fields e.g. `.string(forKey: "foo")` or
   `.integer(atIndex: 0)`.
 
 ### Infrastructure improvements
 
-The full toml-lang/toml-test suite are now imported as unit tests.
+The full toml-lang/toml-test suite is now imported as unit tests.
 
 A new documentation site:
 https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
@@ -41,7 +41,7 @@ https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
 
 - Improved runtime performance for decoding by using less containers while
   assembling decoded values (#65)
-- Fixed a leep year calculation bug (#66)
+- Fixed a leap year calculation bug (#66)
 - Fixed .superDecoder (#68)
 
 ## 0.3.1
@@ -72,8 +72,8 @@ https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
 - Keys with spaces in between segments are now valid
 - Multiline strings can now have 1 or two quotes as valid content
 - Local date with a comment (`1970-01-01 # some comment`) is now accepted
-- Control characters (except taps) in comments are now invalid
-- Escaped CLRF character in multiline string is properly handled 
+- Control characters (except tabs) in comments are now invalid
+- Escaped CRLF character in multiline string is properly handled
 
 ## 0.2.2
 
@@ -85,9 +85,9 @@ https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
 - Include a new type `DeserializationError`. It contains information regarding
   deserialization.
 - Improve error reporting. After encountering one error, the parser will
-  disgard characters until new line, and attempt to parse another top-level
-  expression. This is more determinastic compared to previous recovery attempts.
-- Add more specific errors regarding missing pices at closing position. For
+  discard characters until new line, and attempt to parse another top-level
+  expression. This is more deterministic compared to previous recovery attempts.
+- Add more specific errors regarding missing pieces at closing position. For
   example, string missing closing quotes, or table missing closing bracket.
   These errors will cause the parser to report detailed error message.
 - Fix a bug where newline characters sometimes are considered valid as part of
@@ -99,7 +99,7 @@ https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
 - Remove support for CocoaPods and Carthage
 - Remove dependency on NetTime, parser returns `Foundation.Date` and
   `Foundation.DateComponents` instead.
-- Remove SwiftPM dependency on the `TOMLDeserializer` packege. It has been
+- Remove SwiftPM dependency on the `TOMLDeserializer` package. It has been
   merged into the same project.
 - Improved error reporting: a parsing error won't cause parsing to stop.
   Instead, the parser will attempt to parse as much as possible and report all
