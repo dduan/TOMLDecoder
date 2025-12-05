@@ -55,16 +55,16 @@ different decoding strategies.
 ### Table key strategies
 
 To change how table keys maps into your property names,
-set ``/TOMLDecoder/TOMLDecoder/strategy/key``.
+set ``/TOMLDecoder/TOMLDecoder/Strategy/key``.
 for example,
-``/TOMLDecoder/TOMLDecoder/Strategy/convertFromSnakeCase``
+``/TOMLDecoder/TOMLDecoder/Strategy/Key/convertFromSnakeCase``
 causes a key `ice_cream` in TOML
 to map to the property `iceCreame` on your `Decodable` type.
 
 ### Offset date-time strategies
 
 To change the way a TOML offset date-time is interpereted,
-set ``/TOMLDecoder/TOMLDecoder/strategy/offsetDateTime``.
+set ``/TOMLDecoder/TOMLDecoder/Strategy/offsetDateTime``.
 
 TODO: elaborate on offset date-time.
 
@@ -118,9 +118,9 @@ TOMLDecoder will attempt to convert it to
 
 * `Fonudation.Date`
 * `Double` / `TimeInterval`
-* ``/TOMLDecoder/LcoalDateTime``
-* ``/TOMLDecoder/LcoalDate``
-* ``/TOMLDecoder/LcoalTime``
+* ``/TOMLDecoder/LocalDateTime``
+* ``/TOMLDecoder/LocalDate``
+* ``/TOMLDecoder/LocalTime``
 
 When converting to local date/time types,
 the timezone offset is disgarded.
@@ -135,8 +135,8 @@ Parsed as ``/TOMLDecoder/LocalDateTime``.
 TOMLDecoder will attempt to convert it to
 
 * `Foundation.DateComponents`
-* ``/TOMLDecoder/LcoalDate``
-* ``/TOMLDecoder/LcoalTime``
+* ``/TOMLDecoder/LocalDate``
+* ``/TOMLDecoder/LocalTime``
 
 ### TOML Local Date
 
