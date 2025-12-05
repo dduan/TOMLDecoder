@@ -3,7 +3,7 @@ import Foundation
 /// Convert data for a TOML document into `Codable` types.
 ///
 /// Use this struct to configure and initiate the decoding process.
-/// 
+///
 ///     let tomlData = """
 ///     ip = "127.0.0.1"
 ///     port = "8080"
@@ -19,7 +19,7 @@ import Foundation
 /// Setting ``TOMLDecoder/isLenient`` to `false` causes errors to be thrown
 /// if the declared types in the `Codable` mis-matches those strictly defined
 /// for each TOML value. See <doc:DeserializingTOML>.
-/// 
+///
 /// Use ``TOMLDecoder/strategy`` to customize the decoding behavior.
 /// Each TOML value may be decoded into one or more Swift types.
 /// See <doc:DecodingTOML> to learn all possible types.
@@ -47,15 +47,15 @@ public struct TOMLDecoder {
     ///
     /// Use ``Strategy/Key`` to customize how a TOML key gets mapped
     /// to the property name of a `Codable`.
-    /// 
+    ///
     /// Use ``Strategy/OffsetDateTime`` to specify how TOML offset date-times
     /// are interpreted.
-    /// 
+    ///
     /// Defaults to ``TOMLDecoder/Strategy/default``.
     public var strategy: Strategy
 
     /// Initializes a `TOMLDecoder`.
-    /// 
+    ///
     /// - Parameters:
     ///   - isLenient: whether the decoder is allowed to convert the parsed type
     ///     into related types. See <doc:DecodingTOML>. Defaults to `true`.
@@ -76,7 +76,7 @@ public struct TOMLDecoder {
     public struct Strategy: Sendable {
         /// Specifies how a TOML offset date-time is re-interpreted as a date,
         /// or a time interval.
-        /// 
+        ///
         ///  Has no effects on properties of type ``/TOMLDecoder/OffsetDateTime``.
         ///
         ///  See ``OffsetDateTime`` to learn more.
@@ -90,7 +90,7 @@ public struct TOMLDecoder {
         /// See ``Key`` to learn more.
         public var key: Key
 
-        
+
         /// Creates a `Strategy`.
         ///
         /// - Parameters:
@@ -111,13 +111,13 @@ public struct TOMLDecoder {
         )
 
         /// Specifies how to represent a TOML offset date-time.
-        /// 
+        ///
         /// A valid offset date-time is always internally parsed as a ``/TOMLDecoder/OffsetDateTime``.
         /// But sometimes you need it as a `Date` from Foundation,
         /// or a time interval since a certain reference date.
         /// For each of these types,
         /// there are a number of ways to interpret the literal offset date-time.
-        /// 
+        ///
         /// To represent a offset date-time as a time interval,
         /// specify a reference date by
         /// ``OffsetDateTime/intervalSince1970`` or ``OffsetDateTime/intervalSince2001``.
