@@ -66,7 +66,7 @@ to map to the property `iceCream` on your `Decodable` type.
 To change the way a TOML offset date-time is interpreted,
 set ``/TOMLDecoder/TOMLDecoder/Strategy/offsetDateTime``.
 
-TODO: elaborate on offset date-time.
+This option has no effect if the decoded property is a  ``/TOMLDecoder/OffsetDateTime``.
 
 ## Supported type conversions
 
