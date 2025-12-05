@@ -1,6 +1,6 @@
 # Developing TOMLDecoder
 
-Notes for TOMLDecoder mainateners.
+Notes for TOMLDecoder maintainers.
 
 ## Writing Code
 
@@ -13,7 +13,7 @@ We recommend adding `swiftformat --lint .` in git pre-commit hooks.
 ## Writing documentation
 
 All APIs should be documented.
-Docmuntation should use Semantic Line Breaks.
+Documentation should use Semantic Line Breaks.
 This applies to docstrings, code comments, and articles.
 In short, at most one sentence per line.
 Read https://sembr.org/ for more info.
@@ -23,7 +23,7 @@ Read https://sembr.org/ for more info.
 
 Write tests with Swift's Testing framework.
 
-Our unit tests includes the [official suite](https://github.com/toml-lang/toml-test)
+Our unit tests include the [official suite](https://github.com/toml-lang/toml-test)
 from the TOML GitHub organization,
 systematically translated into Swift tests.
 
@@ -34,7 +34,7 @@ Tests must pass on macOS, Ubuntu, and Windows for any changes to land.
 
 ## Generating Code, and Tests
 
-* Parts of code is written using `gyb`.
+* Parts of the code are written using `gyb`.
   Use the script `Scripts/generate-code.sh` to generate the code.
   The generated code is checked into the repo.
   Look for header comments indicating generated code,
@@ -48,52 +48,52 @@ Tests must pass on macOS, Ubuntu, and Windows for any changes to land.
   Update the SHA to get potential newer tests.
 * The script `Scripts/test-generate.sh` should be run
   to verify that the generated code and tests are up to date.
-  It exists with a non-zero exit code if new code is generated.
+  It exits with a non-zero exit code if new code is generated.
 * Generated source files should have `.Generated.swift` suffix in the filename.
 
 
 ## Benchmarking
 
-Use `Scirpts/benchmark.sh baseline-SHA new-SHA`
+Use `Scripts/benchmark.sh baseline-SHA new-SHA`
 to compare performance between two commits.
 
 ## Releasing
 
-* Pick a new version number accoring to [Semantic Versioning](https://semver.org/).
-* Places referencing the latest version needs to be updated:
-    - Instructions for adding TOMLDocoder as a SwiftPM dependency
+* Pick a new version number according to [Semantic Versioning](https://semver.org/).
+* Places referencing the latest version need to be updated:
+    - Instructions for adding TOMLDecoder as a SwiftPM dependency
       in Getting Started.
     - MODULE.bazel
     - Potentially other places.
       Search for the old version number in the repo.
-* In CHANGLOG.md, create section for the new release.
+* In CHANGELOG.md, create section for the new release.
   Move any content under `Development` to the new section.
-  Note any changes that isn't in the existing notes.
+  Note any changes that aren't in the existing notes.
 * Check in the above changes and land the commit to the `main` branch.
 * Tag the commit on `main` created from the previous step.
   The tag should be the literal version number (No `v` prefix).
   Push the tag to GitHub.
 * Create a draft release referencing the tag on GitHub.
-* Download all source archives inluded in the release in a empty directory.
+* Download all source archives included in the release in an empty directory.
   Run `shasum -a 256 *`.
   Include the output as a code block in the release notes.
 * Publish the release on GitHub.
 
 ## Architecture Overview
 
-TOMLDecoder is a parser with a `Swift.Decoder` implementating sitting on top.
+TOMLDecoder is a parser with a `Swift.Decoder` implementation sitting on top.
 
 TOML has a spec,
-and a large number of parser implementations in many language.
+and a large number of parser implementations in many languages.
 Among them,
-TOMLDecoder's parser is of the garden variaty.
+TOMLDecoder's parser is of the garden variety.
 The parsing occurs in 2 stages,
 each triggered by different API calls.
-<doc:DeserializingTOML#The-Deserielization-Process> describes this at a high level.
+<doc:DeserializingTOML#The-Deserialization-Process> describes this at a high level.
 
 When we make a ``TOMLTable`` out of the TOML document,
 we analyze the structure of the document,
-find out where are the key-value pairs,
+find out where the key-value pairs are,
 the tables, and the arrays.
 Crucially,
 we don't attempt to validate the leaf values in

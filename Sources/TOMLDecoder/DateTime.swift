@@ -1,18 +1,18 @@
-/// A Offset Date-Time as defined by TOML.
+/// An Offset Date-Time as defined by TOML.
 ///
-/// A offset date-time represents a instant in time.
-/// Conceptually ``OffsetDateTime`` simialar to `Foundation.Date`.
+/// An offset date-time represents an instant in time.
+/// Conceptually ``OffsetDateTime`` similar to `Foundation.Date`.
 /// Operationally, ``OffsetDateTime`` works more like `Foundation.DateComponents`.
 /// It stores the components, except each component is non-optional.
 ///
 /// ``OffsetDateTime`` stores fractional seconds to the nanosecond precision.
 /// It's also capable of representing some spelling variations in the string format of the date-time.
 /// If a date-time string has sub-nanosecond precision,
-/// and it does not have superflous trailing zeros in the fractional seconds,
+/// and it does not have superfluous trailing zeros in the fractional seconds,
 /// ``OffsetDateTime`` stores enough information to exactly reconstruct the date-time string.
 ///
 /// > Important: Offset date-time in TOML is defined by RFC 3339,
-/// > which intepret the date with proleptic Gregorian calendar.
+/// > which interprets the date with proleptic Gregorian calendar.
 /// > This is different from Foundation's usage of the Gregorian calendar,
 /// > which follows the Julian calendar up to 1582-10-04,
 /// > then transitions to the Gregorian calendar after that.
@@ -151,7 +151,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
     /// The string representation of the offset date-time.
     ///
     /// If a value has precision up to 1 nanosecond,
-    /// and it does not require superflous trailing zeros in its fraction seconds,
+    /// and it does not require superfluous trailing zeros in its fraction seconds,
     /// this value can be recreated exactly.
     public var description: String {
         let dateString = date.description
@@ -179,7 +179,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         }
     }
 
-    /// Pressentation details for string representation of the offset date-time.
+    /// Presentation details for string representation of the offset date-time.
     ///
     /// A parser can preserve features of a offset date-time string with this type.
     /// If neither lowercase nor uppercase 'T' is present, the date-time seprator is a space, which is allowed by TOML.

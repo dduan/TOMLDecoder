@@ -10,7 +10,7 @@ Combined, they form the superset, `Codable` protocol.
 If your types conforms to `Decodable`, or `Codable`,
 `TOMLDecoder` can create instances of your types from TOML data.
 
-The API for doing so is very similar to the `JSONDecoder` API from `Fonudation`.
+The API for doing so is very similar to the `JSONDecoder` API from `Foundation`.
 
 ```swift
 struct Config: Codable {
@@ -59,11 +59,11 @@ set ``/TOMLDecoder/TOMLDecoder/Strategy/key``.
 for example,
 ``/TOMLDecoder/TOMLDecoder/Strategy/Key/convertFromSnakeCase``
 causes a key `ice_cream` in TOML
-to map to the property `iceCreame` on your `Decodable` type.
+to map to the property `iceCream` on your `Decodable` type.
 
 ### Offset date-time strategies
 
-To change the way a TOML offset date-time is interpereted,
+To change the way a TOML offset date-time is interpreted,
 set ``/TOMLDecoder/TOMLDecoder/Strategy/offsetDateTime``.
 
 TODO: elaborate on offset date-time.
@@ -116,17 +116,17 @@ TOML offset date-times are parsed as ``/TOMLDecoder/OffsetDateTime``s.
 
 TOMLDecoder will attempt to convert it to
 
-* `Fonudation.Date`
+* `Foundation.Date`
 * `Double` / `TimeInterval`
 * ``/TOMLDecoder/LocalDateTime``
 * ``/TOMLDecoder/LocalDate``
 * ``/TOMLDecoder/LocalTime``
 
 When converting to local date/time types,
-the timezone offset is disgarded.
+the timezone offset is discarded.
 
 See ``/TOMLDecoder/TOMLDecoder/Strategy/OffsetDateTime``
-to learn about convertion to `Date` or `Double`.
+to learn about conversion to `Date` or `Double`.
 
 ### TOML Local Date-Time
 
