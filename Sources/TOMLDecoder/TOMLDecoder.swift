@@ -90,7 +90,6 @@ public struct TOMLDecoder {
         /// See ``Key`` to learn more.
         public var key: Key
 
-
         /// Creates a `Strategy`.
         ///
         /// - Parameters:
@@ -98,7 +97,7 @@ public struct TOMLDecoder {
         ///   - key: strategy for TOML table keys.
         public init(
             offsetDateTime: OffsetDateTime = .dateFromGregorianCalendar,
-            key: Key = .useOriginalKeys
+            key: Key = .useOriginalKeys,
         ) {
             self.offsetDateTime = offsetDateTime
             self.key = key
@@ -107,7 +106,7 @@ public struct TOMLDecoder {
         /// ``TOMLDecoder``'s default strategy.
         public static let `default` = Strategy(
             offsetDateTime: .dateFromGregorianCalendar,
-            key: .useOriginalKeys
+            key: .useOriginalKeys,
         )
 
         /// Specifies how to represent a TOML offset date-time.
