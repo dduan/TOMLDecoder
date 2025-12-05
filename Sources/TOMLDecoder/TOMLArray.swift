@@ -27,7 +27,7 @@ import Foundation
 ///
 /// Local date / time may be retrieved from a value that's "fuller".
 /// For example, a local time can be retrieved
-/// when the value is a offset date-time, or lacal date-time.
+/// when the value is a offset date-time, or local date-time.
 /// Pass `exactMatch` as `false` to relax the requirement.
 ///
 ///     // Will not throw error if `time` is an offset date-time or local date-time.
@@ -49,13 +49,13 @@ import Foundation
 ///     let swiftArray: [Any] = try Array(tomlArray)
 ///
 /// This causes all fields to be validated,
-/// and replaces all intermidiate ``TOMLArray``s with `[Any]`,
+/// and replaces all intermediate ``TOMLArray``s with `[Any]`,
 /// and all ``TOMLTable``s with `[String: Any]`.
 /// If any fields are invalid, a ``TOMLError`` is thrown.
 /// This can be slow.
 ///
 /// ``TOMLArray`` declares conformance to `Codable`,
-/// so you can us it as part of a larger Codable structure.
+/// so you can use it as part of a larger Codable structure.
 ///
 ///    struct Config: Codable {
 ///        let servers: TOMLArray // This works.

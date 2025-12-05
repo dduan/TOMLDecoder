@@ -4,11 +4,11 @@ From zero to decoding TOML, a minimal example.
 
 ### Install via SwiftPM
 
-TOMLDecoder is a Swift packgae with mimimal dependencies.
+TOMLDecoder is a Swift package with minimal dependencies.
 
 Let's assume you are starting with a [SwiftPM](https://docs.swift.org/swiftpm/documentation/packagemanagerdocs/) project.
 
-Add the folloving to your package dependencies:
+Add the following to your package dependencies:
 
 ```swift
 .package(url: "https://github.com/dduan/TOMLDecoder", .upToNextMinor(from: "0.3.2")),
@@ -83,5 +83,5 @@ let rootTable = try TOMLTable(source: tomlString)
 let owner = try rootTable.table(forKey: "owner")
 
 // Get a string from `owner`
-print(try owner.string(forKey: name)) // Tom Preston-Werner
+print(try owner.string(forKey: "name")) // Tom Preston-Werner
 ```

@@ -16,7 +16,7 @@ This library can do 2 things to TOML:
   convert TOML strings or byte sequences into strongly-typed,
   structured data, and provide access to parts of it.
 * **Decode**:
-  further convert the strutured data into your `Codeble` types
+  further convert the structured data into your `Codable` types
   according to your preferences.
 
 There's a topic for each of them below,

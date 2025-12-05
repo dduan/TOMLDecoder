@@ -1,30 +1,30 @@
 # How to Deserialize TOML
 
-Learn how TOMLDecoder converts TOML into structudred data.
+Learn how TOMLDecoder converts TOML into structured data.
 
 ## Overview
 
 TOML is a text-based document format
-consisted of different leaf data types like a integer,
+consisted of different leaf data types like an integer,
 or a local date;
 and structural types like a table or an array.
-If these sounds unfamilar to you,
+If these sounds unfamiliar to you,
 head over to [toml.io](https://toml.io) to read up on it.
 
 To represent information in a TOML document in Swift,
 we need a set of Swift types to represent each data type in TOML,
-and a some logic that converts the TOML text into these data type
+and some logic that converts the TOML text into these data type
 according to the rules defined by the TOML specification.
-The conversion proress is referred to as deserializing the data,
-or de-marsheling the data,
+The conversion process is referred to as deserializing the data,
+or de-marshalling the data,
 or parsing the data.
 
 TOML decoder picks a set of Swift types to represent each TOML data type.
-It also handles the parsing/deseralizing/de-marsheling for you.
+It also handles the parsing/deserializing/de-marshalling for you.
 This article explains both aspects of the library.
 
 _This may sound overly complicated.
-and you only care about getting your `Codeble`s.
+and you only care about getting your `Codable`s.
 In that case, checkout <doc:DecodingTOML>_.
 
 ## Representing TOML data types
@@ -32,7 +32,7 @@ In that case, checkout <doc:DecodingTOML>_.
 `TOMLDecoder` has two separate layers of APIs.
 The lower layer deals with deserialization.
 We sometimes refer to it as the parser.
-Each TOML type has a definitely, unambiguous counterpart in Swift.
+Each TOML type has a definite, unambiguous counterpart in Swift.
 Under no circumstances
 will the correspondence between the TOML and Swift types change.
 TOMLDecoder APIs in this layer reflects this strongly typed relation.
@@ -43,7 +43,7 @@ For each data type defined in TOML,
 there's a Swift type,
 either from the standard library,
 or from TOMLDecoder.
-Here the are.
+Here they are.
 
 | TOML             | Swift              |
 | ---------------- | ------------------ |
@@ -58,7 +58,7 @@ Here the are.
 | Array            | ``TOMLArray``      |
 | Table            | ``TOMLTable``      |
 
-TOML keys are always repreested by `Swift.String`
+TOML keys are always represented by `Swift.String`
 
 In TOML, structural types compose with each other.
 The same data structure may be written in different forms.
@@ -72,9 +72,9 @@ The Swift types representing date and time are provided by TOMLDecoder.
 
 ``OffsetDateTime``, and ``LocalDateTime`` are composed of
 ``LocalDate`` and ``LocalTime``.
-Therefore, the APIs allows retieving a ``LocalDate`` or a ``LocalDate``
+Therefore, the APIs allows retrieving a ``LocalDate`` or a ``LocalTime``
 from the larger data types,
-if you explictly specify it as a prference.
+if you explicitly specify it as a preference.
 These are the only exceptions for type safety in the parser.
 
 
@@ -98,7 +98,7 @@ let rootTable = try TOMLTable(source: tomlString)
 
 As promised,
 to retrieve values from the table,
-one must specify which TOML type are they expect.
+one must specify which TOML type they expect.
 And as a result,
 they'll get the value with the corresponding Swift type.
 
@@ -107,12 +107,12 @@ let hello = try rootTable.integer(forKey: "answer")
 ```
 
 This method will fail
-if the value for `anwswer` is not a integer,
+if the value for `answer` is not an integer,
 or if the key doesn't exist in the table.
 And the return value is a `Int64`.
 
-As the only other structuaral type,x
-``TOMLArray`` has similiar design when it comes to types.
+As the only other structural type,
+``TOMLArray`` has similar design when it comes to types.
 
 ```swift
 // A table can contain an array as a value
@@ -120,7 +120,7 @@ let questions: TOMLArray = try rootTable.array(forKey: "questions")
 let question2 = try questions.string(atIndex: 1)
 ```
 
-## The Deserielization Process
+## The Deserialization Process
 
 Next,
 let's talk a little about the deserialization process.
@@ -163,18 +163,18 @@ the APIs for them requres you to `try`.
 
 ```swift
 // Phase 1
-let rootTable = try TOMLTable(source: tomlStrign)
+let rootTable = try TOMLTable(source: tomlString)
 // Phase 2
 let answer = try rootTable.integer(forKey: "answer")
 ```
 
-If anything goes wrong, a ``TOMLError` is thrown.
+If anything goes wrong, a ``TOMLError`` is thrown.
 
 ## Forget your types! I want Swift!
 
 Well, you can't really ignore the leaf types.
 
-BUT, you can replace all the structuaral types
+BUT, you can replace all the structural types
 with `[String: Any]`s and `[Any]`s by using
 the respective `init`s provided by TOMLDecoder.
 
