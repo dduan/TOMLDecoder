@@ -4,15 +4,6 @@ import Testing
 
 @Suite
 struct DateStrategyTests {
-    var rfc3339Style: Date.ISO8601FormatStyle {
-        Date.ISO8601FormatStyle()
-            .year()
-            .month()
-            .day()
-            .time(includingFractionalSeconds: true)
-            .timeZone(separator: .omitted)
-    }
-
     @Test(.tags(.datetime))
     func `datetime as Date by key`() throws {
         struct Test: Decodable {
@@ -46,7 +37,7 @@ struct DateStrategyTests {
 
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Test.self, from: toml)
-        let expected = try rfc3339Style.parse("2021-01-01T00:00:00.000567-12:34")
+        let expected = Date(timeIntervalSince1970: 1_609_504_440.000567)
         #expect(result.datetime == expected)
     }
 
@@ -165,7 +156,7 @@ struct DateStrategyTests {
 
         let decoder = TOMLDecoder()
         let result = try decoder.decode(Test.self, from: toml)
-        let expected = try rfc3339Style.parse("2021-01-01T00:00:00.000567-12:34")
+        let expected = Date(timeIntervalSince1970: 1_609_504_440.000567)
         #expect(result.datetimes == [expected])
     }
 

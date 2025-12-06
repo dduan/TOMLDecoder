@@ -5,7 +5,7 @@ template_name = Path(__file__).name
 generated_file = template_name[:-4] if template_name.endswith('.gyb') else template_name
 configs = [
     ("Span<UInt8>", "@available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)"),
-    ("UnsafeBufferPointer<UInt8>", "@available(iOS 12, macOS 13, watchOS 4, tvOS 12, visionOS 1, *)"),
+    ("UnsafeBufferPointer<UInt8>", "@available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)"),
 ]
 }%
 //  WARNING: This file is generated from ${template_name}
