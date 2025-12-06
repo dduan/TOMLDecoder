@@ -65,17 +65,12 @@ final class _TOMLDecoder: Decoder {
 }
 
 extension TimeInterval {
-    init(from offsetDateTime: OffsetDateTime, strategy: TOMLDecoder.Strategy.OffsetDateTime) throws {
+    init(from offsetDateTime: OffsetDateTime, strategy: TOMLDecoder.TimeIntervalStrategy) throws {
         switch strategy {
-        case .intervalSince1970:
+        case .since1970:
             self = offsetDateTime.timeIntervalSince1970
-        case .intervalSince2001:
+        case .since2001:
             self = offsetDateTime.timeIntervalSince2001
-        default:
-            throw DecodingError.dataCorrupted(DecodingError.Context(
-                codingPath: [],
-                debugDescription: "Invalid strategy \(strategy) for OffsetDateTime conversion to TimeInterval",
-            ))
         }
     }
 }

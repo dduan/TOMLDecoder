@@ -61,7 +61,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .intervalSince1970
+        decoder.strategy.timeInterval = .since1970
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetime == 1_609_504_440.000567)
     }
@@ -77,7 +77,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .intervalSince2001
+        decoder.strategy.timeInterval = .since2001
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetime == 631_197_240.000567)
     }
@@ -93,7 +93,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .dateFromProlepticGregorianCalendar
+        decoder.strategy.date = .prolepticGregorianCalendar
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetime.timeIntervalSince1970 == -61_504_399_559.999435)
     }
@@ -109,7 +109,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .dateFromCalendar(identifiedBy: .gregorian)
+        decoder.strategy.date = .calendar(identifiedBy: .gregorian)
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetime.timeIntervalSince1970 == 1_609_504_440.000567)
     }
@@ -180,7 +180,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .intervalSince1970
+        decoder.strategy.timeInterval = .since1970
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetimes == [1_609_504_440.000567])
     }
@@ -196,7 +196,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .intervalSince2001
+        decoder.strategy.timeInterval = .since2001
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetimes == [631_197_240.000567])
     }
@@ -212,7 +212,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .dateFromProlepticGregorianCalendar
+        decoder.strategy.date = .prolepticGregorianCalendar
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetimes.map(\.timeIntervalSince1970) == [-61_504_399_559.999435])
     }
@@ -228,7 +228,7 @@ struct DateStrategyTests {
         """
 
         var decoder = TOMLDecoder()
-        decoder.strategy.offsetDateTime = .dateFromCalendar(identifiedBy: .gregorian)
+        decoder.strategy.date = .calendar(identifiedBy: .gregorian)
         let result = try decoder.decode(Test.self, from: toml)
         #expect(result.datetimes.map(\.timeIntervalSince1970) == [1_609_504_440.000567])
     }

@@ -33,7 +33,7 @@ public struct TOMLDecoder {
     /// But the decoding may still fail during the type conversion because
     /// the requested type cannot fully represent the specific value.
     /// (For example,
-    /// an integer might be too large to be represented by a type such as `Int8`).p
+    /// an integer might be too large to be represented by a type such as `Int8`).
     /// When `isLenient` is set to `false`,
     /// attempts to decode a TOML value into anything other than the original
     /// deserialized values
@@ -45,11 +45,14 @@ public struct TOMLDecoder {
 
     /// Customize the decoding behavior of a `TOMLDecoder`.
     ///
-    /// Use ``Strategy/Key`` to customize how a TOML key gets mapped
+    /// Use ``KeyStrategy`` to customize how a TOML key gets mapped
     /// to the property name of a `Codable`.
     ///
-    /// Use ``Strategy/OffsetDateTime`` to specify how TOML offset date-times
-    /// are interpreted.
+    /// Use ``TimeIntervalStrategy`` to specify how TOML offset date-times
+    /// are interpreted as `TimeInterval`s.
+    ///
+    /// Use ``DateStrategy`` to specify how TOML offset date-times
+    /// are interpreted as `Date`s.
     ///
     /// Defaults to ``TOMLDecoder/Strategy/default``.
     public var strategy: Strategy
@@ -71,116 +74,56 @@ public struct TOMLDecoder {
     /// Choose how a TOML table's key is mapped to a `Codable`'s property
     /// via ``Strategy/key``.
     ///
-    /// Choose how a TOML offset date-time gets interpreted with
-    /// ``Strategy/offsetDateTime``.
+    /// Use ``TimeIntervalStrategy`` to specify how TOML offset date-times
+    /// are interpreted as `TimeInterval`s.
+    ///
+    /// Use ``DateStrategy`` to specify how TOML offset date-times
+    /// are interpreted as `Date`s.
     public struct Strategy: Sendable {
-        /// Specifies how a TOML offset date-time is re-interpreted as a date,
-        /// or a time interval.
-        ///
-        ///  Has no effects on properties of type ``/TOMLDecoder/OffsetDateTime``.
-        ///
-        ///  See ``OffsetDateTime`` to learn more.
-        public var offsetDateTime: OffsetDateTime
-
         /// Specifies how a TOML table's key is mapped to the name of a `Decodable`'s property.
         ///
-        /// For example, ``Key/convertFromSnakeCase`` maps a key in TOML written as `foo_bar`
+        /// For example, ``/TOMLDecoder/TOMLDecoder/KeyStrategy/convertFromSnakeCase``
+        /// maps a key in TOML written as `foo_bar`
         /// to the corresponding property `fooBar` in the Swift type.
         ///
-        /// See ``Key`` to learn more.
-        public var key: Key
+        /// See ``KeyStrategy`` to learn more.
+        public var key: KeyStrategy
+
+        /// Specifies how a TOML offset date-time is re-interpreted as a date.
+        ///
+        /// See ``DateStrategy`` to learn more.
+        public var date: DateStrategy
+
+        /// Specifies how a TOML offset date-time is re-interpreted as a
+        /// time interval.
+        ///
+        /// See ``TimeIntervalStrategy`` to learn more.
+        public var timeInterval: TimeIntervalStrategy
 
         /// Creates a `Strategy`.
         ///
         /// - Parameters:
-        ///   - offsetDateTime: strategy for TOML offset date-time.
         ///   - key: strategy for TOML table keys.
+        ///   - timeInterval: strategy for converting offset date-times to
+        ///     `Foundation.TimeInterval`s.
+        ///   - date: strategy for converting a offset date-times to
+        ///     `Foundation.Date`s.
         public init(
-            offsetDateTime: OffsetDateTime = .dateFromGregorianCalendar,
-            key: Key = .useOriginalKeys,
+            key: KeyStrategy = .useOriginalKeys,
+            date: DateStrategy = .gregorianCalendar,
+            timeInterval: TimeIntervalStrategy = .since1970,
         ) {
-            self.offsetDateTime = offsetDateTime
             self.key = key
+            self.timeInterval = timeInterval
+            self.date = date
         }
 
         /// ``TOMLDecoder``'s default strategy.
         public static let `default` = Strategy(
-            offsetDateTime: .dateFromGregorianCalendar,
             key: .useOriginalKeys,
+            date: .gregorianCalendar,
+            timeInterval: .since1970,
         )
-
-        /// Specifies how to represent a TOML offset date-time.
-        ///
-        /// A valid offset date-time is always internally parsed as a ``/TOMLDecoder/OffsetDateTime``.
-        /// But sometimes you need it as a `Date` from Foundation,
-        /// or a time interval since a certain reference date.
-        /// For each of these types,
-        /// there are a number of ways to interpret the literal offset date-time.
-        ///
-        /// To represent a offset date-time as a time interval,
-        /// specify a reference date by
-        /// ``OffsetDateTime/intervalSince1970`` or ``OffsetDateTime/intervalSince2001``.
-        public enum OffsetDateTime: Sendable {
-            case intervalSince1970
-            case intervalSince2001
-            case dateFromGregorianCalendar
-            case dateFromCalendar(identifiedBy: Calendar.Identifier)
-            case dateFromProlepticGregorianCalendar
-        }
-
-        /// Strategy for mapping TOML table keys to `Codable` or `Decodable` property names.
-        ///
-        /// You may choose to use the TOML key as-is,
-        /// map a snake_case to a camelCase,
-        /// or apply a custom function that maps the original TOML key to a property name.
-        ///
-        ///   let tomlData = """
-        ///   first_name = "Tom"
-        ///   """
-        ///   struct Person: Codable {
-        ///       let firstName: String
-        ///   }
-        ///
-        ///   // even though it's `first_name` in the TOML,
-        ///   // we choose to map it to `Person.firstName`.
-        ///   let decoder = TOMLDecoder(strategy: .init(key: .convertFromSnakeCase))
-        ///   try print(decoder.decode(Person.self, from: tomlData).firstName) // Tom
-        public enum Key: Sendable {
-            /// Use the keys specified by each type.
-            /// This is the default strategy.
-            case useOriginalKeys
-
-            /// Convert from "snake_case_keys" to "camelCaseKeys"
-            /// before attempting to match a key with the one specified by each type.
-            ///
-            /// Converting from snake case to camel case:
-            /// 1. Capitalizes the word starting after each `_`
-            /// 2. Removes all `_`
-            /// 3. Preserves starting and ending `_`
-            ///    (as these are often used to indicate private variables or other metadata).
-            ///    for example,
-            ///    `one_two_three` becomes `oneTwoThree`.
-            ///    `_one_two_three_` becomes `_oneTwoThree_`.
-            ///
-            /// - Note: Using a key decoding strategy has a nominal performance cost,
-            ///   as each string key has to be inspected for the `_` character.
-            case convertFromSnakeCase
-
-            /// Provide a custom conversion from the key in the encoded TOML
-            /// to the keys specified by the decoded types.
-            case custom(@Sendable (String) -> String)
-
-            var converter: (@Sendable (String) -> String)? {
-                switch self {
-                case .useOriginalKeys:
-                    nil
-                case .convertFromSnakeCase:
-                    snakeCasify(_:)
-                case let .custom(custom):
-                    custom
-                }
-            }
-        }
     }
 
     /// Decode `Data` representing a TOML document into `type`.
@@ -219,6 +162,108 @@ public struct TOMLDecoder {
 
         let decoder = _TOMLDecoder(referencing: .keyed(topLevel), at: [], strategy: strategy, isLenient: isLenient)
         return try type.init(from: decoder)
+    }
+}
+
+extension TOMLDecoder {
+    /// Specifies how to re-interpret a TOML offset date-time,
+    /// or a TOML float,
+    /// as a time interval.
+    ///
+    /// An offset date-time is always parsed as a ``OffsetDateTime`` first.
+    /// But sometimes you want it as a `Foundation.TimeInterval` or `Double`.
+    /// This is allowed as long as `/TOMLDecoder/TOMLDecoder/isLenient` is `true`.
+    public enum TimeIntervalStrategy: Sendable {
+        /// Interpret TOML offset date-times,
+        /// or TOML floats,
+        /// as a time interval since 1970-01-01T00:00:00Z.
+        case since1970
+
+        /// Interpret TOML offset date-times,
+        /// or TOML floats,
+        /// as a time interval since 2001-01-01T00:00:00Z.
+        case since2001
+    }
+
+    /// Specifies how to re-interpret a TOML offset date-time as a Foundation `Date`.
+    ///
+    /// An offset date-time is always parsed as a ``OffsetDateTime`` first.
+    /// But sometimes you need it as a `Foundation.Date`.
+    /// This is allowed as long as `/TOMLDecoder/TOMLDecoder/isLenient` is `true`.
+    ///
+    /// If you don't deal with ancient dates earlier than 1582-10-04,
+    /// you should use ``/TOMLDecoder/TOMLDecoder/DateStrategy/gregorianCalendar``.
+    ///
+    /// This strategy exists because Foundation's Gregorian calendar is *not* proleptic.
+    /// Read <doc:DecodingTOML#Date-strategies> to learn more about this.
+    public enum DateStrategy: Sendable {
+        /// Give the components from a TOML offset date-time to Foundation's Gregorian calendar
+        /// to create a `Foundation.Date`.
+        case gregorianCalendar
+
+        /// Give the components from a TOML offset date-time to a custom calendar from Foundation
+        /// specified by a `Foundation.Calendar.Identifier`
+        /// to create a `Foundation.Date`.
+        case calendar(identifiedBy: Calendar.Identifier)
+
+        /// Calculate the number of seconds using a proleptic Gregorian calendar.
+        /// Then use it to create a `Foundation.Date`.
+        /// For modern dates, this should result in the same `Foundation.Date` as ``gregorianCalendar``.
+        case prolepticGregorianCalendar
+    }
+
+    /// Strategy for mapping TOML table keys to `Codable` or `Decodable` property names.
+    ///
+    /// You may choose to use the TOML key as-is,
+    /// map a snake_case to a camelCase,
+    /// or apply a custom function that maps the original TOML key to a property name.
+    ///
+    ///   let tomlData = """
+    ///   first_name = "Tom"
+    ///   """
+    ///   struct Person: Codable {
+    ///       let firstName: String
+    ///   }
+    ///
+    ///   // even though it's `first_name` in the TOML,
+    ///   // we choose to map it to `Person.firstName`.
+    ///   let decoder = TOMLDecoder(strategy: .init(key: .convertFromSnakeCase))
+    ///   try print(decoder.decode(Person.self, from: tomlData).firstName) // Tom
+    public enum KeyStrategy: Sendable {
+        /// Use the keys specified by each type.
+        /// This is the default strategy.
+        case useOriginalKeys
+
+        /// Convert from "snake_case_keys" to "camelCaseKeys"
+        /// before attempting to match a key with the one specified by each type.
+        ///
+        /// Converting from snake case to camel case:
+        /// 1. Capitalizes the word starting after each `_`
+        /// 2. Removes all `_`
+        /// 3. Preserves starting and ending `_`
+        ///    (as these are often used to indicate private variables or other metadata).
+        ///    for example,
+        ///    `one_two_three` becomes `oneTwoThree`.
+        ///    `_one_two_three_` becomes `_oneTwoThree_`.
+        ///
+        /// - Note: Using a key decoding strategy has a nominal performance cost,
+        ///   as each string key has to be inspected for the `_` character.
+        case convertFromSnakeCase
+
+        /// Provide a custom conversion from the key in the encoded TOML
+        /// to the keys specified by the decoded types.
+        case custom(@Sendable (String) -> String)
+
+        var converter: (@Sendable (String) -> String)? {
+            switch self {
+            case .useOriginalKeys:
+                nil
+            case .convertFromSnakeCase:
+                snakeCasify(_:)
+            case let .custom(custom):
+                custom
+            }
+        }
     }
 }
 
