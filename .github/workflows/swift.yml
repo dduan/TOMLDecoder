@@ -30,43 +30,35 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-15
-            platform: iOS
+          - platform: iOS
             os_version: "18.5"
             destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5"
             sdk: iphonesimulator
-          - os: macos-15
-            platform: tvOS
+          - platform: tvOS
             os_version: "18.5"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=18.5"
             sdk: appletvsimulator
-          - os: macos-15
-            platform: watchOS
+          - platform: watchOS
             os_version: "11.5"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.5"
             sdk: watchsimulator
-          - os: macos-15
-            platform: visionOS
+          - platform: visionOS
             os_version: "2.5"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.5"
             sdk: xrsimulator
-          - os: macos-26
-            platform: iOS
+          - platform: iOS
             os_version: "26.1"
             destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1"
             sdk: iphonesimulator
-          - os: macos-26
-            platform: tvOS
+          - platform: tvOS
             os_version: "26.1"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=26.1"
             sdk: appletvsimulator
-          - os: macos-26
-            platform: watchOS
+          - platform: watchOS
             os_version: "26.1"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.1"
             sdk: watchsimulator
-          - os: macos-26
-            platform: visionOS
+          - platform: visionOS
             os_version: "26.1"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.1"
             sdk: xrsimulator
