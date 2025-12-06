@@ -208,7 +208,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
             return try token.unpackFloat(source: source, context: context)
         } catch let floatError {
             do {
-                return try Double(from: decode(OffsetDateTime.self), strategy: strategy.offsetDateTime)
+                return try Double(from: decode(OffsetDateTime.self), strategy: strategy.timeInterval)
             } catch let error as DecodingError {
                 throw error
             } catch {
@@ -325,28 +325,22 @@ extension _TOMLDecoder {
             throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "No date found."))
         }
 
-        switch strategy.offsetDateTime {
-        case .intervalSince1970:
-            let float = try decode(Double.self)
-            return Date(timeIntervalSince1970: float)
-        case .intervalSince2001:
-            let float = try decode(Double.self)
-            return Date(timeIntervalSinceReferenceDate: float)
-        case .dateFromGregorianCalendar:
+        switch strategy.date {
+        case .gregorianCalendar:
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: .gregorian))
             } catch {
                 throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
             }
-        case let .dateFromCalendar(identifier):
+        case let .calendar(identifiedBy: identifier):
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(offsetDateTime: offsetDateTime, calendar: Calendar(identifier: identifier))
             } catch {
                 throw DecodingError.valueNotFound(Date.self, DecodingError.Context(codingPath: codingPath, debugDescription: "\(error)", underlyingError: error))
             }
-        case .dateFromProlepticGregorianCalendar:
+        case .prolepticGregorianCalendar:
             do {
                 let offsetDateTime = try decode(OffsetDateTime.self)
                 return Date(timeIntervalSinceReferenceDate: offsetDateTime.timeIntervalSince2001)

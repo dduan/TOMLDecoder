@@ -57,16 +57,51 @@ different decoding strategies.
 To change how table keys maps into your property names,
 set ``/TOMLDecoder/TOMLDecoder/Strategy/key``.
 for example,
-``/TOMLDecoder/TOMLDecoder/Strategy/Key/convertFromSnakeCase``
+``/TOMLDecoder/TOMLDecoder/KeyStrategy/convertFromSnakeCase``
 causes a key `ice_cream` in TOML
 to map to the property `iceCream` on your `Decodable` type.
 
-### Offset date-time strategies
+### Time interval strategies
 
-To change the way a TOML offset date-time is interpreted,
-set ``/TOMLDecoder/TOMLDecoder/Strategy/offsetDateTime``.
+You may choose to represent a TOML offset date-time as a time interval since a reference date.
 
-This option has no effect if the decoded property is a  ``/TOMLDecoder/OffsetDateTime``.
+You may also choose to interpret a TOML float as a time interval from a reference date.
+
+Both are allowed as long as `/TOMLDecoder/TOMLDecoder/isLenient` is `true`.
+
+You can control the reference date by setting ``/TOMLDecoder/TOMLDecoder/Strategy/timeInterval``.
+
+This option has no effect if the decoded property is a ``/TOMLDecoder/OffsetDateTime``.
+
+### Date strategies
+
+In TOML, a offset date-time represents a point in time.
+It's supposed to be interpreted as a date on the *proleptic Gregorian calendar*.
+That's a fancy way of saying a date in the current Gregorian calendar system,
+applied backwards as if it has always been in use.
+
+A point in time is conventionally represented as a `Foundation.Date` in Swift.
+However, Foundation's Gregorian calendar is *not* proleptic.
+It uses the *Julian calendar* for dates before October 15, 1582.
+If one constructs a `DateComponents` with a old date prior to that cutoff date,
+and creates a `Date` from it using Foundation's Gregorian calendar,
+the `.timeInteralSince1970` property of the resulting `Date` will disagree
+with the inteneded point in time in TOML.
+But this isn't a problem for modern dates.
+
+For this reason,
+`/TOMLDecoder/TOMLDecoder/DateStrategy` provides options for dealing with this
+discrepancy for `Foundation` dates.
+A TOML offset date-time provides the components of a date.
+This strategy lets you decide how the components are converted into a `Foundation.Date`.
+
+By default, the date conversion is done by Foundation's Gregorian calendar.
+You may also choose an arbitrary calendar by specifying an calendar identifier.
+Or, you can choose the proleptic Gregorian calendar,
+which means the number of seconds are calculated by TOMLDecoder using the
+proleptic Gregorian rules, and then used to create the `Date`.
+
+If you only need to deal with modern dates, the default option should be sufficient.
 
 ## Supported type conversions
 
@@ -104,7 +139,7 @@ TOMLDecoder will attempt to convert it to a `Float`.
 
 You may also interpret a float as a time interval,
 and represent it as a `Foundation.Date`.
-See ``/TOMLDecoder/TOMLDecoder/Strategy/OffsetDateTime``.
+See ``/TOMLDecoder/TOMLDecoder/TimeIntervalStrategy``.
 
 ### TOML String
 
@@ -125,8 +160,10 @@ TOMLDecoder will attempt to convert it to
 When converting to local date/time types,
 the timezone offset is discarded.
 
-See ``/TOMLDecoder/TOMLDecoder/Strategy/OffsetDateTime``
-to learn about conversion to `Date` or `Double`.
+See ``/TOMLDecoder/TOMLDecoder/TimeIntervalStrategy``
+to learn about conversion to `Double`.
+
+See ``/TOMLDecoder/TOMLDecoder/DateStrategy`` about conversion to `Date`.
 
 ### TOML Local Date-Time
 

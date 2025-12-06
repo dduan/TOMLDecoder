@@ -42,8 +42,9 @@ the decoder's behaviors.
 - ``TOMLDecoder``
 - ``TOMLDecoder/isLenient``
 - ``TOMLDecoder/Strategy``
-- ``TOMLDecoder/Strategy/Key``
-- ``TOMLDecoder/Strategy/OffsetDateTime``
+- ``TOMLDecoder/KeyStrategy``
+- ``TOMLDecoder/TimeIntervalStrategy``
+- ``TOMLDecoder/DateStrategy``
 
 ### Deserializing TOML
 
