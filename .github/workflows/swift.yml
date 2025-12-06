@@ -2,64 +2,79 @@ name: Swift Tests
 on: [push]
 jobs:
   swift-test:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    name: ${{ matrix.os_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, windows-2025, macos-15, macos-26]
-        swift: ["6.2"]
+        include:
+          - os: ubuntu-24.04
+            os_name: Ubunto 24.04
+          - os: windows-2025
+            os_name: Windows 2025
+          - os: macos-15
+            os_name: macOS 15
+          - os: macos-26
+            os_name: macOS 26
     steps:
       - uses: SwiftyLab/setup-swift@latest
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: 6.2
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Run tests
         run: swift test
 
   simulator-test:
-    name: ${{ matrix.platform }} on ${{ matrix.os }}
+    name: ${{ matrix.platform }} ${{ matrix.os_version }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: macos-15
             platform: iOS
+            os_version: "18.5"
             scheme: TOMLDecoder-Package
             destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5"
             sdk: iphonesimulator
           - os: macos-15
             platform: tvOS
+            os_version: "18.5"
             scheme: TOMLDecoder-Package
             destination: "platform=tvOS Simulator,name=Apple TV,OS=18.5"
             sdk: appletvsimulator
           - os: macos-15
             platform: watchOS
+            os_version: "11.5"
             scheme: TOMLDecoder-Package
             destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.5"
             sdk: watchsimulator
           - os: macos-15
             platform: visionOS
+            os_version: "2.5"
             scheme: TOMLDecoder-Package
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.5"
             sdk: xrsimulator
           - os: macos-26
             platform: iOS
+            os_version: "26.1"
             scheme: TOMLDecoder-Package
             destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1"
             sdk: iphonesimulator
           - os: macos-26
             platform: tvOS
+            os_version: "26.1"
             scheme: TOMLDecoder-Package
             destination: "platform=tvOS Simulator,name=Apple TV,OS=26.1"
             sdk: appletvsimulator
           - os: macos-26
             platform: watchOS
+            os_version: "26.1"
             scheme: TOMLDecoder-Package
             destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.1"
             sdk: watchsimulator
           - os: macos-26
             platform: visionOS
+            os_version: "26.1"
             scheme: TOMLDecoder-Package
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.1"
             sdk: xrsimulator
