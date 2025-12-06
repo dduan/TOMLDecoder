@@ -8,7 +8,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            os_name: Ubunto 24.04
+            os_name: Ubuntu 24.04
           - os: windows-2025
             os_name: Windows 2025
           - os: macos-15
