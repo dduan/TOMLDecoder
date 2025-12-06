@@ -6,13 +6,87 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-15, macos-26, windows-2025]
+        os: [ubuntu-24.04, windows-2025]
         swift: ["6.2"]
+        include:
+          - os: macos-15
+            swift: "6.2"
+            xcode_path: /Applications/Xcode_16.4.app
+          - os: macos-26
+            swift: "6.2"
+            xcode_path: /Applications/Xcode_26.1.1.app
     steps:
-    - uses: SwiftyLab/setup-swift@latest
-      with:
-        swift-version: ${{ matrix.swift }}
-    - name: Checkout source
-      uses: actions/checkout@v2
-    - name: Run tests
-      run: swift test
+      - uses: SwiftyLab/setup-swift@latest
+        if: runner.os != 'macOS'
+        with:
+          swift-version: ${{ matrix.swift }}
+      - name: Select Xcode
+        if: runner.os == 'macOS'
+        run: sudo xcode-select -s ${{ matrix.xcode_path }}
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: swift test
+
+  simulator-test:
+    name: ${{ matrix.platform }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-15
+            platform: iOS
+            xcode_path: /Applications/Xcode_16.4.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5"
+            sdk: iphonesimulator
+          - os: macos-15
+            platform: tvOS
+            xcode_path: /Applications/Xcode_16.4.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=tvOS Simulator,name=Apple TV,OS=18.5"
+            sdk: appletvsimulator
+          - os: macos-15
+            platform: watchOS
+            xcode_path: /Applications/Xcode_16.4.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.5"
+            sdk: watchsimulator
+          - os: macos-15
+            platform: visionOS
+            xcode_path: /Applications/Xcode_16.4.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.5"
+            sdk: xrsimulator
+          - os: macos-26
+            platform: iOS
+            xcode_path: /Applications/Xcode_26.1.1.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1"
+            sdk: iphonesimulator
+          - os: macos-26
+            platform: tvOS
+            xcode_path: /Applications/Xcode_26.1.1.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=tvOS Simulator,name=Apple TV,OS=26.1"
+            sdk: appletvsimulator
+          - os: macos-26
+            platform: watchOS
+            xcode_path: /Applications/Xcode_26.1.1.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.1"
+            sdk: watchsimulator
+          - os: macos-26
+            platform: visionOS
+            xcode_path: /Applications/Xcode_26.1.1.app
+            scheme: TOMLDecoder-Package
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.1"
+            sdk: xrsimulator
+    steps:
+      - name: Select Xcode
+        run: sudo xcode-select -s ${{ matrix.xcode_path }}
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Run simulator test
+        run: |
+          xcodebuild -scheme "${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test
