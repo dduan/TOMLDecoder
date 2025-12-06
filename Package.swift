@@ -78,7 +78,7 @@ var benchmarkTargets: [Target] = includeBenchmarks ? [
 
 let package = Package(
     name: "TOMLDecoder",
-    platforms: [.iOS(.v12), .tvOS(.v12), .watchOS(.v4), .macOS(.v13), .visionOS(.v1)],
+    platforms: [.iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macOS(.v10_15), .visionOS(.v1)],
     products: [
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),

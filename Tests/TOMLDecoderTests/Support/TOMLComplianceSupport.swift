@@ -326,8 +326,12 @@ enum TOMLComplianceSupport {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let formatter2 = ISO8601DateFormatter()
         formatter2.formatOptions = [.withInternetDateTime]
-        let style = Date.ISO8601FormatStyle().dateTimeSeparator(.space)
-        let date = formatter.date(from: value) ?? formatter2.date(from: value) ?? (try? style.parse(value))
+
+        // Try with space separator format for TOML compliance
+        let formatter3 = ISO8601DateFormatter()
+        formatter3.formatOptions = [.withFullDate, .withFullTime, .withFractionalSeconds]
+
+        let date = formatter.date(from: value) ?? formatter2.date(from: value) ?? formatter3.date(from: value.replacingOccurrences(of: " ", with: "T"))
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 
