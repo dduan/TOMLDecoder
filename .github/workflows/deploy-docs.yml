@@ -34,15 +34,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          git config user.email "$(git show -s --format='%ae' HEAD)"
-          git config user.name "$(git show -s --format='%an' HEAD)"
-          rm -rf /tmp/public
-          cp -r Docs /tmp/public
-          git fetch origin gh-pages:refs/remotes/origin/gh-pages --depth=1
-          git checkout gh-pages
-          rm -rf ./*
-          rm -rf .build
-          cp -r /tmp/public/. ./
-          git add .
-          git commit -m "Deploy $GITHUB_SHA" || true
-          git push origin gh-pages || true
+          Scripts/deploy-docs.sh main
