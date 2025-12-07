@@ -1,1 +1,15 @@
+.DS_Store
+/.build
+/Packages
+xcuserdata
+.swiftpm
 tmp
+/result
+/bazel-*
+MODULE.bazel.lock
+/.vscode
+.claude
+tmp
+Docs
+Package.resolved
+.benchmarkBaselines
