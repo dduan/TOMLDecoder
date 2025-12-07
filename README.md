@@ -21,7 +21,7 @@ let team = try TOMLDecoder().decode(Team.self, from: tomlData)
 Read the [documentation][] to learn more!
 
 [TOML]: https://toml.io/
-[documentation]: https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
+[documentation]: https://dduan.github.io/TOMLDecoder/main/documentation/tomldecoder/
 
 ## License
 

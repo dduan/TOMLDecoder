@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [ "$#" -lt 1 ]; then
-    base_path="/TOMLDecoder"
+    base_path="/TOMLDecoder/main"
 else
     base_path="$1"
 fi
