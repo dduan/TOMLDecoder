@@ -1,6 +1,6 @@
 # Changelog
 
-Kids call this "release notes" these days.
+Also known as release notes.
 
 ## In Development
 
@@ -9,12 +9,23 @@ This release introduces source-breaking changes from 0.3.x.
 The lower-level parser APIs and architecture are introduced with an
 eye towards an eventual 1.0 release.
 
-### API change overview
+The parsing speed is significantly faster than 0.3.x releases.
 
-At the highest level, TOMLDecoder still serves the role of providing
-a `Swift.Decoder` implementation for the TOML language. A TOML table
-can be transformed directly to a Swift `Codable`, similar to what
-`Foundation.JSONDecoder` does for JSON.
+### API overview
+
+The type `TOMLDecoder` still serves as the entry point for decoding TOML into
+types that conforms to `Swift.Decodable`.
+This is similar to previous releases.
+
+The library still provides APIs to deserialize/parse/demarshal TOML documents
+into strutured data representations.
+During this process,
+Each TOML value,
+including container values,
+has a definitive, corresponding Swift type.
+The decoding process can be lenient,
+and convert these initial value types into compatible types in the `Decodable`s.
+
 
 #### Breaking changes
 
@@ -22,6 +33,11 @@ can be transformed directly to a Swift `Codable`, similar to what
 * Decoding strategies are represented and stored differently.
 * `Deserializer` is removed. Its functionalities are subsumed by
   new APIs.
+* New minimal Apple platform versions:
+  * iOS 13
+  * macOS 10.15
+  * tvOS 13
+  * watchOS 6
 
 #### New APIs
 
@@ -32,10 +48,10 @@ can be transformed directly to a Swift `Codable`, similar to what
 
 ### Infrastructure improvements
 
-The full toml-lang/toml-test suite is now imported as unit tests.
-
-A new documentation site:
-https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/
+* The full toml-lang/toml-test suite is now imported as unit tests.
+* [A new documentation site](https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/).
+* More comprehensive CI jobs.
+* New benchmark infra, and suite.
 
 ## 0.3.2
 
