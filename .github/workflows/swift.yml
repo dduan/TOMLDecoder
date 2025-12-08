@@ -1,5 +1,7 @@
 name: Swift Tests
-on: [push]
+on:
+  push:
+  pull_request:
 jobs:
   swift-test:
     name: ${{ matrix.os_name }}
@@ -26,6 +28,7 @@ jobs:
 
   simulator-test:
     name: ${{ matrix.platform }} ${{ matrix.os_version }}
+    if: github.event_name == 'pull_request'
     runs-on: macos-26
     strategy:
       matrix:
