@@ -11,7 +11,7 @@ Let's assume you are starting with a [SwiftPM](https://docs.swift.org/swiftpm/do
 Add the following to your package dependencies:
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", .upToNextMinor(from: "0.3.2")),
+.package(url: "https://github.com/dduan/TOMLDecoder", .upToNextMinor(from: "0.3.3")),
 ```
 
 

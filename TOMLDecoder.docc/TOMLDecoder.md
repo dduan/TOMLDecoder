@@ -66,3 +66,4 @@ is strictly mapped into a data type.
 
 - <doc:DevelopingTOMLDecoder>
 - <doc:CHANGELOG>
+- <doc:VersionedDocs>
