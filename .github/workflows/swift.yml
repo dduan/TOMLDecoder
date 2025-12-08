@@ -1,6 +1,5 @@
 name: Swift Tests
-on:
-  pull_request:
+on: [push]
 jobs:
   swift-test:
     name: ${{ matrix.os_name }}
