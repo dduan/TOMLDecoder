@@ -24,8 +24,6 @@ if [ -z "$DEVICE_NAME" ]; then
 fi
 
 echo "Device name: $DEVICE_NAME"
-echo "=== Runtimes before ensuring ==="
-xcrun simctl list runtimes || true
 
 # Find runtime identifier for this platform + OS version.
 # Example line:
