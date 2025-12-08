@@ -97,10 +97,3 @@ if ! xcrun simctl list devices "$PLATFORM $OS_VERSION" | grep -Fq "$DEVICE_NAME 
 else
   echo "Device '$DEVICE_NAME' already exists for $PLATFORM $OS_VERSION."
 fi
-
-# Optional: boot the device so xcodebuild doesn't have to
-xcrun simctl boot "$DEVICE_NAME" || true
-xcrun simctl bootstatus "$DEVICE_NAME" -b || true
-
-echo "=== Devices for $PLATFORM $OS_VERSION after ensuring ==="
-xcrun simctl list devices "$PLATFORM $OS_VERSION" || true
