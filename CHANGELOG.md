@@ -1,5 +1,10 @@
 ## Development
 
+## 0.3.3
+
+- Align Apple platforms to iOS 12 / macOS 10.14 / tvOS 12 / watchOS 5
+- Fix compile error on iOS for the compliance executable target
+
 ## 0.3.2
 
 - Improved runtime performance for decoding by using less containers while

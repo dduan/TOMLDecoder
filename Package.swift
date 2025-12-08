@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "TOMLDecoder",
-    platforms: [.iOS(.v12), .tvOS(.v12), .watchOS(.v4), .macOS(.v13)],
+    platforms: [.iOS(.v12), .tvOS(.v12), .watchOS(.v5), .macOS(.v10_14)],
     products: [
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),

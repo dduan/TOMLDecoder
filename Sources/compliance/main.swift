@@ -3,7 +3,31 @@
 import Foundation
 import TOMLDecoder
 
-if #available(macOS 12, *) {
+// iOS 13+ compatible date formatter functions
+private func createISO8601FullFormatter() -> ISO8601DateFormatter {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter
+}
+
+private func createISO8601DateTimeFormatter() -> ISO8601DateFormatter {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime]
+    return formatter
+}
+
+private func createISO8601TimeFormatter() -> ISO8601DateFormatter {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withTime, .withFractionalSeconds]
+    return formatter
+}
+
+private func createISO8601DateFormatter() -> ISO8601DateFormatter {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withFullDate]
+    return formatter
+}
+
 let input = FileHandle.standardInput.availableData
 guard let table = try? TOMLDecoder.tomlTable(from: input) else {
     exit(1)
@@ -11,7 +35,7 @@ guard let table = try? TOMLDecoder.tomlTable(from: input) else {
 
 func translate(value: Any) -> Any {
     if let table = value as? [String: Any] {
-        return table.reduce(into: [:]) { (result, pair) in
+        return table.reduce(into: [:]) { result, pair in
             result[pair.key] = translate(value: pair.value)
         }
     } else if let array = value as? [Any] {
@@ -25,7 +49,7 @@ func translate(value: Any) -> Any {
     } else if let value = value as? Bool {
         return ["type": "bool", "value": "\(value)"]
     } else if let value = value as? Date {
-        return ["type": "datetime", "value": value.formatted(.iso8601)]
+        return ["type": "datetime", "value": createISO8601FullFormatter().string(from: value)]
     } else if var value = value as? DateComponents {
         value.timeZone = TimeZone(secondsFromGMT: 0)
         let date = Calendar.current.date(from: value)!
@@ -36,23 +60,21 @@ func translate(value: Any) -> Any {
         switch (hasDate, hasTime) {
         case (true, true):
             type = "datetime-local"
-            content = date.formatted(.iso8601)
+            content = createISO8601DateTimeFormatter().string(from: date)
         case (false, true):
             type = "time-local"
-            content = date.formatted(.iso8601.time(includingFractionalSeconds: true))
+            content = createISO8601TimeFormatter().string(from: date)
         case (true, false):
             type = "date-local"
-            content = date.formatted(.iso8601.year().month().day())
+            content = createISO8601DateFormatter().string(from: date)
         default:
             fatalError()
         }
         return ["type": type, "value": content]
     } else {
-        fatalError()
+        fatalError("Unknown value type: \(type(of: value)) with value: \(value)")
     }
 }
 
-
 let json = try JSONSerialization.data(withJSONObject: translate(value: table))
 print(String(data: json, encoding: .utf8)!)
-}
