@@ -69,6 +69,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Ensure simulator runtime and device exist
+        if: ${{ matrix.platform != 'macOS' }}
         run: |
           Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.os_version }}" "${{ matrix.destination }}"
       - name: Run simulator test
