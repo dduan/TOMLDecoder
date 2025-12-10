@@ -1,5 +1,3 @@
-import Foundation
-
 final class _TOMLDecoder: Decoder {
     enum Container {
         case keyed(TOMLTable)
@@ -64,7 +62,7 @@ final class _TOMLDecoder: Decoder {
     }
 }
 
-extension TimeInterval {
+extension Double {
     init(from offsetDateTime: OffsetDateTime, strategy: TOMLDecoder.TimeIntervalStrategy) throws {
         switch strategy {
         case .since1970:

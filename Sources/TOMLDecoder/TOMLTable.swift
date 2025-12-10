@@ -1,5 +1,3 @@
-import Foundation
-
 extension TOMLTable {
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
         self.source = try TOMLDocument(source: source, keyTransform: keyTransform)

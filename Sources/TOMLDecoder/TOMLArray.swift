@@ -1,5 +1,3 @@
-import Foundation
-
 /// A parsed TOML array.
 ///
 /// This is a structural type that contains TOML fields accessible by index.

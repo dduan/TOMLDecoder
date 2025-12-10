@@ -1,5 +1,3 @@
-import Foundation
-
 struct Token: Equatable {
     enum Kind {
         case dot
