@@ -1,9 +1,3 @@
-import Foundation
-
-enum Constants {
-    static let anonymousArrayKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
-}
-
 enum CodeUnits {
     static let equal: UTF8.CodeUnit = 61
     static let comma: UTF8.CodeUnit = 44

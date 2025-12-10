@@ -431,6 +431,7 @@ extension String {
     }
 }
 
+#if canImport(Foundation)
 import Foundation
 
 extension DateComponents {
@@ -477,3 +478,4 @@ extension Date {
         self = components.date!
     }
 }
+#endif

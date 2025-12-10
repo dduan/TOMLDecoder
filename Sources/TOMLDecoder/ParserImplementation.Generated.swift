@@ -1,8 +1,6 @@
 //  WARNING: This file is generated from ParserImplementation.swift.gyb
 //  Do not edit ParserImplementation.swift directly.
 
-import Foundation
-
 extension Parser {
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
     mutating func parse(bytes: Span<UInt8>) throws(TOMLError) {
@@ -764,7 +762,7 @@ extension Parser {
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: Constants.anonymousArrayKey))
+            tables.append(InternalTOMLTable(key: anonymousArrayKey))
             arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
         }
@@ -820,7 +818,7 @@ extension Token {
             index += 1
         }
 
-        if isdigit(Int32(bytes[index])) == 0 {
+        if !bytes[index].isDecimalDigit {
             guard (
                 bytes[index] == CodeUnits.lowerN &&
                     bytes[index + 1] == CodeUnits.lowerA &&
@@ -853,7 +851,7 @@ extension Token {
                 if ch == CodeUnits.underscore {
                     guard
                         let last = resultCodeUnits.last,
-                        isdigit(Int32(last)) != 0
+                        last.isDecimalDigit
                     else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be preceded by a digit"))
                     }
@@ -861,7 +859,7 @@ extension Token {
                     guard
                         index < text.upperBound,
                         case let next = bytes[index],
-                        isdigit(Int32(next)) != 0
+                        next.isDecimalDigit
                     else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be follewed by a digit"))
                     }
@@ -876,7 +874,7 @@ extension Token {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'.' must be preceded by a decimal digit"))
                     }
 
-                    guard index < text.upperBound, isdigit(Int32(bytes[index])) != 0 else {
+                    guard index < text.upperBound, bytes[index].isDecimalDigit else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "A digit must follow '.'"))
                     }
 
@@ -1157,7 +1155,7 @@ extension Token {
                 var endIndex = index
                 while endIndex < text.upperBound {
                     let ch = bytes[endIndex]
-                    if isdigit(Int32(ch)) != 0 || ch == CodeUnits.colon {
+                    if ch.isDecimalDigit || ch == CodeUnits.colon {
                         endIndex += 1
                     } else {
                         break
@@ -1255,11 +1253,11 @@ func parseTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>, lineNumber: Int)
     // Parse hour digits (exactly 2 required)
     guard
         index < range.upperBound,
-        isdigit(Int32(bytes[index])) != 0,
+        bytes[index].isDecimalDigit,
         case let firstHourDigit = bytes[index],
         case let nextIndex = index + 1,
         nextIndex < range.upperBound,
-        isdigit(Int32(bytes[nextIndex])) != 0,
+        bytes[nextIndex].isDecimalDigit,
         case let secondHourDigit = bytes[nextIndex]
     else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset hour must be exactly 2 digits"))
@@ -1279,11 +1277,11 @@ func parseTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>, lineNumber: Int)
 
     guard
         index < range.upperBound,
-        isdigit(Int32(bytes[index])) != 0,
+        bytes[index].isDecimalDigit,
         case let firstMinuteDigit = bytes[index],
         case let nextMinuteIndex = index + 1,
         nextMinuteIndex < range.upperBound,
-        isdigit(Int32(bytes[nextMinuteIndex])) != 0,
+        bytes[nextMinuteIndex].isDecimalDigit,
         case let secondMinuteDigit = bytes[nextMinuteIndex]
     else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset minute must be exactly 2 digits"))
@@ -1501,7 +1499,7 @@ func scanDigits(bytes: Span<UInt8>, range: Range<Int>, n: Int) -> Int? {
     var result = 0
     var n = n
     var index = range.lowerBound
-    while n > 0, index < range.upperBound, isdigit(Int32(bytes[index])) != 0 {
+    while n > 0, index < range.upperBound, bytes[index].isDecimalDigit {
         result = 10 * result + Int(bytes[index]) - Int(CodeUnits.number0)
         index += 1
         n -= 1
@@ -1546,7 +1544,7 @@ func parseNanoSeconds(bytes: Span<UInt8>, range: Range<Int>, updatedIndex: inout
     var unit: Double = 100_000_000
     var result: Double = 0
     var index = range.lowerBound
-    while index < range.upperBound, isdigit(Int32(bytes[index])) != 0 {
+    while index < range.upperBound, bytes[index].isDecimalDigit {
         result += Double(bytes[index] - CodeUnits.number0) * unit
         index += 1
         unit /= 10
@@ -2385,7 +2383,7 @@ extension Parser {
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: Constants.anonymousArrayKey))
+            tables.append(InternalTOMLTable(key: anonymousArrayKey))
             arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
         }
@@ -2441,7 +2439,7 @@ extension Token {
             index += 1
         }
 
-        if isdigit(Int32(bytes[index])) == 0 {
+        if !bytes[index].isDecimalDigit {
             guard (
                 bytes[index] == CodeUnits.lowerN &&
                     bytes[index + 1] == CodeUnits.lowerA &&
@@ -2474,7 +2472,7 @@ extension Token {
                 if ch == CodeUnits.underscore {
                     guard
                         let last = resultCodeUnits.last,
-                        isdigit(Int32(last)) != 0
+                        last.isDecimalDigit
                     else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be preceded by a digit"))
                     }
@@ -2482,7 +2480,7 @@ extension Token {
                     guard
                         index < text.upperBound,
                         case let next = bytes[index],
-                        isdigit(Int32(next)) != 0
+                        next.isDecimalDigit
                     else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'_' must be follewed by a digit"))
                     }
@@ -2497,7 +2495,7 @@ extension Token {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "'.' must be preceded by a decimal digit"))
                     }
 
-                    guard index < text.upperBound, isdigit(Int32(bytes[index])) != 0 else {
+                    guard index < text.upperBound, bytes[index].isDecimalDigit else {
                         throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "A digit must follow '.'"))
                     }
 
@@ -2778,7 +2776,7 @@ extension Token {
                 var endIndex = index
                 while endIndex < text.upperBound {
                     let ch = bytes[endIndex]
-                    if isdigit(Int32(ch)) != 0 || ch == CodeUnits.colon {
+                    if ch.isDecimalDigit || ch == CodeUnits.colon {
                         endIndex += 1
                     } else {
                         break
@@ -2876,11 +2874,11 @@ func parseTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, l
     // Parse hour digits (exactly 2 required)
     guard
         index < range.upperBound,
-        isdigit(Int32(bytes[index])) != 0,
+        bytes[index].isDecimalDigit,
         case let firstHourDigit = bytes[index],
         case let nextIndex = index + 1,
         nextIndex < range.upperBound,
-        isdigit(Int32(bytes[nextIndex])) != 0,
+        bytes[nextIndex].isDecimalDigit,
         case let secondHourDigit = bytes[nextIndex]
     else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset hour must be exactly 2 digits"))
@@ -2900,11 +2898,11 @@ func parseTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, l
 
     guard
         index < range.upperBound,
-        isdigit(Int32(bytes[index])) != 0,
+        bytes[index].isDecimalDigit,
         case let firstMinuteDigit = bytes[index],
         case let nextMinuteIndex = index + 1,
         nextMinuteIndex < range.upperBound,
-        isdigit(Int32(bytes[nextMinuteIndex])) != 0,
+        bytes[nextMinuteIndex].isDecimalDigit,
         case let secondMinuteDigit = bytes[nextMinuteIndex]
     else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset minute must be exactly 2 digits"))
@@ -3122,7 +3120,7 @@ func scanDigits(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, n: Int) ->
     var result = 0
     var n = n
     var index = range.lowerBound
-    while n > 0, index < range.upperBound, isdigit(Int32(bytes[index])) != 0 {
+    while n > 0, index < range.upperBound, bytes[index].isDecimalDigit {
         result = 10 * result + Int(bytes[index]) - Int(CodeUnits.number0)
         index += 1
         n -= 1
@@ -3167,7 +3165,7 @@ func parseNanoSeconds(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, upda
     var unit: Double = 100_000_000
     var result: Double = 0
     var index = range.lowerBound
-    while index < range.upperBound, isdigit(Int32(bytes[index])) != 0 {
+    while index < range.upperBound, bytes[index].isDecimalDigit {
         result += Double(bytes[index] - CodeUnits.number0) * unit
         index += 1
         unit /= 10
@@ -3333,3 +3331,5 @@ extension Parser {
         currentTable = tableIndex
     }
 }
+
+private let anonymousArrayKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
