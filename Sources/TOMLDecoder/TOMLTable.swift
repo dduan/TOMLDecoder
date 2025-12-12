@@ -21,18 +21,18 @@ extension TOMLTable {
     /// - Returns: A `TOMLTable` representing the root-level table of the TOML document.
     /// - Throws: A ``TOMLError`` if the document is invalid.
     public init(source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
-        try self.init(source: try String(validatingUTF8: source))
+        try self.init(source: String(validatingUTF8: source))
     }
 }
 
 // String.init(validating:as:) does not exist in our supported OSes.
-private extension String {
-    init(validatingUTF8 source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
+extension String {
+    fileprivate init(validatingUTF8 source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
         do {
             if let result = try source.withContiguousStorageIfAvailable(
                 { buffer -> String in
                     try validateAndCreateString(from: buffer)
-                }
+                },
             ) {
                 self = result
                 return
@@ -58,7 +58,7 @@ private func validateAndCreateString(from buffer: UnsafeBufferPointer<UInt8>) th
 
     validationLoop: while true {
         switch decoder.decode(&iterator) {
-        case .scalarValue(_):
+        case .scalarValue:
             continue
         case .emptyInput:
             break validationLoop
