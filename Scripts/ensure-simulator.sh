@@ -41,7 +41,7 @@ RUNTIME_ID="$(
 
 if [ -z "${RUNTIME_ID:-}" ]; then
   echo "Runtime for $PLATFORM $OS_VERSION not found. Attempting to download platform $PLATFORM..."
-  xcodebuild -downloadPlatform "$PLATFORM" || true
+  xcodebuild -downloadPlatform "$PLATFORM" -buildVersion $OS_VERSION || true
 
   RUNTIME_ID="$(
     xcrun simctl list runtimes | \
