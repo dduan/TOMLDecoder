@@ -17,6 +17,7 @@ echo "Destination: $DESTINATION"
 # Extract device name from DESTINATION between name= and ,OS=
 device_part="${DESTINATION#*name=}"
 DEVICE_NAME="${device_part%%,OS=*}"
+downloaded=false
 
 if [ -z "$DEVICE_NAME" ]; then
   echo "::error::Could not parse device name from DESTINATION: $DESTINATION" >&2
@@ -42,6 +43,7 @@ RUNTIME_ID="$(
 
 if [ -z "${RUNTIME_ID:-}" ]; then
   echo "Runtime for $PLATFORM $OS_VERSION not found. Attempting to download platform $PLATFORM..."
+  downloaded=true
   xcodebuild -downloadPlatform "$PLATFORM" -buildVersion "$OS_VERSION" || true
 
   RUNTIME_ID="$(
@@ -95,4 +97,8 @@ if ! xcrun simctl list devices "$PLATFORM $OS_VERSION" | grep -Fq "$DEVICE_NAME 
   xcrun simctl create "$DEVICE_NAME" "$DEVICE_TYPE_ID" "$RUNTIME_ID"
 else
   echo "Device '$DEVICE_NAME' already exists for $PLATFORM $OS_VERSION."
+fi
+
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "downloaded=$downloaded" >> "$GITHUB_OUTPUT"
 fi

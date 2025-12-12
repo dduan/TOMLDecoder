@@ -78,8 +78,10 @@ jobs:
             sudo tar -xzf "${RUNNER_TEMP}/sim-cache.tgz" -C /
           fi
       - name: Ensure simulator exists
+        id: ensure-simulator
         run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
       - name: Save simulator runtime cache tarball
+        if: steps.ensure-simulator.outputs.downloaded == 'true'
         run: |
           sudo tar -czf "${RUNNER_TEMP}/sim-cache.tgz" \
             /Library/Developer/CoreSimulator/Images \
