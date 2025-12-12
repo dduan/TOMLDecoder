@@ -28,6 +28,17 @@ fi
 
 echo "Device name: $DEVICE_NAME"
 
+device_exists_exact() {
+  local platform="$1"
+  local os_version="$2"
+  local device_name="$3"
+
+  xcrun simctl list devices --json | \
+    jq -e --arg platform "$platform" --arg os_version "$os_version" --arg name "$device_name" '
+      (.devices[$platform + " " + $os_version] // []) | map(select(.name == $name)) | length > 0
+    ' >/dev/null
+}
+
 find_runtime_id() {
   xcrun simctl list runtimes | \
     awk -v platform="$PLATFORM" -v ver="$OS_VERSION" '
@@ -83,7 +94,7 @@ echo "=== Devices for $PLATFORM $OS_VERSION before ensuring ==="
 xcrun simctl list devices "$PLATFORM $OS_VERSION" || true
 
 # Check if a device with this name already exists for that runtime
-if ! xcrun simctl list devices "$PLATFORM $OS_VERSION" | grep -Fq "$DEVICE_NAME ("; then
+if ! device_exists_exact "$PLATFORM" "$OS_VERSION" "$DEVICE_NAME"; then
   echo "No device named '$DEVICE_NAME' for $PLATFORM $OS_VERSION. Creating…"
 
   # Find a device type whose display name matches DEVICE_NAME
