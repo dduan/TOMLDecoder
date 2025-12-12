@@ -71,6 +71,8 @@ jobs:
             sdk: xrsimulator
             xcode_version: "26.1.1"
     steps:
+      - name: Look for Xcode
+        run: ls -l /Applications/Xcode*
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_"${{ matrix.xcode_version }}".app
       - name: Checkout source
