@@ -67,26 +67,9 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Restore simulator runtime cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/sim-cache.tgz
-          key: sim-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}-${{ matrix.platform }}-${{ matrix.os_version }}
-      - name: Attempt to Install simulator runtime
-        run: |
-          if [ -f "${RUNNER_TEMP}/sim-cache.tgz" ]; then
-            sudo tar -xzf "${RUNNER_TEMP}/sim-cache.tgz" -C /
-          fi
       - name: Ensure simulator exists
         id: ensure-simulator
         run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
-      - name: Save simulator runtime cache tarball
-        if: steps.ensure-simulator.outputs.downloaded == 'true'
-        run: |
-          sudo tar -czf "${RUNNER_TEMP}/sim-cache.tgz" \
-            /Library/Developer/CoreSimulator/Images \
-            /Library/Developer/CoreSimulator/Cryptex/Images \
-            /Library/Developer/CoreSimulator/Volumes 2>/dev/null || true
       - name: Run tests
         run: |
           xcodebuild -scheme TOMLDecoder-Package -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test
