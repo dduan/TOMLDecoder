@@ -34,6 +34,9 @@ var targets: [Target] = [
     .target(
         name: "TOMLDecoder",
         exclude: ["gyb"],
+        swiftSettings: [
+            .unsafeFlags(["-Xfrontend", "-require-explicit-sendable"]),
+        ],
     ),
 ]
 

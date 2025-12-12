@@ -29,6 +29,16 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
 }
 
 struct InternalTOMLArray: Equatable, Sendable {
+    var key: String?
+    var kind: Kind?
+    var elements: [Element]
+
+    init(key: String? = nil, kind: Kind? = nil, elements: [Element] = []) {
+        self.key = key
+        self.kind = kind
+        self.elements = elements
+    }
+
     enum Element: Equatable {
         case leaf(Token)
         case array(lineNumber: Int, Int)
@@ -65,16 +75,6 @@ struct InternalTOMLArray: Equatable, Sendable {
         case table
         case mixed
     }
-
-    var key: String?
-    var kind: Kind?
-    var elements: [Element]
-
-    init(key: String? = nil, kind: Kind? = nil, elements: [Element] = []) {
-        self.key = key
-        self.kind = kind
-        self.elements = elements
-    }
 }
 
 struct KeyValuePair: Equatable {
@@ -87,12 +87,6 @@ struct KeyValuePair: Equatable {
 }
 
 struct InternalTOMLTable: Equatable, Sendable {
-    enum Value {
-        case keyValue(Int)
-        case array(Int)
-        case table(Int)
-    }
-
     var key: String?
     var implicit: Bool = false
     var readOnly: Bool = false
@@ -140,6 +134,12 @@ struct InternalTOMLTable: Equatable, Sendable {
             }
         }
         return false
+    }
+
+    enum Value {
+        case keyValue(Int)
+        case array(Int)
+        case table(Int)
     }
 }
 
