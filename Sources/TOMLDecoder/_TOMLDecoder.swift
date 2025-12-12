@@ -5,7 +5,7 @@ final class _TOMLDecoder: Decoder {
     }
 
     let container: Container
-    var codingPath: [CodingKey]
+    var codingPath: [any CodingKey]
     let strategy: TOMLDecoder.Strategy
     let isLenient: Bool
     let userInfo: [CodingUserInfoKey: Any] = [:]
@@ -35,10 +35,10 @@ final class _TOMLDecoder: Decoder {
         return KeyedDecodingContainer(TOMLKeyedDecodingContainer(referencing: self, wrapping: table))
     }
 
-    func unkeyedContainer() throws -> UnkeyedDecodingContainer {
+    func unkeyedContainer() throws -> any UnkeyedDecodingContainer {
         guard case let .unkeyed(array) = container else {
             throw DecodingError.valueNotFound(
-                UnkeyedDecodingContainer.self,
+                (any UnkeyedDecodingContainer).self,
                 DecodingError.Context(
                     codingPath: codingPath,
                     debugDescription:
@@ -50,11 +50,11 @@ final class _TOMLDecoder: Decoder {
         return TOMLUnkeyedDecodingContainer(referencing: self, wrapping: array)
     }
 
-    func singleValueContainer() throws -> SingleValueDecodingContainer {
+    func singleValueContainer() throws -> any SingleValueDecodingContainer {
         self
     }
 
-    init(referencing container: Container, at codingPath: [CodingKey] = [], strategy: TOMLDecoder.Strategy, isLenient: Bool) {
+    init(referencing container: Container, at codingPath: [any CodingKey] = [], strategy: TOMLDecoder.Strategy, isLenient: Bool) {
         self.container = container
         self.codingPath = codingPath
         self.strategy = strategy
