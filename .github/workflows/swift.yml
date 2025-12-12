@@ -81,7 +81,7 @@ jobs:
         run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
       - name: Save simulator runtime cache tarball
         run: |
-          sudo tar -czf "$OUT" \
+          sudo tar -czf "${RUNNER_TEMP}/sim-cache.tgz" \
             /Library/Developer/CoreSimulator/Images \
             /Library/Developer/CoreSimulator/Cryptex/Images \
             /Library/Developer/CoreSimulator/Volumes 2>/dev/null || true
