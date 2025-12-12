@@ -25,6 +25,7 @@ fi
 
 echo "Device name: $DEVICE_NAME"
 
+xcrun simctl list runtimes
 # Find runtime identifier for this platform + OS version.
 # Example line:
 #   iOS 18.5 (18.5 - 22F77) - com.apple.CoreSimulator.SimRuntime.iOS-18-5
