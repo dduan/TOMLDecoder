@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: SwiftyLab/setup-swift@latest
         with:
-          swift-version: 6.2.2
+          swift-version: 6.2
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Set up Swift for WASM
