@@ -5,7 +5,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
     private let decoder: _TOMLDecoder
     private let table: TOMLTable
 
-    var codingPath: [CodingKey] {
+    var codingPath: [any CodingKey] {
         decoder.codingPath
     }
 
@@ -109,7 +109,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
         }
     }
 
-    func nestedUnkeyedContainer(forKey key: Key) throws -> UnkeyedDecodingContainer {
+    func nestedUnkeyedContainer(forKey key: Key) throws -> any UnkeyedDecodingContainer {
         do {
             let nestedArray = try table.array(forKey: key.stringValue)
             var nestedCodingPath = codingPath
@@ -122,15 +122,15 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
         }
     }
 
-    func _superDecoder(forKey key: CodingKey) -> Decoder {
+    func _superDecoder(forKey key: any CodingKey) -> any Decoder {
         _TOMLDecoder(referencing: .keyed(table), at: codingPath + [key], strategy: decoder.strategy, isLenient: decoder.isLenient)
     }
 
-    func superDecoder() throws -> Decoder {
+    func superDecoder() throws -> any Decoder {
         _superDecoder(forKey: TOMLKey.super)
     }
 
-    func superDecoder(forKey key: Key) throws -> Decoder {
+    func superDecoder(forKey key: Key) throws -> any Decoder {
         _superDecoder(forKey: key)
     }
 }
