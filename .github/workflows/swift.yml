@@ -26,7 +26,7 @@ jobs:
 
   simulator-test:
     name: ${{ matrix.platform }} ${{ matrix.os_version }}
-    runs-on: ${{ matrix.host_os }}
+    runs-on: macos-26
     strategy:
       matrix:
         include:
@@ -34,53 +34,39 @@ jobs:
             os_version: "18.5"
             destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5,arch=arm64"
             sdk: iphonesimulator
-            xcode_version: "16.4"
-            host_os: macos-15
           - platform: tvOS
             os_version: "18.5"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=18.5,arch=arm64"
             sdk: appletvsimulator
-            xcode_version: "16.4"
-            host_os: macos-15
           - platform: watchOS
             os_version: "11.5"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.5,arch=arm64"
             sdk: watchsimulator
-            xcode_version: "16.4"
-            host_os: macos-15
           - platform: visionOS
             os_version: "2.5"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.5,arch=arm64"
             sdk: xrsimulator
-            xcode_version: "16.4"
-            host_os: macos-15
           - platform: iOS
             os_version: "26.1"
             destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1,arch=arm64"
             sdk: iphonesimulator
-            xcode_version: "26.1.1"
-            host_os: macos-26
           - platform: tvOS
             os_version: "26.1"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=26.1,arch=arm64"
             sdk: appletvsimulator
-            xcode_version: "26.1.1"
-            host_os: macos-26
           - platform: watchOS
             os_version: "26.1"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.1,arch=arm64"
             sdk: watchsimulator
-            xcode_version: "26.1.1"
-            host_os: macos-26
           - platform: visionOS
             os_version: "26.1"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.1,arch=arm64"
             sdk: xrsimulator
-            xcode_version: "26.1.1"
-            host_os: macos-26
     steps:
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_"${{ matrix.xcode_version }}".app
+        run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
+      - name: Ensure simulator exists
+        run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Run tests
