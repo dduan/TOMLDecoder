@@ -67,8 +67,16 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
       - name: Checkout source
         uses: actions/checkout@v4
+      - name: Cache exported simulator runtime
+        id: cache-runtime
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/simruntimes/${{ matrix.platform }}/${{ matrix.os_version }}
+          key: simruntime-${{ runner.os }}-xcode26_1_1-${{ matrix.platform }}-${{ matrix.os_version }}
       - name: Ensure simulator runtime and device exist
         if: ${{ matrix.platform != 'macOS' }}
+        env:
+          SIMRUNTIME_EXPORT_BASE: ${{ runner.temp }}/simruntimes
         run: |
           Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.os_version }}" "${{ matrix.destination }}"
       - name: Run simulator test
