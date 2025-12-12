@@ -23,7 +23,7 @@ import Foundation
 /// Use ``TOMLDecoder/strategy`` to customize the decoding behavior.
 /// Each TOML value may be decoded into one or more Swift types.
 /// See <doc:DecodingTOML> to learn all possible types.
-public struct TOMLDecoder {
+public struct TOMLDecoder: Sendable {
     /// Specify whether TOMLDecoder should attempt to convert the value
     /// from its initial type made by the parser to one of its compatible types.
     ///
