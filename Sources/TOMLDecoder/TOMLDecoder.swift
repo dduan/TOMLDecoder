@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Convert data for a TOML document into `Codable` types.
 ///

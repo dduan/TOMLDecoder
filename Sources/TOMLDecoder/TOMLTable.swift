@@ -21,11 +21,53 @@ extension TOMLTable {
     /// - Returns: A `TOMLTable` representing the root-level table of the TOML document.
     /// - Throws: A ``TOMLError`` if the document is invalid.
     public init(source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
-        guard let source = String(bytes: source, encoding: .utf8) else {
+        try self.init(source: try String(validatingUTF8: source))
+    }
+}
+
+// String.init(validating:as:) does not exist in our supported OSes.
+private extension String {
+    init(validatingUTF8 source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
+        do {
+            if let result = try source.withContiguousStorageIfAvailable(
+                { buffer -> String in
+                    try validateAndCreateString(from: buffer)
+                }
+            ) {
+                self = result
+                return
+            }
+
+            // Slow path: copy to contiguous buffer first
+            let array = Array(source)
+            self = try array.withUnsafeBufferPointer { buffer -> String in
+                try validateAndCreateString(from: buffer)
+            }
+        } catch let error as TOMLError {
+            throw error
+        } catch {
+            fatalError("Unexpected error type")
+        }
+    }
+}
+
+@_transparent
+private func validateAndCreateString(from buffer: UnsafeBufferPointer<UInt8>) throws(TOMLError) -> String {
+    var decoder = UTF8()
+    var iterator = buffer.makeIterator()
+
+    validationLoop: while true {
+        switch decoder.decode(&iterator) {
+        case .scalarValue(_):
+            continue
+        case .emptyInput:
+            break validationLoop
+        case .error:
             throw TOMLError(.invalidUTF8)
         }
-        try self.init(source: source)
     }
+
+    return String(decoding: buffer, as: UTF8.self)
 }
 
 /// A parsed TOML table. Entry point for parsing TOML data.

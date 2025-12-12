@@ -432,7 +432,7 @@ extension String {
 }
 
 #if canImport(Foundation)
-import Foundation
+public import Foundation
 
 extension DateComponents {
     /// Create a new `Foundation.DateComponents` from an offset date-time.
