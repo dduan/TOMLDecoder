@@ -36,7 +36,7 @@ var targets: [Target] = [
         exclude: ["gyb"],
         swiftSettings: [
             .unsafeFlags(["-Xfrontend", "-require-explicit-sendable"]),
-        ]
+        ],
     ),
 ]
 
