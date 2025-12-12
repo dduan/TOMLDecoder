@@ -65,10 +65,10 @@ jobs:
     steps:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
-      - name: Ensure simulator exists
-        run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
       - name: Checkout source
         uses: actions/checkout@v4
+      - name: Ensure simulator exists
+        run:  Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.OS_VERSION }}" "${{ matrix.destination }}"
       - name: Run tests
         run: |
           xcodebuild -scheme TOMLDecoder-Package -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test
