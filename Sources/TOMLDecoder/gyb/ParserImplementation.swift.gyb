@@ -940,19 +940,9 @@ extension Token {
         }
 
         if quoteChar == CodeUnits.singleQuote {
-            do {
-                return try literalString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
-            } catch {
-                // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
-            }
+            return try literalString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
         } else {
-            do {
-                return try basicString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
-            } catch {
-                // Convert the specific string parsing error to our context-aware version
-                throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: error.localizedDescription))
-            }
+            return try basicString(bytes: bytes, range: index ..< endIndex, multiline: multiline)
         }
     }
 

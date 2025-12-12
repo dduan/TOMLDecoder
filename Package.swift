@@ -36,6 +36,8 @@ var targets: [Target] = [
         exclude: ["gyb"],
         swiftSettings: [
             .enableUpcomingFeature("ExistentialAny"),
+            .enableUpcomingFeature("InternalImportsByDefault"),
+            .enableUpcomingFeature("MemberImportVisibility"),
             .unsafeFlags(["-Xfrontend", "-require-explicit-sendable"]),
         ],
     ),
