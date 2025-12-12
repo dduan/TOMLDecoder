@@ -7,7 +7,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     private let array: TOMLArray
 
     /// The path of coding keys taken to get to this point in decoding.
-    var codingPath: [CodingKey] {
+    var codingPath: [any CodingKey] {
         decoder.codingPath
     }
 
@@ -141,10 +141,10 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         return KeyedDecodingContainer(container)
     }
 
-    mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
+    mutating func nestedUnkeyedContainer() throws -> any UnkeyedDecodingContainer {
         guard !isAtEnd else {
             throw DecodingError.valueNotFound(
-                UnkeyedDecodingContainer.self,
+                (any UnkeyedDecodingContainer).self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
                     debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end.",
@@ -154,7 +154,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
         guard let nestedArray = try? array.array(atIndex: currentIndex) else {
             throw DecodingError.typeMismatch(
-                UnkeyedDecodingContainer.self,
+                (any UnkeyedDecodingContainer).self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
                     debugDescription: "Cannot get nested unkeyed container -- element is not an array.",
@@ -170,7 +170,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         return TOMLUnkeyedDecodingContainer(referencing: nestedDecoder, wrapping: nestedArray)
     }
 
-    mutating func superDecoder() throws -> Decoder {
+    mutating func superDecoder() throws -> any Decoder {
         _TOMLDecoder(referencing: .unkeyed(array), at: codingPath + [TOMLKey.super], strategy: decoder.strategy, isLenient: decoder.isLenient)
     }
 }
