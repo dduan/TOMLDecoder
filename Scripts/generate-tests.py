@@ -10,6 +10,7 @@ import sys
 import urllib.request
 import zipfile
 from collections import defaultdict
+import re
 from pathlib import Path
 import textwrap
 from typing import Iterable, List
@@ -91,6 +92,34 @@ def _sanitize_test_name(relative_path: str, counters: defaultdict[str, int]) -> 
     return f"{normalized} {counters[normalized]}"
 
 
+def _make_swift_identifier_from_path(relative_path: str, counters: defaultdict[str, int]) -> str:
+    """Convert a fixture path into a Swift-safe identifier.
+
+    Format: <primary>__<rest>, where primary is the first path component and rest is the remainder.
+    Non-alphanumerics become underscores; leading digits are prefixed with 'test_'.
+    """
+    components = relative_path.split("/")
+    primary = components[0] if components else "test"
+    rest_components = components[1:]
+
+    def slug(value: str) -> str:
+        return re.sub(r"[^A-Za-z0-9]+", "_", value).strip("_")
+
+    primary_slug = slug(primary) or "test"
+    rest_slug = slug(" ".join(rest_components)) if rest_components else ""
+
+    base = f"{primary_slug}__{rest_slug}" if rest_slug else primary_slug
+    if base and base[0].isdigit():
+        base = f"test_{base}"
+    elif not base:
+        base = "test"
+
+    counters[base] += 1
+    if counters[base] > 1:
+        base = f"{base}_{counters[base]}"
+    return base
+
+
 def _get_test_tag(relative_path: str) -> str:
     """Extract the first path component as a tag name."""
     components = relative_path.split("/")
@@ -156,21 +185,23 @@ def _copy_invalid_fixture(base_path: Path, source_root: Path) -> None:
 
 
 def _generate_valid_test_file(fixtures: Iterable[str], commit: str, spec_version: str) -> str:
-    counters: defaultdict[str, int] = defaultdict(int)
+    display_counters: defaultdict[str, int] = defaultdict(int)
+    identifier_counters: defaultdict[str, int] = defaultdict(int)
     tests: List[str] = []
 
     for relative in fixtures:
-        method_name = _sanitize_test_name(relative, counters)
+        display_name = _sanitize_test_name(relative, display_counters)
+        method_name = _make_swift_identifier_from_path(relative, identifier_counters)
         fixture_expr = _swift_fixture_expression(relative)
         tag = _get_test_tag(relative)
 
         if tag:
-            test_decorator = f"@Test(.tags({tag}))\n    "
+            test_decorator = f"@Test(\"{display_name}\", .tags({tag}))\n    "
         else:
-            test_decorator = "@Test\n    "
+            test_decorator = f"@Test(\"{display_name}\")\n    "
 
         tests.append(
-            "    {decorator}func `{name}`() throws {{\n"
+            "    {decorator}func {name}() throws {{\n"
             "        try verifyByFixture(pathComponents: {fixture})\n"
             "    }}\n".format(decorator=test_decorator, name=method_name, fixture=fixture_expr)
         )
@@ -213,21 +244,23 @@ __TESTS__
     )
 
 def _generate_invalid_test_file(fixtures: Iterable[str], commit: str, spec_version: str) -> str:
-    counters: defaultdict[str, int] = defaultdict(int)
+    display_counters: defaultdict[str, int] = defaultdict(int)
+    identifier_counters: defaultdict[str, int] = defaultdict(int)
     tests: List[str] = []
 
     for relative in fixtures:
-        method_name = _sanitize_test_name(relative, counters)
+        display_name = _sanitize_test_name(relative, display_counters)
+        method_name = _make_swift_identifier_from_path(relative, identifier_counters)
         fixture_expr = _swift_fixture_expression(relative)
         tag = _get_test_tag(relative)
 
         if tag:
-            test_decorator = f"@Test(.tags({tag}))\n    "
+            test_decorator = f"@Test(\"{display_name}\", .tags({tag}))\n    "
         else:
-            test_decorator = "@Test\n    "
+            test_decorator = f"@Test(\"{display_name}\")\n    "
 
         tests.append(
-            "    {decorator}func `{name}`() throws {{\n"
+            "    {decorator}func {name}() throws {{\n"
             "        try invalidate(pathComponents: {fixture})\n"
             "    }}\n".format(decorator=test_decorator, name=method_name, fixture=fixture_expr)
         )
@@ -275,54 +308,72 @@ def main(argv: List[str]) -> int:
         default=DEFAULT_SPEC_VERSION,
         help="TOML specification version to use",
     )
+    parser.add_argument(
+        "--use-existing-fixtures",
+        action="store_true",
+        help="Reuse existing fixtures under Tests/TOMLDecoderTests instead of downloading toml-test",
+    )
     args = parser.parse_args(argv)
 
-    toml_test_dir = _ensure_toml_test_checkout()
+    if args.use_existing_fixtures:
+        commit = "local-fixtures"
+        valid_fixtures = [
+            str(path.relative_to(VALID_FIXTURES_DIR).with_suffix(""))
+            .replace(os.sep, "/")
+            for path in sorted(VALID_FIXTURES_DIR.rglob("*.toml"))
+        ]
+        invalid_fixtures = [
+            str(path.relative_to(INVALID_FIXTURES_DIR).with_suffix(""))
+            .replace(os.sep, "/")
+            for path in sorted(INVALID_FIXTURES_DIR.rglob("*.toml"))
+        ]
+    else:
+        toml_test_dir = _ensure_toml_test_checkout()
 
-    list_file = toml_test_dir / "tests" / f"files-toml-{args.spec_version}"
-    if not list_file.exists():
-        raise SystemExit(f"spec version {args.spec_version} is not available (missing {list_file})")
+        list_file = toml_test_dir / "tests" / f"files-toml-{args.spec_version}"
+        if not list_file.exists():
+            raise SystemExit(f"spec version {args.spec_version} is not available (missing {list_file})")
 
-    # Use the known commit hash since we downloaded the archive for this specific commit
-    commit = TOML_TEST_COMMIT
+        # Use the known commit hash since we downloaded the archive for this specific commit
+        commit = TOML_TEST_COMMIT
 
-    lines = _read_lines(list_file)
+        lines = _read_lines(list_file)
 
-    if VALID_FIXTURES_DIR.exists():
-        shutil.rmtree(VALID_FIXTURES_DIR)
-    if INVALID_FIXTURES_DIR.exists():
-        shutil.rmtree(INVALID_FIXTURES_DIR)
+        if VALID_FIXTURES_DIR.exists():
+            shutil.rmtree(VALID_FIXTURES_DIR)
+        if INVALID_FIXTURES_DIR.exists():
+            shutil.rmtree(INVALID_FIXTURES_DIR)
 
-    VALID_FIXTURES_DIR.mkdir(parents=True)
-    INVALID_FIXTURES_DIR.mkdir(parents=True)
+        VALID_FIXTURES_DIR.mkdir(parents=True)
+        INVALID_FIXTURES_DIR.mkdir(parents=True)
 
-    valid_fixtures: List[str] = []
-    invalid_fixtures: List[str] = []
-    seen_valid: set[str] = set()
-    seen_invalid: set[str] = set()
+        valid_fixtures = []
+        invalid_fixtures = []
+        seen_valid: set[str] = set()
+        seen_invalid: set[str] = set()
 
-    for line in lines:
-        path = Path(line)
-        if path.suffix != ".toml":
-            continue
+        for line in lines:
+            path = Path(line)
+            if path.suffix != ".toml":
+                continue
 
-        if path.parts[0] == "valid":
-            base = Path(*path.parts[1:]).with_suffix("")
-            _copy_valid_fixture(base, toml_test_dir)
-            key = str(base).replace(os.sep, "/")
-            if key not in seen_valid:
-                valid_fixtures.append(key)
-                seen_valid.add(key)
-        elif path.parts[0] == "invalid":
-            base = Path(*path.parts[1:]).with_suffix("")
-            _copy_invalid_fixture(base, toml_test_dir)
-            key = str(base).replace(os.sep, "/")
-            if key not in seen_invalid:
-                invalid_fixtures.append(key)
-                seen_invalid.add(key)
+            if path.parts[0] == "valid":
+                base = Path(*path.parts[1:]).with_suffix("")
+                _copy_valid_fixture(base, toml_test_dir)
+                key = str(base).replace(os.sep, "/")
+                if key not in seen_valid:
+                    valid_fixtures.append(key)
+                    seen_valid.add(key)
+            elif path.parts[0] == "invalid":
+                base = Path(*path.parts[1:]).with_suffix("")
+                _copy_invalid_fixture(base, toml_test_dir)
+                key = str(base).replace(os.sep, "/")
+                if key not in seen_invalid:
+                    invalid_fixtures.append(key)
+                    seen_invalid.add(key)
 
-    valid_fixtures.sort()
-    invalid_fixtures.sort()
+        valid_fixtures.sort()
+        invalid_fixtures.sort()
 
     # Collect all tags from both valid and invalid fixtures
     all_tags: set[str] = set()

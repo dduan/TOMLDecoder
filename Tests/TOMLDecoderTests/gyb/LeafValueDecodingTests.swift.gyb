@@ -17,7 +17,7 @@ import TOMLDecoder
 
 @Suite
 struct LeafValueDecodingTests {
-    @Test func `boolean as Bool`() throws {
+    @Test func booleanAsBool() throws {
         struct Test: Decodable, Equatable {
             let boolean: Bool
             let booleans: [Bool]
@@ -47,12 +47,12 @@ struct LeafValueDecodingTests {
             optionalBools: [true, false],
             optionalABool: .true,
             optionalBoolean2: nil,
-            optionalABool2: nil,
+            optionalABool2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `string as String`() throws {
+    @Test func stringAsString() throws {
         struct Test: Decodable, Equatable {
             let string: String
             let strings: [String]
@@ -82,13 +82,13 @@ struct LeafValueDecodingTests {
             optionalStrings: ["foo", "bar"],
             optionalAString: .foo,
             optionalString2: nil,
-            optionalAString2: nil,
+            optionalAString2: nil
         )
         #expect(result == expectation)
     }
 
     % for int_type in int_types:
-    @Test func `integer as ${int_type}`() throws {
+    @Test func integerAs${int_type}() throws {
         struct Test: Decodable, Equatable {
             let integer: ${int_type}
             let integers: [${int_type}]
@@ -118,14 +118,14 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
     % end
     % for float_type in float_types:
-    @Test func `float as ${float_type}`() throws {
+    @Test func floatAs${float_type}() throws {
         struct Test: Decodable, Equatable {
             let float: ${float_type}
             let floats: [${float_type}]
@@ -155,13 +155,13 @@ struct LeafValueDecodingTests {
             optionalFloats: [3.14, 3.15],
             optionalAFloat: .thirtyOneFour,
             optionalFloat2: nil,
-            optionalAFloat2: nil,
+            optionalAFloat2: nil
         )
         #expect(result == expectation)
     }
 
     % end
-    @Test func `all the native dates`() throws {
+    @Test func allTheNativeDates() throws {
         struct Test: Decodable, Equatable {
             let localDate: LocalDate
             let localDateFromLocalDateTime: LocalDate
@@ -444,7 +444,7 @@ struct LeafValueDecodingTests {
             optionalDateComponentsFromOffsetDateTimes: [DateComponents(timeZone: TimeZone(secondsFromGMT: 0), year: 2001, month: 1, day: 1, hour: 1, minute: 0, second: 1)],
             optionalDateComponentsFromLocalDateTimes: [DateComponents(year: 2001, month: 1, day: 1, hour: 1, minute: 0, second: 1)],
             optionalDateComponentsFromLocalTimes: [DateComponents(hour: 1, minute: 0, second: 1)],
-            optionalDateComponentsFromLocalDates: [DateComponents(year: 2001, month: 1, day: 1)],
+            optionalDateComponentsFromLocalDates: [DateComponents(year: 2001, month: 1, day: 1)]
         )
 
         #expect(result == expectation)

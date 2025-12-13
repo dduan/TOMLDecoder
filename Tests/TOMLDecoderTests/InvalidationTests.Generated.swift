@@ -19,2648 +19,2648 @@ struct TOMLInvalidationTests {
         try TOMLComplianceSupport.verifyInvalidFixture(tomlURL: tomlURL, sourceLocation: sourceLocation)
     }
 
-    @Test(.tags(.array))
-    func `[array] double comma 01`() throws {
+    @Test("[array] double comma 01", .tags(.array))
+    func array__double_comma_01() throws {
         try invalidate(pathComponents: ["array", "double-comma-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] double comma 02`() throws {
+    @Test("[array] double comma 02", .tags(.array))
+    func array__double_comma_02() throws {
         try invalidate(pathComponents: ["array", "double-comma-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] double comma 1`() throws {
+    @Test("[array] double comma 1", .tags(.array))
+    func array__double_comma_1() throws {
         try invalidate(pathComponents: ["array", "double-comma-1"])
     }
 
-    @Test(.tags(.array))
-    func `[array] double comma 2`() throws {
+    @Test("[array] double comma 2", .tags(.array))
+    func array__double_comma_2() throws {
         try invalidate(pathComponents: ["array", "double-comma-2"])
     }
 
-    @Test(.tags(.array))
-    func `[array] extend defined aot`() throws {
+    @Test("[array] extend defined aot", .tags(.array))
+    func array__extend_defined_aot() throws {
         try invalidate(pathComponents: ["array", "extend-defined-aot"])
     }
 
-    @Test(.tags(.array))
-    func `[array] extending table`() throws {
+    @Test("[array] extending table", .tags(.array))
+    func array__extending_table() throws {
         try invalidate(pathComponents: ["array", "extending-table"])
     }
 
-    @Test(.tags(.array))
-    func `[array] missing separator 01`() throws {
+    @Test("[array] missing separator 01", .tags(.array))
+    func array__missing_separator_01() throws {
         try invalidate(pathComponents: ["array", "missing-separator-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] missing separator 02`() throws {
+    @Test("[array] missing separator 02", .tags(.array))
+    func array__missing_separator_02() throws {
         try invalidate(pathComponents: ["array", "missing-separator-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 01`() throws {
+    @Test("[array] no close 01", .tags(.array))
+    func array__no_close_01() throws {
         try invalidate(pathComponents: ["array", "no-close-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 02`() throws {
+    @Test("[array] no close 02", .tags(.array))
+    func array__no_close_02() throws {
         try invalidate(pathComponents: ["array", "no-close-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 03`() throws {
+    @Test("[array] no close 03", .tags(.array))
+    func array__no_close_03() throws {
         try invalidate(pathComponents: ["array", "no-close-03"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 04`() throws {
+    @Test("[array] no close 04", .tags(.array))
+    func array__no_close_04() throws {
         try invalidate(pathComponents: ["array", "no-close-04"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 05`() throws {
+    @Test("[array] no close 05", .tags(.array))
+    func array__no_close_05() throws {
         try invalidate(pathComponents: ["array", "no-close-05"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 06`() throws {
+    @Test("[array] no close 06", .tags(.array))
+    func array__no_close_06() throws {
         try invalidate(pathComponents: ["array", "no-close-06"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 07`() throws {
+    @Test("[array] no close 07", .tags(.array))
+    func array__no_close_07() throws {
         try invalidate(pathComponents: ["array", "no-close-07"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 08`() throws {
+    @Test("[array] no close 08", .tags(.array))
+    func array__no_close_08() throws {
         try invalidate(pathComponents: ["array", "no-close-08"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 1`() throws {
+    @Test("[array] no close 1", .tags(.array))
+    func array__no_close_1() throws {
         try invalidate(pathComponents: ["array", "no-close-1"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 2`() throws {
+    @Test("[array] no close 2", .tags(.array))
+    func array__no_close_2() throws {
         try invalidate(pathComponents: ["array", "no-close-2"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 3`() throws {
+    @Test("[array] no close 3", .tags(.array))
+    func array__no_close_3() throws {
         try invalidate(pathComponents: ["array", "no-close-3"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 4`() throws {
+    @Test("[array] no close 4", .tags(.array))
+    func array__no_close_4() throws {
         try invalidate(pathComponents: ["array", "no-close-4"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 5`() throws {
+    @Test("[array] no close 5", .tags(.array))
+    func array__no_close_5() throws {
         try invalidate(pathComponents: ["array", "no-close-5"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 6`() throws {
+    @Test("[array] no close 6", .tags(.array))
+    func array__no_close_6() throws {
         try invalidate(pathComponents: ["array", "no-close-6"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 7`() throws {
+    @Test("[array] no close 7", .tags(.array))
+    func array__no_close_7() throws {
         try invalidate(pathComponents: ["array", "no-close-7"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close 8`() throws {
+    @Test("[array] no close 8", .tags(.array))
+    func array__no_close_8() throws {
         try invalidate(pathComponents: ["array", "no-close-8"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close table 01`() throws {
+    @Test("[array] no close table 01", .tags(.array))
+    func array__no_close_table_01() throws {
         try invalidate(pathComponents: ["array", "no-close-table-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no close table 02`() throws {
+    @Test("[array] no close table 02", .tags(.array))
+    func array__no_close_table_02() throws {
         try invalidate(pathComponents: ["array", "no-close-table-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 01`() throws {
+    @Test("[array] no comma 01", .tags(.array))
+    func array__no_comma_01() throws {
         try invalidate(pathComponents: ["array", "no-comma-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 02`() throws {
+    @Test("[array] no comma 02", .tags(.array))
+    func array__no_comma_02() throws {
         try invalidate(pathComponents: ["array", "no-comma-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 03`() throws {
+    @Test("[array] no comma 03", .tags(.array))
+    func array__no_comma_03() throws {
         try invalidate(pathComponents: ["array", "no-comma-03"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 1`() throws {
+    @Test("[array] no comma 1", .tags(.array))
+    func array__no_comma_1() throws {
         try invalidate(pathComponents: ["array", "no-comma-1"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 2`() throws {
+    @Test("[array] no comma 2", .tags(.array))
+    func array__no_comma_2() throws {
         try invalidate(pathComponents: ["array", "no-comma-2"])
     }
 
-    @Test(.tags(.array))
-    func `[array] no comma 3`() throws {
+    @Test("[array] no comma 3", .tags(.array))
+    func array__no_comma_3() throws {
         try invalidate(pathComponents: ["array", "no-comma-3"])
     }
 
-    @Test(.tags(.array))
-    func `[array] only comma 01`() throws {
+    @Test("[array] only comma 01", .tags(.array))
+    func array__only_comma_01() throws {
         try invalidate(pathComponents: ["array", "only-comma-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] only comma 02`() throws {
+    @Test("[array] only comma 02", .tags(.array))
+    func array__only_comma_02() throws {
         try invalidate(pathComponents: ["array", "only-comma-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] only comma 1`() throws {
+    @Test("[array] only comma 1", .tags(.array))
+    func array__only_comma_1() throws {
         try invalidate(pathComponents: ["array", "only-comma-1"])
     }
 
-    @Test(.tags(.array))
-    func `[array] only comma 2`() throws {
+    @Test("[array] only comma 2", .tags(.array))
+    func array__only_comma_2() throws {
         try invalidate(pathComponents: ["array", "only-comma-2"])
     }
 
-    @Test(.tags(.array))
-    func `[array] tables 01`() throws {
+    @Test("[array] tables 01", .tags(.array))
+    func array__tables_01() throws {
         try invalidate(pathComponents: ["array", "tables-01"])
     }
 
-    @Test(.tags(.array))
-    func `[array] tables 02`() throws {
+    @Test("[array] tables 02", .tags(.array))
+    func array__tables_02() throws {
         try invalidate(pathComponents: ["array", "tables-02"])
     }
 
-    @Test(.tags(.array))
-    func `[array] text after array entries`() throws {
+    @Test("[array] text after array entries", .tags(.array))
+    func array__text_after_array_entries() throws {
         try invalidate(pathComponents: ["array", "text-after-array-entries"])
     }
 
-    @Test(.tags(.array))
-    func `[array] text before array separator`() throws {
+    @Test("[array] text before array separator", .tags(.array))
+    func array__text_before_array_separator() throws {
         try invalidate(pathComponents: ["array", "text-before-array-separator"])
     }
 
-    @Test(.tags(.array))
-    func `[array] text in array`() throws {
+    @Test("[array] text in array", .tags(.array))
+    func array__text_in_array() throws {
         try invalidate(pathComponents: ["array", "text-in-array"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] almost false`() throws {
+    @Test("[bool] almost false", .tags(.bool))
+    func bool__almost_false() throws {
         try invalidate(pathComponents: ["bool", "almost-false"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] almost false with extra`() throws {
+    @Test("[bool] almost false with extra", .tags(.bool))
+    func bool__almost_false_with_extra() throws {
         try invalidate(pathComponents: ["bool", "almost-false-with-extra"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] almost true`() throws {
+    @Test("[bool] almost true", .tags(.bool))
+    func bool__almost_true() throws {
         try invalidate(pathComponents: ["bool", "almost-true"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] almost true with extra`() throws {
+    @Test("[bool] almost true with extra", .tags(.bool))
+    func bool__almost_true_with_extra() throws {
         try invalidate(pathComponents: ["bool", "almost-true-with-extra"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] capitalized false`() throws {
+    @Test("[bool] capitalized false", .tags(.bool))
+    func bool__capitalized_false() throws {
         try invalidate(pathComponents: ["bool", "capitalized-false"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] capitalized true`() throws {
+    @Test("[bool] capitalized true", .tags(.bool))
+    func bool__capitalized_true() throws {
         try invalidate(pathComponents: ["bool", "capitalized-true"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] just f`() throws {
+    @Test("[bool] just f", .tags(.bool))
+    func bool__just_f() throws {
         try invalidate(pathComponents: ["bool", "just-f"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] just t`() throws {
+    @Test("[bool] just t", .tags(.bool))
+    func bool__just_t() throws {
         try invalidate(pathComponents: ["bool", "just-t"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] mixed case`() throws {
+    @Test("[bool] mixed case", .tags(.bool))
+    func bool__mixed_case() throws {
         try invalidate(pathComponents: ["bool", "mixed-case"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] mixed case false`() throws {
+    @Test("[bool] mixed case false", .tags(.bool))
+    func bool__mixed_case_false() throws {
         try invalidate(pathComponents: ["bool", "mixed-case-false"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] mixed case true`() throws {
+    @Test("[bool] mixed case true", .tags(.bool))
+    func bool__mixed_case_true() throws {
         try invalidate(pathComponents: ["bool", "mixed-case-true"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] starting same false`() throws {
+    @Test("[bool] starting same false", .tags(.bool))
+    func bool__starting_same_false() throws {
         try invalidate(pathComponents: ["bool", "starting-same-false"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] starting same true`() throws {
+    @Test("[bool] starting same true", .tags(.bool))
+    func bool__starting_same_true() throws {
         try invalidate(pathComponents: ["bool", "starting-same-true"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] wrong case false`() throws {
+    @Test("[bool] wrong case false", .tags(.bool))
+    func bool__wrong_case_false() throws {
         try invalidate(pathComponents: ["bool", "wrong-case-false"])
     }
 
-    @Test(.tags(.bool))
-    func `[bool] wrong case true`() throws {
+    @Test("[bool] wrong case true", .tags(.bool))
+    func bool__wrong_case_true() throws {
         try invalidate(pathComponents: ["bool", "wrong-case-true"])
     }
 
-    @Test(.tags(.control))
-    func `[control] bare cr`() throws {
+    @Test("[control] bare cr", .tags(.control))
+    func control__bare_cr() throws {
         try invalidate(pathComponents: ["control", "bare-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] bare formfeed`() throws {
+    @Test("[control] bare formfeed", .tags(.control))
+    func control__bare_formfeed() throws {
         try invalidate(pathComponents: ["control", "bare-formfeed"])
     }
 
-    @Test(.tags(.control))
-    func `[control] bare null`() throws {
+    @Test("[control] bare null", .tags(.control))
+    func control__bare_null() throws {
         try invalidate(pathComponents: ["control", "bare-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] bare vertical tab`() throws {
+    @Test("[control] bare vertical tab", .tags(.control))
+    func control__bare_vertical_tab() throws {
         try invalidate(pathComponents: ["control", "bare-vertical-tab"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment cr`() throws {
+    @Test("[control] comment cr", .tags(.control))
+    func control__comment_cr() throws {
         try invalidate(pathComponents: ["control", "comment-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment del`() throws {
+    @Test("[control] comment del", .tags(.control))
+    func control__comment_del() throws {
         try invalidate(pathComponents: ["control", "comment-del"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment ff`() throws {
+    @Test("[control] comment ff", .tags(.control))
+    func control__comment_ff() throws {
         try invalidate(pathComponents: ["control", "comment-ff"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment lf`() throws {
+    @Test("[control] comment lf", .tags(.control))
+    func control__comment_lf() throws {
         try invalidate(pathComponents: ["control", "comment-lf"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment null`() throws {
+    @Test("[control] comment null", .tags(.control))
+    func control__comment_null() throws {
         try invalidate(pathComponents: ["control", "comment-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] comment us`() throws {
+    @Test("[control] comment us", .tags(.control))
+    func control__comment_us() throws {
         try invalidate(pathComponents: ["control", "comment-us"])
     }
 
-    @Test(.tags(.control))
-    func `[control] multi cr`() throws {
+    @Test("[control] multi cr", .tags(.control))
+    func control__multi_cr() throws {
         try invalidate(pathComponents: ["control", "multi-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] multi del`() throws {
+    @Test("[control] multi del", .tags(.control))
+    func control__multi_del() throws {
         try invalidate(pathComponents: ["control", "multi-del"])
     }
 
-    @Test(.tags(.control))
-    func `[control] multi lf`() throws {
+    @Test("[control] multi lf", .tags(.control))
+    func control__multi_lf() throws {
         try invalidate(pathComponents: ["control", "multi-lf"])
     }
 
-    @Test(.tags(.control))
-    func `[control] multi null`() throws {
+    @Test("[control] multi null", .tags(.control))
+    func control__multi_null() throws {
         try invalidate(pathComponents: ["control", "multi-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] multi us`() throws {
+    @Test("[control] multi us", .tags(.control))
+    func control__multi_us() throws {
         try invalidate(pathComponents: ["control", "multi-us"])
     }
 
-    @Test(.tags(.control))
-    func `[control] only ff`() throws {
+    @Test("[control] only ff", .tags(.control))
+    func control__only_ff() throws {
         try invalidate(pathComponents: ["control", "only-ff"])
     }
 
-    @Test(.tags(.control))
-    func `[control] only null`() throws {
+    @Test("[control] only null", .tags(.control))
+    func control__only_null() throws {
         try invalidate(pathComponents: ["control", "only-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] only vt`() throws {
+    @Test("[control] only vt", .tags(.control))
+    func control__only_vt() throws {
         try invalidate(pathComponents: ["control", "only-vt"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawmulti cr`() throws {
+    @Test("[control] rawmulti cr", .tags(.control))
+    func control__rawmulti_cr() throws {
         try invalidate(pathComponents: ["control", "rawmulti-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawmulti del`() throws {
+    @Test("[control] rawmulti del", .tags(.control))
+    func control__rawmulti_del() throws {
         try invalidate(pathComponents: ["control", "rawmulti-del"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawmulti lf`() throws {
+    @Test("[control] rawmulti lf", .tags(.control))
+    func control__rawmulti_lf() throws {
         try invalidate(pathComponents: ["control", "rawmulti-lf"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawmulti null`() throws {
+    @Test("[control] rawmulti null", .tags(.control))
+    func control__rawmulti_null() throws {
         try invalidate(pathComponents: ["control", "rawmulti-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawmulti us`() throws {
+    @Test("[control] rawmulti us", .tags(.control))
+    func control__rawmulti_us() throws {
         try invalidate(pathComponents: ["control", "rawmulti-us"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawstring cr`() throws {
+    @Test("[control] rawstring cr", .tags(.control))
+    func control__rawstring_cr() throws {
         try invalidate(pathComponents: ["control", "rawstring-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawstring del`() throws {
+    @Test("[control] rawstring del", .tags(.control))
+    func control__rawstring_del() throws {
         try invalidate(pathComponents: ["control", "rawstring-del"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawstring lf`() throws {
+    @Test("[control] rawstring lf", .tags(.control))
+    func control__rawstring_lf() throws {
         try invalidate(pathComponents: ["control", "rawstring-lf"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawstring null`() throws {
+    @Test("[control] rawstring null", .tags(.control))
+    func control__rawstring_null() throws {
         try invalidate(pathComponents: ["control", "rawstring-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] rawstring us`() throws {
+    @Test("[control] rawstring us", .tags(.control))
+    func control__rawstring_us() throws {
         try invalidate(pathComponents: ["control", "rawstring-us"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string bs`() throws {
+    @Test("[control] string bs", .tags(.control))
+    func control__string_bs() throws {
         try invalidate(pathComponents: ["control", "string-bs"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string cr`() throws {
+    @Test("[control] string cr", .tags(.control))
+    func control__string_cr() throws {
         try invalidate(pathComponents: ["control", "string-cr"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string del`() throws {
+    @Test("[control] string del", .tags(.control))
+    func control__string_del() throws {
         try invalidate(pathComponents: ["control", "string-del"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string lf`() throws {
+    @Test("[control] string lf", .tags(.control))
+    func control__string_lf() throws {
         try invalidate(pathComponents: ["control", "string-lf"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string null`() throws {
+    @Test("[control] string null", .tags(.control))
+    func control__string_null() throws {
         try invalidate(pathComponents: ["control", "string-null"])
     }
 
-    @Test(.tags(.control))
-    func `[control] string us`() throws {
+    @Test("[control] string us", .tags(.control))
+    func control__string_us() throws {
         try invalidate(pathComponents: ["control", "string-us"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] day zero`() throws {
+    @Test("[datetime] day zero", .tags(.datetime))
+    func datetime__day_zero() throws {
         try invalidate(pathComponents: ["datetime", "day-zero"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] feb 29`() throws {
+    @Test("[datetime] feb 29", .tags(.datetime))
+    func datetime__feb_29() throws {
         try invalidate(pathComponents: ["datetime", "feb-29"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] feb 30`() throws {
+    @Test("[datetime] feb 30", .tags(.datetime))
+    func datetime__feb_30() throws {
         try invalidate(pathComponents: ["datetime", "feb-30"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] hour over`() throws {
+    @Test("[datetime] hour over", .tags(.datetime))
+    func datetime__hour_over() throws {
         try invalidate(pathComponents: ["datetime", "hour-over"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] mday over`() throws {
+    @Test("[datetime] mday over", .tags(.datetime))
+    func datetime__mday_over() throws {
         try invalidate(pathComponents: ["datetime", "mday-over"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] mday under`() throws {
+    @Test("[datetime] mday under", .tags(.datetime))
+    func datetime__mday_under() throws {
         try invalidate(pathComponents: ["datetime", "mday-under"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] minute over`() throws {
+    @Test("[datetime] minute over", .tags(.datetime))
+    func datetime__minute_over() throws {
         try invalidate(pathComponents: ["datetime", "minute-over"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] month over`() throws {
+    @Test("[datetime] month over", .tags(.datetime))
+    func datetime__month_over() throws {
         try invalidate(pathComponents: ["datetime", "month-over"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] month under`() throws {
+    @Test("[datetime] month under", .tags(.datetime))
+    func datetime__month_under() throws {
         try invalidate(pathComponents: ["datetime", "month-under"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no date time sep`() throws {
+    @Test("[datetime] no date time sep", .tags(.datetime))
+    func datetime__no_date_time_sep() throws {
         try invalidate(pathComponents: ["datetime", "no-date-time-sep"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no leads`() throws {
+    @Test("[datetime] no leads", .tags(.datetime))
+    func datetime__no_leads() throws {
         try invalidate(pathComponents: ["datetime", "no-leads"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no leads month`() throws {
+    @Test("[datetime] no leads month", .tags(.datetime))
+    func datetime__no_leads_month() throws {
         try invalidate(pathComponents: ["datetime", "no-leads-month"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no leads with milli`() throws {
+    @Test("[datetime] no leads with milli", .tags(.datetime))
+    func datetime__no_leads_with_milli() throws {
         try invalidate(pathComponents: ["datetime", "no-leads-with-milli"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no secs`() throws {
+    @Test("[datetime] no secs", .tags(.datetime))
+    func datetime__no_secs() throws {
         try invalidate(pathComponents: ["datetime", "no-secs"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no t`() throws {
+    @Test("[datetime] no t", .tags(.datetime))
+    func datetime__no_t() throws {
         try invalidate(pathComponents: ["datetime", "no-t"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] no year month sep`() throws {
+    @Test("[datetime] no year month sep", .tags(.datetime))
+    func datetime__no_year_month_sep() throws {
         try invalidate(pathComponents: ["datetime", "no-year-month-sep"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset minus minute 1digit`() throws {
+    @Test("[datetime] offset minus minute 1digit", .tags(.datetime))
+    func datetime__offset_minus_minute_1digit() throws {
         try invalidate(pathComponents: ["datetime", "offset-minus-minute-1digit"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset minus no hour minute`() throws {
+    @Test("[datetime] offset minus no hour minute", .tags(.datetime))
+    func datetime__offset_minus_no_hour_minute() throws {
         try invalidate(pathComponents: ["datetime", "offset-minus-no-hour-minute"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset minus no hour minute sep`() throws {
+    @Test("[datetime] offset minus no hour minute sep", .tags(.datetime))
+    func datetime__offset_minus_no_hour_minute_sep() throws {
         try invalidate(pathComponents: ["datetime", "offset-minus-no-hour-minute-sep"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset minus no minute`() throws {
+    @Test("[datetime] offset minus no minute", .tags(.datetime))
+    func datetime__offset_minus_no_minute() throws {
         try invalidate(pathComponents: ["datetime", "offset-minus-no-minute"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset overflow hour`() throws {
+    @Test("[datetime] offset overflow hour", .tags(.datetime))
+    func datetime__offset_overflow_hour() throws {
         try invalidate(pathComponents: ["datetime", "offset-overflow-hour"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset overflow minute`() throws {
+    @Test("[datetime] offset overflow minute", .tags(.datetime))
+    func datetime__offset_overflow_minute() throws {
         try invalidate(pathComponents: ["datetime", "offset-overflow-minute"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset plus minute 1digit`() throws {
+    @Test("[datetime] offset plus minute 1digit", .tags(.datetime))
+    func datetime__offset_plus_minute_1digit() throws {
         try invalidate(pathComponents: ["datetime", "offset-plus-minute-1digit"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset plus no hour minute`() throws {
+    @Test("[datetime] offset plus no hour minute", .tags(.datetime))
+    func datetime__offset_plus_no_hour_minute() throws {
         try invalidate(pathComponents: ["datetime", "offset-plus-no-hour-minute"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset plus no hour minute sep`() throws {
+    @Test("[datetime] offset plus no hour minute sep", .tags(.datetime))
+    func datetime__offset_plus_no_hour_minute_sep() throws {
         try invalidate(pathComponents: ["datetime", "offset-plus-no-hour-minute-sep"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] offset plus no minute`() throws {
+    @Test("[datetime] offset plus no minute", .tags(.datetime))
+    func datetime__offset_plus_no_minute() throws {
         try invalidate(pathComponents: ["datetime", "offset-plus-no-minute"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] only T`() throws {
+    @Test("[datetime] only T", .tags(.datetime))
+    func datetime__only_T() throws {
         try invalidate(pathComponents: ["datetime", "only-T"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] only TZ`() throws {
+    @Test("[datetime] only TZ", .tags(.datetime))
+    func datetime__only_TZ() throws {
         try invalidate(pathComponents: ["datetime", "only-TZ"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] only Tdot`() throws {
+    @Test("[datetime] only Tdot", .tags(.datetime))
+    func datetime__only_Tdot() throws {
         try invalidate(pathComponents: ["datetime", "only-Tdot"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] second over`() throws {
+    @Test("[datetime] second over", .tags(.datetime))
+    func datetime__second_over() throws {
         try invalidate(pathComponents: ["datetime", "second-over"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] second trailing dot`() throws {
+    @Test("[datetime] second trailing dot", .tags(.datetime))
+    func datetime__second_trailing_dot() throws {
         try invalidate(pathComponents: ["datetime", "second-trailing-dot"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] second trailing dotz`() throws {
+    @Test("[datetime] second trailing dotz", .tags(.datetime))
+    func datetime__second_trailing_dotz() throws {
         try invalidate(pathComponents: ["datetime", "second-trailing-dotz"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] time no leads`() throws {
+    @Test("[datetime] time no leads", .tags(.datetime))
+    func datetime__time_no_leads() throws {
         try invalidate(pathComponents: ["datetime", "time-no-leads"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] trailing x`() throws {
+    @Test("[datetime] trailing x", .tags(.datetime))
+    func datetime__trailing_x() throws {
         try invalidate(pathComponents: ["datetime", "trailing-x"])
     }
 
-    @Test(.tags(.datetime))
-    func `[datetime] y10k`() throws {
+    @Test("[datetime] y10k", .tags(.datetime))
+    func datetime__y10k() throws {
         try invalidate(pathComponents: ["datetime", "y10k"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad codepoint`() throws {
+    @Test("[encoding] bad codepoint", .tags(.encoding))
+    func encoding__bad_codepoint() throws {
         try invalidate(pathComponents: ["encoding", "bad-codepoint"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 at end`() throws {
+    @Test("[encoding] bad utf8 at end", .tags(.encoding))
+    func encoding__bad_utf8_at_end() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-at-end"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in array`() throws {
+    @Test("[encoding] bad utf8 in array", .tags(.encoding))
+    func encoding__bad_utf8_in_array() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-array"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in comment`() throws {
+    @Test("[encoding] bad utf8 in comment", .tags(.encoding))
+    func encoding__bad_utf8_in_comment() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-comment"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in multiline`() throws {
+    @Test("[encoding] bad utf8 in multiline", .tags(.encoding))
+    func encoding__bad_utf8_in_multiline() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-multiline"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in multiline literal`() throws {
+    @Test("[encoding] bad utf8 in multiline literal", .tags(.encoding))
+    func encoding__bad_utf8_in_multiline_literal() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-multiline-literal"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in string`() throws {
+    @Test("[encoding] bad utf8 in string", .tags(.encoding))
+    func encoding__bad_utf8_in_string() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-string"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bad utf8 in string literal`() throws {
+    @Test("[encoding] bad utf8 in string literal", .tags(.encoding))
+    func encoding__bad_utf8_in_string_literal() throws {
         try invalidate(pathComponents: ["encoding", "bad-utf8-in-string-literal"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bom not at start 01`() throws {
+    @Test("[encoding] bom not at start 01", .tags(.encoding))
+    func encoding__bom_not_at_start_01() throws {
         try invalidate(pathComponents: ["encoding", "bom-not-at-start-01"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] bom not at start 02`() throws {
+    @Test("[encoding] bom not at start 02", .tags(.encoding))
+    func encoding__bom_not_at_start_02() throws {
         try invalidate(pathComponents: ["encoding", "bom-not-at-start-02"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] ideographic space`() throws {
+    @Test("[encoding] ideographic space", .tags(.encoding))
+    func encoding__ideographic_space() throws {
         try invalidate(pathComponents: ["encoding", "ideographic-space"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] utf16 bom`() throws {
+    @Test("[encoding] utf16 bom", .tags(.encoding))
+    func encoding__utf16_bom() throws {
         try invalidate(pathComponents: ["encoding", "utf16-bom"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] utf16 comment`() throws {
+    @Test("[encoding] utf16 comment", .tags(.encoding))
+    func encoding__utf16_comment() throws {
         try invalidate(pathComponents: ["encoding", "utf16-comment"])
     }
 
-    @Test(.tags(.encoding))
-    func `[encoding] utf16 key`() throws {
+    @Test("[encoding] utf16 key", .tags(.encoding))
+    func encoding__utf16_key() throws {
         try invalidate(pathComponents: ["encoding", "utf16-key"])
     }
 
-    @Test(.tags(.float))
-    func `[float] double dot 01`() throws {
+    @Test("[float] double dot 01", .tags(.float))
+    func float__double_dot_01() throws {
         try invalidate(pathComponents: ["float", "double-dot-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] double dot 02`() throws {
+    @Test("[float] double dot 02", .tags(.float))
+    func float__double_dot_02() throws {
         try invalidate(pathComponents: ["float", "double-dot-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] double point 1`() throws {
+    @Test("[float] double point 1", .tags(.float))
+    func float__double_point_1() throws {
         try invalidate(pathComponents: ["float", "double-point-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] double point 2`() throws {
+    @Test("[float] double point 2", .tags(.float))
+    func float__double_point_2() throws {
         try invalidate(pathComponents: ["float", "double-point-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp dot 01`() throws {
+    @Test("[float] exp dot 01", .tags(.float))
+    func float__exp_dot_01() throws {
         try invalidate(pathComponents: ["float", "exp-dot-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp dot 02`() throws {
+    @Test("[float] exp dot 02", .tags(.float))
+    func float__exp_dot_02() throws {
         try invalidate(pathComponents: ["float", "exp-dot-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp dot 03`() throws {
+    @Test("[float] exp dot 03", .tags(.float))
+    func float__exp_dot_03() throws {
         try invalidate(pathComponents: ["float", "exp-dot-03"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp double e 01`() throws {
+    @Test("[float] exp double e 01", .tags(.float))
+    func float__exp_double_e_01() throws {
         try invalidate(pathComponents: ["float", "exp-double-e-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp double e 02`() throws {
+    @Test("[float] exp double e 02", .tags(.float))
+    func float__exp_double_e_02() throws {
         try invalidate(pathComponents: ["float", "exp-double-e-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp double e 1`() throws {
+    @Test("[float] exp double e 1", .tags(.float))
+    func float__exp_double_e_1() throws {
         try invalidate(pathComponents: ["float", "exp-double-e-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp double e 2`() throws {
+    @Test("[float] exp double e 2", .tags(.float))
+    func float__exp_double_e_2() throws {
         try invalidate(pathComponents: ["float", "exp-double-e-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp double us`() throws {
+    @Test("[float] exp double us", .tags(.float))
+    func float__exp_double_us() throws {
         try invalidate(pathComponents: ["float", "exp-double-us"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp leading us`() throws {
+    @Test("[float] exp leading us", .tags(.float))
+    func float__exp_leading_us() throws {
         try invalidate(pathComponents: ["float", "exp-leading-us"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp point 1`() throws {
+    @Test("[float] exp point 1", .tags(.float))
+    func float__exp_point_1() throws {
         try invalidate(pathComponents: ["float", "exp-point-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp point 2`() throws {
+    @Test("[float] exp point 2", .tags(.float))
+    func float__exp_point_2() throws {
         try invalidate(pathComponents: ["float", "exp-point-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp point 3`() throws {
+    @Test("[float] exp point 3", .tags(.float))
+    func float__exp_point_3() throws {
         try invalidate(pathComponents: ["float", "exp-point-3"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp trailing us`() throws {
+    @Test("[float] exp trailing us", .tags(.float))
+    func float__exp_trailing_us() throws {
         try invalidate(pathComponents: ["float", "exp-trailing-us"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp trailing us 01`() throws {
+    @Test("[float] exp trailing us 01", .tags(.float))
+    func float__exp_trailing_us_01() throws {
         try invalidate(pathComponents: ["float", "exp-trailing-us-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp trailing us 02`() throws {
+    @Test("[float] exp trailing us 02", .tags(.float))
+    func float__exp_trailing_us_02() throws {
         try invalidate(pathComponents: ["float", "exp-trailing-us-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp trailing us 1`() throws {
+    @Test("[float] exp trailing us 1", .tags(.float))
+    func float__exp_trailing_us_1() throws {
         try invalidate(pathComponents: ["float", "exp-trailing-us-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] exp trailing us 2`() throws {
+    @Test("[float] exp trailing us 2", .tags(.float))
+    func float__exp_trailing_us_2() throws {
         try invalidate(pathComponents: ["float", "exp-trailing-us-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf capital`() throws {
+    @Test("[float] inf capital", .tags(.float))
+    func float__inf_capital() throws {
         try invalidate(pathComponents: ["float", "inf-capital"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 01`() throws {
+    @Test("[float] inf incomplete 01", .tags(.float))
+    func float__inf_incomplete_01() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 02`() throws {
+    @Test("[float] inf incomplete 02", .tags(.float))
+    func float__inf_incomplete_02() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 03`() throws {
+    @Test("[float] inf incomplete 03", .tags(.float))
+    func float__inf_incomplete_03() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-03"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 1`() throws {
+    @Test("[float] inf incomplete 1", .tags(.float))
+    func float__inf_incomplete_1() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 2`() throws {
+    @Test("[float] inf incomplete 2", .tags(.float))
+    func float__inf_incomplete_2() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf incomplete 3`() throws {
+    @Test("[float] inf incomplete 3", .tags(.float))
+    func float__inf_incomplete_3() throws {
         try invalidate(pathComponents: ["float", "inf-incomplete-3"])
     }
 
-    @Test(.tags(.float))
-    func `[float] inf underscore`() throws {
+    @Test("[float] inf underscore", .tags(.float))
+    func float__inf_underscore() throws {
         try invalidate(pathComponents: ["float", "inf_underscore"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading dot`() throws {
+    @Test("[float] leading dot", .tags(.float))
+    func float__leading_dot() throws {
         try invalidate(pathComponents: ["float", "leading-dot"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading dot neg`() throws {
+    @Test("[float] leading dot neg", .tags(.float))
+    func float__leading_dot_neg() throws {
         try invalidate(pathComponents: ["float", "leading-dot-neg"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading dot plus`() throws {
+    @Test("[float] leading dot plus", .tags(.float))
+    func float__leading_dot_plus() throws {
         try invalidate(pathComponents: ["float", "leading-dot-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading point`() throws {
+    @Test("[float] leading point", .tags(.float))
+    func float__leading_point() throws {
         try invalidate(pathComponents: ["float", "leading-point"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading point neg`() throws {
+    @Test("[float] leading point neg", .tags(.float))
+    func float__leading_point_neg() throws {
         try invalidate(pathComponents: ["float", "leading-point-neg"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading point plus`() throws {
+    @Test("[float] leading point plus", .tags(.float))
+    func float__leading_point_plus() throws {
         try invalidate(pathComponents: ["float", "leading-point-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading us`() throws {
+    @Test("[float] leading us", .tags(.float))
+    func float__leading_us() throws {
         try invalidate(pathComponents: ["float", "leading-us"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading zero`() throws {
+    @Test("[float] leading zero", .tags(.float))
+    func float__leading_zero() throws {
         try invalidate(pathComponents: ["float", "leading-zero"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading zero neg`() throws {
+    @Test("[float] leading zero neg", .tags(.float))
+    func float__leading_zero_neg() throws {
         try invalidate(pathComponents: ["float", "leading-zero-neg"])
     }
 
-    @Test(.tags(.float))
-    func `[float] leading zero plus`() throws {
+    @Test("[float] leading zero plus", .tags(.float))
+    func float__leading_zero_plus() throws {
         try invalidate(pathComponents: ["float", "leading-zero-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan capital`() throws {
+    @Test("[float] nan capital", .tags(.float))
+    func float__nan_capital() throws {
         try invalidate(pathComponents: ["float", "nan-capital"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 01`() throws {
+    @Test("[float] nan incomplete 01", .tags(.float))
+    func float__nan_incomplete_01() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 02`() throws {
+    @Test("[float] nan incomplete 02", .tags(.float))
+    func float__nan_incomplete_02() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 03`() throws {
+    @Test("[float] nan incomplete 03", .tags(.float))
+    func float__nan_incomplete_03() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-03"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 1`() throws {
+    @Test("[float] nan incomplete 1", .tags(.float))
+    func float__nan_incomplete_1() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-1"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 2`() throws {
+    @Test("[float] nan incomplete 2", .tags(.float))
+    func float__nan_incomplete_2() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-2"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan incomplete 3`() throws {
+    @Test("[float] nan incomplete 3", .tags(.float))
+    func float__nan_incomplete_3() throws {
         try invalidate(pathComponents: ["float", "nan-incomplete-3"])
     }
 
-    @Test(.tags(.float))
-    func `[float] nan underscore`() throws {
+    @Test("[float] nan underscore", .tags(.float))
+    func float__nan_underscore() throws {
         try invalidate(pathComponents: ["float", "nan_underscore"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing dot 01`() throws {
+    @Test("[float] trailing dot 01", .tags(.float))
+    func float__trailing_dot_01() throws {
         try invalidate(pathComponents: ["float", "trailing-dot-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing dot 02`() throws {
+    @Test("[float] trailing dot 02", .tags(.float))
+    func float__trailing_dot_02() throws {
         try invalidate(pathComponents: ["float", "trailing-dot-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing dot min`() throws {
+    @Test("[float] trailing dot min", .tags(.float))
+    func float__trailing_dot_min() throws {
         try invalidate(pathComponents: ["float", "trailing-dot-min"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing dot plus`() throws {
+    @Test("[float] trailing dot plus", .tags(.float))
+    func float__trailing_dot_plus() throws {
         try invalidate(pathComponents: ["float", "trailing-dot-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing exp`() throws {
+    @Test("[float] trailing exp", .tags(.float))
+    func float__trailing_exp() throws {
         try invalidate(pathComponents: ["float", "trailing-exp"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing exp minus`() throws {
+    @Test("[float] trailing exp minus", .tags(.float))
+    func float__trailing_exp_minus() throws {
         try invalidate(pathComponents: ["float", "trailing-exp-minus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing exp plus`() throws {
+    @Test("[float] trailing exp plus", .tags(.float))
+    func float__trailing_exp_plus() throws {
         try invalidate(pathComponents: ["float", "trailing-exp-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing exp point`() throws {
+    @Test("[float] trailing exp point", .tags(.float))
+    func float__trailing_exp_point() throws {
         try invalidate(pathComponents: ["float", "trailing-exp-point"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing point`() throws {
+    @Test("[float] trailing point", .tags(.float))
+    func float__trailing_point() throws {
         try invalidate(pathComponents: ["float", "trailing-point"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing point min`() throws {
+    @Test("[float] trailing point min", .tags(.float))
+    func float__trailing_point_min() throws {
         try invalidate(pathComponents: ["float", "trailing-point-min"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing point plus`() throws {
+    @Test("[float] trailing point plus", .tags(.float))
+    func float__trailing_point_plus() throws {
         try invalidate(pathComponents: ["float", "trailing-point-plus"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing us`() throws {
+    @Test("[float] trailing us", .tags(.float))
+    func float__trailing_us() throws {
         try invalidate(pathComponents: ["float", "trailing-us"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing us exp 01`() throws {
+    @Test("[float] trailing us exp 01", .tags(.float))
+    func float__trailing_us_exp_01() throws {
         try invalidate(pathComponents: ["float", "trailing-us-exp-01"])
     }
 
-    @Test(.tags(.float))
-    func `[float] trailing us exp 02`() throws {
+    @Test("[float] trailing us exp 02", .tags(.float))
+    func float__trailing_us_exp_02() throws {
         try invalidate(pathComponents: ["float", "trailing-us-exp-02"])
     }
 
-    @Test(.tags(.float))
-    func `[float] us after dot`() throws {
+    @Test("[float] us after dot", .tags(.float))
+    func float__us_after_dot() throws {
         try invalidate(pathComponents: ["float", "us-after-dot"])
     }
 
-    @Test(.tags(.float))
-    func `[float] us after point`() throws {
+    @Test("[float] us after point", .tags(.float))
+    func float__us_after_point() throws {
         try invalidate(pathComponents: ["float", "us-after-point"])
     }
 
-    @Test(.tags(.float))
-    func `[float] us before dot`() throws {
+    @Test("[float] us before dot", .tags(.float))
+    func float__us_before_dot() throws {
         try invalidate(pathComponents: ["float", "us-before-dot"])
     }
 
-    @Test(.tags(.float))
-    func `[float] us before point`() throws {
+    @Test("[float] us before point", .tags(.float))
+    func float__us_before_point() throws {
         try invalidate(pathComponents: ["float", "us-before-point"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] bad key syntax`() throws {
+    @Test("[inline-table] bad key syntax", .tags(.inline_table))
+    func inline_table__bad_key_syntax() throws {
         try invalidate(pathComponents: ["inline-table", "bad-key-syntax"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] double comma`() throws {
+    @Test("[inline-table] double comma", .tags(.inline_table))
+    func inline_table__double_comma() throws {
         try invalidate(pathComponents: ["inline-table", "double-comma"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] duplicate key 01`() throws {
+    @Test("[inline-table] duplicate key 01", .tags(.inline_table))
+    func inline_table__duplicate_key_01() throws {
         try invalidate(pathComponents: ["inline-table", "duplicate-key-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] duplicate key 02`() throws {
+    @Test("[inline-table] duplicate key 02", .tags(.inline_table))
+    func inline_table__duplicate_key_02() throws {
         try invalidate(pathComponents: ["inline-table", "duplicate-key-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] duplicate key 03`() throws {
+    @Test("[inline-table] duplicate key 03", .tags(.inline_table))
+    func inline_table__duplicate_key_03() throws {
         try invalidate(pathComponents: ["inline-table", "duplicate-key-03"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] duplicate key 04`() throws {
+    @Test("[inline-table] duplicate key 04", .tags(.inline_table))
+    func inline_table__duplicate_key_04() throws {
         try invalidate(pathComponents: ["inline-table", "duplicate-key-04"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] empty 01`() throws {
+    @Test("[inline-table] empty 01", .tags(.inline_table))
+    func inline_table__empty_01() throws {
         try invalidate(pathComponents: ["inline-table", "empty-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] empty 02`() throws {
+    @Test("[inline-table] empty 02", .tags(.inline_table))
+    func inline_table__empty_02() throws {
         try invalidate(pathComponents: ["inline-table", "empty-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] empty 03`() throws {
+    @Test("[inline-table] empty 03", .tags(.inline_table))
+    func inline_table__empty_03() throws {
         try invalidate(pathComponents: ["inline-table", "empty-03"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] linebreak 01`() throws {
+    @Test("[inline-table] linebreak 01", .tags(.inline_table))
+    func inline_table__linebreak_01() throws {
         try invalidate(pathComponents: ["inline-table", "linebreak-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] linebreak 02`() throws {
+    @Test("[inline-table] linebreak 02", .tags(.inline_table))
+    func inline_table__linebreak_02() throws {
         try invalidate(pathComponents: ["inline-table", "linebreak-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] linebreak 03`() throws {
+    @Test("[inline-table] linebreak 03", .tags(.inline_table))
+    func inline_table__linebreak_03() throws {
         try invalidate(pathComponents: ["inline-table", "linebreak-03"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] linebreak 04`() throws {
+    @Test("[inline-table] linebreak 04", .tags(.inline_table))
+    func inline_table__linebreak_04() throws {
         try invalidate(pathComponents: ["inline-table", "linebreak-04"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] no close 01`() throws {
+    @Test("[inline-table] no close 01", .tags(.inline_table))
+    func inline_table__no_close_01() throws {
         try invalidate(pathComponents: ["inline-table", "no-close-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] no close 02`() throws {
+    @Test("[inline-table] no close 02", .tags(.inline_table))
+    func inline_table__no_close_02() throws {
         try invalidate(pathComponents: ["inline-table", "no-close-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] no comma 01`() throws {
+    @Test("[inline-table] no comma 01", .tags(.inline_table))
+    func inline_table__no_comma_01() throws {
         try invalidate(pathComponents: ["inline-table", "no-comma-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] no comma 02`() throws {
+    @Test("[inline-table] no comma 02", .tags(.inline_table))
+    func inline_table__no_comma_02() throws {
         try invalidate(pathComponents: ["inline-table", "no-comma-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 01`() throws {
+    @Test("[inline-table] overwrite 01", .tags(.inline_table))
+    func inline_table__overwrite_01() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-01"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 02`() throws {
+    @Test("[inline-table] overwrite 02", .tags(.inline_table))
+    func inline_table__overwrite_02() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-02"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 03`() throws {
+    @Test("[inline-table] overwrite 03", .tags(.inline_table))
+    func inline_table__overwrite_03() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-03"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 04`() throws {
+    @Test("[inline-table] overwrite 04", .tags(.inline_table))
+    func inline_table__overwrite_04() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-04"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 05`() throws {
+    @Test("[inline-table] overwrite 05", .tags(.inline_table))
+    func inline_table__overwrite_05() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-05"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 06`() throws {
+    @Test("[inline-table] overwrite 06", .tags(.inline_table))
+    func inline_table__overwrite_06() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-06"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 07`() throws {
+    @Test("[inline-table] overwrite 07", .tags(.inline_table))
+    func inline_table__overwrite_07() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-07"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 08`() throws {
+    @Test("[inline-table] overwrite 08", .tags(.inline_table))
+    func inline_table__overwrite_08() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-08"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 09`() throws {
+    @Test("[inline-table] overwrite 09", .tags(.inline_table))
+    func inline_table__overwrite_09() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-09"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] overwrite 10`() throws {
+    @Test("[inline-table] overwrite 10", .tags(.inline_table))
+    func inline_table__overwrite_10() throws {
         try invalidate(pathComponents: ["inline-table", "overwrite-10"])
     }
 
-    @Test(.tags(.inline_table))
-    func `[inline-table] trailing comma`() throws {
+    @Test("[inline-table] trailing comma", .tags(.inline_table))
+    func inline_table__trailing_comma() throws {
         try invalidate(pathComponents: ["inline-table", "trailing-comma"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] capital bin`() throws {
+    @Test("[integer] capital bin", .tags(.integer))
+    func integer__capital_bin() throws {
         try invalidate(pathComponents: ["integer", "capital-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] capital hex`() throws {
+    @Test("[integer] capital hex", .tags(.integer))
+    func integer__capital_hex() throws {
         try invalidate(pathComponents: ["integer", "capital-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] capital oct`() throws {
+    @Test("[integer] capital oct", .tags(.integer))
+    func integer__capital_oct() throws {
         try invalidate(pathComponents: ["integer", "capital-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] double sign nex`() throws {
+    @Test("[integer] double sign nex", .tags(.integer))
+    func integer__double_sign_nex() throws {
         try invalidate(pathComponents: ["integer", "double-sign-nex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] double sign plus`() throws {
+    @Test("[integer] double sign plus", .tags(.integer))
+    func integer__double_sign_plus() throws {
         try invalidate(pathComponents: ["integer", "double-sign-plus"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] double us`() throws {
+    @Test("[integer] double us", .tags(.integer))
+    func integer__double_us() throws {
         try invalidate(pathComponents: ["integer", "double-us"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] incomplete bin`() throws {
+    @Test("[integer] incomplete bin", .tags(.integer))
+    func integer__incomplete_bin() throws {
         try invalidate(pathComponents: ["integer", "incomplete-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] incomplete hex`() throws {
+    @Test("[integer] incomplete hex", .tags(.integer))
+    func integer__incomplete_hex() throws {
         try invalidate(pathComponents: ["integer", "incomplete-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] incomplete oct`() throws {
+    @Test("[integer] incomplete oct", .tags(.integer))
+    func integer__incomplete_oct() throws {
         try invalidate(pathComponents: ["integer", "incomplete-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid bin`() throws {
+    @Test("[integer] invalid bin", .tags(.integer))
+    func integer__invalid_bin() throws {
         try invalidate(pathComponents: ["integer", "invalid-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid hex 01`() throws {
+    @Test("[integer] invalid hex 01", .tags(.integer))
+    func integer__invalid_hex_01() throws {
         try invalidate(pathComponents: ["integer", "invalid-hex-01"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid hex 02`() throws {
+    @Test("[integer] invalid hex 02", .tags(.integer))
+    func integer__invalid_hex_02() throws {
         try invalidate(pathComponents: ["integer", "invalid-hex-02"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid hex 03`() throws {
+    @Test("[integer] invalid hex 03", .tags(.integer))
+    func integer__invalid_hex_03() throws {
         try invalidate(pathComponents: ["integer", "invalid-hex-03"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid hex 1`() throws {
+    @Test("[integer] invalid hex 1", .tags(.integer))
+    func integer__invalid_hex_1() throws {
         try invalidate(pathComponents: ["integer", "invalid-hex-1"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid hex 2`() throws {
+    @Test("[integer] invalid hex 2", .tags(.integer))
+    func integer__invalid_hex_2() throws {
         try invalidate(pathComponents: ["integer", "invalid-hex-2"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] invalid oct`() throws {
+    @Test("[integer] invalid oct", .tags(.integer))
+    func integer__invalid_oct() throws {
         try invalidate(pathComponents: ["integer", "invalid-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading us`() throws {
+    @Test("[integer] leading us", .tags(.integer))
+    func integer__leading_us() throws {
         try invalidate(pathComponents: ["integer", "leading-us"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading us bin`() throws {
+    @Test("[integer] leading us bin", .tags(.integer))
+    func integer__leading_us_bin() throws {
         try invalidate(pathComponents: ["integer", "leading-us-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading us hex`() throws {
+    @Test("[integer] leading us hex", .tags(.integer))
+    func integer__leading_us_hex() throws {
         try invalidate(pathComponents: ["integer", "leading-us-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading us oct`() throws {
+    @Test("[integer] leading us oct", .tags(.integer))
+    func integer__leading_us_oct() throws {
         try invalidate(pathComponents: ["integer", "leading-us-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 01`() throws {
+    @Test("[integer] leading zero 01", .tags(.integer))
+    func integer__leading_zero_01() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-01"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 02`() throws {
+    @Test("[integer] leading zero 02", .tags(.integer))
+    func integer__leading_zero_02() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-02"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 03`() throws {
+    @Test("[integer] leading zero 03", .tags(.integer))
+    func integer__leading_zero_03() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-03"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 1`() throws {
+    @Test("[integer] leading zero 1", .tags(.integer))
+    func integer__leading_zero_1() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-1"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 2`() throws {
+    @Test("[integer] leading zero 2", .tags(.integer))
+    func integer__leading_zero_2() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-2"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero 3`() throws {
+    @Test("[integer] leading zero 3", .tags(.integer))
+    func integer__leading_zero_3() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-3"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 01`() throws {
+    @Test("[integer] leading zero sign 01", .tags(.integer))
+    func integer__leading_zero_sign_01() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-01"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 02`() throws {
+    @Test("[integer] leading zero sign 02", .tags(.integer))
+    func integer__leading_zero_sign_02() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-02"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 03`() throws {
+    @Test("[integer] leading zero sign 03", .tags(.integer))
+    func integer__leading_zero_sign_03() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-03"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 1`() throws {
+    @Test("[integer] leading zero sign 1", .tags(.integer))
+    func integer__leading_zero_sign_1() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-1"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 2`() throws {
+    @Test("[integer] leading zero sign 2", .tags(.integer))
+    func integer__leading_zero_sign_2() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-2"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] leading zero sign 3`() throws {
+    @Test("[integer] leading zero sign 3", .tags(.integer))
+    func integer__leading_zero_sign_3() throws {
         try invalidate(pathComponents: ["integer", "leading-zero-sign-3"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] negative bin`() throws {
+    @Test("[integer] negative bin", .tags(.integer))
+    func integer__negative_bin() throws {
         try invalidate(pathComponents: ["integer", "negative-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] negative hex`() throws {
+    @Test("[integer] negative hex", .tags(.integer))
+    func integer__negative_hex() throws {
         try invalidate(pathComponents: ["integer", "negative-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] negative oct`() throws {
+    @Test("[integer] negative oct", .tags(.integer))
+    func integer__negative_oct() throws {
         try invalidate(pathComponents: ["integer", "negative-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] positive bin`() throws {
+    @Test("[integer] positive bin", .tags(.integer))
+    func integer__positive_bin() throws {
         try invalidate(pathComponents: ["integer", "positive-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] positive hex`() throws {
+    @Test("[integer] positive hex", .tags(.integer))
+    func integer__positive_hex() throws {
         try invalidate(pathComponents: ["integer", "positive-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] positive oct`() throws {
+    @Test("[integer] positive oct", .tags(.integer))
+    func integer__positive_oct() throws {
         try invalidate(pathComponents: ["integer", "positive-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] text after integer`() throws {
+    @Test("[integer] text after integer", .tags(.integer))
+    func integer__text_after_integer() throws {
         try invalidate(pathComponents: ["integer", "text-after-integer"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] trailing us`() throws {
+    @Test("[integer] trailing us", .tags(.integer))
+    func integer__trailing_us() throws {
         try invalidate(pathComponents: ["integer", "trailing-us"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] trailing us bin`() throws {
+    @Test("[integer] trailing us bin", .tags(.integer))
+    func integer__trailing_us_bin() throws {
         try invalidate(pathComponents: ["integer", "trailing-us-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] trailing us hex`() throws {
+    @Test("[integer] trailing us hex", .tags(.integer))
+    func integer__trailing_us_hex() throws {
         try invalidate(pathComponents: ["integer", "trailing-us-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] trailing us oct`() throws {
+    @Test("[integer] trailing us oct", .tags(.integer))
+    func integer__trailing_us_oct() throws {
         try invalidate(pathComponents: ["integer", "trailing-us-oct"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] us after bin`() throws {
+    @Test("[integer] us after bin", .tags(.integer))
+    func integer__us_after_bin() throws {
         try invalidate(pathComponents: ["integer", "us-after-bin"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] us after hex`() throws {
+    @Test("[integer] us after hex", .tags(.integer))
+    func integer__us_after_hex() throws {
         try invalidate(pathComponents: ["integer", "us-after-hex"])
     }
 
-    @Test(.tags(.integer))
-    func `[integer] us after oct`() throws {
+    @Test("[integer] us after oct", .tags(.integer))
+    func integer__us_after_oct() throws {
         try invalidate(pathComponents: ["integer", "us-after-oct"])
     }
 
-    @Test(.tags(.key))
-    func `[key] after array`() throws {
+    @Test("[key] after array", .tags(.key))
+    func key__after_array() throws {
         try invalidate(pathComponents: ["key", "after-array"])
     }
 
-    @Test(.tags(.key))
-    func `[key] after table`() throws {
+    @Test("[key] after table", .tags(.key))
+    func key__after_table() throws {
         try invalidate(pathComponents: ["key", "after-table"])
     }
 
-    @Test(.tags(.key))
-    func `[key] after value`() throws {
+    @Test("[key] after value", .tags(.key))
+    func key__after_value() throws {
         try invalidate(pathComponents: ["key", "after-value"])
     }
 
-    @Test(.tags(.key))
-    func `[key] bare invalid character 01`() throws {
+    @Test("[key] bare invalid character 01", .tags(.key))
+    func key__bare_invalid_character_01() throws {
         try invalidate(pathComponents: ["key", "bare-invalid-character-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] bare invalid character 02`() throws {
+    @Test("[key] bare invalid character 02", .tags(.key))
+    func key__bare_invalid_character_02() throws {
         try invalidate(pathComponents: ["key", "bare-invalid-character-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] dot`() throws {
+    @Test("[key] dot", .tags(.key))
+    func key__dot() throws {
         try invalidate(pathComponents: ["key", "dot"])
     }
 
-    @Test(.tags(.key))
-    func `[key] dotdot`() throws {
+    @Test("[key] dotdot", .tags(.key))
+    func key__dotdot() throws {
         try invalidate(pathComponents: ["key", "dotdot"])
     }
 
-    @Test(.tags(.key))
-    func `[key] dotted redefine table 01`() throws {
+    @Test("[key] dotted redefine table 01", .tags(.key))
+    func key__dotted_redefine_table_01() throws {
         try invalidate(pathComponents: ["key", "dotted-redefine-table-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] dotted redefine table 02`() throws {
+    @Test("[key] dotted redefine table 02", .tags(.key))
+    func key__dotted_redefine_table_02() throws {
         try invalidate(pathComponents: ["key", "dotted-redefine-table-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 01`() throws {
+    @Test("[key] duplicate keys 01", .tags(.key))
+    func key__duplicate_keys_01() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 02`() throws {
+    @Test("[key] duplicate keys 02", .tags(.key))
+    func key__duplicate_keys_02() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 03`() throws {
+    @Test("[key] duplicate keys 03", .tags(.key))
+    func key__duplicate_keys_03() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 04`() throws {
+    @Test("[key] duplicate keys 04", .tags(.key))
+    func key__duplicate_keys_04() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-04"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 05`() throws {
+    @Test("[key] duplicate keys 05", .tags(.key))
+    func key__duplicate_keys_05() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-05"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 06`() throws {
+    @Test("[key] duplicate keys 06", .tags(.key))
+    func key__duplicate_keys_06() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-06"])
     }
 
-    @Test(.tags(.key))
-    func `[key] duplicate keys 07`() throws {
+    @Test("[key] duplicate keys 07", .tags(.key))
+    func key__duplicate_keys_07() throws {
         try invalidate(pathComponents: ["key", "duplicate-keys-07"])
     }
 
-    @Test(.tags(.key))
-    func `[key] empty`() throws {
+    @Test("[key] empty", .tags(.key))
+    func key__empty() throws {
         try invalidate(pathComponents: ["key", "empty"])
     }
 
-    @Test(.tags(.key))
-    func `[key] end in escape`() throws {
+    @Test("[key] end in escape", .tags(.key))
+    func key__end_in_escape() throws {
         try invalidate(pathComponents: ["key", "end-in-escape"])
     }
 
-    @Test(.tags(.key))
-    func `[key] escape`() throws {
+    @Test("[key] escape", .tags(.key))
+    func key__escape() throws {
         try invalidate(pathComponents: ["key", "escape"])
     }
 
-    @Test(.tags(.key))
-    func `[key] hash`() throws {
+    @Test("[key] hash", .tags(.key))
+    func key__hash() throws {
         try invalidate(pathComponents: ["key", "hash"])
     }
 
-    @Test(.tags(.key))
-    func `[key] multiline key 01`() throws {
+    @Test("[key] multiline key 01", .tags(.key))
+    func key__multiline_key_01() throws {
         try invalidate(pathComponents: ["key", "multiline-key-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] multiline key 02`() throws {
+    @Test("[key] multiline key 02", .tags(.key))
+    func key__multiline_key_02() throws {
         try invalidate(pathComponents: ["key", "multiline-key-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] multiline key 03`() throws {
+    @Test("[key] multiline key 03", .tags(.key))
+    func key__multiline_key_03() throws {
         try invalidate(pathComponents: ["key", "multiline-key-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] multiline key 04`() throws {
+    @Test("[key] multiline key 04", .tags(.key))
+    func key__multiline_key_04() throws {
         try invalidate(pathComponents: ["key", "multiline-key-04"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 01`() throws {
+    @Test("[key] newline 01", .tags(.key))
+    func key__newline_01() throws {
         try invalidate(pathComponents: ["key", "newline-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 02`() throws {
+    @Test("[key] newline 02", .tags(.key))
+    func key__newline_02() throws {
         try invalidate(pathComponents: ["key", "newline-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 03`() throws {
+    @Test("[key] newline 03", .tags(.key))
+    func key__newline_03() throws {
         try invalidate(pathComponents: ["key", "newline-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 04`() throws {
+    @Test("[key] newline 04", .tags(.key))
+    func key__newline_04() throws {
         try invalidate(pathComponents: ["key", "newline-04"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 05`() throws {
+    @Test("[key] newline 05", .tags(.key))
+    func key__newline_05() throws {
         try invalidate(pathComponents: ["key", "newline-05"])
     }
 
-    @Test(.tags(.key))
-    func `[key] newline 06`() throws {
+    @Test("[key] newline 06", .tags(.key))
+    func key__newline_06() throws {
         try invalidate(pathComponents: ["key", "newline-06"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 01`() throws {
+    @Test("[key] no eol 01", .tags(.key))
+    func key__no_eol_01() throws {
         try invalidate(pathComponents: ["key", "no-eol-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 02`() throws {
+    @Test("[key] no eol 02", .tags(.key))
+    func key__no_eol_02() throws {
         try invalidate(pathComponents: ["key", "no-eol-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 03`() throws {
+    @Test("[key] no eol 03", .tags(.key))
+    func key__no_eol_03() throws {
         try invalidate(pathComponents: ["key", "no-eol-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 04`() throws {
+    @Test("[key] no eol 04", .tags(.key))
+    func key__no_eol_04() throws {
         try invalidate(pathComponents: ["key", "no-eol-04"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 05`() throws {
+    @Test("[key] no eol 05", .tags(.key))
+    func key__no_eol_05() throws {
         try invalidate(pathComponents: ["key", "no-eol-05"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 06`() throws {
+    @Test("[key] no eol 06", .tags(.key))
+    func key__no_eol_06() throws {
         try invalidate(pathComponents: ["key", "no-eol-06"])
     }
 
-    @Test(.tags(.key))
-    func `[key] no eol 07`() throws {
+    @Test("[key] no eol 07", .tags(.key))
+    func key__no_eol_07() throws {
         try invalidate(pathComponents: ["key", "no-eol-07"])
     }
 
-    @Test(.tags(.key))
-    func `[key] only float`() throws {
+    @Test("[key] only float", .tags(.key))
+    func key__only_float() throws {
         try invalidate(pathComponents: ["key", "only-float"])
     }
 
-    @Test(.tags(.key))
-    func `[key] only int`() throws {
+    @Test("[key] only int", .tags(.key))
+    func key__only_int() throws {
         try invalidate(pathComponents: ["key", "only-int"])
     }
 
-    @Test(.tags(.key))
-    func `[key] only str`() throws {
+    @Test("[key] only str", .tags(.key))
+    func key__only_str() throws {
         try invalidate(pathComponents: ["key", "only-str"])
     }
 
-    @Test(.tags(.key))
-    func `[key] open bracket`() throws {
+    @Test("[key] open bracket", .tags(.key))
+    func key__open_bracket() throws {
         try invalidate(pathComponents: ["key", "open-bracket"])
     }
 
-    @Test(.tags(.key))
-    func `[key] partial quoted`() throws {
+    @Test("[key] partial quoted", .tags(.key))
+    func key__partial_quoted() throws {
         try invalidate(pathComponents: ["key", "partial-quoted"])
     }
 
-    @Test(.tags(.key))
-    func `[key] quoted unclosed 01`() throws {
+    @Test("[key] quoted unclosed 01", .tags(.key))
+    func key__quoted_unclosed_01() throws {
         try invalidate(pathComponents: ["key", "quoted-unclosed-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] quoted unclosed 02`() throws {
+    @Test("[key] quoted unclosed 02", .tags(.key))
+    func key__quoted_unclosed_02() throws {
         try invalidate(pathComponents: ["key", "quoted-unclosed-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] single open bracket`() throws {
+    @Test("[key] single open bracket", .tags(.key))
+    func key__single_open_bracket() throws {
         try invalidate(pathComponents: ["key", "single-open-bracket"])
     }
 
-    @Test(.tags(.key))
-    func `[key] space`() throws {
+    @Test("[key] space", .tags(.key))
+    func key__space() throws {
         try invalidate(pathComponents: ["key", "space"])
     }
 
-    @Test(.tags(.key))
-    func `[key] special character`() throws {
+    @Test("[key] special character", .tags(.key))
+    func key__special_character() throws {
         try invalidate(pathComponents: ["key", "special-character"])
     }
 
-    @Test(.tags(.key))
-    func `[key] start bracket`() throws {
+    @Test("[key] start bracket", .tags(.key))
+    func key__start_bracket() throws {
         try invalidate(pathComponents: ["key", "start-bracket"])
     }
 
-    @Test(.tags(.key))
-    func `[key] start dot`() throws {
+    @Test("[key] start dot", .tags(.key))
+    func key__start_dot() throws {
         try invalidate(pathComponents: ["key", "start-dot"])
     }
 
-    @Test(.tags(.key))
-    func `[key] two equals 01`() throws {
+    @Test("[key] two equals 01", .tags(.key))
+    func key__two_equals_01() throws {
         try invalidate(pathComponents: ["key", "two-equals-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] two equals 02`() throws {
+    @Test("[key] two equals 02", .tags(.key))
+    func key__two_equals_02() throws {
         try invalidate(pathComponents: ["key", "two-equals-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] two equals 03`() throws {
+    @Test("[key] two equals 03", .tags(.key))
+    func key__two_equals_03() throws {
         try invalidate(pathComponents: ["key", "two-equals-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 01`() throws {
+    @Test("[key] without value 01", .tags(.key))
+    func key__without_value_01() throws {
         try invalidate(pathComponents: ["key", "without-value-01"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 02`() throws {
+    @Test("[key] without value 02", .tags(.key))
+    func key__without_value_02() throws {
         try invalidate(pathComponents: ["key", "without-value-02"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 03`() throws {
+    @Test("[key] without value 03", .tags(.key))
+    func key__without_value_03() throws {
         try invalidate(pathComponents: ["key", "without-value-03"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 04`() throws {
+    @Test("[key] without value 04", .tags(.key))
+    func key__without_value_04() throws {
         try invalidate(pathComponents: ["key", "without-value-04"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 05`() throws {
+    @Test("[key] without value 05", .tags(.key))
+    func key__without_value_05() throws {
         try invalidate(pathComponents: ["key", "without-value-05"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 06`() throws {
+    @Test("[key] without value 06", .tags(.key))
+    func key__without_value_06() throws {
         try invalidate(pathComponents: ["key", "without-value-06"])
     }
 
-    @Test(.tags(.key))
-    func `[key] without value 07`() throws {
+    @Test("[key] without value 07", .tags(.key))
+    func key__without_value_07() throws {
         try invalidate(pathComponents: ["key", "without-value-07"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] day 1digit`() throws {
+    @Test("[local-date] day 1digit", .tags(.local_date))
+    func local_date__day_1digit() throws {
         try invalidate(pathComponents: ["local-date", "day-1digit"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] feb 29`() throws {
+    @Test("[local-date] feb 29", .tags(.local_date))
+    func local_date__feb_29() throws {
         try invalidate(pathComponents: ["local-date", "feb-29"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] feb 30`() throws {
+    @Test("[local-date] feb 30", .tags(.local_date))
+    func local_date__feb_30() throws {
         try invalidate(pathComponents: ["local-date", "feb-30"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] mday over`() throws {
+    @Test("[local-date] mday over", .tags(.local_date))
+    func local_date__mday_over() throws {
         try invalidate(pathComponents: ["local-date", "mday-over"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] mday under`() throws {
+    @Test("[local-date] mday under", .tags(.local_date))
+    func local_date__mday_under() throws {
         try invalidate(pathComponents: ["local-date", "mday-under"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] month over`() throws {
+    @Test("[local-date] month over", .tags(.local_date))
+    func local_date__month_over() throws {
         try invalidate(pathComponents: ["local-date", "month-over"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] month under`() throws {
+    @Test("[local-date] month under", .tags(.local_date))
+    func local_date__month_under() throws {
         try invalidate(pathComponents: ["local-date", "month-under"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] no leads`() throws {
+    @Test("[local-date] no leads", .tags(.local_date))
+    func local_date__no_leads() throws {
         try invalidate(pathComponents: ["local-date", "no-leads"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] no leads with milli`() throws {
+    @Test("[local-date] no leads with milli", .tags(.local_date))
+    func local_date__no_leads_with_milli() throws {
         try invalidate(pathComponents: ["local-date", "no-leads-with-milli"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] trailing t`() throws {
+    @Test("[local-date] trailing t", .tags(.local_date))
+    func local_date__trailing_t() throws {
         try invalidate(pathComponents: ["local-date", "trailing-t"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] y10k`() throws {
+    @Test("[local-date] y10k", .tags(.local_date))
+    func local_date__y10k() throws {
         try invalidate(pathComponents: ["local-date", "y10k"])
     }
 
-    @Test(.tags(.local_date))
-    func `[local-date] year 3digits`() throws {
+    @Test("[local-date] year 3digits", .tags(.local_date))
+    func local_date__year_3digits() throws {
         try invalidate(pathComponents: ["local-date", "year-3digits"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] feb 29`() throws {
+    @Test("[local-datetime] feb 29", .tags(.local_datetime))
+    func local_datetime__feb_29() throws {
         try invalidate(pathComponents: ["local-datetime", "feb-29"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] feb 30`() throws {
+    @Test("[local-datetime] feb 30", .tags(.local_datetime))
+    func local_datetime__feb_30() throws {
         try invalidate(pathComponents: ["local-datetime", "feb-30"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] hour over`() throws {
+    @Test("[local-datetime] hour over", .tags(.local_datetime))
+    func local_datetime__hour_over() throws {
         try invalidate(pathComponents: ["local-datetime", "hour-over"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] mday over`() throws {
+    @Test("[local-datetime] mday over", .tags(.local_datetime))
+    func local_datetime__mday_over() throws {
         try invalidate(pathComponents: ["local-datetime", "mday-over"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] mday under`() throws {
+    @Test("[local-datetime] mday under", .tags(.local_datetime))
+    func local_datetime__mday_under() throws {
         try invalidate(pathComponents: ["local-datetime", "mday-under"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] minute over`() throws {
+    @Test("[local-datetime] minute over", .tags(.local_datetime))
+    func local_datetime__minute_over() throws {
         try invalidate(pathComponents: ["local-datetime", "minute-over"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] month over`() throws {
+    @Test("[local-datetime] month over", .tags(.local_datetime))
+    func local_datetime__month_over() throws {
         try invalidate(pathComponents: ["local-datetime", "month-over"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] month under`() throws {
+    @Test("[local-datetime] month under", .tags(.local_datetime))
+    func local_datetime__month_under() throws {
         try invalidate(pathComponents: ["local-datetime", "month-under"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] no leads`() throws {
+    @Test("[local-datetime] no leads", .tags(.local_datetime))
+    func local_datetime__no_leads() throws {
         try invalidate(pathComponents: ["local-datetime", "no-leads"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] no leads with milli`() throws {
+    @Test("[local-datetime] no leads with milli", .tags(.local_datetime))
+    func local_datetime__no_leads_with_milli() throws {
         try invalidate(pathComponents: ["local-datetime", "no-leads-with-milli"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] no secs`() throws {
+    @Test("[local-datetime] no secs", .tags(.local_datetime))
+    func local_datetime__no_secs() throws {
         try invalidate(pathComponents: ["local-datetime", "no-secs"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] no t`() throws {
+    @Test("[local-datetime] no t", .tags(.local_datetime))
+    func local_datetime__no_t() throws {
         try invalidate(pathComponents: ["local-datetime", "no-t"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] second over`() throws {
+    @Test("[local-datetime] second over", .tags(.local_datetime))
+    func local_datetime__second_over() throws {
         try invalidate(pathComponents: ["local-datetime", "second-over"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] time no leads`() throws {
+    @Test("[local-datetime] time no leads", .tags(.local_datetime))
+    func local_datetime__time_no_leads() throws {
         try invalidate(pathComponents: ["local-datetime", "time-no-leads"])
     }
 
-    @Test(.tags(.local_datetime))
-    func `[local-datetime] y10k`() throws {
+    @Test("[local-datetime] y10k", .tags(.local_datetime))
+    func local_datetime__y10k() throws {
         try invalidate(pathComponents: ["local-datetime", "y10k"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] hour over`() throws {
+    @Test("[local-time] hour over", .tags(.local_time))
+    func local_time__hour_over() throws {
         try invalidate(pathComponents: ["local-time", "hour-over"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] minute over`() throws {
+    @Test("[local-time] minute over", .tags(.local_time))
+    func local_time__minute_over() throws {
         try invalidate(pathComponents: ["local-time", "minute-over"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] no secs`() throws {
+    @Test("[local-time] no secs", .tags(.local_time))
+    func local_time__no_secs() throws {
         try invalidate(pathComponents: ["local-time", "no-secs"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] second over`() throws {
+    @Test("[local-time] second over", .tags(.local_time))
+    func local_time__second_over() throws {
         try invalidate(pathComponents: ["local-time", "second-over"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] time no leads 01`() throws {
+    @Test("[local-time] time no leads 01", .tags(.local_time))
+    func local_time__time_no_leads_01() throws {
         try invalidate(pathComponents: ["local-time", "time-no-leads-01"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] time no leads 02`() throws {
+    @Test("[local-time] time no leads 02", .tags(.local_time))
+    func local_time__time_no_leads_02() throws {
         try invalidate(pathComponents: ["local-time", "time-no-leads-02"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] trailing dot`() throws {
+    @Test("[local-time] trailing dot", .tags(.local_time))
+    func local_time__trailing_dot() throws {
         try invalidate(pathComponents: ["local-time", "trailing-dot"])
     }
 
-    @Test(.tags(.local_time))
-    func `[local-time] trailing dotdot`() throws {
+    @Test("[local-time] trailing dotdot", .tags(.local_time))
+    func local_time__trailing_dotdot() throws {
         try invalidate(pathComponents: ["local-time", "trailing-dotdot"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] inline table 2 0`() throws {
+    @Test("[spec-1.0.0] inline table 2 0", .tags(.spec_1_0_0))
+    func spec_1_0_0__inline_table_2_0() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "inline-table-2-0"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] inline table 3 0`() throws {
+    @Test("[spec-1.0.0] inline table 3 0", .tags(.spec_1_0_0))
+    func spec_1_0_0__inline_table_3_0() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "inline-table-3-0"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] key value pair 1`() throws {
+    @Test("[spec-1.0.0] key value pair 1", .tags(.spec_1_0_0))
+    func spec_1_0_0__key_value_pair_1() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "key-value-pair-1"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] keys 2`() throws {
+    @Test("[spec-1.0.0] keys 2", .tags(.spec_1_0_0))
+    func spec_1_0_0__keys_2() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "keys-2"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] string 4 0`() throws {
+    @Test("[spec-1.0.0] string 4 0", .tags(.spec_1_0_0))
+    func spec_1_0_0__string_4_0() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "string-4-0"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] string 7 0`() throws {
+    @Test("[spec-1.0.0] string 7 0", .tags(.spec_1_0_0))
+    func spec_1_0_0__string_7_0() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "string-7-0"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] table 9 0`() throws {
+    @Test("[spec-1.0.0] table 9 0", .tags(.spec_1_0_0))
+    func spec_1_0_0__table_9_0() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "table-9-0"])
     }
 
-    @Test(.tags(.spec_1_0_0))
-    func `[spec-1.0.0] table 9 1`() throws {
+    @Test("[spec-1.0.0] table 9 1", .tags(.spec_1_0_0))
+    func spec_1_0_0__table_9_1() throws {
         try invalidate(pathComponents: ["spec-1.0.0", "table-9-1"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad byte escape`() throws {
+    @Test("[string] bad byte escape", .tags(.string))
+    func string__bad_byte_escape() throws {
         try invalidate(pathComponents: ["string", "bad-byte-escape"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad concat`() throws {
+    @Test("[string] bad concat", .tags(.string))
+    func string__bad_concat() throws {
         try invalidate(pathComponents: ["string", "bad-concat"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad escape 01`() throws {
+    @Test("[string] bad escape 01", .tags(.string))
+    func string__bad_escape_01() throws {
         try invalidate(pathComponents: ["string", "bad-escape-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad escape 02`() throws {
+    @Test("[string] bad escape 02", .tags(.string))
+    func string__bad_escape_02() throws {
         try invalidate(pathComponents: ["string", "bad-escape-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad escape 03`() throws {
+    @Test("[string] bad escape 03", .tags(.string))
+    func string__bad_escape_03() throws {
         try invalidate(pathComponents: ["string", "bad-escape-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad escape 04`() throws {
+    @Test("[string] bad escape 04", .tags(.string))
+    func string__bad_escape_04() throws {
         try invalidate(pathComponents: ["string", "bad-escape-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad escape 05`() throws {
+    @Test("[string] bad escape 05", .tags(.string))
+    func string__bad_escape_05() throws {
         try invalidate(pathComponents: ["string", "bad-escape-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 01`() throws {
+    @Test("[string] bad hex esc 01", .tags(.string))
+    func string__bad_hex_esc_01() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 02`() throws {
+    @Test("[string] bad hex esc 02", .tags(.string))
+    func string__bad_hex_esc_02() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 03`() throws {
+    @Test("[string] bad hex esc 03", .tags(.string))
+    func string__bad_hex_esc_03() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 04`() throws {
+    @Test("[string] bad hex esc 04", .tags(.string))
+    func string__bad_hex_esc_04() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 05`() throws {
+    @Test("[string] bad hex esc 05", .tags(.string))
+    func string__bad_hex_esc_05() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 1`() throws {
+    @Test("[string] bad hex esc 1", .tags(.string))
+    func string__bad_hex_esc_1() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-1"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 2`() throws {
+    @Test("[string] bad hex esc 2", .tags(.string))
+    func string__bad_hex_esc_2() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-2"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 3`() throws {
+    @Test("[string] bad hex esc 3", .tags(.string))
+    func string__bad_hex_esc_3() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-3"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad hex esc 4`() throws {
+    @Test("[string] bad hex esc 4", .tags(.string))
+    func string__bad_hex_esc_4() throws {
         try invalidate(pathComponents: ["string", "bad-hex-esc-4"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad multiline`() throws {
+    @Test("[string] bad multiline", .tags(.string))
+    func string__bad_multiline() throws {
         try invalidate(pathComponents: ["string", "bad-multiline"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad slash escape`() throws {
+    @Test("[string] bad slash escape", .tags(.string))
+    func string__bad_slash_escape() throws {
         try invalidate(pathComponents: ["string", "bad-slash-escape"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 01`() throws {
+    @Test("[string] bad uni esc 01", .tags(.string))
+    func string__bad_uni_esc_01() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 02`() throws {
+    @Test("[string] bad uni esc 02", .tags(.string))
+    func string__bad_uni_esc_02() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 03`() throws {
+    @Test("[string] bad uni esc 03", .tags(.string))
+    func string__bad_uni_esc_03() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 04`() throws {
+    @Test("[string] bad uni esc 04", .tags(.string))
+    func string__bad_uni_esc_04() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 05`() throws {
+    @Test("[string] bad uni esc 05", .tags(.string))
+    func string__bad_uni_esc_05() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 06`() throws {
+    @Test("[string] bad uni esc 06", .tags(.string))
+    func string__bad_uni_esc_06() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-06"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 07`() throws {
+    @Test("[string] bad uni esc 07", .tags(.string))
+    func string__bad_uni_esc_07() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-07"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 1`() throws {
+    @Test("[string] bad uni esc 1", .tags(.string))
+    func string__bad_uni_esc_1() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-1"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 2`() throws {
+    @Test("[string] bad uni esc 2", .tags(.string))
+    func string__bad_uni_esc_2() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-2"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 3`() throws {
+    @Test("[string] bad uni esc 3", .tags(.string))
+    func string__bad_uni_esc_3() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-3"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 4`() throws {
+    @Test("[string] bad uni esc 4", .tags(.string))
+    func string__bad_uni_esc_4() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-4"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 5`() throws {
+    @Test("[string] bad uni esc 5", .tags(.string))
+    func string__bad_uni_esc_5() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-5"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 6`() throws {
+    @Test("[string] bad uni esc 6", .tags(.string))
+    func string__bad_uni_esc_6() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-6"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc 7`() throws {
+    @Test("[string] bad uni esc 7", .tags(.string))
+    func string__bad_uni_esc_7() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-7"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 1`() throws {
+    @Test("[string] bad uni esc ml 1", .tags(.string))
+    func string__bad_uni_esc_ml_1() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-1"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 2`() throws {
+    @Test("[string] bad uni esc ml 2", .tags(.string))
+    func string__bad_uni_esc_ml_2() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-2"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 3`() throws {
+    @Test("[string] bad uni esc ml 3", .tags(.string))
+    func string__bad_uni_esc_ml_3() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-3"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 4`() throws {
+    @Test("[string] bad uni esc ml 4", .tags(.string))
+    func string__bad_uni_esc_ml_4() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-4"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 5`() throws {
+    @Test("[string] bad uni esc ml 5", .tags(.string))
+    func string__bad_uni_esc_ml_5() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-5"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 6`() throws {
+    @Test("[string] bad uni esc ml 6", .tags(.string))
+    func string__bad_uni_esc_ml_6() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-6"])
     }
 
-    @Test(.tags(.string))
-    func `[string] bad uni esc ml 7`() throws {
+    @Test("[string] bad uni esc ml 7", .tags(.string))
+    func string__bad_uni_esc_ml_7() throws {
         try invalidate(pathComponents: ["string", "bad-uni-esc-ml-7"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic byte escapes`() throws {
+    @Test("[string] basic byte escapes", .tags(.string))
+    func string__basic_byte_escapes() throws {
         try invalidate(pathComponents: ["string", "basic-byte-escapes"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic multiline out of range unicode escape 01`() throws {
+    @Test("[string] basic multiline out of range unicode escape 01", .tags(.string))
+    func string__basic_multiline_out_of_range_unicode_escape_01() throws {
         try invalidate(pathComponents: ["string", "basic-multiline-out-of-range-unicode-escape-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic multiline out of range unicode escape 02`() throws {
+    @Test("[string] basic multiline out of range unicode escape 02", .tags(.string))
+    func string__basic_multiline_out_of_range_unicode_escape_02() throws {
         try invalidate(pathComponents: ["string", "basic-multiline-out-of-range-unicode-escape-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic multiline quotes`() throws {
+    @Test("[string] basic multiline quotes", .tags(.string))
+    func string__basic_multiline_quotes() throws {
         try invalidate(pathComponents: ["string", "basic-multiline-quotes"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic multiline unknown escape`() throws {
+    @Test("[string] basic multiline unknown escape", .tags(.string))
+    func string__basic_multiline_unknown_escape() throws {
         try invalidate(pathComponents: ["string", "basic-multiline-unknown-escape"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic out of range unicode escape 01`() throws {
+    @Test("[string] basic out of range unicode escape 01", .tags(.string))
+    func string__basic_out_of_range_unicode_escape_01() throws {
         try invalidate(pathComponents: ["string", "basic-out-of-range-unicode-escape-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic out of range unicode escape 02`() throws {
+    @Test("[string] basic out of range unicode escape 02", .tags(.string))
+    func string__basic_out_of_range_unicode_escape_02() throws {
         try invalidate(pathComponents: ["string", "basic-out-of-range-unicode-escape-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] basic unknown escape`() throws {
+    @Test("[string] basic unknown escape", .tags(.string))
+    func string__basic_unknown_escape() throws {
         try invalidate(pathComponents: ["string", "basic-unknown-escape"])
     }
 
-    @Test(.tags(.string))
-    func `[string] literal multiline quotes 01`() throws {
+    @Test("[string] literal multiline quotes 01", .tags(.string))
+    func string__literal_multiline_quotes_01() throws {
         try invalidate(pathComponents: ["string", "literal-multiline-quotes-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] literal multiline quotes 02`() throws {
+    @Test("[string] literal multiline quotes 02", .tags(.string))
+    func string__literal_multiline_quotes_02() throws {
         try invalidate(pathComponents: ["string", "literal-multiline-quotes-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] missing quotes`() throws {
+    @Test("[string] missing quotes", .tags(.string))
+    func string__missing_quotes() throws {
         try invalidate(pathComponents: ["string", "missing-quotes"])
     }
 
-    @Test(.tags(.string))
-    func `[string] missing quotes array`() throws {
+    @Test("[string] missing quotes array", .tags(.string))
+    func string__missing_quotes_array() throws {
         try invalidate(pathComponents: ["string", "missing-quotes-array"])
     }
 
-    @Test(.tags(.string))
-    func `[string] missing quotes inline table`() throws {
+    @Test("[string] missing quotes inline table", .tags(.string))
+    func string__missing_quotes_inline_table() throws {
         try invalidate(pathComponents: ["string", "missing-quotes-inline-table"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline bad escape 01`() throws {
+    @Test("[string] multiline bad escape 01", .tags(.string))
+    func string__multiline_bad_escape_01() throws {
         try invalidate(pathComponents: ["string", "multiline-bad-escape-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline bad escape 02`() throws {
+    @Test("[string] multiline bad escape 02", .tags(.string))
+    func string__multiline_bad_escape_02() throws {
         try invalidate(pathComponents: ["string", "multiline-bad-escape-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline bad escape 03`() throws {
+    @Test("[string] multiline bad escape 03", .tags(.string))
+    func string__multiline_bad_escape_03() throws {
         try invalidate(pathComponents: ["string", "multiline-bad-escape-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline bad escape 04`() throws {
+    @Test("[string] multiline bad escape 04", .tags(.string))
+    func string__multiline_bad_escape_04() throws {
         try invalidate(pathComponents: ["string", "multiline-bad-escape-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline escape space 01`() throws {
+    @Test("[string] multiline escape space 01", .tags(.string))
+    func string__multiline_escape_space_01() throws {
         try invalidate(pathComponents: ["string", "multiline-escape-space-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline escape space 02`() throws {
+    @Test("[string] multiline escape space 02", .tags(.string))
+    func string__multiline_escape_space_02() throws {
         try invalidate(pathComponents: ["string", "multiline-escape-space-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline lit no close 01`() throws {
+    @Test("[string] multiline lit no close 01", .tags(.string))
+    func string__multiline_lit_no_close_01() throws {
         try invalidate(pathComponents: ["string", "multiline-lit-no-close-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline lit no close 02`() throws {
+    @Test("[string] multiline lit no close 02", .tags(.string))
+    func string__multiline_lit_no_close_02() throws {
         try invalidate(pathComponents: ["string", "multiline-lit-no-close-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline lit no close 03`() throws {
+    @Test("[string] multiline lit no close 03", .tags(.string))
+    func string__multiline_lit_no_close_03() throws {
         try invalidate(pathComponents: ["string", "multiline-lit-no-close-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline lit no close 04`() throws {
+    @Test("[string] multiline lit no close 04", .tags(.string))
+    func string__multiline_lit_no_close_04() throws {
         try invalidate(pathComponents: ["string", "multiline-lit-no-close-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline no close 01`() throws {
+    @Test("[string] multiline no close 01", .tags(.string))
+    func string__multiline_no_close_01() throws {
         try invalidate(pathComponents: ["string", "multiline-no-close-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline no close 02`() throws {
+    @Test("[string] multiline no close 02", .tags(.string))
+    func string__multiline_no_close_02() throws {
         try invalidate(pathComponents: ["string", "multiline-no-close-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline no close 03`() throws {
+    @Test("[string] multiline no close 03", .tags(.string))
+    func string__multiline_no_close_03() throws {
         try invalidate(pathComponents: ["string", "multiline-no-close-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline no close 04`() throws {
+    @Test("[string] multiline no close 04", .tags(.string))
+    func string__multiline_no_close_04() throws {
         try invalidate(pathComponents: ["string", "multiline-no-close-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline no close 05`() throws {
+    @Test("[string] multiline no close 05", .tags(.string))
+    func string__multiline_no_close_05() throws {
         try invalidate(pathComponents: ["string", "multiline-no-close-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] multiline quotes 01`() throws {
+    @Test("[string] multiline quotes 01", .tags(.string))
+    func string__multiline_quotes_01() throws {
         try invalidate(pathComponents: ["string", "multiline-quotes-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 01`() throws {
+    @Test("[string] no close 01", .tags(.string))
+    func string__no_close_01() throws {
         try invalidate(pathComponents: ["string", "no-close-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 02`() throws {
+    @Test("[string] no close 02", .tags(.string))
+    func string__no_close_02() throws {
         try invalidate(pathComponents: ["string", "no-close-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 03`() throws {
+    @Test("[string] no close 03", .tags(.string))
+    func string__no_close_03() throws {
         try invalidate(pathComponents: ["string", "no-close-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 04`() throws {
+    @Test("[string] no close 04", .tags(.string))
+    func string__no_close_04() throws {
         try invalidate(pathComponents: ["string", "no-close-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 05`() throws {
+    @Test("[string] no close 05", .tags(.string))
+    func string__no_close_05() throws {
         try invalidate(pathComponents: ["string", "no-close-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 06`() throws {
+    @Test("[string] no close 06", .tags(.string))
+    func string__no_close_06() throws {
         try invalidate(pathComponents: ["string", "no-close-06"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 07`() throws {
+    @Test("[string] no close 07", .tags(.string))
+    func string__no_close_07() throws {
         try invalidate(pathComponents: ["string", "no-close-07"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 08`() throws {
+    @Test("[string] no close 08", .tags(.string))
+    func string__no_close_08() throws {
         try invalidate(pathComponents: ["string", "no-close-08"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 09`() throws {
+    @Test("[string] no close 09", .tags(.string))
+    func string__no_close_09() throws {
         try invalidate(pathComponents: ["string", "no-close-09"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no close 10`() throws {
+    @Test("[string] no close 10", .tags(.string))
+    func string__no_close_10() throws {
         try invalidate(pathComponents: ["string", "no-close-10"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 01`() throws {
+    @Test("[string] no open 01", .tags(.string))
+    func string__no_open_01() throws {
         try invalidate(pathComponents: ["string", "no-open-01"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 02`() throws {
+    @Test("[string] no open 02", .tags(.string))
+    func string__no_open_02() throws {
         try invalidate(pathComponents: ["string", "no-open-02"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 03`() throws {
+    @Test("[string] no open 03", .tags(.string))
+    func string__no_open_03() throws {
         try invalidate(pathComponents: ["string", "no-open-03"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 04`() throws {
+    @Test("[string] no open 04", .tags(.string))
+    func string__no_open_04() throws {
         try invalidate(pathComponents: ["string", "no-open-04"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 05`() throws {
+    @Test("[string] no open 05", .tags(.string))
+    func string__no_open_05() throws {
         try invalidate(pathComponents: ["string", "no-open-05"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 06`() throws {
+    @Test("[string] no open 06", .tags(.string))
+    func string__no_open_06() throws {
         try invalidate(pathComponents: ["string", "no-open-06"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 07`() throws {
+    @Test("[string] no open 07", .tags(.string))
+    func string__no_open_07() throws {
         try invalidate(pathComponents: ["string", "no-open-07"])
     }
 
-    @Test(.tags(.string))
-    func `[string] no open 08`() throws {
+    @Test("[string] no open 08", .tags(.string))
+    func string__no_open_08() throws {
         try invalidate(pathComponents: ["string", "no-open-08"])
     }
 
-    @Test(.tags(.string))
-    func `[string] text after string`() throws {
+    @Test("[string] text after string", .tags(.string))
+    func string__text_after_string() throws {
         try invalidate(pathComponents: ["string", "text-after-string"])
     }
 
-    @Test(.tags(.string))
-    func `[string] wrong close`() throws {
+    @Test("[string] wrong close", .tags(.string))
+    func string__wrong_close() throws {
         try invalidate(pathComponents: ["string", "wrong-close"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 01`() throws {
+    @Test("[table] append with dotted keys 01", .tags(.table))
+    func table__append_with_dotted_keys_01() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 02`() throws {
+    @Test("[table] append with dotted keys 02", .tags(.table))
+    func table__append_with_dotted_keys_02() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 03`() throws {
+    @Test("[table] append with dotted keys 03", .tags(.table))
+    func table__append_with_dotted_keys_03() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 04`() throws {
+    @Test("[table] append with dotted keys 04", .tags(.table))
+    func table__append_with_dotted_keys_04() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-04"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 05`() throws {
+    @Test("[table] append with dotted keys 05", .tags(.table))
+    func table__append_with_dotted_keys_05() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-05"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 06`() throws {
+    @Test("[table] append with dotted keys 06", .tags(.table))
+    func table__append_with_dotted_keys_06() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-06"])
     }
 
-    @Test(.tags(.table))
-    func `[table] append with dotted keys 07`() throws {
+    @Test("[table] append with dotted keys 07", .tags(.table))
+    func table__append_with_dotted_keys_07() throws {
         try invalidate(pathComponents: ["table", "append-with-dotted-keys-07"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array empty`() throws {
+    @Test("[table] array empty", .tags(.table))
+    func table__array_empty() throws {
         try invalidate(pathComponents: ["table", "array-empty"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array implicit`() throws {
+    @Test("[table] array implicit", .tags(.table))
+    func table__array_implicit() throws {
         try invalidate(pathComponents: ["table", "array-implicit"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array no close 01`() throws {
+    @Test("[table] array no close 01", .tags(.table))
+    func table__array_no_close_01() throws {
         try invalidate(pathComponents: ["table", "array-no-close-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array no close 02`() throws {
+    @Test("[table] array no close 02", .tags(.table))
+    func table__array_no_close_02() throws {
         try invalidate(pathComponents: ["table", "array-no-close-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array no close 03`() throws {
+    @Test("[table] array no close 03", .tags(.table))
+    func table__array_no_close_03() throws {
         try invalidate(pathComponents: ["table", "array-no-close-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] array no close 04`() throws {
+    @Test("[table] array no close 04", .tags(.table))
+    func table__array_no_close_04() throws {
         try invalidate(pathComponents: ["table", "array-no-close-04"])
     }
 
-    @Test(.tags(.table))
-    func `[table] bare invalid character 01`() throws {
+    @Test("[table] bare invalid character 01", .tags(.table))
+    func table__bare_invalid_character_01() throws {
         try invalidate(pathComponents: ["table", "bare-invalid-character-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] bare invalid character 02`() throws {
+    @Test("[table] bare invalid character 02", .tags(.table))
+    func table__bare_invalid_character_02() throws {
         try invalidate(pathComponents: ["table", "bare-invalid-character-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] dot`() throws {
+    @Test("[table] dot", .tags(.table))
+    func table__dot() throws {
         try invalidate(pathComponents: ["table", "dot"])
     }
 
-    @Test(.tags(.table))
-    func `[table] dotdot`() throws {
+    @Test("[table] dotdot", .tags(.table))
+    func table__dotdot() throws {
         try invalidate(pathComponents: ["table", "dotdot"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 01`() throws {
+    @Test("[table] duplicate key 01", .tags(.table))
+    func table__duplicate_key_01() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 02`() throws {
+    @Test("[table] duplicate key 02", .tags(.table))
+    func table__duplicate_key_02() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 03`() throws {
+    @Test("[table] duplicate key 03", .tags(.table))
+    func table__duplicate_key_03() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 04`() throws {
+    @Test("[table] duplicate key 04", .tags(.table))
+    func table__duplicate_key_04() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-04"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 05`() throws {
+    @Test("[table] duplicate key 05", .tags(.table))
+    func table__duplicate_key_05() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-05"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 06`() throws {
+    @Test("[table] duplicate key 06", .tags(.table))
+    func table__duplicate_key_06() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-06"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 07`() throws {
+    @Test("[table] duplicate key 07", .tags(.table))
+    func table__duplicate_key_07() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-07"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 08`() throws {
+    @Test("[table] duplicate key 08", .tags(.table))
+    func table__duplicate_key_08() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-08"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 09`() throws {
+    @Test("[table] duplicate key 09", .tags(.table))
+    func table__duplicate_key_09() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-09"])
     }
 
-    @Test(.tags(.table))
-    func `[table] duplicate key 10`() throws {
+    @Test("[table] duplicate key 10", .tags(.table))
+    func table__duplicate_key_10() throws {
         try invalidate(pathComponents: ["table", "duplicate-key-10"])
     }
 
-    @Test(.tags(.table))
-    func `[table] empty`() throws {
+    @Test("[table] empty", .tags(.table))
+    func table__empty() throws {
         try invalidate(pathComponents: ["table", "empty"])
     }
 
-    @Test(.tags(.table))
-    func `[table] empty implicit table`() throws {
+    @Test("[table] empty implicit table", .tags(.table))
+    func table__empty_implicit_table() throws {
         try invalidate(pathComponents: ["table", "empty-implicit-table"])
     }
 
-    @Test(.tags(.table))
-    func `[table] equals sign`() throws {
+    @Test("[table] equals sign", .tags(.table))
+    func table__equals_sign() throws {
         try invalidate(pathComponents: ["table", "equals-sign"])
     }
 
-    @Test(.tags(.table))
-    func `[table] llbrace`() throws {
+    @Test("[table] llbrace", .tags(.table))
+    func table__llbrace() throws {
         try invalidate(pathComponents: ["table", "llbrace"])
     }
 
-    @Test(.tags(.table))
-    func `[table] multiline key 01`() throws {
+    @Test("[table] multiline key 01", .tags(.table))
+    func table__multiline_key_01() throws {
         try invalidate(pathComponents: ["table", "multiline-key-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] multiline key 02`() throws {
+    @Test("[table] multiline key 02", .tags(.table))
+    func table__multiline_key_02() throws {
         try invalidate(pathComponents: ["table", "multiline-key-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] nested brackets close`() throws {
+    @Test("[table] nested brackets close", .tags(.table))
+    func table__nested_brackets_close() throws {
         try invalidate(pathComponents: ["table", "nested-brackets-close"])
     }
 
-    @Test(.tags(.table))
-    func `[table] nested brackets open`() throws {
+    @Test("[table] nested brackets open", .tags(.table))
+    func table__nested_brackets_open() throws {
         try invalidate(pathComponents: ["table", "nested-brackets-open"])
     }
 
-    @Test(.tags(.table))
-    func `[table] newline 01`() throws {
+    @Test("[table] newline 01", .tags(.table))
+    func table__newline_01() throws {
         try invalidate(pathComponents: ["table", "newline-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] newline 02`() throws {
+    @Test("[table] newline 02", .tags(.table))
+    func table__newline_02() throws {
         try invalidate(pathComponents: ["table", "newline-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] newline 03`() throws {
+    @Test("[table] newline 03", .tags(.table))
+    func table__newline_03() throws {
         try invalidate(pathComponents: ["table", "newline-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] newline 04`() throws {
+    @Test("[table] newline 04", .tags(.table))
+    func table__newline_04() throws {
         try invalidate(pathComponents: ["table", "newline-04"])
     }
 
-    @Test(.tags(.table))
-    func `[table] newline 05`() throws {
+    @Test("[table] newline 05", .tags(.table))
+    func table__newline_05() throws {
         try invalidate(pathComponents: ["table", "newline-05"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 01`() throws {
+    @Test("[table] no close 01", .tags(.table))
+    func table__no_close_01() throws {
         try invalidate(pathComponents: ["table", "no-close-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 02`() throws {
+    @Test("[table] no close 02", .tags(.table))
+    func table__no_close_02() throws {
         try invalidate(pathComponents: ["table", "no-close-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 03`() throws {
+    @Test("[table] no close 03", .tags(.table))
+    func table__no_close_03() throws {
         try invalidate(pathComponents: ["table", "no-close-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 04`() throws {
+    @Test("[table] no close 04", .tags(.table))
+    func table__no_close_04() throws {
         try invalidate(pathComponents: ["table", "no-close-04"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 05`() throws {
+    @Test("[table] no close 05", .tags(.table))
+    func table__no_close_05() throws {
         try invalidate(pathComponents: ["table", "no-close-05"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 06`() throws {
+    @Test("[table] no close 06", .tags(.table))
+    func table__no_close_06() throws {
         try invalidate(pathComponents: ["table", "no-close-06"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 07`() throws {
+    @Test("[table] no close 07", .tags(.table))
+    func table__no_close_07() throws {
         try invalidate(pathComponents: ["table", "no-close-07"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 08`() throws {
+    @Test("[table] no close 08", .tags(.table))
+    func table__no_close_08() throws {
         try invalidate(pathComponents: ["table", "no-close-08"])
     }
 
-    @Test(.tags(.table))
-    func `[table] no close 09`() throws {
+    @Test("[table] no close 09", .tags(.table))
+    func table__no_close_09() throws {
         try invalidate(pathComponents: ["table", "no-close-09"])
     }
 
-    @Test(.tags(.table))
-    func `[table] overwrite array in parent`() throws {
+    @Test("[table] overwrite array in parent", .tags(.table))
+    func table__overwrite_array_in_parent() throws {
         try invalidate(pathComponents: ["table", "overwrite-array-in-parent"])
     }
 
-    @Test(.tags(.table))
-    func `[table] overwrite bool with array`() throws {
+    @Test("[table] overwrite bool with array", .tags(.table))
+    func table__overwrite_bool_with_array() throws {
         try invalidate(pathComponents: ["table", "overwrite-bool-with-array"])
     }
 
-    @Test(.tags(.table))
-    func `[table] overwrite with deep table`() throws {
+    @Test("[table] overwrite with deep table", .tags(.table))
+    func table__overwrite_with_deep_table() throws {
         try invalidate(pathComponents: ["table", "overwrite-with-deep-table"])
     }
 
-    @Test(.tags(.table))
-    func `[table] redefine 01`() throws {
+    @Test("[table] redefine 01", .tags(.table))
+    func table__redefine_01() throws {
         try invalidate(pathComponents: ["table", "redefine-01"])
     }
 
-    @Test(.tags(.table))
-    func `[table] redefine 02`() throws {
+    @Test("[table] redefine 02", .tags(.table))
+    func table__redefine_02() throws {
         try invalidate(pathComponents: ["table", "redefine-02"])
     }
 
-    @Test(.tags(.table))
-    func `[table] redefine 03`() throws {
+    @Test("[table] redefine 03", .tags(.table))
+    func table__redefine_03() throws {
         try invalidate(pathComponents: ["table", "redefine-03"])
     }
 
-    @Test(.tags(.table))
-    func `[table] rrbrace`() throws {
+    @Test("[table] rrbrace", .tags(.table))
+    func table__rrbrace() throws {
         try invalidate(pathComponents: ["table", "rrbrace"])
     }
 
-    @Test(.tags(.table))
-    func `[table] super twice`() throws {
+    @Test("[table] super twice", .tags(.table))
+    func table__super_twice() throws {
         try invalidate(pathComponents: ["table", "super-twice"])
     }
 
-    @Test(.tags(.table))
-    func `[table] text after table`() throws {
+    @Test("[table] text after table", .tags(.table))
+    func table__text_after_table() throws {
         try invalidate(pathComponents: ["table", "text-after-table"])
     }
 
-    @Test(.tags(.table))
-    func `[table] trailing dot`() throws {
+    @Test("[table] trailing dot", .tags(.table))
+    func table__trailing_dot() throws {
         try invalidate(pathComponents: ["table", "trailing-dot"])
     }
 
-    @Test(.tags(.table))
-    func `[table] whitespace`() throws {
+    @Test("[table] whitespace", .tags(.table))
+    func table__whitespace() throws {
         try invalidate(pathComponents: ["table", "whitespace"])
     }
 
-    @Test(.tags(.table))
-    func `[table] with pound`() throws {
+    @Test("[table] with pound", .tags(.table))
+    func table__with_pound() throws {
         try invalidate(pathComponents: ["table", "with-pound"])
     }
 }

@@ -28,7 +28,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -48,7 +48,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -68,7 +68,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -88,7 +88,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -108,7 +108,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -128,7 +128,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -148,7 +148,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -168,7 +168,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -188,7 +188,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Int64 or lenient decoding strategy.",
+                debugDescription: "Use Int64 or lenient decoding strategy."
             ))
         }
 
@@ -221,7 +221,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
         if !isLenient {
             throw DecodingError.typeMismatch(type, DecodingError.Context(
                 codingPath: codingPath,
-                debugDescription: "Use Double or lenient decoding strategy.",
+                debugDescription: "Use Double or lenient decoding strategy."
             ))
         }
         do {
