@@ -27,8 +27,8 @@ final class _TOMLDecoder: Decoder {
                 DecodingError.Context(
                     codingPath: codingPath,
                     debugDescription:
-                    "Cannot get keyed decoding container -- found \(Swift.type(of: container)) instead.",
-                ),
+                    "Cannot get keyed decoding container -- found \(Swift.type(of: container)) instead."
+                )
             )
         }
 
@@ -42,8 +42,8 @@ final class _TOMLDecoder: Decoder {
                 DecodingError.Context(
                     codingPath: codingPath,
                     debugDescription:
-                    "Cannot get unkeyed decoding container -- found \(Swift.type(of: container)) instead.",
-                ),
+                    "Cannot get unkeyed decoding container -- found \(Swift.type(of: container)) instead."
+                )
             )
         }
 

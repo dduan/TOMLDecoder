@@ -2,10 +2,18 @@ name: Swift Tests
 on: [push]
 jobs:
   swift-test:
-    name: ${{ matrix.os_name }}
+    name: ${{ matrix.os_name }} (Swift ${{ matrix.swift_version }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os:
+          - ubuntu-24.04
+          - windows-2025
+          - macos-15
+          - macos-26
+        swift_version:
+          - "6.0"
+          - "6.2"
         include:
           - os: ubuntu-24.04
             os_name: Ubuntu 24.04
@@ -18,7 +26,7 @@ jobs:
     steps:
       - uses: SwiftyLab/setup-swift@latest
         with:
-          swift-version: 6.2
+          swift-version: ${{ matrix.swift_version }}
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Run tests

@@ -7,7 +7,7 @@ import TOMLDecoder
 
 @Suite
 struct LeafValueDecodingTests {
-    @Test func `boolean as Bool`() throws {
+    @Test func booleanAsBool() throws {
         struct Test: Decodable, Equatable {
             let boolean: Bool
             let booleans: [Bool]
@@ -37,12 +37,12 @@ struct LeafValueDecodingTests {
             optionalBools: [true, false],
             optionalABool: .true,
             optionalBoolean2: nil,
-            optionalABool2: nil,
+            optionalABool2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `string as String`() throws {
+    @Test func stringAsString() throws {
         struct Test: Decodable, Equatable {
             let string: String
             let strings: [String]
@@ -72,12 +72,12 @@ struct LeafValueDecodingTests {
             optionalStrings: ["foo", "bar"],
             optionalAString: .foo,
             optionalString2: nil,
-            optionalAString2: nil,
+            optionalAString2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as Int`() throws {
+    @Test func integerAsInt() throws {
         struct Test: Decodable, Equatable {
             let integer: Int
             let integers: [Int]
@@ -107,12 +107,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as Int8`() throws {
+    @Test func integerAsInt8() throws {
         struct Test: Decodable, Equatable {
             let integer: Int8
             let integers: [Int8]
@@ -142,12 +142,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as Int16`() throws {
+    @Test func integerAsInt16() throws {
         struct Test: Decodable, Equatable {
             let integer: Int16
             let integers: [Int16]
@@ -177,12 +177,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as Int32`() throws {
+    @Test func integerAsInt32() throws {
         struct Test: Decodable, Equatable {
             let integer: Int32
             let integers: [Int32]
@@ -212,12 +212,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as UInt`() throws {
+    @Test func integerAsUInt() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt
             let integers: [UInt]
@@ -247,12 +247,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as UInt8`() throws {
+    @Test func integerAsUInt8() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt8
             let integers: [UInt8]
@@ -282,12 +282,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as UInt16`() throws {
+    @Test func integerAsUInt16() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt16
             let integers: [UInt16]
@@ -317,12 +317,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as UInt32`() throws {
+    @Test func integerAsUInt32() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt32
             let integers: [UInt32]
@@ -352,12 +352,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `integer as UInt64`() throws {
+    @Test func integerAsUInt64() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt64
             let integers: [UInt64]
@@ -387,12 +387,12 @@ struct LeafValueDecodingTests {
             optionalIntegers: [2, 3],
             optionalAInteger: .foo,
             optionalInteger2: nil,
-            optionalAInteger2: nil,
+            optionalAInteger2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `float as Float`() throws {
+    @Test func floatAsFloat() throws {
         struct Test: Decodable, Equatable {
             let float: Float
             let floats: [Float]
@@ -422,12 +422,12 @@ struct LeafValueDecodingTests {
             optionalFloats: [3.14, 3.15],
             optionalAFloat: .thirtyOneFour,
             optionalFloat2: nil,
-            optionalAFloat2: nil,
+            optionalAFloat2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `float as Double`() throws {
+    @Test func floatAsDouble() throws {
         struct Test: Decodable, Equatable {
             let float: Double
             let floats: [Double]
@@ -457,12 +457,12 @@ struct LeafValueDecodingTests {
             optionalFloats: [3.14, 3.15],
             optionalAFloat: .thirtyOneFour,
             optionalFloat2: nil,
-            optionalAFloat2: nil,
+            optionalAFloat2: nil
         )
         #expect(result == expectation)
     }
 
-    @Test func `all the native dates`() throws {
+    @Test func allTheNativeDates() throws {
         struct Test: Decodable, Equatable {
             let localDate: LocalDate
             let localDateFromLocalDateTime: LocalDate
@@ -745,7 +745,7 @@ struct LeafValueDecodingTests {
             optionalDateComponentsFromOffsetDateTimes: [DateComponents(timeZone: TimeZone(secondsFromGMT: 0), year: 2001, month: 1, day: 1, hour: 1, minute: 0, second: 1)],
             optionalDateComponentsFromLocalDateTimes: [DateComponents(year: 2001, month: 1, day: 1, hour: 1, minute: 0, second: 1)],
             optionalDateComponentsFromLocalTimes: [DateComponents(hour: 1, minute: 0, second: 1)],
-            optionalDateComponentsFromLocalDates: [DateComponents(year: 2001, month: 1, day: 1)],
+            optionalDateComponentsFromLocalDates: [DateComponents(year: 2001, month: 1, day: 1)]
         )
 
         #expect(result == expectation)
