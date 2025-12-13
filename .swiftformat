@@ -1,3 +1,4 @@
 --disable redundantBackticks
 --extension-acl on-declarations
 --ifdef no-indent
+--trailing-commas collections-only

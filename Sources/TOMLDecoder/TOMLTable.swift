@@ -32,7 +32,7 @@ extension String {
             if let result = try source.withContiguousStorageIfAvailable(
                 { buffer -> String in
                     try validateAndCreateString(from: buffer)
-                },
+                }
             ) {
                 self = result
                 return
