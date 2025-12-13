@@ -1,0 +1,16 @@
+name: WASM Build
+on: [push]
+jobs:
+  swift-build:
+    name: Build for WebAssembly
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: 6.2
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Swift for WASM
+        run: swift sdk install https://download.swift.org/swift-6.2.2-release/wasm-sdk/swift-6.2.2-RELEASE/swift-6.2.2-RELEASE_wasm.artifactbundle.tar.gz --checksum 128fa003e0cad624897c2b1d5f07cedf400e3c8bd851d304e57440b591cbe606
+      - name: Run tests
+        run: swift build --swift-sdk swift-6.2.2-RELEASE_wasm
