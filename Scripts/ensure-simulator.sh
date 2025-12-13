@@ -104,11 +104,14 @@ xcrun simctl list devices "$PLATFORM $OS_VERSION" || true
 if ! device_exists_exact "$RUNTIME_ID" "$PLATFORM" "$OS_VERSION" "$DEVICE_NAME"; then
   echo "No device named '$DEVICE_NAME' for $PLATFORM $OS_VERSION. Creating…"
 
-  mapfile -t DEVICE_TYPE_CANDIDATES < <(
+  DEVICE_TYPE_CANDIDATES=()
+  while IFS= read -r line; do
+    DEVICE_TYPE_CANDIDATES+=("$line")
+  done < <(
     xcrun simctl list devicetypes --json | \
       jq -r --arg name "$DEVICE_NAME" '
         .devicetypes
-        | map(select(.name | startswith($name)))
+        | (map(select(.name == $name)) + map(select(.name | startswith($name) and .name != $name)))
         | map("\(.name)|\(.identifier)")
         | .[]
       ' || true
