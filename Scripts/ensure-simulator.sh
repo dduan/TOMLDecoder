@@ -104,28 +104,39 @@ xcrun simctl list devices "$PLATFORM $OS_VERSION" || true
 if ! device_exists_exact "$RUNTIME_ID" "$PLATFORM" "$OS_VERSION" "$DEVICE_NAME"; then
   echo "No device named '$DEVICE_NAME' for $PLATFORM $OS_VERSION. Creating…"
 
-  # Find a device type whose display name matches DEVICE_NAME
-  # Example line:
-  #   iPhone 16 Pro (com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro)
-  DEVICE_TYPE_ID="$(
-    xcrun simctl list devicetypes | \
-    awk -v name="$DEVICE_NAME" -F '[()]' '
-      $1 ~ name"[[:space:]]*$" {
-        print $2;
-        exit;
-      }
-    ' || true
-  )"
+  mapfile -t DEVICE_TYPE_CANDIDATES < <(
+    xcrun simctl list devicetypes --json | \
+      jq -r --arg name "$DEVICE_NAME" '
+        .devicetypes
+        | map(select(.name | startswith($name)))
+        | map("\(.name)|\(.identifier)")
+        | .[]
+      ' || true
+  )
 
-  if [ -z "${DEVICE_TYPE_ID:-}" ]; then
+  if [ "${#DEVICE_TYPE_CANDIDATES[@]}" -eq 0 ]; then
     echo "::error::Could not find a device type matching '$DEVICE_NAME'." >&2
     echo "Available device types:"
     xcrun simctl list devicetypes || true
     exit 1
   fi
 
-  echo "Using device type id: $DEVICE_TYPE_ID"
-  xcrun simctl create "$DEVICE_NAME" "$DEVICE_TYPE_ID" "$RUNTIME_ID"
+  CREATED=0
+  for candidate in "${DEVICE_TYPE_CANDIDATES[@]}"; do
+    IFS='|' read -r candidate_name candidate_id <<<"$candidate"
+    echo "Trying device type: $candidate_name ($candidate_id)"
+    if xcrun simctl create "$DEVICE_NAME" "$candidate_id" "$RUNTIME_ID"; then
+      CREATED=1
+      break
+    else
+      echo "Device creation failed with device type '$candidate_name', trying next if available..."
+    fi
+  done
+
+  if [ "$CREATED" -ne 1 ]; then
+    echo "::error::Failed to create device '$DEVICE_NAME' for runtime $RUNTIME_ID with any candidate device type." >&2
+    exit 1
+  fi
 else
   echo "Device '$DEVICE_NAME' already exists for $PLATFORM $OS_VERSION."
 fi
