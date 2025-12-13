@@ -110,8 +110,18 @@ if ! device_exists_exact "$RUNTIME_ID" "$PLATFORM" "$OS_VERSION" "$DEVICE_NAME";
   done < <(
     xcrun simctl list devicetypes --json | \
       jq -r --arg name "$DEVICE_NAME" '
-        .devicetypes
-        | (map(select(.name == $name)) + map(select(.name | startswith($name) and .name != $name)))
+        (.devicetypes // [])
+        | map(select(type == "object" and (.name? and .identifier?)))
+        | map({
+            name: .name,
+            identifier: .identifier,
+            weight:
+              (if (.name | test("\\(at ")) then 0
+               elif .name == $name then 1
+               elif (.name | startswith($name)) then 2
+               else 3 end)
+          })
+        | sort_by(.weight)
         | map("\(.name)|\(.identifier)")
         | .[]
       ' || true
