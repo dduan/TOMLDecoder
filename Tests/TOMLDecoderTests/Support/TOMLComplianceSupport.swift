@@ -7,11 +7,11 @@ import TOMLDecoder
 // To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use the ProlepticGregorianTestHelpers module
 func epochSecondsViaProlepticHelper(
     year: Int, month: Int = 1, day: Int = 1,
-    hour: Int = 0, minute: Int = 0, second: Int = 0,
+    hour: Int = 0, minute: Int = 0, second: Int = 0
 ) -> Int64 {
     hh_proleptic_seconds_since_unix_epoch(
         Int32(year), Int32(month), Int32(day),
-        Int32(hour), Int32(minute), Int32(second),
+        Int32(hour), Int32(minute), Int32(second)
     )
 }
 
@@ -337,7 +337,7 @@ enum TOMLComplianceSupport {
 
         let components = calendar.dateComponents(
             [.year, .month, .day, .hour, .minute, .second, .nanosecond],
-            from: date!,
+            from: date!
         )
 
         var seconds = Double(epochSecondsViaProlepticHelper(
@@ -346,7 +346,7 @@ enum TOMLComplianceSupport {
             day: components.day!,
             hour: components.hour!,
             minute: components.minute!,
-            second: components.second!,
+            second: components.second!
         ))
 
         if let nanoseconds = components.nanosecond {

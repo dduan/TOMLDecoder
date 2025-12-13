@@ -111,7 +111,7 @@ public struct TOMLDecoder: Sendable {
         public init(
             key: KeyStrategy = .useOriginalKeys,
             date: DateStrategy = .gregorianCalendar,
-            timeInterval: TimeIntervalStrategy = .since1970,
+            timeInterval: TimeIntervalStrategy = .since1970
         ) {
             self.key = key
             self.timeInterval = timeInterval
@@ -122,7 +122,7 @@ public struct TOMLDecoder: Sendable {
         public static let `default` = Strategy(
             key: .useOriginalKeys,
             date: .gregorianCalendar,
-            timeInterval: .since1970,
+            timeInterval: .since1970
         )
     }
 

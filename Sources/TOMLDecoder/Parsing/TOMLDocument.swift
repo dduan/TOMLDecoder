@@ -10,6 +10,7 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
         var source = source
         var parser = Parser(keyTransform: keyTransform)
+        #if swift(>=6.2)
         if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
             let bytes = source.utf8Span.span
             try parser.parse(bytes: bytes)
@@ -20,6 +21,13 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
                 throw error as! TOMLError
             }
         }
+        #else
+        do {
+            try source.withUTF8 { try parser.parse(bytes: $0) }
+        } catch {
+            throw error as! TOMLError
+        }
+        #endif
 
         self.source = source
         tables = parser.tables
