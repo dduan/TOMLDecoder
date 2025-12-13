@@ -34,34 +34,42 @@ jobs:
             os_version: "18.5"
             destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5"
             sdk: iphonesimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro
           - platform: tvOS
             os_version: "18.5"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=18.5"
             sdk: appletvsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p
           - platform: watchOS
             os_version: "11.5"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=11.5"
             sdk: watchsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-10-46mm
           - platform: visionOS
             os_version: "2.5"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=2.5"
             sdk: xrsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-Vision-Pro
           - platform: iOS
             os_version: "26.1"
             destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1"
             sdk: iphonesimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro
           - platform: tvOS
             os_version: "26.1"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=26.1"
             sdk: appletvsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p
           - platform: watchOS
             os_version: "26.1"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.1"
             sdk: watchsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-11-46mm
           - platform: visionOS
             os_version: "26.1"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.1"
             sdk: xrsimulator
+            device_type_id: com.apple.CoreSimulator.SimDeviceType.Apple-Vision-Pro
     steps:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.1.1.app
@@ -70,7 +78,7 @@ jobs:
       - name: Ensure simulator runtime and device exist
         if: ${{ matrix.platform != 'macOS' }}
         run: |
-          Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.os_version }}" "${{ matrix.destination }}"
+          Scripts/ensure-simulator.sh "${{ matrix.platform }}" "${{ matrix.os_version }}" "${{ matrix.destination }}" "${{ matrix.device_type_id }}"
       - name: Run simulator test
         run: |
           xcodebuild -scheme TOMLDecoder-Package -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test

@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <PLATFORM> <OS_VERSION> <DESTINATION>" >&2
+if [ "$#" -ne 4 ]; then
+  echo "Usage: $0 <PLATFORM> <OS_VERSION> <DESTINATION> <DEVICE_TYPE_ID>" >&2
   exit 1
 fi
 
 PLATFORM="$1"      # e.g. iOS, tvOS, watchOS, visionOS
 OS_VERSION="$2"    # e.g. 26.1
 DESTINATION="$3"   # e.g. platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5
+DEVICE_TYPE_ID="$4" # e.g. com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro
+EXPORT_BASE="${SIMRUNTIME_EXPORT_BASE:-${RUNNER_TEMP:-/tmp}/simruntimes}"
+EXPORT_DIR="${EXPORT_BASE}/${PLATFORM}/${OS_VERSION}"
 
 echo "Platform:   $PLATFORM"
 echo "OS version: $OS_VERSION"
 echo "Destination: $DESTINATION"
+echo "Device type id: $DEVICE_TYPE_ID"
+echo "Runtime export dir: $EXPORT_DIR"
 
 # Extract device name from DESTINATION between name= and ,OS=
 device_part="${DESTINATION#*name=}"
@@ -67,6 +72,7 @@ echo "=== Devices for $PLATFORM $OS_VERSION before ensuring ==="
 xcrun simctl list devices "$PLATFORM $OS_VERSION" || true
 
 # Check if a device with this name already exists for that runtime
+<<<<<<< HEAD
 if ! xcrun simctl list devices "$PLATFORM $OS_VERSION" | grep -Fq "$DEVICE_NAME ("; then
   echo "No device named '$DEVICE_NAME' for $PLATFORM $OS_VERSION. Creating…"
 
@@ -91,6 +97,15 @@ if ! xcrun simctl list devices "$PLATFORM $OS_VERSION" | grep -Fq "$DEVICE_NAME 
   fi
 
   echo "Using device type id: $DEVICE_TYPE_ID"
+=======
+if ! device_exists_exact "$RUNTIME_ID" "$PLATFORM" "$OS_VERSION" "$DEVICE_NAME"; then
+  if [ -z "$DEVICE_TYPE_ID" ]; then
+    echo "::error::DEVICE_TYPE_ID is required to create device '$DEVICE_NAME' for $PLATFORM $OS_VERSION." >&2
+    exit 1
+  fi
+
+  echo "Creating device '$DEVICE_NAME' using device type id: $DEVICE_TYPE_ID"
+>>>>>>> ec2f96d ([CI] Simplify simulator setup)
   xcrun simctl create "$DEVICE_NAME" "$DEVICE_TYPE_ID" "$RUNTIME_ID"
 else
   echo "Device '$DEVICE_NAME' already exists for $PLATFORM $OS_VERSION."
