@@ -6,23 +6,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - ubuntu-24.04
-          - windows-2025
-          - macos-15
-          - macos-26
-        swift_version:
-          - "6.0"
-          - "6.2"
         include:
           - os: ubuntu-24.04
             os_name: Ubuntu 24.04
+            swift_version: "6.0"
+          - os: ubuntu-24.04
+            os_name: Ubuntu 24.04
+            swift_version: "6.2"
           - os: windows-2025
             os_name: Windows 2025
+            swift_version: "6.2"
           - os: macos-15
             os_name: macOS 15
+            swift_version: "6.0"
+          - os: macos-15
+            os_name: macOS 15
+            swift_version: "6.2"
           - os: macos-26
             os_name: macOS 26
+            swift_version: "6.0"
+          - os: macos-26
+            os_name: macOS 26
+            swift_version: "6.2"
     steps:
       - uses: SwiftyLab/setup-swift@latest
         with:
