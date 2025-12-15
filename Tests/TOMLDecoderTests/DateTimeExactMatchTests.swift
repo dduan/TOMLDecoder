@@ -4,7 +4,7 @@ import TOMLDecoder
 @Suite
 struct DateTimeExactMatchTests {
     @Test(.tags(.local_date))
-    func `local date exact match`() throws {
+    func localDateExactMatch() throws {
         let toml = """
         date = 2021-01-01
         date_with_time = 2021-01-01T01:02:03
@@ -22,7 +22,7 @@ struct DateTimeExactMatchTests {
     }
 
     @Test(.tags(.local_time))
-    func `local time exact match`() throws {
+    func localTimeExactMatch() throws {
         let toml = """
         time = 01:02:03
         time_with_date = 2021-01-01T01:02:03
@@ -40,7 +40,7 @@ struct DateTimeExactMatchTests {
     }
 
     @Test(.tags(.local_datetime))
-    func `local datetime exact match`() throws {
+    func localDatetimeExactMatch() throws {
         let toml = """
         datetime = 2021-01-01T01:02:03
         datetime_with_offset = 2021-01-01T01:02:03+01:00
@@ -56,7 +56,7 @@ struct DateTimeExactMatchTests {
     }
 
     @Test(.tags(.local_date, .array))
-    func `local date exact match in array`() throws {
+    func localDateExactMatchInArray() throws {
         let toml = """
         dates = [2021-01-01, 2021-01-01T01:02:03, 2021-01-01T01:02:03+01:00]
         """
@@ -73,7 +73,7 @@ struct DateTimeExactMatchTests {
     }
 
     @Test(.tags(.local_time, .array))
-    func `local time exact match in array`() throws {
+    func localTimeExactMatchInArray() throws {
         let toml = """
         times = [01:02:03, 2021-01-01T01:02:03, 2021-01-01T01:02:03+01:00]
         """
@@ -90,7 +90,7 @@ struct DateTimeExactMatchTests {
     }
 
     @Test(.tags(.local_datetime, .array))
-    func `local datetime exact match in array`() throws {
+    func localDatetimeExactMatchInArray() throws {
         let toml = """
         datetimes = [2021-01-01T01:02:03, 2021-01-01T01:02:03+01:00]
         """

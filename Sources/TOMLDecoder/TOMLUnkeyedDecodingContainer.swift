@@ -117,8 +117,8 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                 KeyedDecodingContainer<NestedKey>.self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
-                    debugDescription: "Unkeyed container is at end.",
-                ),
+                    debugDescription: "Unkeyed container is at end."
+                )
             )
         }
 
@@ -127,8 +127,8 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                 KeyedDecodingContainer<NestedKey>.self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
-                    debugDescription: "Element is not a table.",
-                ),
+                    debugDescription: "Element is not a table."
+                )
             )
         }
 
@@ -147,8 +147,8 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                 (any UnkeyedDecodingContainer).self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
-                    debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end.",
-                ),
+                    debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end."
+                )
             )
         }
 
@@ -157,8 +157,8 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                 (any UnkeyedDecodingContainer).self,
                 DecodingError.Context(
                     codingPath: codingPath + [TOMLKey(intValue: currentIndex)],
-                    debugDescription: "Cannot get nested unkeyed container -- element is not an array.",
-                ),
+                    debugDescription: "Cannot get nested unkeyed container -- element is not an array."
+                )
             )
         }
 

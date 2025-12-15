@@ -1,6 +1,7 @@
 //  WARNING: This file is generated from ParserImplementation.swift.gyb
 //  Do not edit ParserImplementation.swift directly.
 
+#if swift(>=6.2)
 extension Parser {
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
     mutating func parse(bytes: Span<UInt8>) throws(TOMLError) {
@@ -56,14 +57,14 @@ extension Parser {
                                 throw TOMLError(
                                     .syntax(
                                         lineNumber: lineNumber,
-                                        message: "control characters are not allowed in comments",
+                                        message: "control characters are not allowed in comments"
                                     ))
                             }
                         } else {
                             throw TOMLError(
                                 .syntax(
                                     lineNumber: lineNumber,
-                                    message: "control characters are not allowed in comments",
+                                    message: "control characters are not allowed in comments"
                                 ))
                         }
                     }
@@ -76,7 +77,7 @@ extension Parser {
                 token = Token(
                     kind: .dot,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             }
@@ -85,49 +86,49 @@ extension Parser {
                 token = Token(
                     kind: .comma,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.equal {
                 token = Token(
                     kind: .equal,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lbrace {
                 token = Token(
                     kind: .lbrace,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.rbrace {
                 token = Token(
                     kind: .rbrace,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lbracket {
                 token = Token(
                     kind: .lbracket,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.rbracket {
                 token = Token(
                     kind: .rbracket,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lf {
                 token = Token(
                     kind: .newline,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.cr {
@@ -138,14 +139,14 @@ extension Parser {
                     token = Token(
                         kind: .newline,
                         lineNumber: lineNumber,
-                        text: position ..< nextPosition + 1,
+                        text: position ..< nextPosition + 1
                     )
                     return
                 } else {
                     // Bare CR is invalid
                     throw TOMLError(
                         .syntax(
-                            lineNumber: lineNumber, message: "bare carriage return is not allowed",
+                            lineNumber: lineNumber, message: "bare carriage return is not allowed"
                         ))
                 }
             } else if ch == CodeUnits.space || ch == CodeUnits.tab {
@@ -186,7 +187,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< end,
+                        text: start ..< end
                     )
                     return
                 }
@@ -226,7 +227,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< end,
+                        text: start ..< end
                     )
                     return
                 }
@@ -252,7 +253,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< i + 1,
+                        text: start ..< i + 1
                     )
                     return
                 }
@@ -338,7 +339,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< i + 1,
+                        text: start ..< i + 1
                     )
                     return
                 }
@@ -352,14 +353,14 @@ extension Parser {
                     {
                         let timeStarter = dateEnder + 1
                         if let timeEnder = scanTime(
-                            bytes: bytes, range: timeStarter ..< range.upperBound,
+                            bytes: bytes, range: timeStarter ..< range.upperBound
                         )?.3 {
                             index = timeEnder
                         }
                     } else if let dateEnder {
                         index = dateEnder
                     } else if let timeEnder = scanTime(
-                        bytes: bytes, range: start ..< range.upperBound,
+                        bytes: bytes, range: start ..< range.upperBound
                     )?.3 {
                         index = timeEnder
                     }
@@ -376,7 +377,7 @@ extension Parser {
                             if bytes[index] == CodeUnits.upperZ || bytes[index] == CodeUnits.lowerZ {
                                 index += 1
                             } else if let timzoneEnder = scanTimezoneOffset(
-                                bytes: bytes, range: index ..< range.upperBound,
+                                bytes: bytes, range: index ..< range.upperBound
                             ) {
                                 index = timzoneEnder
                             }
@@ -391,7 +392,7 @@ extension Parser {
                         token = Token(
                             kind: .string,
                             lineNumber: lineNumber,
-                            text: start ..< index,
+                            text: start ..< index
                         )
                         return
                     }
@@ -434,7 +435,7 @@ extension Parser {
                 token = Token(
                     kind: .string,
                     lineNumber: lineNumber,
-                    text: start ..< index,
+                    text: start ..< index
                 )
             }
 
@@ -445,7 +446,7 @@ extension Parser {
         token = Token(
             kind: .eof,
             lineNumber: lineNumber,
-            text: position ..< bytes.count,
+            text: position ..< bytes.count
         )
     }
 
@@ -1189,7 +1190,7 @@ extension Token {
             date: date.map { LocalDate(year: .init($0.year), month: .init($0.month), day: .init($0.day)) },
             time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) },
             offset: timeOffset,
-            features: features,
+            features: features
         )
     }
 
@@ -1359,7 +1360,7 @@ func basicString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throws(
                         .syntax(
                             lineNumber: 0,
                             message:
-                            "basic multiline strings cannot contain more than 2 consecutive double quotes",
+                            "basic multiline strings cannot contain more than 2 consecutive double quotes"
                         ))
                 }
             } else {
@@ -1391,12 +1392,12 @@ func basicString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throws(
         if multiline {
             let afterWhitespace = indexAfterSkippingCharacters(
                 start: index, endIndex: endIndex,
-                characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr],
+                characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr]
             )
             if afterWhitespace < endIndex, bytes[afterWhitespace] == CodeUnits.lf {
                 index = indexAfterSkippingCharacters(
                     start: index, endIndex: endIndex,
-                    characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr, CodeUnits.lf],
+                    characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr, CodeUnits.lf]
                 )
                 continue
             }
@@ -1611,7 +1612,7 @@ func normalizeKey(bytes: Span<UInt8>, token: Token, keyTransform: (@Sendable (St
 
     return makeString(bytes: bytes, range: start ..< end)
 }
-
+#endif
 extension Parser {
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
     mutating func parse(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
@@ -1667,14 +1668,14 @@ extension Parser {
                                 throw TOMLError(
                                     .syntax(
                                         lineNumber: lineNumber,
-                                        message: "control characters are not allowed in comments",
+                                        message: "control characters are not allowed in comments"
                                     ))
                             }
                         } else {
                             throw TOMLError(
                                 .syntax(
                                     lineNumber: lineNumber,
-                                    message: "control characters are not allowed in comments",
+                                    message: "control characters are not allowed in comments"
                                 ))
                         }
                     }
@@ -1687,7 +1688,7 @@ extension Parser {
                 token = Token(
                     kind: .dot,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             }
@@ -1696,49 +1697,49 @@ extension Parser {
                 token = Token(
                     kind: .comma,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.equal {
                 token = Token(
                     kind: .equal,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lbrace {
                 token = Token(
                     kind: .lbrace,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.rbrace {
                 token = Token(
                     kind: .rbrace,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lbracket {
                 token = Token(
                     kind: .lbracket,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.rbracket {
                 token = Token(
                     kind: .rbracket,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.lf {
                 token = Token(
                     kind: .newline,
                     lineNumber: lineNumber,
-                    text: position ..< position + 1,
+                    text: position ..< position + 1
                 )
                 return
             } else if ch == CodeUnits.cr {
@@ -1749,14 +1750,14 @@ extension Parser {
                     token = Token(
                         kind: .newline,
                         lineNumber: lineNumber,
-                        text: position ..< nextPosition + 1,
+                        text: position ..< nextPosition + 1
                     )
                     return
                 } else {
                     // Bare CR is invalid
                     throw TOMLError(
                         .syntax(
-                            lineNumber: lineNumber, message: "bare carriage return is not allowed",
+                            lineNumber: lineNumber, message: "bare carriage return is not allowed"
                         ))
                 }
             } else if ch == CodeUnits.space || ch == CodeUnits.tab {
@@ -1797,7 +1798,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< end,
+                        text: start ..< end
                     )
                     return
                 }
@@ -1837,7 +1838,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< end,
+                        text: start ..< end
                     )
                     return
                 }
@@ -1863,7 +1864,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< i + 1,
+                        text: start ..< i + 1
                     )
                     return
                 }
@@ -1949,7 +1950,7 @@ extension Parser {
                     token = Token(
                         kind: .string,
                         lineNumber: lineNumber,
-                        text: start ..< i + 1,
+                        text: start ..< i + 1
                     )
                     return
                 }
@@ -1963,14 +1964,14 @@ extension Parser {
                     {
                         let timeStarter = dateEnder + 1
                         if let timeEnder = scanTime(
-                            bytes: bytes, range: timeStarter ..< range.upperBound,
+                            bytes: bytes, range: timeStarter ..< range.upperBound
                         )?.3 {
                             index = timeEnder
                         }
                     } else if let dateEnder {
                         index = dateEnder
                     } else if let timeEnder = scanTime(
-                        bytes: bytes, range: start ..< range.upperBound,
+                        bytes: bytes, range: start ..< range.upperBound
                     )?.3 {
                         index = timeEnder
                     }
@@ -1987,7 +1988,7 @@ extension Parser {
                             if bytes[index] == CodeUnits.upperZ || bytes[index] == CodeUnits.lowerZ {
                                 index += 1
                             } else if let timzoneEnder = scanTimezoneOffset(
-                                bytes: bytes, range: index ..< range.upperBound,
+                                bytes: bytes, range: index ..< range.upperBound
                             ) {
                                 index = timzoneEnder
                             }
@@ -2002,7 +2003,7 @@ extension Parser {
                         token = Token(
                             kind: .string,
                             lineNumber: lineNumber,
-                            text: start ..< index,
+                            text: start ..< index
                         )
                         return
                     }
@@ -2045,7 +2046,7 @@ extension Parser {
                 token = Token(
                     kind: .string,
                     lineNumber: lineNumber,
-                    text: start ..< index,
+                    text: start ..< index
                 )
             }
 
@@ -2056,7 +2057,7 @@ extension Parser {
         token = Token(
             kind: .eof,
             lineNumber: lineNumber,
-            text: position ..< bytes.count,
+            text: position ..< bytes.count
         )
     }
 
@@ -2800,7 +2801,7 @@ extension Token {
             date: date.map { LocalDate(year: .init($0.year), month: .init($0.month), day: .init($0.day)) },
             time: time.map { LocalTime(hour: .init($0.hour), minute: .init($0.minute), second: .init($0.second), nanosecond: nanoseconds ?? 0) },
             offset: timeOffset,
-            features: features,
+            features: features
         )
     }
 
@@ -2970,7 +2971,7 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
                         .syntax(
                             lineNumber: 0,
                             message:
-                            "basic multiline strings cannot contain more than 2 consecutive double quotes",
+                            "basic multiline strings cannot contain more than 2 consecutive double quotes"
                         ))
                 }
             } else {
@@ -3002,12 +3003,12 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
         if multiline {
             let afterWhitespace = indexAfterSkippingCharacters(
                 start: index, endIndex: endIndex,
-                characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr],
+                characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr]
             )
             if afterWhitespace < endIndex, bytes[afterWhitespace] == CodeUnits.lf {
                 index = indexAfterSkippingCharacters(
                     start: index, endIndex: endIndex,
-                    characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr, CodeUnits.lf],
+                    characters: [CodeUnits.space, CodeUnits.tab, CodeUnits.cr, CodeUnits.lf]
                 )
                 continue
             }
@@ -3223,11 +3224,12 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
     return makeString(bytes: bytes, range: start ..< end)
 }
 
+#if swift(>=6.2)
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
 private func makeString(bytes: Span<UInt8>, range: Range<Int>) -> String {
     String(copying: UTF8Span(unchecked: bytes.extracting(range)))
 }
-
+#endif
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
     String(decoding: bytes[range], as: UTF8.self)
 }

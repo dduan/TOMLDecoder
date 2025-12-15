@@ -4,7 +4,7 @@ import Testing
 @Suite
 struct DateTimeDescriptionTests {
     @Test(.tags(.local_date))
-    func `local date basic formatting`() {
+    func localDateBasicFormatting() {
         let date = LocalDate(year: 2023, month: 5, day: 27)
         #expect(date.description == "2023-05-27")
 
@@ -13,7 +13,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.local_time))
-    func `local time without fractional seconds`() {
+    func localTimeWithoutFractionalSeconds() {
         let time = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0)
         #expect(time.description == "07:32:00")
 
@@ -22,7 +22,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.local_time))
-    func `local time with fractional seconds`() {
+    func localTimeWithFractionalSeconds() {
         let timeWithMicroseconds = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 999_000_000)
         #expect(timeWithMicroseconds.description == "07:32:00.999")
 
@@ -37,7 +37,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.local_datetime))
-    func `local date time basic formatting`() {
+    func localDateTimeBasicFormatting() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let time = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0)
         let dateTime = LocalDateTime(date: date, time: time)
@@ -49,7 +49,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.datetime))
-    func `offset date time Z suffix formatting`() {
+    func offsetDateTimeZSuffixFormatting() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let time = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0)
         let uppercaseZ = OffsetDateTime(date: date, time: time, offset: 0, features: [.uppercaseZ])
@@ -60,7 +60,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.datetime))
-    func `offset date time numeric offset formatting`() {
+    func offsetDateTimeNumericOffsetFormatting() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let time = LocalTime(hour: 0, minute: 32, second: 0, nanosecond: 0)
 
@@ -75,7 +75,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.datetime))
-    func `offset date time lowercase T separator`() {
+    func offsetDateTimeLowercaseTSeparator() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let time = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0)
 
@@ -87,7 +87,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.datetime))
-    func `offset date time with fractional seconds`() {
+    func offsetDateTimeWithFractionalSeconds() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let timeWithFraction = LocalTime(hour: 0, minute: 32, second: 0, nanosecond: 999_999_000)
 
@@ -96,7 +96,7 @@ struct DateTimeDescriptionTests {
     }
 
     @Test(.tags(.datetime))
-    func `offset date time validation with Z flags`() {
+    func offsetDateTimeValidationWithZFlags() {
         let date = LocalDate(year: 1979, month: 5, day: 27)
         let time = LocalTime(hour: 7, minute: 32, second: 0, nanosecond: 0)
 

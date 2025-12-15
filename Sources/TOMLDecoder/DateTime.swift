@@ -449,7 +449,7 @@ extension DateComponents {
             hour: Int(offsetDateTime.time.hour),
             minute: Int(offsetDateTime.time.minute),
             second: Int(offsetDateTime.time.second),
-            nanosecond: Int(offsetDateTime.time.nanosecond),
+            nanosecond: Int(offsetDateTime.time.nanosecond)
         )
     }
 }
