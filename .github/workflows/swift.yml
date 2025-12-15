@@ -77,19 +77,11 @@ jobs:
   swift-test-simulator-backdeploy:
     name: iOS 17.0.1 (Swift 6.0)
     runs-on: macos-14
-    strategy:
-      matrix:
-        include:
-          - platform: iOS
-            os_version: "17.0.1"
-            destination: "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0.1"
-            sdk: iphonesimulator
-            device_type_id: com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro
     steps:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.1.app
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Run simulator test
+      - name: Run tests (simulator)
         run: |
-          xcodebuild -scheme TOMLDecoder-Package -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test
+          xcodebuild -scheme TOMLDecoder-Package -destination "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0.1" -sdk iphonesimulator test
