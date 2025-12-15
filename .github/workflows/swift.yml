@@ -16,18 +16,6 @@ jobs:
           - os: windows-2025
             os_name: Windows 2025
             swift_version: "6.2"
-          - os: macos-15
-            os_name: macOS 15
-            swift_version: "6.0"
-          - os: macos-15
-            os_name: macOS 15
-            swift_version: "6.2"
-          - os: macos-26
-            os_name: macOS 26
-            swift_version: "6.0"
-          - os: macos-26
-            os_name: macOS 26
-            swift_version: "6.2"
     steps:
       - uses: SwiftyLab/setup-swift@latest
         with:
@@ -37,7 +25,23 @@ jobs:
       - name: Run tests
         run: swift test
 
-  simulator-test:
+  swift-test-macos:
+    name: ${{ matrix.os_name }} (Swift ${{ matrix.swift_version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-15
+            os_name: macOS 15
+          - os: macos-26
+            os_name: macOS 26
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Run tests
+        run: swift test
+
+  swift-test-simulator:
     name: ${{ matrix.platform }} ${{ matrix.os_version }}
     runs-on: macos-26
     strategy:
