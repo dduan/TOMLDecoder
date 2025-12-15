@@ -33,8 +33,10 @@ jobs:
         include:
           - os: macos-15
             os_name: macOS 15
+            swift_version: "6.0"
           - os: macos-26
             os_name: macOS 26
+            swift_version: "6.2"
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
