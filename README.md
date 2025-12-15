@@ -1,7 +1,7 @@
 # TOMLDecoder
 
 A fast, Swift-native, minimal dependency library
-that fully implements [TOML][] spec 1.0.
+that fully implements [TOML][https://toml.io/] spec 1.0.
 
 ```swift
 struct Team: Codable {
@@ -18,10 +18,10 @@ let team = try TOMLDecoder().decode(Team.self, from: tomlData)
 ```
 
 
-Read the [documentation][] to learn more!
+Read the documentation to learn more:
 
-[TOML]: https://toml.io/
-[documentation]: https://dduan.github.io/TOMLDecoder/main/documentation/tomldecoder/
+- for [0.4.0](https://dduan.github.io/TOMLDecoder/0.4.x/documentation/tomldecoder/), the latest release
+- for [the main branch](https://dduan.github.io/TOMLDecoder/main/documentation/tomldecoder/)
 
 ## License
 
