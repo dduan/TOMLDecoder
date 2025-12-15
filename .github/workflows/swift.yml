@@ -81,8 +81,8 @@ jobs:
       matrix:
         include:
           - platform: iOS
-            os_version: "17.0"
-            destination: "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0"
+            os_version: "17.0.1"
+            destination: "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0.1"
             sdk: iphonesimulator
             device_type_id: com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro
     steps:
