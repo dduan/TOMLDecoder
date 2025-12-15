@@ -4,7 +4,7 @@ Also known as release notes.
 
 ## In Development
 
-## 0.4.0
+## 0.4.1
 
 This release introduces source-breaking changes from 0.3.x.
 
