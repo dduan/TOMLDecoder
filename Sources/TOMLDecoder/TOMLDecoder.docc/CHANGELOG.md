@@ -4,6 +4,8 @@ Also known as release notes.
 
 ## In Development
 
+## 0.4.0
+
 This release introduces source-breaking changes from 0.3.x.
 
 The lower-level parser APIs and architecture are introduced with an
