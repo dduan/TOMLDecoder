@@ -15,16 +15,11 @@ The parsing speed is significantly faster than 0.3.x releases.
 
 ### API overview
 
-The type `TOMLDecoder` still serves as the entry point for decoding TOML into
-types that conforms to `Swift.Decodable`.
+The type `TOMLDecoder` still serves as the entry point for decoding TOML into types that conforms to `Swift.Decodable`.
 This is similar to previous releases.
 
-The library still provides APIs to deserialize/parse/demarshal TOML documents
-into strutured data representations.
-During this process,
-Each TOML value,
-including container values,
-has a definitive, corresponding Swift type.
+The library still provides APIs to deserialize/parse/demarshal TOML documents into structured data representations.
+During this process, Each TOML value, including container values, has a definitive, corresponding Swift type.
 The decoding process can be lenient,
 and convert these initial value types into compatible types in the `Decodable`s.
 
@@ -33,8 +28,7 @@ and convert these initial value types into compatible types in the `Decodable`s.
 
 * `TOMLDecoder` is no longer an `open class`. It's now a struct.
 * Decoding strategies are represented and stored differently.
-* `Deserializer` is removed. Its functionalities are subsumed by
-  new APIs.
+* `Deserializer` is removed. Its functionalities are subsumed by new APIs.
 * New minimal Apple platform versions:
   * iOS 13
   * macOS 10.15
