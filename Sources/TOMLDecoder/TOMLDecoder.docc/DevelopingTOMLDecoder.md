@@ -117,3 +117,32 @@ by the decoder,
 or requested by the user via,
 for example,
 ``/TOMLDecoder/TOMLTable/string(forKey:)``.
+
+## Supported versions
+
+Versions could mean a few things.
+Here are the specifics.
+These should be tested in CI.
+
+### Swift
+
+Supporting Swift means the project should build with a minimum Swift release.
+This means the implementation may not strictly depend on a language feature
+that only exists in a new Swift release.
+In practice, this usually means the comment atop of `Package.swift` needs to
+reflect the minimum supported Swift version.
+
+It may also mean qualifying in certain language modes.
+For example,
+* Swift 6 with full concurrency checking.
+* Embedded Swift
+
+### Deployment target
+
+Users should be able to build with the latest compiler/Xcode,
+and have the built executable run on an older OS with older runtimes.
+For the user,
+this is their minimum deployment target.
+For TOMLDecoder,
+this usually is controled by the `platforms` field in `Package.swift`.
+This usually doesn't apply to Linux.
