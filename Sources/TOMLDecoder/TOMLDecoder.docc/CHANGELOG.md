@@ -45,7 +45,7 @@ and convert these initial value types into compatible types in the `Decodable`s.
 ### Infrastructure improvements
 
 * The full toml-lang/toml-test suite is now imported as unit tests.
-* [A new documentation site](https://dduan.github.io/TOMLDecoder/documentation/tomldecoder/).
+* [A new documentation site](https://dduan.github.io/TOMLDecoder/0.4.x/documentation/tomldecoder/).
 * More comprehensive CI jobs.
 * New benchmark infra, and suite.
 
