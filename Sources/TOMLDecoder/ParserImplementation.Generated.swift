@@ -9,7 +9,7 @@ extension Parser {
             switch token.kind {
             case .newline:
                 try nextToken(bytes: bytes, isDotSpecial: true)
-            case .string:
+            case .string, .bareKey:
                 try parseKeyValue(bytes: bytes, tableIndex: currentTable, isKeyed: currentTableIsKeyed)
                 if token.kind != .newline, token.kind != .eof {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after value"))
@@ -351,6 +351,7 @@ extension Parser {
                 }
 
                 var index = start
+                var isValidKey = true
                 while index < range.upperBound {
                     let ch = bytes[index]
                     if ch == CodeUnits.lf {
@@ -372,8 +373,6 @@ extension Parser {
                     }
 
                     if ch.isDecimalDigit
-                        || ch == CodeUnits.dot
-                        || ch == CodeUnits.plus
                         || ch == CodeUnits.minus
                         || ch == CodeUnits.underscore
                     {
@@ -381,10 +380,16 @@ extension Parser {
                         continue
                     }
 
+                    if ch == CodeUnits.dot || ch == CodeUnits.plus {
+                        isValidKey = false
+                        index += 1
+                        continue
+                    }
+
                     break
                 }
 
-                emitToken(kind: .string, start: start, end: index)
+                emitToken(kind: (isValidKey && isDotSpecial) ? .bareKey : .string, start: start, end: index)
             }
 
             try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
@@ -499,7 +504,7 @@ extension Parser {
                 break
             }
 
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
@@ -538,7 +543,7 @@ extension Parser {
                 break
             }
 
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
@@ -576,7 +581,7 @@ extension Parser {
             }
 
             switch token.kind {
-            case .string:
+            case .string, .bareKey:
                 if keyArrays[arrayIndex].array.kind == nil {
                     keyArrays[arrayIndex].array.kind = .value
                 } else if keyArrays[arrayIndex].array.kind != .value {
@@ -585,7 +590,7 @@ extension Parser {
 
                 keyArrays[arrayIndex].array.elements.append(.leaf(token))
 
-                try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+                try nextToken(bytes: bytes, isDotSpecial: true)
 
             case .lbracket: // Nested array
                 if keyArrays[arrayIndex].array.kind == nil {
@@ -701,7 +706,7 @@ extension Parser {
         }
 
         let key = token
-        try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+        try nextToken(bytes: bytes, isDotSpecial: true)
 
         if token.kind == .dot {
             let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
@@ -728,7 +733,7 @@ extension Parser {
 
         try nextToken(bytes: bytes, isDotSpecial: false)
 
-        if token.kind == .string {
+        if token.kind == .string || token.kind == .bareKey {
             let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
             let value = token
             keyValues[index].value = value
@@ -757,7 +762,7 @@ extension Parser {
         tablePath.removeAll(keepingCapacity: true)
 
         while true {
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: lineNumber, message: "invalid or missing key"))
             }
 
@@ -1631,6 +1636,14 @@ func scanTimezoneOffset(bytes: borrowing Span<UInt8>, range: Range<Int>) -> Int?
 func normalizeKey(bytes: borrowing Span<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
     var start = token.text.lowerBound
     var end = token.text.upperBound
+    if token.kind == .bareKey {
+        var str = makeString(bytes: bytes, range: start ..< end)
+        if let keyTransform {
+            str = keyTransform(str)
+        }
+        return str
+    }
+
     let ch = bytes[start]
     var result = ""
     if ch == CodeUnits.doubleQuote || ch == CodeUnits.singleQuote {
@@ -1678,7 +1691,7 @@ extension Parser {
             switch token.kind {
             case .newline:
                 try nextToken(bytes: bytes, isDotSpecial: true)
-            case .string:
+            case .string, .bareKey:
                 try parseKeyValue(bytes: bytes, tableIndex: currentTable, isKeyed: currentTableIsKeyed)
                 if token.kind != .newline, token.kind != .eof {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after value"))
@@ -2020,6 +2033,7 @@ extension Parser {
                 }
 
                 var index = start
+                var isValidKey = true
                 while index < range.upperBound {
                     let ch = bytes[index]
                     if ch == CodeUnits.lf {
@@ -2041,8 +2055,6 @@ extension Parser {
                     }
 
                     if ch.isDecimalDigit
-                        || ch == CodeUnits.dot
-                        || ch == CodeUnits.plus
                         || ch == CodeUnits.minus
                         || ch == CodeUnits.underscore
                     {
@@ -2050,10 +2062,16 @@ extension Parser {
                         continue
                     }
 
+                    if ch == CodeUnits.dot || ch == CodeUnits.plus {
+                        isValidKey = false
+                        index += 1
+                        continue
+                    }
+
                     break
                 }
 
-                emitToken(kind: .string, start: start, end: index)
+                emitToken(kind: (isValidKey && isDotSpecial) ? .bareKey : .string, start: start, end: index)
             }
 
             try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
@@ -2168,7 +2186,7 @@ extension Parser {
                 break
             }
 
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
@@ -2207,7 +2225,7 @@ extension Parser {
                 break
             }
 
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
@@ -2245,7 +2263,7 @@ extension Parser {
             }
 
             switch token.kind {
-            case .string:
+            case .string, .bareKey:
                 if keyArrays[arrayIndex].array.kind == nil {
                     keyArrays[arrayIndex].array.kind = .value
                 } else if keyArrays[arrayIndex].array.kind != .value {
@@ -2254,7 +2272,7 @@ extension Parser {
 
                 keyArrays[arrayIndex].array.elements.append(.leaf(token))
 
-                try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+                try nextToken(bytes: bytes, isDotSpecial: true)
 
             case .lbracket: // Nested array
                 if keyArrays[arrayIndex].array.kind == nil {
@@ -2370,7 +2388,7 @@ extension Parser {
         }
 
         let key = token
-        try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+        try nextToken(bytes: bytes, isDotSpecial: true)
 
         if token.kind == .dot {
             let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
@@ -2397,7 +2415,7 @@ extension Parser {
 
         try nextToken(bytes: bytes, isDotSpecial: false)
 
-        if token.kind == .string {
+        if token.kind == .string || token.kind == .bareKey {
             let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
             let value = token
             keyValues[index].value = value
@@ -2426,7 +2444,7 @@ extension Parser {
         tablePath.removeAll(keepingCapacity: true)
 
         while true {
-            if token.kind != .string {
+            if token.kind != .string, token.kind != .bareKey {
                 throw TOMLError(.syntax(lineNumber: lineNumber, message: "invalid or missing key"))
             }
 
@@ -3300,6 +3318,14 @@ func scanTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
 func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
     var start = token.text.lowerBound
     var end = token.text.upperBound
+    if token.kind == .bareKey {
+        var str = makeString(bytes: bytes, range: start ..< end)
+        if let keyTransform {
+            str = keyTransform(str)
+        }
+        return str
+    }
+
     let ch = bytes[start]
     var result = ""
     if ch == CodeUnits.doubleQuote || ch == CodeUnits.singleQuote {
