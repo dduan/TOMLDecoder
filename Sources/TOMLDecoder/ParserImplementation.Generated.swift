@@ -545,7 +545,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
+    mutating func parseKeyedInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -561,7 +561,7 @@ extension Parser {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
-            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: isKeyed)
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: true)
 
             if token.kind == .newline {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
@@ -580,11 +580,46 @@ extension Parser {
 
         try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
 
-        if isKeyed {
-            keyTables[tableIndex].readOnly = true
-        } else {
-            tables[tableIndex].readOnly = true
+        keyTables[tableIndex].readOnly = true
+    }
+
+    @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
+    mutating func parseInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
+        try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
+
+        while true {
+            if token.kind == .newline {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
+            }
+
+            if token.kind == .rbrace {
+                break
+            }
+
+            if token.kind != .string {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
+            }
+
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: false)
+
+            if token.kind == .newline {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
+            }
+
+            if token.kind == .comma {
+                try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
+                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
+                if token.kind == .rbrace {
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
+                }
+                continue
+            }
+            break
         }
+
+        try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
+
+        tables[tableIndex].readOnly = true
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
@@ -634,7 +669,7 @@ extension Parser {
                 tables.append(InternalTOMLTable())
                 keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -699,7 +734,7 @@ extension Parser {
                 tables.append(InternalTOMLTable())
                 arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -767,7 +802,7 @@ extension Parser {
 
         if token.kind == .lbrace {
             let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
-            try parseInlineTable(bytes: bytes, tableIndex: index, isKeyed: true)
+            try parseKeyedInlineTable(bytes: bytes, tableIndex: index)
             return
         }
 
@@ -2237,7 +2272,7 @@ extension Parser {
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func parseInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
+    mutating func parseKeyedInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -2253,7 +2288,7 @@ extension Parser {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
-            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: isKeyed)
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: true)
 
             if token.kind == .newline {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
@@ -2272,11 +2307,46 @@ extension Parser {
 
         try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
 
-        if isKeyed {
-            keyTables[tableIndex].readOnly = true
-        } else {
-            tables[tableIndex].readOnly = true
+        keyTables[tableIndex].readOnly = true
+    }
+
+    @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
+    mutating func parseInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
+        try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
+
+        while true {
+            if token.kind == .newline {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
+            }
+
+            if token.kind == .rbrace {
+                break
+            }
+
+            if token.kind != .string {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
+            }
+
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: false)
+
+            if token.kind == .newline {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
+            }
+
+            if token.kind == .comma {
+                try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
+                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
+                if token.kind == .rbrace {
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
+                }
+                continue
+            }
+            break
         }
+
+        try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
+
+        tables[tableIndex].readOnly = true
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
@@ -2326,7 +2396,7 @@ extension Parser {
                 tables.append(InternalTOMLTable())
                 keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -2391,7 +2461,7 @@ extension Parser {
                 tables.append(InternalTOMLTable())
                 arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -2459,7 +2529,7 @@ extension Parser {
 
         if token.kind == .lbrace {
             let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
-            try parseInlineTable(bytes: bytes, tableIndex: index, isKeyed: true)
+            try parseKeyedInlineTable(bytes: bytes, tableIndex: index)
             return
         }
 
