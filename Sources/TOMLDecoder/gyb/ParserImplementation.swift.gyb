@@ -1625,14 +1625,14 @@ func normalizeKey(bytes: ${byte_type}, token: Token, keyTransform: (@Sendable (S
 
     return makeString(bytes: bytes, range: start ..< end)
 }
-% if byte_type == "Span<UInt8>":
+% if byte_type == "borrowing Span<UInt8>":
 #endif
 % end
 % end
 
 #if swift(>=6.2)
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-private func makeString(bytes: Span<UInt8>, range: Range<Int>) -> String {
+private func makeString(bytes: borrowing Span<UInt8>, range: Range<Int>) -> String {
     String(copying: UTF8Span(unchecked: bytes.extracting(range)))
 }
 #endif

@@ -1612,6 +1612,7 @@ func normalizeKey(bytes: borrowing Span<UInt8>, token: Token, keyTransform: (@Se
 
     return makeString(bytes: bytes, range: start ..< end)
 }
+#endif
 extension Parser {
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
     mutating func parse(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
@@ -3225,7 +3226,7 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
 
 #if swift(>=6.2)
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-private func makeString(bytes: Span<UInt8>, range: Range<Int>) -> String {
+private func makeString(bytes: borrowing Span<UInt8>, range: Range<Int>) -> String {
     String(copying: UTF8Span(unchecked: bytes.extracting(range)))
 }
 #endif
