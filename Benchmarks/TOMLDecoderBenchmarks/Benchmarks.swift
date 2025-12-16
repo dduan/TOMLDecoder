@@ -5,7 +5,6 @@ import TOMLDecoder
 
 let benchmarks: @Sendable () -> Void = {
     Benchmark.defaultConfiguration.metrics = [
-        .cpuUser,
         .wallClock,
         .instructions,
         .retainCount,
