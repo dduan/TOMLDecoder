@@ -5,10 +5,8 @@ struct Parser {
     var tablePath: [(String, Token)] = []
     var tables: [InternalTOMLTable] = [InternalTOMLTable()]
     var arrays: [InternalTOMLArray] = []
-    var keyTables: [InternalTOMLTable] = []
-    var keyTableKeys: [String] = []
-    var keyArrays: [InternalTOMLArray] = []
-    var keyArrayKeys: [String] = []
+    var keyTables: [KeyTablePair] = []
+    var keyArrays: [KeyArrayPair] = []
     var keyValues: [KeyValuePair] = []
     var keyTransform: (@Sendable (String) -> String)?
 }

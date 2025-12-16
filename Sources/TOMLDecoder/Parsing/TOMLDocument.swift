@@ -35,8 +35,8 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
         tables = parser.tables
         arrays = parser.arrays
         keyValues = parser.keyValues
-        keyTables = zip(parser.keyTableKeys, parser.keyTables).map { KeyTablePair(key: $0.0, table: $0.1) }
-        keyArrays = zip(parser.keyArrayKeys, parser.keyArrays).map { KeyArrayPair(key: $0.0, array: $0.1) }
+        keyTables = parser.keyTables
+        keyArrays = parser.keyArrays
     }
 }
 
