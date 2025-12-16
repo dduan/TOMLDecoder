@@ -27,14 +27,14 @@ extension Parser {
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
     mutating func nextToken(bytes: borrowing Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        var lineNumber = token.lineNumber
-        var position = token.text.lowerBound
+        var lineNumber = currentLineNumber
+        var position = cursor
 
-        while position < token.text.upperBound {
-            if bytes[position] == CodeUnits.lf {
-                lineNumber += 1
-            }
-            position += 1
+        @inline(__always)
+        func emitToken(kind: Token.Kind, start: Int, end: Int, newlines: Int = 0) {
+            token = Token(kind: kind, lineNumber: lineNumber, text: start ..< end)
+            cursor = end
+            currentLineNumber = lineNumber + newlines
         }
 
         while position < bytes.count {
@@ -74,73 +74,37 @@ extension Parser {
             }
 
             if ch == CodeUnits.dot && isDotSpecial {
-                token = Token(
-                    kind: .dot,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .dot, start: position, end: position + 1)
                 return
             }
 
             if ch == CodeUnits.comma {
-                token = Token(
-                    kind: .comma,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .comma, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.equal {
-                token = Token(
-                    kind: .equal,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .equal, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lbrace {
-                token = Token(
-                    kind: .lbrace,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .lbrace, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.rbrace {
-                token = Token(
-                    kind: .rbrace,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .rbrace, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lbracket {
-                token = Token(
-                    kind: .lbracket,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .lbracket, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.rbracket {
-                token = Token(
-                    kind: .rbracket,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .rbracket, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lf {
-                token = Token(
-                    kind: .newline,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
                 return
             } else if ch == CodeUnits.cr {
                 // Check if this is part of a CRLF sequence
                 let nextPosition = position + 1
                 if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
                     // This is CRLF, treat as newline
-                    token = Token(
-                        kind: .newline,
-                        lineNumber: lineNumber,
-                        text: position ..< nextPosition + 1
-                    )
+                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
                     return
                 } else {
                     // Bare CR is invalid
@@ -164,8 +128,12 @@ extension Parser {
                    bytes[start + 2] == CodeUnits.singleQuote
                 {
                     var i = start + 3
+                    var newlinesInToken = 0
 
                     while i < range.upperBound {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
                         if i + 3 <= range.upperBound,
                            bytes[i] == CodeUnits.singleQuote,
                            bytes[i + 1] == CodeUnits.singleQuote,
@@ -184,11 +152,7 @@ extension Parser {
                     }
 
                     let end = i + 3
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< end
-                    )
+                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
                     return
                 }
 
@@ -199,8 +163,12 @@ extension Parser {
                 {
                     var i = start + 3
                     let textCount = range.upperBound
+                    var newlinesInToken = 0
 
                     while i < textCount {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
                         if i + 3 <= textCount,
                            bytes[i] == CodeUnits.doubleQuote,
                            bytes[i + 1] == CodeUnits.doubleQuote,
@@ -224,11 +192,7 @@ extension Parser {
                     }
 
                     let end = i + 3
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< end
-                    )
+                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
                     return
                 }
 
@@ -250,11 +214,7 @@ extension Parser {
                             .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
                     }
 
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< i + 1
-                    )
+                    emitToken(kind: .string, start: start, end: i + 1)
                     return
                 }
 
@@ -336,11 +296,7 @@ extension Parser {
                             .syntax(lineNumber: lineNumber, message: "unterminated quote"))
                     }
 
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< i + 1
-                    )
+                    emitToken(kind: .string, start: start, end: i + 1)
                     return
                 }
 
@@ -389,11 +345,7 @@ extension Parser {
                             index -= 1
                         }
                         // tokenize
-                        token = Token(
-                            kind: .string,
-                            lineNumber: lineNumber,
-                            text: start ..< index
-                        )
+                        emitToken(kind: .string, start: start, end: index)
                         return
                     }
                 }
@@ -432,22 +384,14 @@ extension Parser {
                     break
                 }
 
-                token = Token(
-                    kind: .string,
-                    lineNumber: lineNumber,
-                    text: start ..< index
-                )
+                emitToken(kind: .string, start: start, end: index)
             }
 
             try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
             return
         }
 
-        token = Token(
-            kind: .eof,
-            lineNumber: lineNumber,
-            text: position ..< bytes.count
-        )
+        emitToken(kind: .eof, start: position, end: bytes.count)
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
@@ -1752,14 +1696,14 @@ extension Parser {
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
     mutating func nextToken(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        var lineNumber = token.lineNumber
-        var position = token.text.lowerBound
+        var lineNumber = currentLineNumber
+        var position = cursor
 
-        while position < token.text.upperBound {
-            if bytes[position] == CodeUnits.lf {
-                lineNumber += 1
-            }
-            position += 1
+        @inline(__always)
+        func emitToken(kind: Token.Kind, start: Int, end: Int, newlines: Int = 0) {
+            token = Token(kind: kind, lineNumber: lineNumber, text: start ..< end)
+            cursor = end
+            currentLineNumber = lineNumber + newlines
         }
 
         while position < bytes.count {
@@ -1799,73 +1743,37 @@ extension Parser {
             }
 
             if ch == CodeUnits.dot && isDotSpecial {
-                token = Token(
-                    kind: .dot,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .dot, start: position, end: position + 1)
                 return
             }
 
             if ch == CodeUnits.comma {
-                token = Token(
-                    kind: .comma,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .comma, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.equal {
-                token = Token(
-                    kind: .equal,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .equal, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lbrace {
-                token = Token(
-                    kind: .lbrace,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .lbrace, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.rbrace {
-                token = Token(
-                    kind: .rbrace,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .rbrace, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lbracket {
-                token = Token(
-                    kind: .lbracket,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .lbracket, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.rbracket {
-                token = Token(
-                    kind: .rbracket,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .rbracket, start: position, end: position + 1)
                 return
             } else if ch == CodeUnits.lf {
-                token = Token(
-                    kind: .newline,
-                    lineNumber: lineNumber,
-                    text: position ..< position + 1
-                )
+                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
                 return
             } else if ch == CodeUnits.cr {
                 // Check if this is part of a CRLF sequence
                 let nextPosition = position + 1
                 if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
                     // This is CRLF, treat as newline
-                    token = Token(
-                        kind: .newline,
-                        lineNumber: lineNumber,
-                        text: position ..< nextPosition + 1
-                    )
+                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
                     return
                 } else {
                     // Bare CR is invalid
@@ -1889,8 +1797,12 @@ extension Parser {
                    bytes[start + 2] == CodeUnits.singleQuote
                 {
                     var i = start + 3
+                    var newlinesInToken = 0
 
                     while i < range.upperBound {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
                         if i + 3 <= range.upperBound,
                            bytes[i] == CodeUnits.singleQuote,
                            bytes[i + 1] == CodeUnits.singleQuote,
@@ -1909,11 +1821,7 @@ extension Parser {
                     }
 
                     let end = i + 3
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< end
-                    )
+                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
                     return
                 }
 
@@ -1924,8 +1832,12 @@ extension Parser {
                 {
                     var i = start + 3
                     let textCount = range.upperBound
+                    var newlinesInToken = 0
 
                     while i < textCount {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
                         if i + 3 <= textCount,
                            bytes[i] == CodeUnits.doubleQuote,
                            bytes[i + 1] == CodeUnits.doubleQuote,
@@ -1949,11 +1861,7 @@ extension Parser {
                     }
 
                     let end = i + 3
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< end
-                    )
+                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
                     return
                 }
 
@@ -1975,11 +1883,7 @@ extension Parser {
                             .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
                     }
 
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< i + 1
-                    )
+                    emitToken(kind: .string, start: start, end: i + 1)
                     return
                 }
 
@@ -2061,11 +1965,7 @@ extension Parser {
                             .syntax(lineNumber: lineNumber, message: "unterminated quote"))
                     }
 
-                    token = Token(
-                        kind: .string,
-                        lineNumber: lineNumber,
-                        text: start ..< i + 1
-                    )
+                    emitToken(kind: .string, start: start, end: i + 1)
                     return
                 }
 
@@ -2114,11 +2014,7 @@ extension Parser {
                             index -= 1
                         }
                         // tokenize
-                        token = Token(
-                            kind: .string,
-                            lineNumber: lineNumber,
-                            text: start ..< index
-                        )
+                        emitToken(kind: .string, start: start, end: index)
                         return
                     }
                 }
@@ -2157,22 +2053,14 @@ extension Parser {
                     break
                 }
 
-                token = Token(
-                    kind: .string,
-                    lineNumber: lineNumber,
-                    text: start ..< index
-                )
+                emitToken(kind: .string, start: start, end: index)
             }
 
             try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
             return
         }
 
-        token = Token(
-            kind: .eof,
-            lineNumber: lineNumber,
-            text: position ..< bytes.count
-        )
+        emitToken(kind: .eof, start: position, end: bytes.count)
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
