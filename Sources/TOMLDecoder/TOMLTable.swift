@@ -212,19 +212,6 @@ public struct TOMLTable: Sendable, Equatable {
         throw TOMLError(.keyNotFoundInTable(key: key, expected: "table"))
     }
 
-    // @inline(__always)
-    // func value<T>(forKey key: String, parse: (String.UTF8View.SubSequence) throws(TOMLError) -> T) throws(TOMLError) -> T {
-    //     let pairIndices = source.tables[index].keyValues
-    //     let allPairs = source.keyValues
-    //     for i in pairIndices {
-    //         if allPairs[i].key == key {
-    //             return try parse(allPairs[i].value.text)
-    //         }
-    //     }
-
-    //     throw TOMLError(.keyNotFoundInTable(key: key, expected: String(describing: T.self)))
-    // }
-
     @inline(__always)
     func token(forKey key: String, expected: String) throws(TOMLError) -> Token {
         let pairIndices = source.tables[index].keyValues
