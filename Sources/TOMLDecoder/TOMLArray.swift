@@ -70,15 +70,16 @@
 public struct TOMLArray: Equatable, Sendable {
     let source: TOMLDocument
     let index: Int
+    let isKeyed: Bool
 
     /// Number of elements in the array.
     public var count: Int {
-        source.arrays[index].elements.count
+        resolvedArray().elements.count
     }
 
     @inline(__always)
     func element(atIndex index: Int) throws(TOMLError) -> InternalTOMLArray.Element {
-        let elements = source.arrays[self.index].elements
+        let elements = resolvedArray().elements
         guard index < elements.count else {
             throw TOMLError(.arrayOutOfBound(index: index, bound: elements.count))
         }
@@ -102,7 +103,7 @@ public struct TOMLArray: Equatable, Sendable {
             throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "array"))
         }
 
-        return TOMLArray(source: source, index: arrayIndex)
+        return TOMLArray(source: source, index: arrayIndex, isKeyed: false)
     }
 
     /// Access a TOML table at a given index.
@@ -120,7 +121,7 @@ public struct TOMLArray: Equatable, Sendable {
         guard case let .table(_, tableIndex) = element else {
             throw TOMLError(.typeMismatchInArray(lineNumber: element.lineNumber, index: index, expected: "table"))
         }
-        return TOMLTable(source: source, index: tableIndex)
+        return TOMLTable(source: source, index: tableIndex, isKeyed: false)
     }
 
     @inline(__always)
@@ -286,11 +287,24 @@ public struct TOMLArray: Equatable, Sendable {
     }
 
     func array() throws(TOMLError) -> [Any] {
-        let count = source.arrays.count
-        guard index < count else {
-            throw TOMLError(.arrayOutOfBound(index: index, bound: count))
+        if isKeyed {
+            let count = source.keyArrays.count
+            guard index < count else {
+                throw TOMLError(.arrayOutOfBound(index: index, bound: count))
+            }
+            return try source.keyArrays[index].array.array(source: source)
+        } else {
+            let count = source.arrays.count
+            guard index < count else {
+                throw TOMLError(.arrayOutOfBound(index: index, bound: count))
+            }
+            return try source.arrays[index].array(source: source)
         }
-        return try source.arrays[index].array(source: source)
+    }
+
+    @inline(__always)
+    func resolvedArray() -> InternalTOMLArray {
+        source.array(at: index, keyed: isKeyed)
     }
 }
 

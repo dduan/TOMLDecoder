@@ -3,6 +3,8 @@ import Foundation
 struct TOMLDocument: Equatable, @unchecked Sendable {
     let tables: [InternalTOMLTable]
     let arrays: [InternalTOMLArray]
+    let keyTables: [KeyTablePair]
+    let keyArrays: [KeyArrayPair]
     let keyValues: [KeyValuePair]
 
     let source: String
@@ -33,16 +35,16 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
         tables = parser.tables
         arrays = parser.arrays
         keyValues = parser.keyValues
+        keyTables = parser.keyTables
+        keyArrays = parser.keyArrays
     }
 }
 
 struct InternalTOMLArray: Equatable, Sendable {
-    var key: String?
     var kind: Kind?
     var elements: [Element]
 
-    init(key: String? = nil, kind: Kind? = nil, elements: [Element] = []) {
-        self.key = key
+    init(kind: Kind? = nil, elements: [Element] = []) {
         self.kind = kind
         self.elements = elements
     }
@@ -85,6 +87,16 @@ struct InternalTOMLArray: Equatable, Sendable {
     }
 }
 
+struct KeyTablePair: Equatable {
+    let key: String
+    var table: InternalTOMLTable
+}
+
+struct KeyArrayPair: Equatable {
+    let key: String
+    var array: InternalTOMLArray
+}
+
 struct KeyValuePair: Equatable {
     let key: String
     var value: Token
@@ -95,7 +107,6 @@ struct KeyValuePair: Equatable {
 }
 
 struct InternalTOMLTable: Equatable, Sendable {
-    var key: String?
     var implicit: Bool = false
     var readOnly: Bool = false
     var definedByDottedKey: Bool = false
@@ -103,24 +114,16 @@ struct InternalTOMLTable: Equatable, Sendable {
     var arrays: [Int] = []
     var tables: [Int] = []
 
-    init(key: String? = nil) {
-        self.key = key
-    }
-
     func allKeys(_ document: TOMLDocument) -> [String] {
         var keys = [String]()
         for kv in keyValues {
             keys.append(document.keyValues[kv].key)
         }
         for arr in arrays {
-            if let key = document.arrays[arr].key {
-                keys.append(key)
-            }
+            keys.append(document.keyArrays[arr].key)
         }
         for table in tables {
-            if let key = document.tables[table].key {
-                keys.append(key)
-            }
+            keys.append(document.keyTables[table].key)
         }
         return keys
     }
@@ -132,12 +135,12 @@ struct InternalTOMLTable: Equatable, Sendable {
             }
         }
         for arr in arrays {
-            if source.arrays[arr].key == key {
+            if source.keyArrays[arr].key == key {
                 return true
             }
         }
         for table in tables {
-            if source.tables[table].key == key {
+            if source.keyTables[table].key == key {
                 return true
             }
         }
@@ -198,15 +201,13 @@ extension InternalTOMLTable {
     func dictionary(source: TOMLDocument) throws(TOMLError) -> [String: Any] {
         var result = [String: Any]()
         for tableIndex in tables {
-            let table = source.tables[tableIndex]
-            guard let key = table.key else { continue }
-            result[key] = try table.dictionary(source: source)
+            let tablePair = source.keyTables[tableIndex]
+            result[tablePair.key] = try tablePair.table.dictionary(source: source)
         }
 
         for arrayIndex in arrays {
-            let array = source.arrays[arrayIndex]
-            guard let key = array.key else { continue }
-            result[key] = try array.array(source: source)
+            let arrayPair = source.keyArrays[arrayIndex]
+            result[arrayPair.key] = try arrayPair.array.array(source: source)
         }
 
         for kvIndex in keyValues {
@@ -234,5 +235,17 @@ extension InternalTOMLArray {
         }
 
         return result
+    }
+}
+
+extension TOMLDocument {
+    @inline(__always)
+    func table(at index: Int, keyed: Bool) -> InternalTOMLTable {
+        keyed ? keyTables[index].table : tables[index]
+    }
+
+    @inline(__always)
+    func array(at index: Int, keyed: Bool) -> InternalTOMLArray {
+        keyed ? keyArrays[index].array : arrays[index]
     }
 }
