@@ -1,0 +1,13 @@
+common --enable_bzlmod
+common --incompatible_disallow_empty_glob
+common --lockfile_mode=off
+
+build --features=swift.use_explicit_swift_module_map
+build --host_features=swift.use_explicit_swift_module_map
+
+# Should keep in sync with Package.swift
+# However, there's a bug in rules_swift preventing it
+build --host_macos_minimum_os=13
+build --macos_minimum_os=13
+
+test --test_output=errors
