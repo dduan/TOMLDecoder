@@ -763,7 +763,7 @@ extension Parser {
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: anonymousArrayKey))
+            tables.append(InternalTOMLTable(key: nil))
             arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
         }
@@ -2375,7 +2375,7 @@ extension Parser {
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: anonymousArrayKey))
+            tables.append(InternalTOMLTable(key: nil))
             arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
         }
@@ -3315,5 +3315,3 @@ extension Parser {
         currentTable = tableIndex
     }
 }
-
-private let anonymousArrayKey = "3b60b623-fab0-4045-b091-dc33c08e4126"
