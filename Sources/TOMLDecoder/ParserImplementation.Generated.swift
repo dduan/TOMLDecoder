@@ -588,7 +588,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseArray(bytes: borrowing Span<UInt8>, arrayIndex: Int, isKeyed: Bool) throws(TOMLError) {
+    mutating func parseKeyedArray(bytes: borrowing Span<UInt8>, arrayIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
         while true {
@@ -600,73 +600,104 @@ extension Parser {
 
             switch token.kind {
             case .string:
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .value
-                    } else if keyArrays[arrayIndex].kind != .value {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-
-                    keyArrays[arrayIndex].elements.append(.leaf(token))
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .value
-                    } else if arrays[arrayIndex].kind != .value {
-                        arrays[arrayIndex].kind = .mixed
-                    }
-
-                    arrays[arrayIndex].elements.append(.leaf(token))
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .value
+                } else if keyArrays[arrayIndex].kind != .value {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
+
+                keyArrays[arrayIndex].elements.append(.leaf(token))
 
                 try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
 
             case .lbracket: // Nested array
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .array
-                    } else if keyArrays[arrayIndex].kind != .array {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .array
-                    } else if arrays[arrayIndex].kind != .array {
-                        arrays[arrayIndex].kind = .mixed
-                    }
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .array
+                } else if keyArrays[arrayIndex].kind != .array {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
 
                 let newArrayIndex = arrays.count
                 arrays.append(InternalTOMLArray())
-                if isKeyed {
-                    keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
-                } else {
-                    arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
-                }
+                keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
 
-                try parseArray(bytes: bytes, arrayIndex: newArrayIndex, isKeyed: false)
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
 
             case .lbrace: // Nested table
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .table
-                    } else if keyArrays[arrayIndex].kind != .table {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .table
-                    } else if arrays[arrayIndex].kind != .table {
-                        arrays[arrayIndex].kind = .mixed
-                    }
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .table
+                } else if keyArrays[arrayIndex].kind != .table {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                if isKeyed {
-                    keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
-                } else {
-                    arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+
+            default:
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
+            }
+
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
+
+            if token.kind == .comma {
+                try eatToken(bytes: bytes, kind: .comma, isDotSpecial: false)
+                continue
+            }
+            break
+        }
+
+        try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
+    }
+
+    @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
+    mutating func parseArray(bytes: borrowing Span<UInt8>, arrayIndex: Int) throws(TOMLError) {
+        try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
+
+        while true {
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
+
+            if token.kind == .rbracket {
+                break
+            }
+
+            switch token.kind {
+            case .string:
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .value
+                } else if arrays[arrayIndex].kind != .value {
+                    arrays[arrayIndex].kind = .mixed
                 }
+
+                arrays[arrayIndex].elements.append(.leaf(token))
+
+                try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+
+            case .lbracket: // Nested array
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .array
+                } else if arrays[arrayIndex].kind != .array {
+                    arrays[arrayIndex].kind = .mixed
+                }
+
+                let newArrayIndex = arrays.count
+                arrays.append(InternalTOMLArray())
+                arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
+
+            case .lbrace: // Nested table
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .table
+                } else if arrays[arrayIndex].kind != .table {
+                    arrays[arrayIndex].kind = .mixed
+                }
+
+                let newTableIndex = tables.count
+                tables.append(InternalTOMLTable())
+                arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
                 try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
 
@@ -730,7 +761,7 @@ extension Parser {
 
         if token.kind == .lbracket {
             let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
-            try parseArray(bytes: bytes, arrayIndex: index, isKeyed: true)
+            try parseKeyedArray(bytes: bytes, arrayIndex: index)
             return
         }
 
@@ -2249,7 +2280,7 @@ extension Parser {
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func parseArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int, isKeyed: Bool) throws(TOMLError) {
+    mutating func parseKeyedArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
         while true {
@@ -2261,73 +2292,104 @@ extension Parser {
 
             switch token.kind {
             case .string:
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .value
-                    } else if keyArrays[arrayIndex].kind != .value {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-
-                    keyArrays[arrayIndex].elements.append(.leaf(token))
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .value
-                    } else if arrays[arrayIndex].kind != .value {
-                        arrays[arrayIndex].kind = .mixed
-                    }
-
-                    arrays[arrayIndex].elements.append(.leaf(token))
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .value
+                } else if keyArrays[arrayIndex].kind != .value {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
+
+                keyArrays[arrayIndex].elements.append(.leaf(token))
 
                 try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
 
             case .lbracket: // Nested array
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .array
-                    } else if keyArrays[arrayIndex].kind != .array {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .array
-                    } else if arrays[arrayIndex].kind != .array {
-                        arrays[arrayIndex].kind = .mixed
-                    }
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .array
+                } else if keyArrays[arrayIndex].kind != .array {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
 
                 let newArrayIndex = arrays.count
                 arrays.append(InternalTOMLArray())
-                if isKeyed {
-                    keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
-                } else {
-                    arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
-                }
+                keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
 
-                try parseArray(bytes: bytes, arrayIndex: newArrayIndex, isKeyed: false)
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
 
             case .lbrace: // Nested table
-                if isKeyed {
-                    if keyArrays[arrayIndex].kind == nil {
-                        keyArrays[arrayIndex].kind = .table
-                    } else if keyArrays[arrayIndex].kind != .table {
-                        keyArrays[arrayIndex].kind = .mixed
-                    }
-                } else {
-                    if arrays[arrayIndex].kind == nil {
-                        arrays[arrayIndex].kind = .table
-                    } else if arrays[arrayIndex].kind != .table {
-                        arrays[arrayIndex].kind = .mixed
-                    }
+                if keyArrays[arrayIndex].kind == nil {
+                    keyArrays[arrayIndex].kind = .table
+                } else if keyArrays[arrayIndex].kind != .table {
+                    keyArrays[arrayIndex].kind = .mixed
                 }
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                if isKeyed {
-                    keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
-                } else {
-                    arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
+
+            default:
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
+            }
+
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
+
+            if token.kind == .comma {
+                try eatToken(bytes: bytes, kind: .comma, isDotSpecial: false)
+                continue
+            }
+            break
+        }
+
+        try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
+    }
+
+    @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
+    mutating func parseArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int) throws(TOMLError) {
+        try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
+
+        while true {
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
+
+            if token.kind == .rbracket {
+                break
+            }
+
+            switch token.kind {
+            case .string:
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .value
+                } else if arrays[arrayIndex].kind != .value {
+                    arrays[arrayIndex].kind = .mixed
                 }
+
+                arrays[arrayIndex].elements.append(.leaf(token))
+
+                try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+
+            case .lbracket: // Nested array
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .array
+                } else if arrays[arrayIndex].kind != .array {
+                    arrays[arrayIndex].kind = .mixed
+                }
+
+                let newArrayIndex = arrays.count
+                arrays.append(InternalTOMLArray())
+                arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
+
+            case .lbrace: // Nested table
+                if arrays[arrayIndex].kind == nil {
+                    arrays[arrayIndex].kind = .table
+                } else if arrays[arrayIndex].kind != .table {
+                    arrays[arrayIndex].kind = .mixed
+                }
+
+                let newTableIndex = tables.count
+                tables.append(InternalTOMLTable())
+                arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
 
                 try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
 
@@ -2391,7 +2453,7 @@ extension Parser {
 
         if token.kind == .lbracket {
             let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
-            try parseArray(bytes: bytes, arrayIndex: index, isKeyed: true)
+            try parseKeyedArray(bytes: bytes, arrayIndex: index)
             return
         }
 
