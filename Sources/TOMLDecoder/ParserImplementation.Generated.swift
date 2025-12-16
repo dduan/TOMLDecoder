@@ -10,7 +10,7 @@ extension Parser {
             case .newline:
                 try nextToken(bytes: bytes, isDotSpecial: true)
             case .string:
-                try parseKeyValue(bytes: bytes, tableIndex: currentTable)
+                try parseKeyValue(bytes: bytes, tableIndex: currentTable, isKeyed: currentTableIsKeyed)
                 if token.kind != .newline, token.kind != .eof {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after value"))
                 }
@@ -461,35 +461,40 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyValue(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
+    mutating func createKeyValue(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        if tableValue(table: tables[tableIndex], key: key) != nil {
+        if tableValue(table: table(at: tableIndex, keyed: isKeyed), key: key) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
         let kv = KeyValuePair(key: key, value: Token.empty)
         let index = keyValues.count
         keyValues.append(kv)
 
-        tables[tableIndex].keyValues.append(index)
+        if isKeyed {
+            keyTables[tableIndex].keyValues.append(index)
+        } else {
+            tables[tableIndex].keyValues.append(index)
+        }
         return index
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyTable(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
+    mutating func createKeyTable(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
+        let parentTable = table(at: tableIndex, keyed: isKeyed)
 
         // Check if parent table is readOnly (inline table)
-        if tables[tableIndex].readOnly {
+        if parentTable.readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
         }
 
-        switch tableValue(table: tables[tableIndex], key: key) {
+        switch tableValue(table: parentTable, key: key) {
         case let .table(existingTableIndex):
-            if tables[existingTableIndex].implicit {
-                if tables[existingTableIndex].definedByDottedKey {
+            if keyTables[existingTableIndex].implicit {
+                if keyTables[existingTableIndex].definedByDottedKey {
                     throw TOMLError(.keyExists(lineNumber: token.lineNumber))
                 }
-                tables[existingTableIndex].implicit = false
+                keyTables[existingTableIndex].implicit = false
                 return existingTableIndex
             }
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
@@ -498,26 +503,36 @@ extension Parser {
         case nil:
             break
         }
-        let index = tables.count
-        var newTable = InternalTOMLTable(key: key)
+        let index = keyTables.count
+        var newTable = InternalTOMLTable()
         newTable.implicit = implicit
         newTable.definedByDottedKey = implicit
-        tables.append(newTable)
+        keyTables.append(newTable)
+        keyTableKeys.append(key)
 
-        tables[tableIndex].tables.append(index)
+        if isKeyed {
+            keyTables[tableIndex].tables.append(index)
+        } else {
+            tables[tableIndex].tables.append(index)
+        }
         return index
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyArray(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
+    mutating func createKeyArray(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        if tableValue(table: tables[tableIndex], key: key) != nil {
+        if tableValue(table: table(at: tableIndex, keyed: isKeyed), key: key) != nil {
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         }
 
-        let index = arrays.count
-        arrays.append(InternalTOMLArray(key: key, kind: kind))
-        tables[tableIndex].arrays.append(index)
+        let index = keyArrays.count
+        keyArrays.append(InternalTOMLArray(kind: kind))
+        keyArrayKeys.append(key)
+        if isKeyed {
+            keyTables[tableIndex].arrays.append(index)
+        } else {
+            tables[tableIndex].arrays.append(index)
+        }
         return index
     }
 
@@ -532,7 +547,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
+    mutating func parseInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -548,7 +563,7 @@ extension Parser {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
-            try parseKeyValue(bytes: bytes, tableIndex: tableIndex)
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: isKeyed)
 
             if token.kind == .newline {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
@@ -567,14 +582,17 @@ extension Parser {
 
         try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
 
-        tables[tableIndex].readOnly = true
+        if isKeyed {
+            keyTables[tableIndex].readOnly = true
+        } else {
+            tables[tableIndex].readOnly = true
+        }
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseArray(bytes: borrowing Span<UInt8>, arrayIndex: Int) throws(TOMLError) {
+    mutating func parseArray(bytes: borrowing Span<UInt8>, arrayIndex: Int, isKeyed: Bool) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
-        var array = arrays[arrayIndex]
         while true {
             try skipNewlines(bytes: bytes, isDotSpecial: false)
 
@@ -584,41 +602,75 @@ extension Parser {
 
             switch token.kind {
             case .string:
-                if array.kind == nil {
-                    array.kind = .value
-                } else if array.kind != .value {
-                    array.kind = .mixed
-                }
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .value
+                    } else if keyArrays[arrayIndex].kind != .value {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
 
-                array.elements.append(.leaf(token))
+                    keyArrays[arrayIndex].elements.append(.leaf(token))
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .value
+                    } else if arrays[arrayIndex].kind != .value {
+                        arrays[arrayIndex].kind = .mixed
+                    }
+
+                    arrays[arrayIndex].elements.append(.leaf(token))
+                }
 
                 try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
 
             case .lbracket: // Nested array
-                if array.kind == nil {
-                    array.kind = .array
-                } else if array.kind != .array {
-                    array.kind = .mixed
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .array
+                    } else if keyArrays[arrayIndex].kind != .array {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .array
+                    } else if arrays[arrayIndex].kind != .array {
+                        arrays[arrayIndex].kind = .mixed
+                    }
                 }
 
                 let newArrayIndex = arrays.count
                 arrays.append(InternalTOMLArray())
-                array.elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                if isKeyed {
+                    keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                } else {
+                    arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                }
 
-                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex, isKeyed: false)
 
             case .lbrace: // Nested table
-                if array.kind == nil {
-                    array.kind = .table
-                } else if array.kind != .table {
-                    array.kind = .mixed
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .table
+                    } else if keyArrays[arrayIndex].kind != .table {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .table
+                    } else if arrays[arrayIndex].kind != .table {
+                        arrays[arrayIndex].kind = .mixed
+                    }
                 }
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                if isKeyed {
+                    keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                } else {
+                    arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                }
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -634,14 +686,12 @@ extension Parser {
         }
 
         try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
-
-        arrays[arrayIndex] = array
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseKeyValue(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
-        let table = tables[tableIndex]
-        if table.readOnly {
+    mutating func parseKeyValue(bytes: borrowing Span<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
+        let currentTable = table(at: tableIndex, keyed: isKeyed)
+        if currentTable.readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table"))
         }
 
@@ -652,18 +702,18 @@ extension Parser {
             let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
             let subTableIndex: Int
 
-            if let existingTableIndex = lookupTable(in: table, key: subTableKey) {
+            if let existingTableIndex = lookupTable(in: currentTable, key: subTableKey) {
                 // Check if the existing table is explicitly defined (not implicit)
-                if !tables[existingTableIndex].implicit {
+                if !table(at: existingTableIndex, keyed: true).implicit {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to explicitly defined table using dotted keys"))
                 }
                 subTableIndex = existingTableIndex
             } else {
-                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, implicit: true)
+                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed, implicit: true)
             }
 
             try nextToken(bytes: bytes, isDotSpecial: true)
-            try parseKeyValue(bytes: bytes, tableIndex: subTableIndex)
+            try parseKeyValue(bytes: bytes, tableIndex: subTableIndex, isKeyed: true)
             return
         }
 
@@ -674,7 +724,7 @@ extension Parser {
         try nextToken(bytes: bytes, isDotSpecial: false)
 
         if token.kind == .string {
-            let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex)
+            let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
             let value = token
             keyValues[index].value = value
             try nextToken(bytes: bytes, isDotSpecial: false)
@@ -682,14 +732,14 @@ extension Parser {
         }
 
         if token.kind == .lbracket {
-            let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex)
-            try parseArray(bytes: bytes, arrayIndex: index)
+            let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
+            try parseArray(bytes: bytes, arrayIndex: index, isKeyed: true)
             return
         }
 
         if token.kind == .lbrace {
-            let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex)
-            try parseInlineTable(bytes: bytes, tableIndex: index)
+            let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
+            try parseInlineTable(bytes: bytes, tableIndex: index, isKeyed: true)
             return
         }
 
@@ -748,24 +798,26 @@ extension Parser {
 
         if !llb {
             // [x.y.z] -> create z = {} in x.y
-            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable)
+            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed)
+            currentTableIsKeyed = true
         } else {
             // [[x.y.z]] -> create z = [] in x.y
             let key = try normalizeKey(bytes: bytes, token: z, keyTransform: keyTransform)
-            var maybeArrayIndex = lookupArray(in: tables[currentTable], key: key)
+            var maybeArrayIndex = lookupArray(in: table(at: currentTable, keyed: currentTableIsKeyed), key: key)
             if maybeArrayIndex == nil {
-                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, kind: .table)
+                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed, kind: .table)
             }
             let arrayIndex = maybeArrayIndex!
-            if arrays[arrayIndex].kind != .table {
+            if keyArrays[arrayIndex].kind != .table {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
             }
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: nil))
-            arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+            tables.append(InternalTOMLTable())
+            keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
+            currentTableIsKeyed = false
         }
 
         if token.kind != .rbracket {
@@ -1622,7 +1674,7 @@ extension Parser {
             case .newline:
                 try nextToken(bytes: bytes, isDotSpecial: true)
             case .string:
-                try parseKeyValue(bytes: bytes, tableIndex: currentTable)
+                try parseKeyValue(bytes: bytes, tableIndex: currentTable, isKeyed: currentTableIsKeyed)
                 if token.kind != .newline, token.kind != .eof {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after value"))
                 }
@@ -2073,35 +2125,40 @@ extension Parser {
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
+    mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        if tableValue(table: tables[tableIndex], key: key) != nil {
+        if tableValue(table: table(at: tableIndex, keyed: isKeyed), key: key) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
         let kv = KeyValuePair(key: key, value: Token.empty)
         let index = keyValues.count
         keyValues.append(kv)
 
-        tables[tableIndex].keyValues.append(index)
+        if isKeyed {
+            keyTables[tableIndex].keyValues.append(index)
+        } else {
+            tables[tableIndex].keyValues.append(index)
+        }
         return index
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
+    mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
+        let parentTable = table(at: tableIndex, keyed: isKeyed)
 
         // Check if parent table is readOnly (inline table)
-        if tables[tableIndex].readOnly {
+        if parentTable.readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
         }
 
-        switch tableValue(table: tables[tableIndex], key: key) {
+        switch tableValue(table: parentTable, key: key) {
         case let .table(existingTableIndex):
-            if tables[existingTableIndex].implicit {
-                if tables[existingTableIndex].definedByDottedKey {
+            if keyTables[existingTableIndex].implicit {
+                if keyTables[existingTableIndex].definedByDottedKey {
                     throw TOMLError(.keyExists(lineNumber: token.lineNumber))
                 }
-                tables[existingTableIndex].implicit = false
+                keyTables[existingTableIndex].implicit = false
                 return existingTableIndex
             }
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
@@ -2110,26 +2167,36 @@ extension Parser {
         case nil:
             break
         }
-        let index = tables.count
-        var newTable = InternalTOMLTable(key: key)
+        let index = keyTables.count
+        var newTable = InternalTOMLTable()
         newTable.implicit = implicit
         newTable.definedByDottedKey = implicit
-        tables.append(newTable)
+        keyTables.append(newTable)
+        keyTableKeys.append(key)
 
-        tables[tableIndex].tables.append(index)
+        if isKeyed {
+            keyTables[tableIndex].tables.append(index)
+        } else {
+            tables[tableIndex].tables.append(index)
+        }
         return index
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
+    mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        if tableValue(table: tables[tableIndex], key: key) != nil {
+        if tableValue(table: table(at: tableIndex, keyed: isKeyed), key: key) != nil {
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         }
 
-        let index = arrays.count
-        arrays.append(InternalTOMLArray(key: key, kind: kind))
-        tables[tableIndex].arrays.append(index)
+        let index = keyArrays.count
+        keyArrays.append(InternalTOMLArray(kind: kind))
+        keyArrayKeys.append(key)
+        if isKeyed {
+            keyTables[tableIndex].arrays.append(index)
+        } else {
+            tables[tableIndex].arrays.append(index)
+        }
         return index
     }
 
@@ -2144,7 +2211,7 @@ extension Parser {
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func parseInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
+    mutating func parseInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -2160,7 +2227,7 @@ extension Parser {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expect a string"))
             }
 
-            try parseKeyValue(bytes: bytes, tableIndex: tableIndex)
+            try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: isKeyed)
 
             if token.kind == .newline {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
@@ -2179,14 +2246,17 @@ extension Parser {
 
         try eatToken(bytes: bytes, kind: .rbrace, isDotSpecial: true)
 
-        tables[tableIndex].readOnly = true
+        if isKeyed {
+            keyTables[tableIndex].readOnly = true
+        } else {
+            tables[tableIndex].readOnly = true
+        }
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func parseArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int) throws(TOMLError) {
+    mutating func parseArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int, isKeyed: Bool) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
-        var array = arrays[arrayIndex]
         while true {
             try skipNewlines(bytes: bytes, isDotSpecial: false)
 
@@ -2196,41 +2266,75 @@ extension Parser {
 
             switch token.kind {
             case .string:
-                if array.kind == nil {
-                    array.kind = .value
-                } else if array.kind != .value {
-                    array.kind = .mixed
-                }
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .value
+                    } else if keyArrays[arrayIndex].kind != .value {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
 
-                array.elements.append(.leaf(token))
+                    keyArrays[arrayIndex].elements.append(.leaf(token))
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .value
+                    } else if arrays[arrayIndex].kind != .value {
+                        arrays[arrayIndex].kind = .mixed
+                    }
+
+                    arrays[arrayIndex].elements.append(.leaf(token))
+                }
 
                 try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
 
             case .lbracket: // Nested array
-                if array.kind == nil {
-                    array.kind = .array
-                } else if array.kind != .array {
-                    array.kind = .mixed
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .array
+                    } else if keyArrays[arrayIndex].kind != .array {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .array
+                    } else if arrays[arrayIndex].kind != .array {
+                        arrays[arrayIndex].kind = .mixed
+                    }
                 }
 
                 let newArrayIndex = arrays.count
                 arrays.append(InternalTOMLArray())
-                array.elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                if isKeyed {
+                    keyArrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                } else {
+                    arrays[arrayIndex].elements.append(.array(lineNumber: token.lineNumber, newArrayIndex))
+                }
 
-                try parseArray(bytes: bytes, arrayIndex: newArrayIndex)
+                try parseArray(bytes: bytes, arrayIndex: newArrayIndex, isKeyed: false)
 
             case .lbrace: // Nested table
-                if array.kind == nil {
-                    array.kind = .table
-                } else if array.kind != .table {
-                    array.kind = .mixed
+                if isKeyed {
+                    if keyArrays[arrayIndex].kind == nil {
+                        keyArrays[arrayIndex].kind = .table
+                    } else if keyArrays[arrayIndex].kind != .table {
+                        keyArrays[arrayIndex].kind = .mixed
+                    }
+                } else {
+                    if arrays[arrayIndex].kind == nil {
+                        arrays[arrayIndex].kind = .table
+                    } else if arrays[arrayIndex].kind != .table {
+                        arrays[arrayIndex].kind = .mixed
+                    }
                 }
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                if isKeyed {
+                    keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                } else {
+                    arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                }
 
-                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex)
+                try parseInlineTable(bytes: bytes, tableIndex: newTableIndex, isKeyed: false)
 
             default:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
@@ -2246,14 +2350,12 @@ extension Parser {
         }
 
         try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
-
-        arrays[arrayIndex] = array
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
-    mutating func parseKeyValue(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
-        let table = tables[tableIndex]
-        if table.readOnly {
+    mutating func parseKeyValue(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
+        let currentTable = table(at: tableIndex, keyed: isKeyed)
+        if currentTable.readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table"))
         }
 
@@ -2264,18 +2366,18 @@ extension Parser {
             let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
             let subTableIndex: Int
 
-            if let existingTableIndex = lookupTable(in: table, key: subTableKey) {
+            if let existingTableIndex = lookupTable(in: currentTable, key: subTableKey) {
                 // Check if the existing table is explicitly defined (not implicit)
-                if !tables[existingTableIndex].implicit {
+                if !table(at: existingTableIndex, keyed: true).implicit {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to explicitly defined table using dotted keys"))
                 }
                 subTableIndex = existingTableIndex
             } else {
-                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, implicit: true)
+                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed, implicit: true)
             }
 
             try nextToken(bytes: bytes, isDotSpecial: true)
-            try parseKeyValue(bytes: bytes, tableIndex: subTableIndex)
+            try parseKeyValue(bytes: bytes, tableIndex: subTableIndex, isKeyed: true)
             return
         }
 
@@ -2286,7 +2388,7 @@ extension Parser {
         try nextToken(bytes: bytes, isDotSpecial: false)
 
         if token.kind == .string {
-            let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex)
+            let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
             let value = token
             keyValues[index].value = value
             try nextToken(bytes: bytes, isDotSpecial: false)
@@ -2294,14 +2396,14 @@ extension Parser {
         }
 
         if token.kind == .lbracket {
-            let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex)
-            try parseArray(bytes: bytes, arrayIndex: index)
+            let index = try createKeyArray(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
+            try parseArray(bytes: bytes, arrayIndex: index, isKeyed: true)
             return
         }
 
         if token.kind == .lbrace {
-            let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex)
-            try parseInlineTable(bytes: bytes, tableIndex: index)
+            let index = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
+            try parseInlineTable(bytes: bytes, tableIndex: index, isKeyed: true)
             return
         }
 
@@ -2360,24 +2462,26 @@ extension Parser {
 
         if !llb {
             // [x.y.z] -> create z = {} in x.y
-            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable)
+            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed)
+            currentTableIsKeyed = true
         } else {
             // [[x.y.z]] -> create z = [] in x.y
             let key = try normalizeKey(bytes: bytes, token: z, keyTransform: keyTransform)
-            var maybeArrayIndex = lookupArray(in: tables[currentTable], key: key)
+            var maybeArrayIndex = lookupArray(in: table(at: currentTable, keyed: currentTableIsKeyed), key: key)
             if maybeArrayIndex == nil {
-                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, kind: .table)
+                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed, kind: .table)
             }
             let arrayIndex = maybeArrayIndex!
-            if arrays[arrayIndex].kind != .table {
+            if keyArrays[arrayIndex].kind != .table {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
             }
 
             // add to z[]
             let newTableIndex = tables.count
-            tables.append(InternalTOMLTable(key: nil))
-            arrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+            tables.append(InternalTOMLTable())
+            keyArrays[arrayIndex].elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
+            currentTableIsKeyed = false
         }
 
         if token.kind != .rbracket {
@@ -3237,6 +3341,10 @@ private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
 }
 
 extension Parser {
+    func table(at index: Int, keyed: Bool) -> InternalTOMLTable {
+        keyed ? keyTables[index] : tables[index]
+    }
+
     func tableValue(table: InternalTOMLTable, key: String) -> InternalTOMLTable.Value? {
         for kv in table.keyValues {
             if keyValues[kv].key == key {
@@ -3245,13 +3353,13 @@ extension Parser {
         }
 
         for arr in table.arrays {
-            if arrays[arr].key == key {
+            if keyArrayKeys[arr] == key {
                 return .array(arr)
             }
         }
 
         for table in table.tables {
-            if tables[table].key == key {
+            if keyTableKeys[table] == key {
                 return .table(table)
             }
         }
@@ -3261,7 +3369,7 @@ extension Parser {
 
     func lookupTable(in table: InternalTOMLTable, key: String) -> Int? {
         for i in 0 ..< table.tables.count {
-            if tables[table.tables[i]].key == key {
+            if keyTableKeys[table.tables[i]] == key {
                 return table.tables[i]
             }
         }
@@ -3270,7 +3378,7 @@ extension Parser {
 
     func lookupArray(in table: InternalTOMLTable, key: String) -> Int? {
         for i in 0 ..< table.arrays.count {
-            if arrays[table.arrays[i]].key == key {
+            if keyArrayKeys[table.arrays[i]] == key {
                 return table.arrays[i]
             }
         }
@@ -3279,12 +3387,14 @@ extension Parser {
 
     mutating func walkTablePath() throws(TOMLError) {
         var tableIndex = 0
+        var isKeyed = false
         for (key, _) in tablePath {
-            switch tableValue(table: tables[tableIndex], key: key) {
+            switch tableValue(table: table(at: tableIndex, keyed: isKeyed), key: key) {
             case let .table(index):
                 tableIndex = index
+                isKeyed = true
             case let .array(arrayIndex):
-                let array = arrays[arrayIndex]
+                let array = keyArrays[arrayIndex]
                 guard case .table = array.kind else {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
                 }
@@ -3298,20 +3408,28 @@ extension Parser {
                 }
 
                 tableIndex = index
+                isKeyed = false
             case .keyValue:
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "key-value already exists"))
             default:
-                let newTableAddress = tables.count
-                var newTable = InternalTOMLTable(key: key)
+                let newTableAddress = keyTables.count
+                var newTable = InternalTOMLTable()
                 newTable.implicit = true
                 newTable.definedByDottedKey = false
-                tables.append(newTable)
+                keyTables.append(newTable)
+                keyTableKeys.append(key)
 
-                tables[tableIndex].tables.append(newTableAddress)
+                if isKeyed {
+                    keyTables[tableIndex].tables.append(newTableAddress)
+                } else {
+                    tables[tableIndex].tables.append(newTableAddress)
+                }
                 tableIndex = newTableAddress
+                isKeyed = true
             }
         }
 
         currentTable = tableIndex
+        currentTableIsKeyed = isKeyed
     }
 }

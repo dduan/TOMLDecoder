@@ -2,6 +2,7 @@ extension TOMLTable {
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
         self.source = try TOMLDocument(source: source, keyTransform: keyTransform)
         index = 0
+        isKeyed = false
     }
 
     /// Create a root-level TOML table from a TOML document.
@@ -153,17 +154,18 @@ private func validateAndCreateString(from buffer: UnsafeBufferPointer<UInt8>) th
 public struct TOMLTable: Sendable, Equatable {
     let source: TOMLDocument
     let index: Int
+    let isKeyed: Bool
 
     /// All keys available in the table.
     public var keys: [String] {
-        source.tables[index].allKeys(source)
+        source.table(at: index, keyed: isKeyed).allKeys(source)
     }
 
     /// Check if the table contains a given key.
     ///
     /// - Parameter key: The key to check for.
     public func contains(key: String) -> Bool {
-        source.tables[index].contains(source: source, key: key)
+        source.table(at: index, keyed: isKeyed).contains(source: source, key: key)
     }
 
     /// Access a TOML array for a given key.
@@ -178,11 +180,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError`
     ///   if the key does not exist or is not an array.
     public func array(forKey key: String) throws(TOMLError) -> TOMLArray {
-        let arrayIndices = source.tables[index].arrays
-        let allArrays = source.arrays
+        let arrayIndices = source.table(at: index, keyed: isKeyed).arrays
+        let allArrays = source.keyArrays
         for i in arrayIndices {
             if allArrays[i].key == key {
-                return TOMLArray(source: source, index: i)
+                return TOMLArray(source: source, index: i, isKeyed: true)
             }
         }
 
@@ -201,11 +203,11 @@ public struct TOMLTable: Sendable, Equatable {
     /// - Throws: `TOMLError`
     ///   if the key does not exist or is not a table.
     public func table(forKey key: String) throws(TOMLError) -> TOMLTable {
-        let tableIndices = source.tables[index].tables
-        let allTables = source.tables
+        let tableIndices = source.table(at: index, keyed: isKeyed).tables
+        let allTables = source.keyTables
         for i in tableIndices {
             if allTables[i].key == key {
-                return TOMLTable(source: source, index: i)
+                return TOMLTable(source: source, index: i, isKeyed: true)
             }
         }
 
@@ -214,7 +216,7 @@ public struct TOMLTable: Sendable, Equatable {
 
     @inline(__always)
     func token(forKey key: String, expected: String) throws(TOMLError) -> Token {
-        let pairIndices = source.tables[index].keyValues
+        let pairIndices = source.table(at: index, keyed: isKeyed).keyValues
         let allPairs = source.keyValues
         for i in pairIndices {
             if allPairs[i].key == key {
@@ -381,7 +383,7 @@ public struct TOMLTable: Sendable, Equatable {
     }
 
     func dictionary() throws(TOMLError) -> [String: Any] {
-        try source.tables[index].dictionary(source: source)
+        try source.table(at: index, keyed: isKeyed).dictionary(source: source)
     }
 }
 
