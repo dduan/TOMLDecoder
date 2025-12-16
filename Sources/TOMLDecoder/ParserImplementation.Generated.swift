@@ -1,10 +1,9 @@
 //  WARNING: This file is generated from ParserImplementation.swift.gyb
 //  Do not edit ParserImplementation.swift directly.
 
-#if swift(>=6.2)
 extension Parser {
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parse(bytes: Span<UInt8>) throws(TOMLError) {
+    mutating func parse(bytes: borrowing Span<UInt8>) throws(TOMLError) {
         while token.kind != .eof {
             switch token.kind {
             case .newline:
@@ -26,7 +25,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func nextToken(bytes: Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
+    mutating func nextToken(bytes: borrowing Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
         var lineNumber = token.lineNumber
         var position = token.text.lowerBound
 
@@ -451,7 +450,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func eatToken(bytes: Span<UInt8>, kind: Token.Kind, isDotSpecial: Bool)
+    mutating func eatToken(bytes: borrowing Span<UInt8>, kind: Token.Kind, isDotSpecial: Bool)
         throws(TOMLError)
     {
         if token.kind != kind {
@@ -461,7 +460,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyValue(bytes: Span<UInt8>, token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
+    mutating func createKeyValue(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         if tableValue(table: tables[tableIndex], key: key) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
@@ -475,7 +474,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyTable(bytes: Span<UInt8>, token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
+    mutating func createKeyTable(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
 
         // Check if parent table is readOnly (inline table)
@@ -509,7 +508,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func createKeyArray(bytes: Span<UInt8>, token: Token, inTable tableIndex: Int, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
+    mutating func createKeyArray(bytes: borrowing Span<UInt8>, token: Token, inTable tableIndex: Int, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         if tableValue(table: tables[tableIndex], key: key) != nil {
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
@@ -522,7 +521,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func skipNewlines(bytes: Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
+    mutating func skipNewlines(bytes: borrowing Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
         while token.kind == .newline {
             try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
             if token.kind == .eof {
@@ -532,7 +531,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseInlineTable(bytes: Span<UInt8>, tableIndex: Int) throws(TOMLError) {
+    mutating func parseInlineTable(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -571,7 +570,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseArray(bytes: Span<UInt8>, arrayIndex: Int) throws(TOMLError) {
+    mutating func parseArray(bytes: borrowing Span<UInt8>, arrayIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
         var array = arrays[arrayIndex]
@@ -639,7 +638,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseKeyValue(bytes: Span<UInt8>, tableIndex: Int) throws(TOMLError) {
+    mutating func parseKeyValue(bytes: borrowing Span<UInt8>, tableIndex: Int) throws(TOMLError) {
         let table = tables[tableIndex]
         if table.readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table"))
@@ -697,7 +696,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func fillTablePath(bytes: Span<UInt8>) throws(TOMLError) {
+    mutating func fillTablePath(bytes: borrowing Span<UInt8>) throws(TOMLError) {
         let lineNumber = token.lineNumber
         tablePath.removeAll(keepingCapacity: true)
 
@@ -726,7 +725,7 @@ extension Parser {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    mutating func parseSelect(bytes: Span<UInt8>) throws(TOMLError) {
+    mutating func parseSelect(bytes: borrowing Span<UInt8>) throws(TOMLError) {
         assert(token.kind == .lbracket)
         let index = token.text.lowerBound
         let nextIndex = index + 1
@@ -789,7 +788,7 @@ extension Parser {
 
 extension Token {
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackBool(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Bool {
+    func unpackBool(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Bool {
         if text.count == 4,
            bytes[text.lowerBound] == CodeUnits.lowerT,
            bytes[text.lowerBound + 1] == CodeUnits.lowerR,
@@ -811,7 +810,7 @@ extension Token {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackFloat(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Double {
+    func unpackFloat(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Double {
         var resultCodeUnits: [UTF8.CodeUnit] = []
         var index = text.lowerBound
         if bytes[index] == CodeUnits.plus || bytes[index] == CodeUnits.minus {
@@ -896,7 +895,7 @@ extension Token {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackString(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> String {
+    func unpackString(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> String {
         var multiline = false
 
         if bytes.count == 0 {
@@ -937,7 +936,7 @@ extension Token {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackInteger(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Int64 {
+    func unpackInteger(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Int64 {
         @_transparent
         func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
             switch base {
@@ -1037,7 +1036,7 @@ extension Token {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackDateTime(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
+    func unpackDateTime(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
         var mustParseTime = false
         var date: (year: Int, month: Int, day: Int)?
         var time: (hour: Int, minute: Int, second: Int)?
@@ -1195,7 +1194,7 @@ extension Token {
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-    func unpackAnyValue(bytes: Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Any {
+    func unpackAnyValue(bytes: borrowing Span<UInt8>, context: TOMLKey) throws(TOMLError) -> Any {
         let firstChar = text.count > 0 ? bytes[text.lowerBound] : nil
         if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
             return try unpackString(bytes: bytes, context: context)
@@ -1234,7 +1233,7 @@ extension Token {
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func parseTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
+func parseTimezoneOffset(bytes: borrowing Span<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard range.count >= 2 else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must have at least 2 digits for hour"))
     }
@@ -1285,7 +1284,7 @@ func parseTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>, lineNumber: Int)
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func literalString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
+func literalString(bytes: borrowing Span<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
     var resultCodeUnits: [UTF8.CodeUnit] = []
     var consecutiveQuotes = 0
 
@@ -1322,7 +1321,7 @@ func literalString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throw
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func basicString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
+func basicString(bytes: borrowing Span<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
     let startIndex = range.lowerBound
     let endIndex = range.upperBound
     var resultCodeUnits: [UTF8.CodeUnit] = []
@@ -1454,7 +1453,7 @@ func basicString(bytes: Span<UInt8>, range: Range<Int>, multiline: Bool) throws(
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func scanDate(bytes: Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
+func scanDate(bytes: borrowing Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
     guard let year = scanDigits(bytes: bytes, range: range, n: 4) else {
         return nil
     }
@@ -1486,7 +1485,7 @@ func scanDate(bytes: Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func scanDigits(bytes: Span<UInt8>, range: Range<Int>, n: Int) -> Int? {
+func scanDigits(bytes: borrowing Span<UInt8>, range: Range<Int>, n: Int) -> Int? {
     var result = 0
     var n = n
     var index = range.lowerBound
@@ -1499,7 +1498,7 @@ func scanDigits(bytes: Span<UInt8>, range: Range<Int>, n: Int) -> Int? {
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func scanTime(bytes: Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
+func scanTime(bytes: borrowing Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
     guard let hour = scanDigits(bytes: bytes, range: range, n: 2) else {
         return nil
     }
@@ -1531,7 +1530,7 @@ func scanTime(bytes: Span<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func parseNanoSeconds(bytes: Span<UInt8>, range: Range<Int>, updatedIndex: inout Int) -> UInt32 {
+func parseNanoSeconds(bytes: borrowing Span<UInt8>, range: Range<Int>, updatedIndex: inout Int) -> UInt32 {
     var unit: Double = 100_000_000
     var result: Double = 0
     var index = range.lowerBound
@@ -1545,7 +1544,7 @@ func parseNanoSeconds(bytes: Span<UInt8>, range: Range<Int>, updatedIndex: inout
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func scanTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>) -> Int? {
+func scanTimezoneOffset(bytes: borrowing Span<UInt8>, range: Range<Int>) -> Int? {
     var index = range.lowerBound
     guard index < range.upperBound, bytes[index] == CodeUnits.plus || bytes[index] == CodeUnits.minus else {
         return nil
@@ -1570,7 +1569,7 @@ func scanTimezoneOffset(bytes: Span<UInt8>, range: Range<Int>) -> Int? {
 }
 
 @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-func normalizeKey(bytes: Span<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
+func normalizeKey(bytes: borrowing Span<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
     var start = token.text.lowerBound
     var end = token.text.upperBound
     let ch = bytes[start]
@@ -1612,7 +1611,6 @@ func normalizeKey(bytes: Span<UInt8>, token: Token, keyTransform: (@Sendable (St
 
     return makeString(bytes: bytes, range: start ..< end)
 }
-#endif
 extension Parser {
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
     mutating func parse(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
