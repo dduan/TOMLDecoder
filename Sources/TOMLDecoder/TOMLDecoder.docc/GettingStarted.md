@@ -1,8 +1,10 @@
 # Getting Started
 
-From zero to decoding TOML, a minimal example.
+From zero to decoding TOML with TOMLDecoder, a minimal example.
 
-### Install via SwiftPM
+## Install
+
+### via SwiftPM
 
 TOMLDecoder is a Swift package with minimal dependencies.
 
@@ -23,6 +25,20 @@ In a target's dependencies, add:
 
 Run `swift build`.
 You may have to update your package's `platforms` if you see a related error.
+
+### via Bazel Central Registry
+
+You can use TOMLDecoder from the Bazel Central Registry.
+Include it in your MODULE.bazel
+
+```
+bazel_dep(name = 'swift-tomldecoder', version = '0.4.1')
+```
+
+And add `@swift-tomldecoder//:TOMLDecoder` as a dependency to your target as needed.
+
+
+## Using TOMLDecoder
 
 ### Decoding TOML
 
