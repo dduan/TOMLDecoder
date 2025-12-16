@@ -1,6 +1,7 @@
 //  WARNING: This file is generated from ParserImplementation.swift.gyb
 //  Do not edit ParserImplementation.swift directly.
 
+#if swift(>=6.2)
 extension Parser {
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
     mutating func parse(bytes: borrowing Span<UInt8>) throws(TOMLError) {

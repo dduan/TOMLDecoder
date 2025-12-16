@@ -12,7 +12,7 @@ configs = [
 //  Do not edit ${generated_file} directly.
 
 % for byte_type, availability in configs:
-% if byte_type == "Span<UInt8>":
+% if byte_type == "borrowing Span<UInt8>":
 #if swift(>=6.2)
 % end
 extension Parser {
