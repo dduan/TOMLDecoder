@@ -1339,6 +1339,7 @@ func basicString(bytes: ${byte_type}, range: Range<Int>, multiline: Bool) throws
     let startIndex = range.lowerBound
     let endIndex = range.upperBound
     var resultCodeUnits: [UTF8.CodeUnit] = []
+    resultCodeUnits.reserveCapacity(range.count)
     var consecutiveQuotes = 0
     var index = startIndex
     while true {

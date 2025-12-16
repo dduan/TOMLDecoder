@@ -1326,6 +1326,7 @@ func basicString(bytes: borrowing Span<UInt8>, range: Range<Int>, multiline: Boo
     let startIndex = range.lowerBound
     let endIndex = range.upperBound
     var resultCodeUnits: [UTF8.CodeUnit] = []
+    resultCodeUnits.reserveCapacity(range.count)
     var consecutiveQuotes = 0
     var index = startIndex
     while true {
@@ -2937,6 +2938,7 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
     let startIndex = range.lowerBound
     let endIndex = range.upperBound
     var resultCodeUnits: [UTF8.CodeUnit] = []
+    resultCodeUnits.reserveCapacity(range.count)
     var consecutiveQuotes = 0
     var index = startIndex
     while true {
