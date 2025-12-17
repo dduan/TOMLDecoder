@@ -134,6 +134,28 @@ extension Parser {
 
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
                 let start = range.lowerBound
+                let head = bytes[start]
+                if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
+                    (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
+                    head == CodeUnits.underscore
+                {
+                    var index = start + 1
+                    while index < range.upperBound {
+                        let ch = bytes[index]
+                        if (ch >= CodeUnits.lowerA && ch <= CodeUnits.lowerZ) ||
+                            (ch >= CodeUnits.upperA && ch <= CodeUnits.upperZ) ||
+                            (ch >= CodeUnits.number0 && ch <= CodeUnits.number9) ||
+                            ch == CodeUnits.underscore ||
+                            ch == CodeUnits.minus
+                        {
+                            index += 1
+                            continue
+                        }
+                        break
+                    }
+                    emitToken(kind: .bareKey, start: start, end: index)
+                    return
+                }
 
                 if start + 3 <= range.upperBound,
                    bytes[start] == CodeUnits.singleQuote,
