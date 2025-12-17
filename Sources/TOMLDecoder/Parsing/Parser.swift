@@ -4,7 +4,7 @@ struct Parser {
     var currentLineNumber = 1
     var currentTable = 0
     var currentTableIsKeyed = false
-    var tablePath: [(String, Token)] = []
+    var tablePath: [(key: String, keyHash: Int, token: Token)] = []
     var tables: [InternalTOMLTable] = [InternalTOMLTable()]
     var arrays: [InternalTOMLArray] = []
     var keyTables: [KeyTablePair] = []
