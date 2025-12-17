@@ -17,7 +17,8 @@ var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
 
 var docsDeps: [Package.Dependency] = includeDocs ? [
     .package(
-        url: "https://github.com/apple/swift-docc-plugin",
+        // prevent Swift Package Index from using this dependency
+        url: "https://github.com/apple/swift-doc" + "c-plugin",
         exact: "1.4.5"
     ),
 ] : []
