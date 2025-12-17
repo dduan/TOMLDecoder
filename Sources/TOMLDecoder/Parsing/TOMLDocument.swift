@@ -89,20 +89,23 @@ struct InternalTOMLArray: Equatable, Sendable {
 
 struct KeyTablePair: Equatable {
     let key: String
+    let keyHash: Int
     var table: InternalTOMLTable
 }
 
 struct KeyArrayPair: Equatable {
     let key: String
+    let keyHash: Int
     var array: InternalTOMLArray
 }
 
 struct KeyValuePair: Equatable {
     let key: String
+    let keyHash: Int
     var value: Token
 
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.key == rhs.key && lhs.value == rhs.value
+        lhs.keyHash == rhs.keyHash && lhs.key == rhs.key && lhs.value == rhs.value
     }
 }
 
@@ -129,18 +132,22 @@ struct InternalTOMLTable: Equatable, Sendable {
     }
 
     func contains(source: TOMLDocument, key: String) -> Bool {
+        let keyHash = key.hashValue
         for kv in keyValues {
-            if source.keyValues[kv].key == key {
+            let pair = source.keyValues[kv]
+            if pair.keyHash == keyHash, pair.key == key {
                 return true
             }
         }
         for arr in arrays {
-            if source.keyArrays[arr].key == key {
+            let arrayPair = source.keyArrays[arr]
+            if arrayPair.keyHash == keyHash, arrayPair.key == key {
                 return true
             }
         }
         for table in tables {
-            if source.keyTables[table].key == key {
+            let tablePair = source.keyTables[table]
+            if tablePair.keyHash == keyHash, tablePair.key == key {
                 return true
             }
         }
