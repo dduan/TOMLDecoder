@@ -225,18 +225,6 @@ extension Parser {
                     var localEscape = false
 
                     while i < range.upperBound {
-                        // Fast Scan Loop: Skip all "simple" characters
-                        if !localEscape && localExpectedHexDigit == 0 && expectedHexDigit == 0 {
-                            while i < range.upperBound {
-                                let c = bytes[i]
-                                if !CodeUnits.isSimpleStringChar(c) {
-                                    break
-                                }
-                                i += 1
-                            }
-                            if i == range.upperBound { break }
-                        }
-
                         let ch = bytes[i]
                         if localEscape {
                             localEscape = false
@@ -366,17 +354,30 @@ extension Parser {
                 var isValidKey = true
                 while index < range.upperBound {
                     let ch = bytes[index]
-                    if CodeUnits.isBareKey(ch) {
-                        index += 1
-                        continue
-                    }
-
                     if ch == CodeUnits.lf {
                         break
                     }
 
                     if ch == CodeUnits.dot && isDotSpecial {
                         break
+                    }
+
+                    if CodeUnits.upperA <= ch && ch <= CodeUnits.upperZ {
+                        index += 1
+                        continue
+                    }
+
+                    if CodeUnits.lowerA <= ch && ch <= CodeUnits.lowerZ {
+                        index += 1
+                        continue
+                    }
+
+                    if ch.isDecimalDigit
+                        || ch == CodeUnits.minus
+                        || ch == CodeUnits.underscore
+                    {
+                        index += 1
+                        continue
                     }
 
                     if ch == CodeUnits.dot || ch == CodeUnits.plus {
@@ -1909,18 +1910,6 @@ extension Parser {
                     var localEscape = false
 
                     while i < range.upperBound {
-                        // Fast Scan Loop: Skip all "simple" characters
-                        if !localEscape && localExpectedHexDigit == 0 && expectedHexDigit == 0 {
-                            while i < range.upperBound {
-                                let c = bytes[i]
-                                if !CodeUnits.isSimpleStringChar(c) {
-                                    break
-                                }
-                                i += 1
-                            }
-                            if i == range.upperBound { break }
-                        }
-
                         let ch = bytes[i]
                         if localEscape {
                             localEscape = false
@@ -2050,17 +2039,30 @@ extension Parser {
                 var isValidKey = true
                 while index < range.upperBound {
                     let ch = bytes[index]
-                    if CodeUnits.isBareKey(ch) {
-                        index += 1
-                        continue
-                    }
-
                     if ch == CodeUnits.lf {
                         break
                     }
 
                     if ch == CodeUnits.dot && isDotSpecial {
                         break
+                    }
+
+                    if CodeUnits.upperA <= ch && ch <= CodeUnits.upperZ {
+                        index += 1
+                        continue
+                    }
+
+                    if CodeUnits.lowerA <= ch && ch <= CodeUnits.lowerZ {
+                        index += 1
+                        continue
+                    }
+
+                    if ch.isDecimalDigit
+                        || ch == CodeUnits.minus
+                        || ch == CodeUnits.underscore
+                    {
+                        index += 1
+                        continue
                     }
 
                     if ch == CodeUnits.dot || ch == CodeUnits.plus {
