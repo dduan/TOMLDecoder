@@ -5,7 +5,7 @@ import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 let includeBenchmarks = env["TOMLDECODER_BENCHMARKS"] == "1"
-let includeDocs = env["TOMLDECODER_DOCS"] == "1"
+let includeDocs = env["TOMLDECODER_DOCS"] == "1" || env["SPI_GENERATE_DOCS"] != nil
 let includeFormatting = env["TOMLDECODER_FORMATTING"] == "1"
 
 var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
@@ -18,7 +18,7 @@ var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
 var docsDeps: [Package.Dependency] = includeDocs ? [
     .package(
         // prevent Swift Package Index from using this dependency
-        url: "https://github.com/apple/swift-doc" + "c-plugin",
+        url: "https://github.com/apple/swift-docc-plugin",
         exact: "1.4.5"
     ),
 ] : []
