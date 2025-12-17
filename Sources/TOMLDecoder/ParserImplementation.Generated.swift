@@ -3410,7 +3410,7 @@ extension Parser {
         let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
         for i in 0 ..< table.tables.count {
             let tableIndexAtPosition = table.tables[i]
-            if keyTables[tableIndexAtPosition].keyHash == keyHash && keyTables[tableIndexAtPosition].key == key {
+            if keyTables[tableIndexAtPosition].keyHash == keyHash, keyTables[tableIndexAtPosition].key == key {
                 return tableIndexAtPosition
             }
         }
@@ -3421,7 +3421,7 @@ extension Parser {
         let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
         for i in 0 ..< table.arrays.count {
             let arrayIndex = table.arrays[i]
-            if keyArrays[arrayIndex].keyHash == keyHash && keyArrays[arrayIndex].key == key {
+            if keyArrays[arrayIndex].keyHash == keyHash, keyArrays[arrayIndex].key == key {
                 return arrayIndex
             }
         }
