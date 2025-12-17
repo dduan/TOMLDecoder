@@ -47,6 +47,23 @@ enum CodeUnits {
     static let upperU: UTF8.CodeUnit = 85
     static let upperZ: UTF8.CodeUnit = 90
 
+    nonisolated(unsafe) static let isBareKeyChar: UnsafePointer<Bool> = {
+        let ptr = UnsafeMutablePointer<Bool>.allocate(capacity: 256)
+        ptr.initialize(repeating: false, count: 256)
+        for i in 0 ..< 256 {
+            let ch = UTF8.CodeUnit(i)
+            if (ch >= CodeUnits.lowerA && ch <= CodeUnits.lowerZ) ||
+                (ch >= CodeUnits.upperA && ch <= CodeUnits.upperZ) ||
+                (ch >= CodeUnits.number0 && ch <= CodeUnits.number9) ||
+                ch == CodeUnits.underscore ||
+                ch == CodeUnits.minus
+            {
+                ptr[i] = true
+            }
+        }
+        return UnsafePointer(ptr)
+    }()
+
     static let null: UTF8.CodeUnit = 0x00
     static let unitSeparator: UTF8.CodeUnit = 0x1F
     static let delete: UTF8.CodeUnit = 0x7F
