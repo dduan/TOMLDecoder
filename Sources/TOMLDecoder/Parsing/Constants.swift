@@ -65,3 +65,67 @@ extension UTF8.CodeUnit {
             || CodeUnits.upperA <= self && self <= CodeUnits.upperF
     }
 }
+
+extension CodeUnits {
+    // Bitmask for valid simple string characters (excluding control chars, backslash, quote)
+    // We want to skip loop logic for "safe" characters.
+    // Safe: >= 0x20 (space), != 0x22 ("), != 0x5C (\), != 0x7F (DEL)
+    // 0x20..0x7E, excluding 0x22 and 0x5C.
+    // Optimization: Check for < 0x20 separately (control chars).
+    // Then use bitmask for 0x20..0x7F range (offset by 0x20).
+
+    @_transparent
+    static func isSimpleStringChar(_ ch: UInt8) -> Bool {
+        if ch < 0x20 { return false } // Control characters + LF/CR
+        if ch == 0x7F { return false } // DEL
+        if ch == 0x22 { return false } // "
+        if ch == 0x5C { return false } // \
+        return true
+    }
+
+    // Bare Keys: A-Z a-z 0-9 - _
+    // 0-9: 48-57
+    // A-Z: 65-90
+    // a-z: 97-122
+    // -: 45
+    // _: 95
+
+    // Bitmask approach for bare keys (0-127 range)
+    // We can use two 64-bit integers to map the first 128 ASCII characters.
+
+    static let bareKeyMask0: UInt64 = {
+        var mask: UInt64 = 0
+        // 0-9 (48-57)
+        for i in 48 ... 57 {
+            mask |= 1 << i
+        }
+        // - (45)
+        mask |= 1 << 45
+        return mask
+    }()
+
+    static let bareKeyMask1: UInt64 = {
+        var mask: UInt64 = 0
+        // A-Z (65-90) -> (65-64)...(90-64) -> 1...26
+        for i in 65 ... 90 {
+            mask |= 1 << (i - 64)
+        }
+        // a-z (97-122) -> (97-64)...(122-64) -> 33...58
+        for i in 97 ... 122 {
+            mask |= 1 << (i - 64)
+        }
+        // _ (95) -> 95-64 -> 31
+        mask |= 1 << (95 - 64)
+        return mask
+    }()
+
+    @_transparent
+    static func isBareKey(_ ch: UInt8) -> Bool {
+        if ch < 64 {
+            return (bareKeyMask0 & (1 << ch)) != 0
+        } else if ch < 128 {
+            return (bareKeyMask1 & (1 << (ch - 64))) != 0
+        }
+        return false
+    }
+}
