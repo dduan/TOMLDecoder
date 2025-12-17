@@ -9,6 +9,7 @@ struct Token: Equatable {
         case lbracket
         case rbracket
         case string
+        case bareKey
         case eof
     }
 
