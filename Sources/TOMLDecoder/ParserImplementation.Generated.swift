@@ -27,7 +27,7 @@ extension Parser {
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
     mutating func nextToken(bytes: borrowing Span<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        var lineNumber = currentLineNumber
+        let lineNumber = currentLineNumber
         var position = cursor
 
         @inline(__always)
@@ -129,12 +129,7 @@ extension Parser {
                     var index = start + 1
                     while index < range.upperBound {
                         let ch = bytes[index]
-                        if (ch >= CodeUnits.lowerA && ch <= CodeUnits.lowerZ) ||
-                            (ch >= CodeUnits.upperA && ch <= CodeUnits.upperZ) ||
-                            (ch >= CodeUnits.number0 && ch <= CodeUnits.number9) ||
-                            ch == CodeUnits.underscore ||
-                            ch == CodeUnits.minus
-                        {
+                        if CodeUnits.isBareKeyChar[Int(ch)] {
                             index += 1
                             continue
                         }
@@ -1734,7 +1729,7 @@ extension Parser {
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
     mutating func nextToken(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        var lineNumber = currentLineNumber
+        let lineNumber = currentLineNumber
         var position = cursor
 
         @inline(__always)
@@ -1836,12 +1831,7 @@ extension Parser {
                     var index = start + 1
                     while index < range.upperBound {
                         let ch = bytes[index]
-                        if (ch >= CodeUnits.lowerA && ch <= CodeUnits.lowerZ) ||
-                            (ch >= CodeUnits.upperA && ch <= CodeUnits.upperZ) ||
-                            (ch >= CodeUnits.number0 && ch <= CodeUnits.number9) ||
-                            ch == CodeUnits.underscore ||
-                            ch == CodeUnits.minus
-                        {
+                        if CodeUnits.isBareKeyChar[Int(ch)] {
                             index += 1
                             continue
                         }
