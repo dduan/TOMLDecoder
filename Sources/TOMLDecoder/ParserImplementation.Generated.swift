@@ -241,6 +241,19 @@ extension Parser {
                     var localExpectedHexDigit = 0
                     var localEscape = false
 
+                    // 8x unrolling for double-quoted strings
+                    while i + 8 <= range.upperBound {
+                        if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
+                        if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
+                        if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
+                        if bytes[i + 3] == CodeUnits.backslash || bytes[i + 3] == CodeUnits.doubleQuote || bytes[i + 3] == CodeUnits.lf { break }
+                        if bytes[i + 4] == CodeUnits.backslash || bytes[i + 4] == CodeUnits.doubleQuote || bytes[i + 4] == CodeUnits.lf { break }
+                        if bytes[i + 5] == CodeUnits.backslash || bytes[i + 5] == CodeUnits.doubleQuote || bytes[i + 5] == CodeUnits.lf { break }
+                        if bytes[i + 6] == CodeUnits.backslash || bytes[i + 6] == CodeUnits.doubleQuote || bytes[i + 6] == CodeUnits.lf { break }
+                        if bytes[i + 7] == CodeUnits.backslash || bytes[i + 7] == CodeUnits.doubleQuote || bytes[i + 7] == CodeUnits.lf { break }
+                        i += 8
+                    }
+
                     while i < range.upperBound {
                         let ch = bytes[i]
                         if localEscape {
@@ -1942,6 +1955,19 @@ extension Parser {
                     var expectedHexDigit = 0
                     var localExpectedHexDigit = 0
                     var localEscape = false
+
+                    // 8x unrolling for double-quoted strings
+                    while i + 8 <= range.upperBound {
+                        if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
+                        if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
+                        if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
+                        if bytes[i + 3] == CodeUnits.backslash || bytes[i + 3] == CodeUnits.doubleQuote || bytes[i + 3] == CodeUnits.lf { break }
+                        if bytes[i + 4] == CodeUnits.backslash || bytes[i + 4] == CodeUnits.doubleQuote || bytes[i + 4] == CodeUnits.lf { break }
+                        if bytes[i + 5] == CodeUnits.backslash || bytes[i + 5] == CodeUnits.doubleQuote || bytes[i + 5] == CodeUnits.lf { break }
+                        if bytes[i + 6] == CodeUnits.backslash || bytes[i + 6] == CodeUnits.doubleQuote || bytes[i + 6] == CodeUnits.lf { break }
+                        if bytes[i + 7] == CodeUnits.backslash || bytes[i + 7] == CodeUnits.doubleQuote || bytes[i + 7] == CodeUnits.lf { break }
+                        i += 8
+                    }
 
                     while i < range.upperBound {
                         let ch = bytes[i]
