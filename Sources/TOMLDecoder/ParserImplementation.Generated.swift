@@ -332,7 +332,12 @@ extension Parser {
 
                 if !isDotSpecial {
                     var index = start
-                    let dateEnder = scanDate(bytes: bytes, range: range)?.3
+                    var dateEnder: Int?
+                    // Fast path: Dates must produce YYYY-MM-DD, so checks for the dash
+                    if start + 4 < range.upperBound && bytes[start + 4] == CodeUnits.minus {
+                        dateEnder = scanDate(bytes: bytes, range: range)?.3
+                    }
+
                     if let dateEnder, dateEnder < range.upperBound,
                        bytes[dateEnder] == CodeUnits.upperT || bytes[dateEnder] == CodeUnits.lowerT
                        || bytes[dateEnder] == CodeUnits.space
@@ -345,9 +350,11 @@ extension Parser {
                         }
                     } else if let dateEnder {
                         index = dateEnder
-                    } else if let timeEnder = scanTime(
-                        bytes: bytes, range: start ..< range.upperBound
-                    )?.3 {
+                    } else if start + 2 < range.upperBound, bytes[start + 2] == CodeUnits.colon,
+                              let timeEnder = scanTime(
+                                  bytes: bytes, range: start ..< range.upperBound
+                              )?.3
+                    {
                         index = timeEnder
                     }
                     if index > start {
@@ -2047,7 +2054,12 @@ extension Parser {
 
                 if !isDotSpecial {
                     var index = start
-                    let dateEnder = scanDate(bytes: bytes, range: range)?.3
+                    var dateEnder: Int?
+                    // Fast path: Dates must produce YYYY-MM-DD, so checks for the dash
+                    if start + 4 < range.upperBound && bytes[start + 4] == CodeUnits.minus {
+                        dateEnder = scanDate(bytes: bytes, range: range)?.3
+                    }
+
                     if let dateEnder, dateEnder < range.upperBound,
                        bytes[dateEnder] == CodeUnits.upperT || bytes[dateEnder] == CodeUnits.lowerT
                        || bytes[dateEnder] == CodeUnits.space
@@ -2060,9 +2072,11 @@ extension Parser {
                         }
                     } else if let dateEnder {
                         index = dateEnder
-                    } else if let timeEnder = scanTime(
-                        bytes: bytes, range: start ..< range.upperBound
-                    )?.3 {
+                    } else if start + 2 < range.upperBound, bytes[start + 2] == CodeUnits.colon,
+                              let timeEnder = scanTime(
+                                  bytes: bytes, range: start ..< range.upperBound
+                              )?.3
+                    {
                         index = timeEnder
                     }
                     if index > start {
