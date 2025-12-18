@@ -498,4 +498,45 @@ struct TOMLDecoderTests {
     @Test func canada() throws {
         _ = try TOMLDecoder().decode(CanadaFeatureCollection.self, from: Resources.canadaTOMLString)
     }
+
+    @Test func pokedex() throws {
+        var decoder = TOMLDecoder()
+        decoder.isLenient = true
+        let result = try decoder.decode(PokemonData.self, from: Resources.pokedexTOMLString)
+        #expect(result.pokemon.count == 151)
+
+        // Test first Pokemon (Bulbasaur) - has evolution
+        let bulbasaur = result.pokemon[0]
+        #expect(bulbasaur.name == "Bulbasaur")
+        #expect(bulbasaur.id == 1)
+        #expect(bulbasaur.type == ["Grass", "Poison"])
+        #expect(bulbasaur.spawnChance == 0.69)
+        #expect(bulbasaur.avgSpawns == 69.0)
+        #expect(bulbasaur.nextEvolution?.count == 2)
+        #expect(bulbasaur.nextEvolution?.first?.name == "Ivysaur")
+        #expect(bulbasaur.nextEvolution?.last?.name == "Venusaur")
+        #expect(bulbasaur.prevEvolution == nil)
+
+        // Test Charmander - has next evolution
+        let charmander = result.pokemon.first { $0.name == "Charmander" }!
+        #expect(charmander.id == 4)
+        #expect(charmander.nextEvolution?.count == 2)
+        #expect(charmander.nextEvolution?.first?.name == "Charmeleon")
+        #expect(charmander.prevEvolution == nil)
+
+        // Test Charizard - has prev evolution only
+        let charizard = result.pokemon.first { $0.name == "Charizard" }!
+        #expect(charizard.id == 6)
+        #expect(charizard.nextEvolution == nil)
+        #expect(charizard.prevEvolution?.count == 2)
+        #expect(charizard.prevEvolution?.first?.name == "Charmander")
+        #expect(charizard.prevEvolution?.last?.name == "Charmeleon")
+
+        // Test Pikachu - basic Pokemon
+        let pikachu = result.pokemon.first { $0.name == "Pikachu" }!
+        #expect(pikachu.id == 25)
+        #expect(pikachu.type == ["Electric"])
+        #expect(pikachu.weaknesses == ["Ground"])
+        #expect(pikachu.multipliers == [2.34])
+    }
 }

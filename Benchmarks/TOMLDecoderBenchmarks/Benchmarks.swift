@@ -40,6 +40,10 @@ let benchmarks: @Sendable () -> Void = {
         benchmark.startMeasurement()
         try blackHole(decoder.decode(TwitterArchive.self, from: Resources.twitterTOMLString))
     }
+
+    Benchmark("parse pokedex.toml") { _ in
+        try blackHole(TOMLTable(source: Resources.pokedexTOMLString))
+    }
 }
 
 let tomlIOTOML = """
