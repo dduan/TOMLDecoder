@@ -28,12 +28,6 @@ struct Token: Equatable {
 
 extension Token {
     func unpackBool(source: String, context: TOMLKey) throws(TOMLError) -> Bool {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackBool(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackBool(bytes: $0, context: context) })!
         } catch {
@@ -42,12 +36,6 @@ extension Token {
     }
 
     func unpackFloat(source: String, context: TOMLKey) throws(TOMLError) -> Double {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackFloat(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackFloat(bytes: $0, context: context) })!
         } catch {
@@ -56,12 +44,6 @@ extension Token {
     }
 
     func unpackString(source: String, context: TOMLKey) throws(TOMLError) -> String {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackString(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackString(bytes: $0, context: context) })!
         } catch {
@@ -70,12 +52,6 @@ extension Token {
     }
 
     func unpackInteger(source: String, context: TOMLKey) throws(TOMLError) -> Int64 {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackInteger(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackInteger(bytes: $0, context: context) })!
         } catch {
@@ -84,12 +60,6 @@ extension Token {
     }
 
     func unpackDateTime(source: String, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackDateTime(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackDateTime(bytes: $0, context: context) })!
         } catch {
@@ -99,23 +69,11 @@ extension Token {
 
     func unpackOffsetDateTime(source: String, context: TOMLKey) throws(TOMLError) -> OffsetDateTime {
         let datetime: DateTimeComponents
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            datetime = try unpackDateTime(bytes: source.utf8Span.span, context: context)
-        } else {
-            do {
-                datetime = try (source.utf8.withContiguousStorageIfAvailable { try unpackDateTime(bytes: $0, context: context) })!
-            } catch {
-                throw error as! TOMLError
-            }
-        }
-        #else
         do {
             datetime = try (source.utf8.withContiguousStorageIfAvailable { try unpackDateTime(bytes: $0, context: context) })!
         } catch {
             throw error as! TOMLError
         }
-        #endif
         switch (datetime.date, datetime.time, datetime.offset) {
         case let (.some(date), .some(time), .some(offset)):
             return OffsetDateTime(date: date, time: time, offset: offset, features: datetime.features)
@@ -149,12 +107,6 @@ extension Token {
     }
 
     func unpackAnyValue(source: String, context: TOMLKey) throws(TOMLError) -> Any {
-        #if swift(>=6.2)
-        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
-            return try unpackAnyValue(bytes: source.utf8Span.span, context: context)
-        }
-        #endif
-
         do {
             return try (source.utf8.withContiguousStorageIfAvailable { try unpackAnyValue(bytes: $0, context: context) })!
         } catch {
