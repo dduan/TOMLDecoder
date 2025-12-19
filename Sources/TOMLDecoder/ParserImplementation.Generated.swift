@@ -37,12 +37,14 @@ extension Parser {
             currentLineNumber = lineNumber + newlines
         }
 
-        while position < bytes.count {
+        let count = bytes.count
+        while position < count {
             let ch = bytes[position]
-            if ch == CodeUnits.pound {
+            switch ch {
+            case CodeUnits.pound:
                 // skip comment, stop just before the \n.
                 position += 1
-                while position < bytes.count, bytes[position] != CodeUnits.lf {
+                while position < count, bytes[position] != CodeUnits.lf {
                     let commentChar = bytes[position]
                     // Validate comment characters - control characters are not allowed except CR when followed by LF (CRLF)
                     if (commentChar >= CodeUnits.null && commentChar <= CodeUnits.backspace)
@@ -51,7 +53,7 @@ extension Parser {
                     {
                         if commentChar == CodeUnits.cr {
                             let nextPosition = position + 1
-                            if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
+                            if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
                                 // Allow CRLF sequence
                             } else {
                                 throw TOMLError(
@@ -71,50 +73,8 @@ extension Parser {
                     position += 1
                 }
                 continue
-            }
-
-            if ch == CodeUnits.dot && isDotSpecial {
-                emitToken(kind: .dot, start: position, end: position + 1)
-                return
-            }
-
-            if ch == CodeUnits.comma {
-                emitToken(kind: .comma, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.equal {
-                emitToken(kind: .equal, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lbrace {
-                emitToken(kind: .lbrace, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.rbrace {
-                emitToken(kind: .rbrace, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lbracket {
-                emitToken(kind: .lbracket, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.rbracket {
-                emitToken(kind: .rbracket, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lf {
-                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
-                return
-            } else if ch == CodeUnits.cr {
-                // Check if this is part of a CRLF sequence
-                let nextPosition = position + 1
-                if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
-                    // This is CRLF, treat as newline
-                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
-                    return
-                } else {
-                    // Bare CR is invalid
-                    throw TOMLError(
-                        .syntax(
-                            lineNumber: lineNumber, message: "bare carriage return is not allowed"
-                        ))
-                }
-            } else if ch == CodeUnits.space || ch == CodeUnits.tab {
-                // Skip consecutive whitespace
+            case CodeUnits.space, CodeUnits.tab:
+                // ignore white spaces
                 position += 1
                 while position < bytes.count {
                     let ws = bytes[position]
@@ -124,6 +84,46 @@ extension Parser {
                     position += 1
                 }
                 continue
+            case CodeUnits.dot where isDotSpecial:
+                emitToken(kind: .dot, start: position, end: position + 1)
+                return
+            case CodeUnits.comma:
+                emitToken(kind: .comma, start: position, end: position + 1)
+                return
+            case CodeUnits.equal:
+                emitToken(kind: .equal, start: position, end: position + 1)
+                return
+            case CodeUnits.lbrace:
+                emitToken(kind: .lbrace, start: position, end: position + 1)
+                return
+            case CodeUnits.rbrace:
+                emitToken(kind: .rbrace, start: position, end: position + 1)
+                return
+            case CodeUnits.lbracket:
+                emitToken(kind: .lbracket, start: position, end: position + 1)
+                return
+            case CodeUnits.rbracket:
+                emitToken(kind: .rbracket, start: position, end: position + 1)
+                return
+            case CodeUnits.lf:
+                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
+                return
+            case CodeUnits.cr:
+                // Check if this is part of a CRLF sequence
+                let nextPosition = position + 1
+                if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
+                    // This is CRLF, treat as newline
+                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
+                    return
+                }
+                // Bare CR is invalid
+                throw TOMLError(
+                    .syntax(
+                        lineNumber: lineNumber,
+                        message: "bare carriage return is not allowed"
+                    ))
+            default:
+                break
             }
 
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
@@ -436,11 +436,11 @@ extension Parser {
                 emitToken(kind: (isValidKey && isDotSpecial) ? .bareKey : .string, start: start, end: index)
             }
 
-            try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
+            try scanString(range: position ..< count, lineNumber: lineNumber)
             return
         }
 
-        emitToken(kind: .eof, start: position, end: bytes.count)
+        emitToken(kind: .eof, start: position, end: count)
     }
 
     @available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
@@ -626,6 +626,9 @@ extension Parser {
             if token.kind == .rbracket {
                 break
             }
+            if keyArrays[arrayIndex].array.elements.isEmpty {
+                keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+            }
 
             switch token.kind {
             case .string, .bareKey:
@@ -690,6 +693,9 @@ extension Parser {
 
             if token.kind == .rbracket {
                 break
+            }
+            if arrays[arrayIndex].elements.isEmpty {
+                arrays[arrayIndex].elements.reserveCapacity(8)
             }
 
             switch token.kind {
@@ -1766,12 +1772,14 @@ extension Parser {
             currentLineNumber = lineNumber + newlines
         }
 
-        while position < bytes.count {
+        let count = bytes.count
+        while position < count {
             let ch = bytes[position]
-            if ch == CodeUnits.pound {
+            switch ch {
+            case CodeUnits.pound:
                 // skip comment, stop just before the \n.
                 position += 1
-                while position < bytes.count, bytes[position] != CodeUnits.lf {
+                while position < count, bytes[position] != CodeUnits.lf {
                     let commentChar = bytes[position]
                     // Validate comment characters - control characters are not allowed except CR when followed by LF (CRLF)
                     if (commentChar >= CodeUnits.null && commentChar <= CodeUnits.backspace)
@@ -1780,7 +1788,7 @@ extension Parser {
                     {
                         if commentChar == CodeUnits.cr {
                             let nextPosition = position + 1
-                            if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
+                            if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
                                 // Allow CRLF sequence
                             } else {
                                 throw TOMLError(
@@ -1800,50 +1808,8 @@ extension Parser {
                     position += 1
                 }
                 continue
-            }
-
-            if ch == CodeUnits.dot && isDotSpecial {
-                emitToken(kind: .dot, start: position, end: position + 1)
-                return
-            }
-
-            if ch == CodeUnits.comma {
-                emitToken(kind: .comma, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.equal {
-                emitToken(kind: .equal, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lbrace {
-                emitToken(kind: .lbrace, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.rbrace {
-                emitToken(kind: .rbrace, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lbracket {
-                emitToken(kind: .lbracket, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.rbracket {
-                emitToken(kind: .rbracket, start: position, end: position + 1)
-                return
-            } else if ch == CodeUnits.lf {
-                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
-                return
-            } else if ch == CodeUnits.cr {
-                // Check if this is part of a CRLF sequence
-                let nextPosition = position + 1
-                if nextPosition < bytes.count, bytes[nextPosition] == CodeUnits.lf {
-                    // This is CRLF, treat as newline
-                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
-                    return
-                } else {
-                    // Bare CR is invalid
-                    throw TOMLError(
-                        .syntax(
-                            lineNumber: lineNumber, message: "bare carriage return is not allowed"
-                        ))
-                }
-            } else if ch == CodeUnits.space || ch == CodeUnits.tab {
-                // Skip consecutive whitespace
+            case CodeUnits.space, CodeUnits.tab:
+                // ignore white spaces
                 position += 1
                 while position < bytes.count {
                     let ws = bytes[position]
@@ -1853,6 +1819,46 @@ extension Parser {
                     position += 1
                 }
                 continue
+            case CodeUnits.dot where isDotSpecial:
+                emitToken(kind: .dot, start: position, end: position + 1)
+                return
+            case CodeUnits.comma:
+                emitToken(kind: .comma, start: position, end: position + 1)
+                return
+            case CodeUnits.equal:
+                emitToken(kind: .equal, start: position, end: position + 1)
+                return
+            case CodeUnits.lbrace:
+                emitToken(kind: .lbrace, start: position, end: position + 1)
+                return
+            case CodeUnits.rbrace:
+                emitToken(kind: .rbrace, start: position, end: position + 1)
+                return
+            case CodeUnits.lbracket:
+                emitToken(kind: .lbracket, start: position, end: position + 1)
+                return
+            case CodeUnits.rbracket:
+                emitToken(kind: .rbracket, start: position, end: position + 1)
+                return
+            case CodeUnits.lf:
+                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
+                return
+            case CodeUnits.cr:
+                // Check if this is part of a CRLF sequence
+                let nextPosition = position + 1
+                if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
+                    // This is CRLF, treat as newline
+                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
+                    return
+                }
+                // Bare CR is invalid
+                throw TOMLError(
+                    .syntax(
+                        lineNumber: lineNumber,
+                        message: "bare carriage return is not allowed"
+                    ))
+            default:
+                break
             }
 
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
@@ -2165,11 +2171,11 @@ extension Parser {
                 emitToken(kind: (isValidKey && isDotSpecial) ? .bareKey : .string, start: start, end: index)
             }
 
-            try scanString(range: position ..< bytes.count, lineNumber: lineNumber)
+            try scanString(range: position ..< count, lineNumber: lineNumber)
             return
         }
 
-        emitToken(kind: .eof, start: position, end: bytes.count)
+        emitToken(kind: .eof, start: position, end: count)
     }
 
     @available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)
@@ -2355,6 +2361,9 @@ extension Parser {
             if token.kind == .rbracket {
                 break
             }
+            if keyArrays[arrayIndex].array.elements.isEmpty {
+                keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+            }
 
             switch token.kind {
             case .string, .bareKey:
@@ -2419,6 +2428,9 @@ extension Parser {
 
             if token.kind == .rbracket {
                 break
+            }
+            if arrays[arrayIndex].elements.isEmpty {
+                arrays[arrayIndex].elements.reserveCapacity(8)
             }
 
             switch token.kind {
