@@ -142,6 +142,58 @@ extension Parser {
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
                 let start = range.lowerBound
                 let head = bytes[start]
+                // Fast path for numbers
+                if head.isDecimalDigit || head == CodeUnits.minus || head == CodeUnits.plus {
+                    var idx = start + 1
+                    while idx < range.upperBound, bytes[idx].isDecimalDigit { idx += 1 }
+
+                    if !isDotSpecial {
+                        // Float
+                        if idx < range.upperBound, bytes[idx] == CodeUnits.dot {
+                            let save = idx
+                            idx += 1
+                            if idx < range.upperBound, bytes[idx].isDecimalDigit {
+                                while idx < range.upperBound, bytes[idx].isDecimalDigit { idx += 1 }
+                            } else {
+                                idx = save
+                            }
+                        }
+                        // Exponent
+                        if idx < range.upperBound, (bytes[idx] == CodeUnits.lowerE || bytes[idx] == CodeUnits.upperE) {
+                            let save = idx
+                            idx += 1
+                            if idx < range.upperBound, (bytes[idx] == CodeUnits.plus || bytes[idx] == CodeUnits.minus) {
+                                idx += 1
+                            }
+                            if idx < range.upperBound, bytes[idx].isDecimalDigit {
+                                while idx < range.upperBound, bytes[idx].isDecimalDigit { idx += 1 }
+                            } else {
+                                idx = save
+                            }
+                        }
+                    }
+
+                    var isDelimiter = false
+                    if idx >= range.upperBound {
+                        isDelimiter = true
+                    } else {
+                        let ch = bytes[idx]
+                        if ch == CodeUnits.space || ch == CodeUnits.tab || ch == CodeUnits.comma ||
+                           ch == CodeUnits.rbracket || ch == CodeUnits.rbrace || ch == CodeUnits.pound || ch == CodeUnits.lf
+                        {
+                            isDelimiter = true
+                        } else if isDotSpecial, ch == CodeUnits.dot {
+                            // Dot acts as delimiter for bare keys
+                            isDelimiter = true
+                        }
+                    }
+
+                    if isDelimiter {
+                        emitToken(kind: isDotSpecial ? .bareKey : .string, start: start, end: idx)
+                        return
+                    }
+                }
+
                 if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
                     (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
                     head == CodeUnits.underscore
