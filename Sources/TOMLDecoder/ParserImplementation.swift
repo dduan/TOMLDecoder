@@ -1,23 +1,5 @@
-%{
-# gyb variables available: `__file__` gives the template’s path.
-from pathlib import Path
-template_name = Path(__file__).name
-generated_file = template_name[:-4] if template_name.endswith('.gyb') else template_name
-configs = [
-    ("borrowing Span<UInt8>", "@available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)"),
-    ("UnsafeBufferPointer<UInt8>", "@available(iOS 13, macOS 10.15, watchOS 6, tvOS 13, visionOS 1, *)"),
-]
-}%
-//  WARNING: This file is generated from ${template_name}
-//  Do not edit ${generated_file} directly.
-
-% for byte_type, availability in configs:
-% if byte_type == "borrowing Span<UInt8>":
-#if swift(>=6.2)
-% end
 extension Parser {
-    ${availability}
-    mutating func parse(bytes: ${byte_type}) throws(TOMLError) {
+    mutating func parse(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
         while token.kind != .eof {
             switch token.kind {
             case .newline:
@@ -38,8 +20,7 @@ extension Parser {
         }
     }
 
-    ${availability}
-    mutating func nextToken(bytes: ${byte_type}, isDotSpecial: Bool) throws(TOMLError) {
+    mutating func nextToken(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
         let lineNumber = currentLineNumber
         var position = cursor
 
@@ -456,8 +437,7 @@ extension Parser {
         emitToken(kind: .eof, start: position, end: count)
     }
 
-    ${availability}
-    mutating func eatToken(bytes: ${byte_type}, kind: Token.Kind, isDotSpecial: Bool)
+    mutating func eatToken(bytes: UnsafeBufferPointer<UInt8>, kind: Token.Kind, isDotSpecial: Bool)
         throws(TOMLError)
     {
         if token.kind != kind {
@@ -466,8 +446,7 @@ extension Parser {
         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
     }
 
-    ${availability}
-    mutating func createKeyValue(bytes: ${byte_type}, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
+    mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         let keyHash = key.hashValue
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
@@ -485,8 +464,7 @@ extension Parser {
         return index
     }
 
-    ${availability}
-    mutating func createKeyTable(bytes: ${byte_type}, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
+    mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         let keyHash = key.hashValue
         // Check if parent table is readOnly (inline table)
@@ -523,8 +501,7 @@ extension Parser {
         return index
     }
 
-    ${availability}
-    mutating func createKeyArray(bytes: ${byte_type}, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
+    mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         let keyHash = key.hashValue
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
@@ -541,8 +518,7 @@ extension Parser {
         return index
     }
 
-    ${availability}
-    mutating func skipNewlines(bytes: ${byte_type}, isDotSpecial: Bool) throws(TOMLError) {
+    mutating func skipNewlines(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
         while token.kind == .newline {
             try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
             if token.kind == .eof {
@@ -551,8 +527,7 @@ extension Parser {
         }
     }
 
-    ${availability}
-    mutating func parseKeyedInlineTable(bytes: ${byte_type}, tableIndex: Int) throws(TOMLError) {
+    mutating func parseKeyedInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -590,8 +565,7 @@ extension Parser {
         keyTables[tableIndex].table.readOnly = true
     }
 
-    ${availability}
-    mutating func parseInlineTable(bytes: ${byte_type}, tableIndex: Int) throws(TOMLError) {
+    mutating func parseInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
@@ -629,8 +603,7 @@ extension Parser {
         tables[tableIndex].readOnly = true
     }
 
-    ${availability}
-    mutating func parseKeyedArray(bytes: ${byte_type}, arrayIndex: Int) throws(TOMLError) {
+    mutating func parseKeyedArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
         while true {
@@ -697,8 +670,7 @@ extension Parser {
         try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
     }
 
-    ${availability}
-    mutating func parseArray(bytes: ${byte_type}, arrayIndex: Int) throws(TOMLError) {
+    mutating func parseArray(bytes: UnsafeBufferPointer<UInt8>, arrayIndex: Int) throws(TOMLError) {
         try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: false)
 
         while true {
@@ -765,8 +737,7 @@ extension Parser {
         try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
     }
 
-    ${availability}
-    mutating func parseKeyValue(bytes: ${byte_type}, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
+    mutating func parseKeyValue(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int, isKeyed: Bool) throws(TOMLError) {
         if isKeyed ? keyTables[tableIndex].table.readOnly : tables[tableIndex].readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot insert new entry into existing table"))
         }
@@ -823,8 +794,7 @@ extension Parser {
         throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
     }
 
-    ${availability}
-    mutating func fillTablePath(bytes: ${byte_type}) throws(TOMLError) {
+    mutating func fillTablePath(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
         let lineNumber = token.lineNumber
         tablePath.removeAll(keepingCapacity: true)
 
@@ -852,8 +822,7 @@ extension Parser {
         }
     }
 
-    ${availability}
-    mutating func parseSelect(bytes: ${byte_type}) throws(TOMLError) {
+    mutating func parseSelect(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
         assert(token.kind == .lbracket)
         let index = token.text.lowerBound
         let nextIndex = index + 1
@@ -916,8 +885,7 @@ extension Parser {
 }
 
 extension Token {
-    ${availability}
-    func unpackBool(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> Bool {
+    func unpackBool(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Bool {
         if text.count == 4,
            bytes[text.lowerBound] == CodeUnits.lowerT,
            bytes[text.lowerBound + 1] == CodeUnits.lowerR,
@@ -938,8 +906,7 @@ extension Token {
         throw TOMLError(.invalidBool(context: context, lineNumber: lineNumber))
     }
 
-    ${availability}
-    func unpackFloat(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> Double {
+    func unpackFloat(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Double {
         var resultCodeUnits: [UTF8.CodeUnit] = []
         var index = text.lowerBound
         if bytes[index] == CodeUnits.plus || bytes[index] == CodeUnits.minus {
@@ -1023,8 +990,7 @@ extension Token {
         return double
     }
 
-    ${availability}
-    func unpackString(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> String {
+    func unpackString(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> String {
         var multiline = false
 
         if bytes.count == 0 {
@@ -1064,8 +1030,7 @@ extension Token {
         }
     }
 
-    ${availability}
-    func unpackInteger(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> Int64 {
+    func unpackInteger(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Int64 {
         @_transparent
         func isValidDigit(_ codeUnit: UTF8.CodeUnit, base: Int) -> Bool {
             switch base {
@@ -1164,8 +1129,7 @@ extension Token {
         return i
     }
 
-    ${availability}
-    func unpackDateTime(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
+    func unpackDateTime(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> DateTimeComponents {
         var mustParseTime = false
         var date: (year: Int, month: Int, day: Int)?
         var time: (hour: Int, minute: Int, second: Int)?
@@ -1322,8 +1286,7 @@ extension Token {
         )
     }
 
-    ${availability}
-    func unpackAnyValue(bytes: ${byte_type}, context: TOMLKey) throws(TOMLError) -> Any {
+    func unpackAnyValue(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Any {
         let firstChar = text.count > 0 ? bytes[text.lowerBound] : nil
         if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
             return try unpackString(bytes: bytes, context: context)
@@ -1361,8 +1324,7 @@ extension Token {
     }
 }
 
-${availability}
-func parseTimezoneOffset(bytes: ${byte_type}, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
+func parseTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {
     guard range.count >= 2 else {
         throw TOMLError(.invalidDateTime(lineNumber: lineNumber, reason: "timezone offset must have at least 2 digits for hour"))
     }
@@ -1412,8 +1374,7 @@ func parseTimezoneOffset(bytes: ${byte_type}, range: Range<Int>, lineNumber: Int
     return (offsetHour, offsetMinute, consumedLength)
 }
 
-${availability}
-func literalString(bytes: ${byte_type}, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
+func literalString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
     var resultCodeUnits: [UTF8.CodeUnit] = []
     var consecutiveQuotes = 0
 
@@ -1449,8 +1410,7 @@ func literalString(bytes: ${byte_type}, range: Range<Int>, multiline: Bool) thro
     return String(decoding: resultCodeUnits, as: UTF8.self)
 }
 
-${availability}
-func basicString(bytes: ${byte_type}, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
+func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline: Bool) throws(TOMLError) -> String {
     let startIndex = range.lowerBound
     let endIndex = range.upperBound
     var resultCodeUnits: [UTF8.CodeUnit] = []
@@ -1582,8 +1542,7 @@ func basicString(bytes: ${byte_type}, range: Range<Int>, multiline: Bool) throws
     return String(decoding: resultCodeUnits, as: UTF8.self)
 }
 
-${availability}
-func scanDate(bytes: ${byte_type}, range: Range<Int>) -> (Int, Int, Int, Int)? {
+func scanDate(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
     guard let year = scanDigits(bytes: bytes, range: range, n: 4) else {
         return nil
     }
@@ -1614,8 +1573,7 @@ func scanDate(bytes: ${byte_type}, range: Range<Int>) -> (Int, Int, Int, Int)? {
     return (year, month, day, index)
 }
 
-${availability}
-func scanDigits(bytes: ${byte_type}, range: Range<Int>, n: Int) -> Int? {
+func scanDigits(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, n: Int) -> Int? {
     var result = 0
     var n = n
     var index = range.lowerBound
@@ -1627,8 +1585,7 @@ func scanDigits(bytes: ${byte_type}, range: Range<Int>, n: Int) -> Int? {
     return n != 0 ? nil : result
 }
 
-${availability}
-func scanTime(bytes: ${byte_type}, range: Range<Int>) -> (Int, Int, Int, Int)? {
+func scanTime(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> (Int, Int, Int, Int)? {
     guard let hour = scanDigits(bytes: bytes, range: range, n: 2) else {
         return nil
     }
@@ -1659,8 +1616,7 @@ func scanTime(bytes: ${byte_type}, range: Range<Int>) -> (Int, Int, Int, Int)? {
     return (hour, minute, second, index)
 }
 
-${availability}
-func parseNanoSeconds(bytes: ${byte_type}, range: Range<Int>, updatedIndex: inout Int) -> UInt32 {
+func parseNanoSeconds(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, updatedIndex: inout Int) -> UInt32 {
     var unit: Double = 100_000_000
     var result: Double = 0
     var index = range.lowerBound
@@ -1673,8 +1629,7 @@ func parseNanoSeconds(bytes: ${byte_type}, range: Range<Int>, updatedIndex: inou
     return UInt32(result)
 }
 
-${availability}
-func scanTimezoneOffset(bytes: ${byte_type}, range: Range<Int>) -> Int? {
+func scanTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> Int? {
     var index = range.lowerBound
     guard index < range.upperBound, bytes[index] == CodeUnits.plus || bytes[index] == CodeUnits.minus else {
         return nil
@@ -1698,8 +1653,7 @@ func scanTimezoneOffset(bytes: ${byte_type}, range: Range<Int>) -> Int? {
     return index
 }
 
-${availability}
-func normalizeKey(bytes: ${byte_type}, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
+func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
     var start = token.text.lowerBound
     var end = token.text.upperBound
     if token.kind == .bareKey {
@@ -1749,17 +1703,7 @@ func normalizeKey(bytes: ${byte_type}, token: Token, keyTransform: (@Sendable (S
 
     return makeString(bytes: bytes, range: start ..< end)
 }
-% if byte_type == "borrowing Span<UInt8>":
-#endif
-% end
-% end
 
-#if swift(>=6.2)
-@available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *)
-private func makeString(bytes: borrowing Span<UInt8>, range: Range<Int>) -> String {
-    String(copying: UTF8Span(unchecked: bytes.extracting(range)))
-}
-#endif
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
     String(decoding: bytes[range], as: UTF8.self)
 }
