@@ -114,8 +114,15 @@ extension Parser {
                         ))
                 }
             } else if ch == CodeUnits.space || ch == CodeUnits.tab {
-                // ignore white spaces
+                // Skip consecutive whitespace
                 position += 1
+                while position < bytes.count {
+                    let ws = bytes[position]
+                    if ws != CodeUnits.space, ws != CodeUnits.tab {
+                        break
+                    }
+                    position += 1
+                }
                 continue
             }
 
@@ -1836,8 +1843,15 @@ extension Parser {
                         ))
                 }
             } else if ch == CodeUnits.space || ch == CodeUnits.tab {
-                // ignore white spaces
+                // Skip consecutive whitespace
                 position += 1
+                while position < bytes.count {
+                    let ws = bytes[position]
+                    if ws != CodeUnits.space, ws != CodeUnits.tab {
+                        break
+                    }
+                    position += 1
+                }
                 continue
             }
 
