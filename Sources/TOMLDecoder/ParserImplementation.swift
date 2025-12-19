@@ -523,11 +523,11 @@ extension Parser {
         if token.kind != .newline {
             return
         }
-        
+
         // Optimization: consume contiguous whitespace/newlines/comments manually
         // to avoid repeatedly calling nextToken() and creating Token objects
         let count = bytes.count
-        
+
         while cursor < count {
             // 8x unrolling for space/tab skipping
             while cursor + 8 <= count {
@@ -580,20 +580,21 @@ extension Parser {
                         break // Leave LF for next iteration to handle line number
                     }
                     if (c >= CodeUnits.null && c <= CodeUnits.backspace) ||
-                       (c >= CodeUnits.lf && c <= CodeUnits.unitSeparator) ||
-                       c == CodeUnits.delete {
-                         // Control char checks, let nextToken handle strict validation if we suspect badness,
-                         // but for speed we might want to just skip valid text.
-                         // To be strictly correct with errors, we should check.
-                         // However, checking here mimics nextToken's check.
-                         // Let's rely on nextToken for complex cases?
-                         // No, we must replicate logic or we can't skip.
-                         // The original code checks for control chars.
+                        (c >= CodeUnits.lf && c <= CodeUnits.unitSeparator) ||
+                        c == CodeUnits.delete
+                    {
+                        // Control char checks, let nextToken handle strict validation if we suspect badness,
+                        // but for speed we might want to just skip valid text.
+                        // To be strictly correct with errors, we should check.
+                        // However, checking here mimics nextToken's check.
+                        // Let's rely on nextToken for complex cases?
+                        // No, we must replicate logic or we can't skip.
+                        // The original code checks for control chars.
                         if c == CodeUnits.cr {
-                             if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
-                                 // CRLF ends comment
-                                 break
-                             }
+                            if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
+                                // CRLF ends comment
+                                break
+                            }
                         }
                         // Let nextToken throw the error
                         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
