@@ -518,13 +518,98 @@ extension Parser {
         return index
     }
 
+    @inline(__always)
     mutating func skipNewlines(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        while token.kind == .newline {
-            try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
-            if token.kind == .eof {
-                break
+        if token.kind != .newline {
+            return
+        }
+        
+        // Optimization: consume contiguous whitespace/newlines/comments manually
+        // to avoid repeatedly calling nextToken() and creating Token objects
+        let count = bytes.count
+        
+        while cursor < count {
+            // 8x unrolling for space/tab skipping
+            while cursor + 8 <= count {
+                let c0 = bytes[cursor]
+                let c1 = bytes[cursor + 1]
+                let c2 = bytes[cursor + 2]
+                let c3 = bytes[cursor + 3]
+                let c4 = bytes[cursor + 4]
+                let c5 = bytes[cursor + 5]
+                let c6 = bytes[cursor + 6]
+                let c7 = bytes[cursor + 7]
+
+                if c0 == CodeUnits.space || c0 == CodeUnits.tab,
+                   c1 == CodeUnits.space || c1 == CodeUnits.tab,
+                   c2 == CodeUnits.space || c2 == CodeUnits.tab,
+                   c3 == CodeUnits.space || c3 == CodeUnits.tab,
+                   c4 == CodeUnits.space || c4 == CodeUnits.tab,
+                   c5 == CodeUnits.space || c5 == CodeUnits.tab,
+                   c6 == CodeUnits.space || c6 == CodeUnits.tab,
+                   c7 == CodeUnits.space || c7 == CodeUnits.tab
+                {
+                    cursor += 8
+                } else {
+                    break
+                }
+            }
+
+            let ch = bytes[cursor]
+            switch ch {
+            case CodeUnits.lf:
+                currentLineNumber += 1
+                cursor += 1
+            case CodeUnits.cr:
+                if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
+                    currentLineNumber += 1
+                    cursor += 2
+                } else {
+                    // Bare CR, let nextToken handle error
+                    try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
+                    return
+                }
+            case CodeUnits.space, CodeUnits.tab:
+                cursor += 1
+            case CodeUnits.pound:
+                // Comment
+                cursor += 1
+                while cursor < count {
+                    let c = bytes[cursor]
+                    if c == CodeUnits.lf {
+                        break // Leave LF for next iteration to handle line number
+                    }
+                    if (c >= CodeUnits.null && c <= CodeUnits.backspace) ||
+                       (c >= CodeUnits.lf && c <= CodeUnits.unitSeparator) ||
+                       c == CodeUnits.delete {
+                         // Control char checks, let nextToken handle strict validation if we suspect badness,
+                         // but for speed we might want to just skip valid text.
+                         // To be strictly correct with errors, we should check.
+                         // However, checking here mimics nextToken's check.
+                         // Let's rely on nextToken for complex cases?
+                         // No, we must replicate logic or we can't skip.
+                         // The original code checks for control chars.
+                        if c == CodeUnits.cr {
+                             if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
+                                 // CRLF ends comment
+                                 break
+                             }
+                        }
+                        // Let nextToken throw the error
+                        try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
+                        return
+                    }
+                    cursor += 1
+                }
+            default:
+                // Found something else, stop skipping
+                try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
+                return
             }
         }
+        
+        // If we hit EOF or loop finishes
+        try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
     }
 
     mutating func parseKeyedInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
