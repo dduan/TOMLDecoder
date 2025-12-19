@@ -524,8 +524,6 @@ extension Parser {
             return
         }
 
-        // Optimization: consume contiguous whitespace/newlines/comments manually
-        // to avoid repeatedly calling nextToken() and creating Token objects
         let count = bytes.count
 
         while cursor < count {
@@ -583,13 +581,6 @@ extension Parser {
                         (c >= CodeUnits.lf && c <= CodeUnits.unitSeparator) ||
                         c == CodeUnits.delete
                     {
-                        // Control char checks, let nextToken handle strict validation if we suspect badness,
-                        // but for speed we might want to just skip valid text.
-                        // To be strictly correct with errors, we should check.
-                        // However, checking here mimics nextToken's check.
-                        // Let's rely on nextToken for complex cases?
-                        // No, we must replicate logic or we can't skip.
-                        // The original code checks for control chars.
                         if c == CodeUnits.cr {
                             if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
                                 // CRLF ends comment
@@ -608,7 +599,7 @@ extension Parser {
                 return
             }
         }
-        
+
         // If we hit EOF or loop finishes
         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
     }
