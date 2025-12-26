@@ -38,7 +38,6 @@ var targets: [Target] = [
             .enableUpcomingFeature("ExistentialAny"),
             .enableUpcomingFeature("InternalImportsByDefault"),
             .enableUpcomingFeature("MemberImportVisibility"),
-            .unsafeFlags(["-Xfrontend", "-require-explicit-sendable"]),
         ]
     ),
 ]
