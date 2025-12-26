@@ -17,11 +17,7 @@ struct Team: Codable {
 let team = try TOMLDecoder().decode(Team.self, from: tomlData)
 ```
 
-
-Read the documentation to learn more:
-
-- for [0.4.2](https://dduan.github.io/TOMLDecoder/0.4.x/documentation/tomldecoder/), the latest release
-- for [the main branch](https://dduan.github.io/TOMLDecoder/main/documentation/tomldecoder/)
+Read the [documentation](https://dduan.github.io/TOMLDecoder/0.4.x/documentation/tomldecoder/) to [get started](https://dduan.github.io/TOMLDecoder/0.4.x/documentation/tomldecoder/gettingstarted).
 
 ## License
 
