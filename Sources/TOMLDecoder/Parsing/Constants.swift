@@ -64,6 +64,25 @@ enum CodeUnits {
         return UnsafePointer(ptr)
     }()
 
+    nonisolated(unsafe) static let isValueChar: UnsafePointer<Bool> = {
+        let ptr = UnsafeMutablePointer<Bool>.allocate(capacity: 256)
+        ptr.initialize(repeating: false, count: 256)
+        for i in 0 ..< 256 {
+            let ch = UTF8.CodeUnit(i)
+            if (ch >= CodeUnits.lowerA && ch <= CodeUnits.lowerZ) ||
+                (ch >= CodeUnits.upperA && ch <= CodeUnits.upperZ) ||
+                (ch >= CodeUnits.number0 && ch <= CodeUnits.number9) ||
+                ch == CodeUnits.underscore ||
+                ch == CodeUnits.minus ||
+                ch == CodeUnits.plus ||
+                ch == CodeUnits.dot
+            {
+                ptr[i] = true
+            }
+        }
+        return UnsafePointer(ptr)
+    }()
+
     static let null: UTF8.CodeUnit = 0x00
     static let unitSeparator: UTF8.CodeUnit = 0x1F
     static let delete: UTF8.CodeUnit = 0x7F

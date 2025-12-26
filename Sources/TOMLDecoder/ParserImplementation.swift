@@ -388,46 +388,41 @@ extension Parser {
                     }
                 }
 
-                var index = start
-                var isValidKey = true
-                while index < range.upperBound {
-                    let ch = bytes[index]
-                    if ch == CodeUnits.lf {
+                if isDotSpecial {
+                    var index = start
+                    var isValidKey = true
+                    while index < range.upperBound {
+                        let ch = bytes[index]
+                        if ch == CodeUnits.lf || ch == CodeUnits.dot {
+                            break
+                        }
+                        if CodeUnits.isBareKeyChar[Int(ch)] {
+                            index += 1
+                            continue
+                        }
+                        if ch == CodeUnits.plus {
+                            isValidKey = false
+                            index += 1
+                            continue
+                        }
                         break
                     }
-
-                    if ch == CodeUnits.dot && isDotSpecial {
+                    emitToken(kind: isValidKey ? .bareKey : .string, start: start, end: index)
+                } else {
+                    var index = start
+                    while index < range.upperBound {
+                        let ch = bytes[index]
+                        if ch == CodeUnits.lf {
+                            break
+                        }
+                        if CodeUnits.isValueChar[Int(ch)] {
+                            index += 1
+                            continue
+                        }
                         break
                     }
-
-                    if CodeUnits.upperA <= ch && ch <= CodeUnits.upperZ {
-                        index += 1
-                        continue
-                    }
-
-                    if CodeUnits.lowerA <= ch && ch <= CodeUnits.lowerZ {
-                        index += 1
-                        continue
-                    }
-
-                    if ch.isDecimalDigit
-                        || ch == CodeUnits.minus
-                        || ch == CodeUnits.underscore
-                    {
-                        index += 1
-                        continue
-                    }
-
-                    if ch == CodeUnits.dot || ch == CodeUnits.plus {
-                        isValidKey = false
-                        index += 1
-                        continue
-                    }
-
-                    break
+                    emitToken(kind: .string, start: start, end: index)
                 }
-
-                emitToken(kind: (isValidKey && isDotSpecial) ? .bareKey : .string, start: start, end: index)
             }
 
             try scanString(range: position ..< count, lineNumber: lineNumber)
