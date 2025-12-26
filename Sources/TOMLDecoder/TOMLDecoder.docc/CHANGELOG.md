@@ -4,7 +4,7 @@ Also known as release notes.
 
 ## In Development
 
-## 0.4.1
+## 0.4.2
 
 - Fixed a project configuration that prevented SwiftPM consumption of the package
 
