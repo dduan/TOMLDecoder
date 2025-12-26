@@ -6,6 +6,10 @@ Also known as release notes.
 
 ## 0.4.1
 
+- Fixed a project configuration that prevented SwiftPM consumption of the package
+
+## 0.4.1
+
 This release introduces source-breaking changes from 0.3.x.
 
 The lower-level parser APIs and architecture are introduced with an
