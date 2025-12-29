@@ -70,7 +70,7 @@ extension Parser {
             case CodeUnits.space, CodeUnits.tab:
                 // ignore white spaces
                 position += 1
-                while position < bytes.count {
+                while position < count {
                     let ws = bytes[position]
                     if ws != CodeUnits.space, ws != CodeUnits.tab {
                         break
@@ -395,9 +395,6 @@ extension Parser {
                     var isValidKey = true
                     while index < range.upperBound {
                         let ch = bytes[index]
-                        if ch == CodeUnits.lf || ch == CodeUnits.dot {
-                            break
-                        }
                         if isBareKeyChar[Int(ch)] {
                             index += 1
                             continue
@@ -414,9 +411,6 @@ extension Parser {
                     var index = start
                     while index < range.upperBound {
                         let ch = bytes[index]
-                        if ch == CodeUnits.lf {
-                            break
-                        }
                         if isValueChar[Int(ch)] {
                             index += 1
                             continue
@@ -522,20 +516,22 @@ extension Parser {
         }
 
         let count = bytes.count
+        var position = cursor
+        var lineNumber = currentLineNumber
 
-        while cursor < count {
-            let ch = bytes[cursor]
+        while position < count {
+            let ch = bytes[position]
             if ch == CodeUnits.space || ch == CodeUnits.tab {
                 // 8x unrolling for space/tab skipping
-                while cursor + 8 <= count {
-                    let c0 = bytes[cursor]
-                    let c1 = bytes[cursor + 1]
-                    let c2 = bytes[cursor + 2]
-                    let c3 = bytes[cursor + 3]
-                    let c4 = bytes[cursor + 4]
-                    let c5 = bytes[cursor + 5]
-                    let c6 = bytes[cursor + 6]
-                    let c7 = bytes[cursor + 7]
+                while position + 8 <= count {
+                    let c0 = bytes[position]
+                    let c1 = bytes[position + 1]
+                    let c2 = bytes[position + 2]
+                    let c3 = bytes[position + 3]
+                    let c4 = bytes[position + 4]
+                    let c5 = bytes[position + 5]
+                    let c6 = bytes[position + 6]
+                    let c7 = bytes[position + 7]
 
                     if c0 == CodeUnits.space || c0 == CodeUnits.tab,
                        c1 == CodeUnits.space || c1 == CodeUnits.tab,
@@ -546,39 +542,41 @@ extension Parser {
                        c6 == CodeUnits.space || c6 == CodeUnits.tab,
                        c7 == CodeUnits.space || c7 == CodeUnits.tab
                     {
-                        cursor += 8
+                        position += 8
                     } else {
                         break
                     }
                 }
 
-                while cursor < count {
-                    let ws = bytes[cursor]
+                while position < count {
+                    let ws = bytes[position]
                     if ws != CodeUnits.space, ws != CodeUnits.tab {
                         break
                     }
-                    cursor += 1
+                    position += 1
                 }
                 continue
             }
             switch ch {
             case CodeUnits.lf:
-                currentLineNumber += 1
-                cursor += 1
+                lineNumber += 1
+                position += 1
             case CodeUnits.cr:
-                if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
-                    currentLineNumber += 1
-                    cursor += 2
+                if position + 1 < count, bytes[position + 1] == CodeUnits.lf {
+                    lineNumber += 1
+                    position += 2
                 } else {
                     // Bare CR, let nextToken handle error
+                    cursor = position
+                    currentLineNumber = lineNumber
                     try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
                     return
                 }
             case CodeUnits.pound:
                 // Comment
-                cursor += 1
-                while cursor < count {
-                    let c = bytes[cursor]
+                position += 1
+                while position < count {
+                    let c = bytes[position]
                     if c == CodeUnits.lf {
                         break // Leave LF for next iteration to handle line number
                     }
@@ -587,25 +585,31 @@ extension Parser {
                         c == CodeUnits.delete
                     {
                         if c == CodeUnits.cr {
-                            if cursor + 1 < count, bytes[cursor + 1] == CodeUnits.lf {
+                            if position + 1 < count, bytes[position + 1] == CodeUnits.lf {
                                 // CRLF ends comment
                                 break
                             }
                         }
                         // Let nextToken throw the error
+                        cursor = position
+                        currentLineNumber = lineNumber
                         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
                         return
                     }
-                    cursor += 1
+                    position += 1
                 }
             default:
                 // Found something else, stop skipping
+                cursor = position
+                currentLineNumber = lineNumber
                 try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
                 return
             }
         }
 
         // If we hit EOF or loop finishes
+        cursor = position
+        currentLineNumber = lineNumber
         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
     }
 
