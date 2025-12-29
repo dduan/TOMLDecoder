@@ -121,6 +121,8 @@ extension Parser {
             }
 
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
+                let isBareKeyChar = CodeUnits.isBareKeyChar
+                let isValueChar = CodeUnits.isValueChar
                 let start = range.lowerBound
                 let head = bytes[start]
                 if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
@@ -130,7 +132,7 @@ extension Parser {
                     var index = start + 1
                     while index < range.upperBound {
                         let ch = bytes[index]
-                        if CodeUnits.isBareKeyChar[Int(ch)] {
+                        if isBareKeyChar[Int(ch)] {
                             index += 1
                             continue
                         }
@@ -396,7 +398,7 @@ extension Parser {
                         if ch == CodeUnits.lf || ch == CodeUnits.dot {
                             break
                         }
-                        if CodeUnits.isBareKeyChar[Int(ch)] {
+                        if isBareKeyChar[Int(ch)] {
                             index += 1
                             continue
                         }
@@ -415,7 +417,7 @@ extension Parser {
                         if ch == CodeUnits.lf {
                             break
                         }
-                        if CodeUnits.isValueChar[Int(ch)] {
+                        if isValueChar[Int(ch)] {
                             index += 1
                             continue
                         }
@@ -522,33 +524,43 @@ extension Parser {
         let count = bytes.count
 
         while cursor < count {
-            // 8x unrolling for space/tab skipping
-            while cursor + 8 <= count {
-                let c0 = bytes[cursor]
-                let c1 = bytes[cursor + 1]
-                let c2 = bytes[cursor + 2]
-                let c3 = bytes[cursor + 3]
-                let c4 = bytes[cursor + 4]
-                let c5 = bytes[cursor + 5]
-                let c6 = bytes[cursor + 6]
-                let c7 = bytes[cursor + 7]
-
-                if c0 == CodeUnits.space || c0 == CodeUnits.tab,
-                   c1 == CodeUnits.space || c1 == CodeUnits.tab,
-                   c2 == CodeUnits.space || c2 == CodeUnits.tab,
-                   c3 == CodeUnits.space || c3 == CodeUnits.tab,
-                   c4 == CodeUnits.space || c4 == CodeUnits.tab,
-                   c5 == CodeUnits.space || c5 == CodeUnits.tab,
-                   c6 == CodeUnits.space || c6 == CodeUnits.tab,
-                   c7 == CodeUnits.space || c7 == CodeUnits.tab
-                {
-                    cursor += 8
-                } else {
-                    break
-                }
-            }
-
             let ch = bytes[cursor]
+            if ch == CodeUnits.space || ch == CodeUnits.tab {
+                // 8x unrolling for space/tab skipping
+                while cursor + 8 <= count {
+                    let c0 = bytes[cursor]
+                    let c1 = bytes[cursor + 1]
+                    let c2 = bytes[cursor + 2]
+                    let c3 = bytes[cursor + 3]
+                    let c4 = bytes[cursor + 4]
+                    let c5 = bytes[cursor + 5]
+                    let c6 = bytes[cursor + 6]
+                    let c7 = bytes[cursor + 7]
+
+                    if c0 == CodeUnits.space || c0 == CodeUnits.tab,
+                       c1 == CodeUnits.space || c1 == CodeUnits.tab,
+                       c2 == CodeUnits.space || c2 == CodeUnits.tab,
+                       c3 == CodeUnits.space || c3 == CodeUnits.tab,
+                       c4 == CodeUnits.space || c4 == CodeUnits.tab,
+                       c5 == CodeUnits.space || c5 == CodeUnits.tab,
+                       c6 == CodeUnits.space || c6 == CodeUnits.tab,
+                       c7 == CodeUnits.space || c7 == CodeUnits.tab
+                    {
+                        cursor += 8
+                    } else {
+                        break
+                    }
+                }
+
+                while cursor < count {
+                    let ws = bytes[cursor]
+                    if ws != CodeUnits.space, ws != CodeUnits.tab {
+                        break
+                    }
+                    cursor += 1
+                }
+                continue
+            }
             switch ch {
             case CodeUnits.lf:
                 currentLineNumber += 1
@@ -562,8 +574,6 @@ extension Parser {
                     try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
                     return
                 }
-            case CodeUnits.space, CodeUnits.tab:
-                cursor += 1
             case CodeUnits.pound:
                 // Comment
                 cursor += 1
@@ -765,7 +775,7 @@ extension Parser {
 
                 arrays[arrayIndex].elements.append(.leaf(token))
 
-                try eatToken(bytes: bytes, kind: .string, isDotSpecial: true)
+                try nextToken(bytes: bytes, isDotSpecial: true)
 
             case .lbracket: // Nested array
                 if arrays[arrayIndex].kind == nil {
