@@ -20,19 +20,381 @@ extension Parser {
         }
     }
 
-    mutating func nextToken(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
-        let lineNumber = currentLineNumber
-        var position = cursor
-
+    @inline(__always)
+    mutating func lexToken(
+        bytes: UnsafeBufferPointer<UInt8>,
+        position: Int,
+        lineNumber: Int,
+        isDotSpecial: Bool
+    ) throws(TOMLError) {
         @inline(__always)
         func emitToken(kind: Token.Kind, start: Int, end: Int, newlines: Int = 0) {
             token = Token(kind: kind, lineNumber: lineNumber, text: start ..< end)
             cursor = end
-            currentLineNumber = lineNumber + newlines
+            if newlines != 0 {
+                currentLineNumber = lineNumber + newlines
+            }
         }
 
         let count = bytes.count
-        while position < count {
+
+        @inline(__always)
+        func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
+            let start = range.lowerBound
+            let end = range.upperBound
+            let head = bytes[start]
+            if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
+                (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
+                head == CodeUnits.underscore
+            {
+                let isBareKeyChar = CodeUnits.isBareKeyChar
+                var index = start + 1
+                while index < end {
+                    let ch = bytes[index]
+                    if isBareKeyChar[Int(ch)] {
+                        index += 1
+                        continue
+                    }
+                    break
+                }
+                emitToken(kind: .bareKey, start: start, end: index)
+                return
+            }
+
+            if head == CodeUnits.singleQuote {
+                if start + 3 <= end,
+                   bytes[start + 1] == CodeUnits.singleQuote,
+                   bytes[start + 2] == CodeUnits.singleQuote
+                {
+                    var i = start + 3
+                    var newlinesInToken = 0
+
+                    while i < end {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
+                        if i + 3 <= end,
+                           bytes[i] == CodeUnits.singleQuote,
+                           bytes[i + 1] == CodeUnits.singleQuote,
+                           bytes[i + 2] == CodeUnits.singleQuote
+                        {
+                            if i + 3 >= end || bytes[i + 3] != CodeUnits.singleQuote {
+                                break
+                            }
+                        }
+                        i += 1
+                    }
+
+                    guard i < end else {
+                        throw TOMLError(
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote"))
+                    }
+
+                    let endIndex = i + 3
+                    emitToken(kind: .string, start: start, end: endIndex, newlines: newlinesInToken)
+                    return
+                }
+
+                var i = start + 1
+
+                while i < end {
+                    let ch = bytes[i]
+                    if ch == CodeUnits.singleQuote || ch == CodeUnits.lf {
+                        break
+                    }
+                    i += 1
+                }
+
+                if i >= end || bytes[i] != CodeUnits.singleQuote {
+                    throw TOMLError(
+                        .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
+                }
+
+                emitToken(kind: .string, start: start, end: i + 1)
+                return
+            }
+
+            if head == CodeUnits.doubleQuote {
+                if start + 3 < end,
+                   bytes[start + 1] == CodeUnits.doubleQuote,
+                   bytes[start + 2] == CodeUnits.doubleQuote
+                {
+                    var i = start + 3
+                    var newlinesInToken = 0
+
+                    while i < end {
+                        if bytes[i] == CodeUnits.lf {
+                            newlinesInToken += 1
+                        }
+                        if i + 3 <= end,
+                           bytes[i] == CodeUnits.doubleQuote,
+                           bytes[i + 1] == CodeUnits.doubleQuote,
+                           bytes[i + 2] == CodeUnits.doubleQuote
+                        {
+                            // Check if this is exactly 3 quotes (not part of a longer sequence)
+                            if i + 3 >= end || bytes[i + 3] != CodeUnits.doubleQuote {
+                                if bytes[i - 1] == CodeUnits.backslash {
+                                    i += 1
+                                    continue
+                                }
+                                break
+                            }
+                        }
+                        i += 1
+                    }
+
+                    guard i < end else {
+                        throw TOMLError(
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote"))
+                    }
+
+                    let endIndex = i + 3
+                    emitToken(kind: .string, start: start, end: endIndex, newlines: newlinesInToken)
+                    return
+                }
+
+                var i = start + 1
+                var expectedHexDigit = 0
+                var localExpectedHexDigit = 0
+                var localEscape = false
+
+                // 8x unrolling for double-quoted strings
+                while i + 8 <= end {
+                    if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
+                    if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
+                    if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
+                    if bytes[i + 3] == CodeUnits.backslash || bytes[i + 3] == CodeUnits.doubleQuote || bytes[i + 3] == CodeUnits.lf { break }
+                    if bytes[i + 4] == CodeUnits.backslash || bytes[i + 4] == CodeUnits.doubleQuote || bytes[i + 4] == CodeUnits.lf { break }
+                    if bytes[i + 5] == CodeUnits.backslash || bytes[i + 5] == CodeUnits.doubleQuote || bytes[i + 5] == CodeUnits.lf { break }
+                    if bytes[i + 6] == CodeUnits.backslash || bytes[i + 6] == CodeUnits.doubleQuote || bytes[i + 6] == CodeUnits.lf { break }
+                    if bytes[i + 7] == CodeUnits.backslash || bytes[i + 7] == CodeUnits.doubleQuote || bytes[i + 7] == CodeUnits.lf { break }
+                    i += 8
+                }
+
+                while i < end {
+                    let ch = bytes[i]
+                    if localEscape {
+                        localEscape = false
+                        if ch == CodeUnits.lowerB || ch == CodeUnits.lowerT
+                            || ch == CodeUnits.lowerN || ch == CodeUnits.lowerF
+                            || ch == CodeUnits.lowerR || ch == CodeUnits.doubleQuote
+                            || ch == CodeUnits.backslash
+                        {
+                            i += 1
+                            continue
+                        }
+
+                        if ch == CodeUnits.lowerU {
+                            localExpectedHexDigit = 4
+                            i += 1
+                            continue
+                        }
+
+                        if ch == CodeUnits.upperU {
+                            localExpectedHexDigit = 8
+                            i += 1
+                            continue
+                        }
+
+                        // Set error flag and break
+                        expectedHexDigit = -1
+                        break
+                    }
+
+                    if localExpectedHexDigit > 0 {
+                        localExpectedHexDigit -= 1
+                        if ch.isHexDigit {
+                            i += 1
+                            continue
+                        }
+                        // Set error flag and break
+                        expectedHexDigit = -2
+                        break
+                    }
+
+                    if ch == CodeUnits.backslash {
+                        localEscape = true
+                        i += 1
+                        continue
+                    }
+
+                    if ch == CodeUnits.singleQuote {
+                        i += 1
+                        continue
+                    }
+
+                    if ch == CodeUnits.lf || ch == CodeUnits.doubleQuote {
+                        break
+                    }
+                    i += 1
+                }
+
+                expectedHexDigit = localExpectedHexDigit
+
+                if expectedHexDigit == -1 {
+                    throw TOMLError(
+                        .syntax(lineNumber: lineNumber, message: "expected escape char"))
+                }
+                if expectedHexDigit == -2 {
+                    throw TOMLError(.syntax(lineNumber: lineNumber, message: "expect hex char"))
+                }
+                if i >= end || bytes[i] != CodeUnits.doubleQuote {
+                    throw TOMLError(
+                        .syntax(lineNumber: lineNumber, message: "unterminated quote"))
+                }
+
+                emitToken(kind: .string, start: start, end: i + 1)
+                return
+            }
+
+            if !isDotSpecial {
+                var index = start
+                var dateEnder: Int?
+                // Fast path: Dates must produce YYYY-MM-DD, so checks for the dash
+                if start + 4 < end && bytes[start + 4] == CodeUnits.minus {
+                    dateEnder = scanDate(bytes: bytes, range: range)?.3
+                }
+
+                if let dateEnder, dateEnder < end,
+                   bytes[dateEnder] == CodeUnits.upperT || bytes[dateEnder] == CodeUnits.lowerT
+                   || bytes[dateEnder] == CodeUnits.space
+                {
+                    let timeStarter = dateEnder + 1
+                    if let timeEnder = scanTime(
+                        bytes: bytes, range: timeStarter ..< end
+                    )?.3 {
+                        index = timeEnder
+                    }
+                } else if let dateEnder {
+                    index = dateEnder
+                } else if start + 2 < end, bytes[start + 2] == CodeUnits.colon,
+                          let timeEnder = scanTime(
+                              bytes: bytes, range: start ..< end
+                          )?.3
+                {
+                    index = timeEnder
+                }
+                if index > start {
+                    if index < end {
+                        if bytes[index] == CodeUnits.dot {
+                            index += 1
+                            while index < end, bytes[index] >= CodeUnits.number0,
+                                  bytes[index] <= CodeUnits.number9
+                            {
+                                index += 1
+                            }
+                        }
+                        if bytes[index] == CodeUnits.upperZ || bytes[index] == CodeUnits.lowerZ {
+                            index += 1
+                        } else if let timzoneEnder = scanTimezoneOffset(
+                            bytes: bytes, range: index ..< end
+                        ) {
+                            index = timzoneEnder
+                        }
+                    }
+                    // squeeze out any spaces at end of string
+                    while index >= start,
+                          bytes[index - 1] == CodeUnits.space
+                    {
+                        index -= 1
+                    }
+                    // tokenize
+                    emitToken(kind: .string, start: start, end: index)
+                    return
+                }
+            }
+
+            if isDotSpecial {
+                let isBareKeyChar = CodeUnits.isBareKeyChar
+                var index = start
+                var isValidKey = true
+                while index < end {
+                    let ch = bytes[index]
+                    if isBareKeyChar[Int(ch)] {
+                        index += 1
+                        continue
+                    }
+                    if ch == CodeUnits.plus {
+                        isValidKey = false
+                        index += 1
+                        continue
+                    }
+                    break
+                }
+                emitToken(kind: isValidKey ? .bareKey : .string, start: start, end: index)
+            } else {
+                let isValueChar = CodeUnits.isValueChar
+                var index = start
+                while index < end {
+                    let ch = bytes[index]
+                    if isValueChar[Int(ch)] {
+                        index += 1
+                        continue
+                    }
+                    break
+                }
+                emitToken(kind: .string, start: start, end: index)
+            }
+        }
+
+        if position >= count {
+            emitToken(kind: .eof, start: position, end: count)
+            return
+        }
+
+        let ch = bytes[position]
+        switch ch {
+        case CodeUnits.dot where isDotSpecial:
+            emitToken(kind: .dot, start: position, end: position + 1)
+            return
+        case CodeUnits.comma:
+            emitToken(kind: .comma, start: position, end: position + 1)
+            return
+        case CodeUnits.equal:
+            emitToken(kind: .equal, start: position, end: position + 1)
+            return
+        case CodeUnits.lbrace:
+            emitToken(kind: .lbrace, start: position, end: position + 1)
+            return
+        case CodeUnits.rbrace:
+            emitToken(kind: .rbrace, start: position, end: position + 1)
+            return
+        case CodeUnits.lbracket:
+            emitToken(kind: .lbracket, start: position, end: position + 1)
+            return
+        case CodeUnits.rbracket:
+            emitToken(kind: .rbracket, start: position, end: position + 1)
+            return
+        case CodeUnits.lf:
+            emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
+            return
+        case CodeUnits.cr:
+            // Check if this is part of a CRLF sequence
+            let nextPosition = position + 1
+            if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
+                // This is CRLF, treat as newline
+                emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
+                return
+            }
+            // Bare CR is invalid
+            throw TOMLError(
+                .syntax(
+                    lineNumber: lineNumber,
+                    message: "bare carriage return is not allowed"
+                ))
+        default:
+            break
+        }
+
+        try scanString(range: position ..< count, lineNumber: lineNumber)
+    }
+
+    mutating func nextToken(bytes: UnsafeBufferPointer<UInt8>, isDotSpecial: Bool) throws(TOMLError) {
+        let lineNumber = currentLineNumber
+        var position = cursor
+
+        let count = bytes.count
+        skipTrivia: while position < count {
             let ch = bytes[position]
             switch ch {
             case CodeUnits.pound:
@@ -78,354 +440,12 @@ extension Parser {
                     position += 1
                 }
                 continue
-            case CodeUnits.dot where isDotSpecial:
-                emitToken(kind: .dot, start: position, end: position + 1)
-                return
-            case CodeUnits.comma:
-                emitToken(kind: .comma, start: position, end: position + 1)
-                return
-            case CodeUnits.equal:
-                emitToken(kind: .equal, start: position, end: position + 1)
-                return
-            case CodeUnits.lbrace:
-                emitToken(kind: .lbrace, start: position, end: position + 1)
-                return
-            case CodeUnits.rbrace:
-                emitToken(kind: .rbrace, start: position, end: position + 1)
-                return
-            case CodeUnits.lbracket:
-                emitToken(kind: .lbracket, start: position, end: position + 1)
-                return
-            case CodeUnits.rbracket:
-                emitToken(kind: .rbracket, start: position, end: position + 1)
-                return
-            case CodeUnits.lf:
-                emitToken(kind: .newline, start: position, end: position + 1, newlines: 1)
-                return
-            case CodeUnits.cr:
-                // Check if this is part of a CRLF sequence
-                let nextPosition = position + 1
-                if nextPosition < count, bytes[nextPosition] == CodeUnits.lf {
-                    // This is CRLF, treat as newline
-                    emitToken(kind: .newline, start: position, end: nextPosition + 1, newlines: 1)
-                    return
-                }
-                // Bare CR is invalid
-                throw TOMLError(
-                    .syntax(
-                        lineNumber: lineNumber,
-                        message: "bare carriage return is not allowed"
-                    ))
             default:
-                break
+                break skipTrivia
             }
-
-            func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
-                let isBareKeyChar = CodeUnits.isBareKeyChar
-                let isValueChar = CodeUnits.isValueChar
-                let start = range.lowerBound
-                let head = bytes[start]
-                if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
-                    (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
-                    head == CodeUnits.underscore
-                {
-                    var index = start + 1
-                    while index < range.upperBound {
-                        let ch = bytes[index]
-                        if isBareKeyChar[Int(ch)] {
-                            index += 1
-                            continue
-                        }
-                        break
-                    }
-                    emitToken(kind: .bareKey, start: start, end: index)
-                    return
-                }
-
-                if start + 3 <= range.upperBound,
-                   bytes[start] == CodeUnits.singleQuote,
-                   bytes[start + 1] == CodeUnits.singleQuote,
-                   bytes[start + 2] == CodeUnits.singleQuote
-                {
-                    var i = start + 3
-                    var newlinesInToken = 0
-
-                    while i < range.upperBound {
-                        if bytes[i] == CodeUnits.lf {
-                            newlinesInToken += 1
-                        }
-                        if i + 3 <= range.upperBound,
-                           bytes[i] == CodeUnits.singleQuote,
-                           bytes[i + 1] == CodeUnits.singleQuote,
-                           bytes[i + 2] == CodeUnits.singleQuote
-                        {
-                            if i + 3 >= range.upperBound || bytes[i + 3] != CodeUnits.singleQuote {
-                                break
-                            }
-                        }
-                        i += 1
-                    }
-
-                    guard i < range.upperBound else {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote"))
-                    }
-
-                    let end = i + 3
-                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
-                    return
-                }
-
-                if start + 3 < range.upperBound,
-                   bytes[start] == CodeUnits.doubleQuote,
-                   bytes[start + 1] == CodeUnits.doubleQuote,
-                   bytes[start + 2] == CodeUnits.doubleQuote
-                {
-                    var i = start + 3
-                    let textCount = range.upperBound
-                    var newlinesInToken = 0
-
-                    while i < textCount {
-                        if bytes[i] == CodeUnits.lf {
-                            newlinesInToken += 1
-                        }
-                        if i + 3 <= textCount,
-                           bytes[i] == CodeUnits.doubleQuote,
-                           bytes[i + 1] == CodeUnits.doubleQuote,
-                           bytes[i + 2] == CodeUnits.doubleQuote
-                        {
-                            // Check if this is exactly 3 quotes (not part of a longer sequence)
-                            if i + 3 >= textCount || bytes[i + 3] != CodeUnits.doubleQuote {
-                                if bytes[i - 1] == CodeUnits.backslash {
-                                    i += 1
-                                    continue
-                                }
-                                break
-                            }
-                        }
-                        i += 1
-                    }
-
-                    guard i < range.upperBound else {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote"))
-                    }
-
-                    let end = i + 3
-                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
-                    return
-                }
-
-                let ch = bytes[start]
-                if ch == CodeUnits.singleQuote {
-                    var i = start + 1
-                    let textCount = range.upperBound
-
-                    while i < textCount {
-                        let ch = bytes[i]
-                        if ch == CodeUnits.singleQuote || ch == CodeUnits.lf {
-                            break
-                        }
-                        i += 1
-                    }
-
-                    if i >= textCount || bytes[i] != CodeUnits.singleQuote {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
-                    }
-
-                    emitToken(kind: .string, start: start, end: i + 1)
-                    return
-                }
-
-                if ch == CodeUnits.doubleQuote {
-                    var i = start + 1
-                    var expectedHexDigit = 0
-                    var localExpectedHexDigit = 0
-                    var localEscape = false
-
-                    // 8x unrolling for double-quoted strings
-                    while i + 8 <= range.upperBound {
-                        if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
-                        if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
-                        if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
-                        if bytes[i + 3] == CodeUnits.backslash || bytes[i + 3] == CodeUnits.doubleQuote || bytes[i + 3] == CodeUnits.lf { break }
-                        if bytes[i + 4] == CodeUnits.backslash || bytes[i + 4] == CodeUnits.doubleQuote || bytes[i + 4] == CodeUnits.lf { break }
-                        if bytes[i + 5] == CodeUnits.backslash || bytes[i + 5] == CodeUnits.doubleQuote || bytes[i + 5] == CodeUnits.lf { break }
-                        if bytes[i + 6] == CodeUnits.backslash || bytes[i + 6] == CodeUnits.doubleQuote || bytes[i + 6] == CodeUnits.lf { break }
-                        if bytes[i + 7] == CodeUnits.backslash || bytes[i + 7] == CodeUnits.doubleQuote || bytes[i + 7] == CodeUnits.lf { break }
-                        i += 8
-                    }
-
-                    while i < range.upperBound {
-                        let ch = bytes[i]
-                        if localEscape {
-                            localEscape = false
-                            if ch == CodeUnits.lowerB || ch == CodeUnits.lowerT
-                                || ch == CodeUnits.lowerN || ch == CodeUnits.lowerF
-                                || ch == CodeUnits.lowerR || ch == CodeUnits.doubleQuote
-                                || ch == CodeUnits.backslash
-                            {
-                                i += 1
-                                continue
-                            }
-
-                            if ch == CodeUnits.lowerU {
-                                localExpectedHexDigit = 4
-                                i += 1
-                                continue
-                            }
-
-                            if ch == CodeUnits.upperU {
-                                localExpectedHexDigit = 8
-                                i += 1
-                                continue
-                            }
-
-                            // Set error flag and break
-                            expectedHexDigit = -1
-                            break
-                        }
-
-                        if localExpectedHexDigit > 0 {
-                            localExpectedHexDigit -= 1
-                            if ch.isHexDigit {
-                                i += 1
-                                continue
-                            }
-                            // Set error flag and break
-                            expectedHexDigit = -2
-                            break
-                        }
-
-                        if ch == CodeUnits.backslash {
-                            localEscape = true
-                            i += 1
-                            continue
-                        }
-
-                        if ch == CodeUnits.singleQuote {
-                            i += 1
-                            continue
-                        }
-
-                        if ch == CodeUnits.lf || ch == CodeUnits.doubleQuote {
-                            break
-                        }
-                        i += 1
-                    }
-
-                    expectedHexDigit = localExpectedHexDigit
-
-                    if expectedHexDigit == -1 {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "expected escape char"))
-                    }
-                    if expectedHexDigit == -2 {
-                        throw TOMLError(.syntax(lineNumber: lineNumber, message: "expect hex char"))
-                    }
-                    if i >= range.upperBound || bytes[i] != CodeUnits.doubleQuote {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated quote"))
-                    }
-
-                    emitToken(kind: .string, start: start, end: i + 1)
-                    return
-                }
-
-                if !isDotSpecial {
-                    var index = start
-                    var dateEnder: Int?
-                    // Fast path: Dates must produce YYYY-MM-DD, so checks for the dash
-                    if start + 4 < range.upperBound && bytes[start + 4] == CodeUnits.minus {
-                        dateEnder = scanDate(bytes: bytes, range: range)?.3
-                    }
-
-                    if let dateEnder, dateEnder < range.upperBound,
-                       bytes[dateEnder] == CodeUnits.upperT || bytes[dateEnder] == CodeUnits.lowerT
-                       || bytes[dateEnder] == CodeUnits.space
-                    {
-                        let timeStarter = dateEnder + 1
-                        if let timeEnder = scanTime(
-                            bytes: bytes, range: timeStarter ..< range.upperBound
-                        )?.3 {
-                            index = timeEnder
-                        }
-                    } else if let dateEnder {
-                        index = dateEnder
-                    } else if start + 2 < range.upperBound, bytes[start + 2] == CodeUnits.colon,
-                              let timeEnder = scanTime(
-                                  bytes: bytes, range: start ..< range.upperBound
-                              )?.3
-                    {
-                        index = timeEnder
-                    }
-                    if index > start {
-                        if index < range.upperBound {
-                            if bytes[index] == CodeUnits.dot {
-                                index += 1
-                                while index < range.upperBound, bytes[index] >= CodeUnits.number0,
-                                      bytes[index] <= CodeUnits.number9
-                                {
-                                    index += 1
-                                }
-                            }
-                            if bytes[index] == CodeUnits.upperZ || bytes[index] == CodeUnits.lowerZ {
-                                index += 1
-                            } else if let timzoneEnder = scanTimezoneOffset(
-                                bytes: bytes, range: index ..< range.upperBound
-                            ) {
-                                index = timzoneEnder
-                            }
-                        }
-                        // squeeze out any spaces at end of string
-                        while index >= start,
-                              bytes[index - 1] == CodeUnits.space
-                        {
-                            index -= 1
-                        }
-                        // tokenize
-                        emitToken(kind: .string, start: start, end: index)
-                        return
-                    }
-                }
-
-                if isDotSpecial {
-                    var index = start
-                    var isValidKey = true
-                    while index < range.upperBound {
-                        let ch = bytes[index]
-                        if isBareKeyChar[Int(ch)] {
-                            index += 1
-                            continue
-                        }
-                        if ch == CodeUnits.plus {
-                            isValidKey = false
-                            index += 1
-                            continue
-                        }
-                        break
-                    }
-                    emitToken(kind: isValidKey ? .bareKey : .string, start: start, end: index)
-                } else {
-                    var index = start
-                    while index < range.upperBound {
-                        let ch = bytes[index]
-                        if isValueChar[Int(ch)] {
-                            index += 1
-                            continue
-                        }
-                        break
-                    }
-                    emitToken(kind: .string, start: start, end: index)
-                }
-            }
-
-            try scanString(range: position ..< count, lineNumber: lineNumber)
-            return
         }
 
-        emitToken(kind: .eof, start: position, end: count)
+        try lexToken(bytes: bytes, position: position, lineNumber: lineNumber, isDotSpecial: isDotSpecial)
     }
 
     mutating func eatToken(bytes: UnsafeBufferPointer<UInt8>, kind: Token.Kind, isDotSpecial: Bool)
@@ -602,7 +622,7 @@ extension Parser {
                 // Found something else, stop skipping
                 cursor = position
                 currentLineNumber = lineNumber
-                try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
+                try lexToken(bytes: bytes, position: position, lineNumber: lineNumber, isDotSpecial: isDotSpecial)
                 return
             }
         }
@@ -610,7 +630,7 @@ extension Parser {
         // If we hit EOF or loop finishes
         cursor = position
         currentLineNumber = lineNumber
-        try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
+        try lexToken(bytes: bytes, position: position, lineNumber: lineNumber, isDotSpecial: isDotSpecial)
     }
 
     mutating func parseKeyedInlineTable(bytes: UnsafeBufferPointer<UInt8>, tableIndex: Int) throws(TOMLError) {
