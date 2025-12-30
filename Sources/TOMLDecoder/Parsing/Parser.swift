@@ -461,8 +461,14 @@ struct Parser {
         keyValues.append(kv)
 
         if isKeyed {
+            if keyTables[tableIndex].table.keyValues.isEmpty {
+                keyTables[tableIndex].table.keyValues.reserveCapacity(8)
+            }
             keyTables[tableIndex].table.keyValues.append(index)
         } else {
+            if tables[tableIndex].keyValues.isEmpty {
+                tables[tableIndex].keyValues.reserveCapacity(8)
+            }
             tables[tableIndex].keyValues.append(index)
         }
         return index
@@ -498,8 +504,14 @@ struct Parser {
         keyTables.append(KeyTablePair(key: key, keyHash: keyHash, table: newTable))
 
         if isKeyed {
+            if keyTables[tableIndex].table.tables.isEmpty {
+                keyTables[tableIndex].table.tables.reserveCapacity(8)
+            }
             keyTables[tableIndex].table.tables.append(index)
         } else {
+            if tables[tableIndex].tables.isEmpty {
+                tables[tableIndex].tables.reserveCapacity(8)
+            }
             tables[tableIndex].tables.append(index)
         }
         return index
@@ -515,8 +527,14 @@ struct Parser {
         let index = keyArrays.count
         keyArrays.append(KeyArrayPair(key: key, keyHash: keyHash, array: InternalTOMLArray(kind: kind)))
         if isKeyed {
+            if keyTables[tableIndex].table.arrays.isEmpty {
+                keyTables[tableIndex].table.arrays.reserveCapacity(8)
+            }
             keyTables[tableIndex].table.arrays.append(index)
         } else {
+            if tables[tableIndex].arrays.isEmpty {
+                tables[tableIndex].arrays.reserveCapacity(8)
+            }
             tables[tableIndex].arrays.append(index)
         }
         return index
