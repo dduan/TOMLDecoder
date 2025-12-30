@@ -101,3 +101,28 @@ extension UTF8.CodeUnit {
             || CodeUnits.upperA <= self && self <= CodeUnits.upperF
     }
 }
+
+let keyHashOffsetBasis: UInt64 = 0xCBF2_9CE4_8422_2325
+let keyHashPrime: UInt64 = 0x100_0000_01B3
+
+@inline(__always)
+func computeKeyHash(bytes: UnsafeBufferPointer<UInt8>, start: Int, end: Int) -> Int {
+    var hash = keyHashOffsetBasis
+    var index = start
+    while index < end {
+        hash ^= UInt64(bytes[index])
+        hash &*= keyHashPrime
+        index += 1
+    }
+    return Int(truncatingIfNeeded: hash)
+}
+
+@inline(__always)
+func computeKeyHash(_ string: String) -> Int {
+    var hash = keyHashOffsetBasis
+    for byte in string.utf8 {
+        hash ^= UInt64(byte)
+        hash &*= keyHashPrime
+    }
+    return Int(truncatingIfNeeded: hash)
+}

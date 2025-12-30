@@ -119,7 +119,7 @@ struct InternalTOMLTable: Equatable, Sendable {
     }
 
     func contains(source: TOMLDocument, key: String) -> Bool {
-        let keyHash = key.hashValue
+        let keyHash = computeKeyHash(key)
         for kv in keyValues {
             let pair = source.keyValues[kv]
             if pair.keyHash == keyHash, pair.key == key {

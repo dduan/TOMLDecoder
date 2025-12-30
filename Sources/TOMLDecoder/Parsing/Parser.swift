@@ -451,8 +451,7 @@ struct Parser {
     }
 
     mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
-        let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let (key, keyHash) = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
@@ -475,8 +474,18 @@ struct Parser {
     }
 
     mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
-        let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let (key, keyHash) = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
+        return try createKeyTable(
+            key: key,
+            keyHash: keyHash,
+            token: token,
+            inTable: tableIndex,
+            isKeyed: isKeyed,
+            implicit: implicit
+        )
+    }
+
+    mutating func createKeyTable(key: String, keyHash: Int, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         // Check if parent table is readOnly (inline table)
         if isKeyed ? keyTables[tableIndex].table.readOnly : tables[tableIndex].readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
@@ -518,8 +527,18 @@ struct Parser {
     }
 
     mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
-        let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let (key, keyHash) = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
+        return try createKeyArray(
+            key: key,
+            keyHash: keyHash,
+            token: token,
+            inTable: tableIndex,
+            isKeyed: isKeyed,
+            kind: kind
+        )
+    }
+
+    mutating func createKeyArray(key: String, keyHash: Int, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         }
@@ -863,8 +882,7 @@ struct Parser {
         try nextToken(bytes: bytes, isDotSpecial: true)
 
         if token.kind == .dot {
-            let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
-            let subTableHash = subTableKey.hashValue
+            let (subTableKey, subTableHash) = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
             let subTableIndex: Int
 
             if let existingTableIndex = lookupTable(in: tableIndex, keyed: isKeyed, key: subTableKey, keyHash: subTableHash) {
@@ -874,7 +892,14 @@ struct Parser {
                 }
                 subTableIndex = existingTableIndex
             } else {
-                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed, implicit: true)
+                subTableIndex = try createKeyTable(
+                    key: subTableKey,
+                    keyHash: subTableHash,
+                    token: key,
+                    inTable: tableIndex,
+                    isKeyed: isKeyed,
+                    implicit: true
+                )
             }
 
             try nextToken(bytes: bytes, isDotSpecial: true)
@@ -920,8 +945,8 @@ struct Parser {
                 throw TOMLError(.syntax(lineNumber: lineNumber, message: "invalid or missing key"))
             }
 
-            let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-            tablePath.append((key: key, keyHash: key.hashValue, token: token))
+            let (key, keyHash) = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
+            tablePath.append((key: key, keyHash: keyHash, token: token))
             try nextToken(bytes: bytes, isDotSpecial: true)
 
             if token.kind == .rbracket {
@@ -961,13 +986,26 @@ struct Parser {
 
         if !llb {
             // [x.y.z] -> create z = {} in x.y
-            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed)
+            currentTable = try createKeyTable(
+                key: lastKey,
+                keyHash: lastKeyHash,
+                token: z,
+                inTable: currentTable,
+                isKeyed: currentTableIsKeyed
+            )
             currentTableIsKeyed = true
         } else {
             // [[x.y.z]] -> create z = [] in x.y
             var maybeArrayIndex = lookupArray(in: currentTable, keyed: currentTableIsKeyed, key: lastKey, keyHash: lastKeyHash)
             if maybeArrayIndex == nil {
-                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed, kind: .table)
+                maybeArrayIndex = try createKeyArray(
+                    key: lastKey,
+                    keyHash: lastKeyHash,
+                    token: z,
+                    inTable: currentTable,
+                    isKeyed: currentTableIsKeyed,
+                    kind: .table
+                )
             }
             let arrayIndex = maybeArrayIndex!
             if keyArrays[arrayIndex].array.kind != .table {
@@ -1768,19 +1806,19 @@ func scanTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
     return index
 }
 
-func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> String {
+func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> (key: String, keyHash: Int) {
     var start = token.text.lowerBound
     var end = token.text.upperBound
     if token.kind == .bareKey {
-        var str = makeString(bytes: bytes, range: start ..< end)
+        let key = makeString(bytes: bytes, range: start ..< end)
         if let keyTransform {
-            str = keyTransform(str)
+            let transformed = keyTransform(key)
+            return (transformed, computeKeyHash(transformed))
         }
-        return str
+        return (key, computeKeyHash(bytes: bytes, start: start, end: end))
     }
 
     let ch = bytes[start]
-    var result = ""
     if ch == CodeUnits.doubleQuote || ch == CodeUnits.singleQuote {
         if bytes[start + 1] == ch, bytes[start + 2] == ch {
             // Keys cannot be multiline
@@ -1790,13 +1828,35 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
             end = end - 1
         }
 
-        if ch == CodeUnits.singleQuote {
-            result = makeString(bytes: bytes, range: start ..< end)
+        let result: String = if ch == CodeUnits.singleQuote {
+            makeString(bytes: bytes, range: start ..< end)
         } else {
-            result = try basicString(bytes: bytes, range: start ..< end, multiline: false)
+            try basicString(bytes: bytes, range: start ..< end, multiline: false)
         }
 
-        return result
+        let key = keyTransform?(result) ?? result
+        return (key, computeKeyHash(key))
+    }
+
+    if keyTransform == nil {
+        var hash = keyHashOffsetBasis
+        for i in start ..< end {
+            let byte = bytes[i]
+            if byte >= CodeUnits.number0 && byte <= CodeUnits.number9 || // 0-9
+                byte >= CodeUnits.upperA && byte <= CodeUnits.upperZ || // A-Z
+                byte >= CodeUnits.lowerA && byte <= CodeUnits.lowerZ || // a-z
+                byte == CodeUnits.underscore || // _
+                byte == CodeUnits.minus // -
+            {
+                hash ^= UInt64(byte)
+                hash &*= keyHashPrime
+                continue
+            }
+            throw TOMLError(.badKey(lineNumber: token.lineNumber))
+        }
+
+        let key = makeString(bytes: bytes, range: start ..< end)
+        return (key, Int(truncatingIfNeeded: hash))
     }
 
     for i in start ..< end {
@@ -1812,11 +1872,8 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
         throw TOMLError(.badKey(lineNumber: token.lineNumber))
     }
 
-    if let keyTransform {
-        return keyTransform(makeString(bytes: bytes, range: start ..< end))
-    }
-
-    return makeString(bytes: bytes, range: start ..< end)
+    let key = keyTransform?(makeString(bytes: bytes, range: start ..< end)) ?? makeString(bytes: bytes, range: start ..< end)
+    return (key, computeKeyHash(key))
 }
 
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
