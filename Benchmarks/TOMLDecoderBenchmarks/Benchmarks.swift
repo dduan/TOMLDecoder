@@ -40,6 +40,10 @@ let benchmarks: @Sendable () -> Void = {
         benchmark.startMeasurement()
         try blackHole(decoder.decode(TwitterArchive.self, from: Resources.twitterTOMLString))
     }
+
+    Benchmark("parse GitHub events archive") { _ in
+        try blackHole(TOMLTable(source: Resources.eventArchiveTOMLString))
+    }
 }
 
 let tomlIOTOML = """

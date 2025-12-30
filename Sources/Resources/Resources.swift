@@ -15,4 +15,8 @@ public enum Resources {
     public static var canadaTOMLString: String {
         stringContent(forResource: "canada.toml")
     }
+
+    public static var eventArchiveTOMLString: String {
+        stringContent(forResource: "github-events-archive.toml")
+    }
 }
