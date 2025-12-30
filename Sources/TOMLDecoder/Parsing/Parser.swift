@@ -1100,7 +1100,6 @@ extension Token {
         var index = text.lowerBound
         var endIndex = text.upperBound
 
-        assert(quoteChar == CodeUnits.doubleQuote || quoteChar == CodeUnits.singleQuote)
 
         if endIndex - index >= 3 && bytes[index] == CodeUnits.doubleQuote && bytes[index + 1] == CodeUnits.doubleQuote && bytes[index + 2] == CodeUnits.doubleQuote ||
             endIndex - index >= 3 && bytes[index] == CodeUnits.singleQuote && bytes[index + 1] == CodeUnits.singleQuote && bytes[index + 2] == CodeUnits.singleQuote
@@ -1117,7 +1116,7 @@ extension Token {
         } else {
             index = index + 1
             endIndex = endIndex - 1
-            guard bytes[endIndex] == quoteChar else {
+            guard endIndex >= 0, bytes[endIndex] == quoteChar else {
                 throw TOMLError(.invalidString(context: context, lineNumber: lineNumber, reason: "missing closing quote"))
             }
         }
