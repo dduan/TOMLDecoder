@@ -253,9 +253,6 @@ struct Parser {
 
                 if ch == CodeUnits.doubleQuote {
                     var i = start + 1
-                    var expectedHexDigit = 0
-                    var localExpectedHexDigit = 0
-                    var localEscape = false
 
                     // 8x unrolling for double-quoted strings
                     while i + 8 <= range.upperBound {
@@ -272,54 +269,13 @@ struct Parser {
 
                     while i < range.upperBound {
                         let ch = bytes[i]
-                        if localEscape {
-                            localEscape = false
-                            if ch == CodeUnits.lowerB || ch == CodeUnits.lowerT
-                                || ch == CodeUnits.lowerN || ch == CodeUnits.lowerF
-                                || ch == CodeUnits.lowerR || ch == CodeUnits.doubleQuote
-                                || ch == CodeUnits.backslash
-                            {
-                                i += 1
-                                continue
-                            }
-
-                            if ch == CodeUnits.lowerU {
-                                localExpectedHexDigit = 4
-                                i += 1
-                                continue
-                            }
-
-                            if ch == CodeUnits.upperU {
-                                localExpectedHexDigit = 8
-                                i += 1
-                                continue
-                            }
-
-                            // Set error flag and break
-                            expectedHexDigit = -1
-                            break
-                        }
-
-                        if localExpectedHexDigit > 0 {
-                            localExpectedHexDigit -= 1
-                            if ch.isHexDigit {
-                                i += 1
-                                continue
-                            }
-                            // Set error flag and break
-                            expectedHexDigit = -2
-                            break
-                        }
-
                         if ch == CodeUnits.backslash {
-                            localEscape = true
                             i += 1
-                            continue
-                        }
-
-                        if ch == CodeUnits.singleQuote {
-                            i += 1
-                            continue
+                            if i < range.upperBound {
+                                i += 1
+                                continue
+                            }
+                            break
                         }
 
                         if ch == CodeUnits.lf || ch == CodeUnits.doubleQuote {
@@ -328,15 +284,6 @@ struct Parser {
                         i += 1
                     }
 
-                    expectedHexDigit = localExpectedHexDigit
-
-                    if expectedHexDigit == -1 {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "expected escape char"))
-                    }
-                    if expectedHexDigit == -2 {
-                        throw TOMLError(.syntax(lineNumber: lineNumber, message: "expect hex char"))
-                    }
                     if i >= range.upperBound || bytes[i] != CodeUnits.doubleQuote {
                         throw TOMLError(
                             .syntax(lineNumber: lineNumber, message: "unterminated quote"))
