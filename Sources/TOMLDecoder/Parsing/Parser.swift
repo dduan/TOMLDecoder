@@ -1100,7 +1100,6 @@ extension Token {
         var index = text.lowerBound
         var endIndex = text.upperBound
 
-
         if endIndex - index >= 3 && bytes[index] == CodeUnits.doubleQuote && bytes[index + 1] == CodeUnits.doubleQuote && bytes[index + 2] == CodeUnits.doubleQuote ||
             endIndex - index >= 3 && bytes[index] == CodeUnits.singleQuote && bytes[index + 1] == CodeUnits.singleQuote && bytes[index + 2] == CodeUnits.singleQuote
         {
