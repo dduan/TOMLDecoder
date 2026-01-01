@@ -9,11 +9,9 @@ Also known as release notes.
 Improved runtime performance.
 
 For a TOML document such as [this twitter payload](https://github.com/dduan/TOMLDecoder/blob/cea8f0bee33f37e0fcc33b566a742485c71196e7/Sources/Resources/fixtures/twitter.toml),
-Parsing it costs >50% less CPU instructions,
-and ~100% less memeory retains.
+Parsing it costs >50% less CPU instructions, and ~100% less memory retains.
 
-The in release build,
-parsing this document with TOMLDecoder takes less time than the C library [tomlc99](https://github.com/cktan/tomlc99).
+The in release build, parsing this document with TOMLDecoder takes less time than the C library [tomlc99](https://github.com/cktan/tomlc99).
 
 
 ## 0.4.2
