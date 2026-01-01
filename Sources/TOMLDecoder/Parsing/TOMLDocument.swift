@@ -10,12 +10,25 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
     let source: String
 
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
-        var source = source
+        var hasContinousStorage = false
         var parser = Parser(keyTransform: keyTransform)
+
         do {
-            try source.withUTF8 { try parser.parse(bytes: $0) }
+            try source.utf8.withContiguousStorageIfAvailable {
+                hasContinousStorage = true
+                try parser.parse(bytes: $0)
+            }
         } catch {
             throw error as! TOMLError
+        }
+
+        if !hasContinousStorage {
+            var source = source
+            do {
+                try source.withUTF8 { try parser.parse(bytes: $0) }
+            } catch {
+                throw error as! TOMLError
+            }
         }
 
         self.source = source
