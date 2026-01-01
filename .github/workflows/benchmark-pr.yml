@@ -14,7 +14,7 @@ env:
 jobs:
   benchmark-delta:
     name: PR vs main
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     continue-on-error: true
     permissions:
       issues: write
@@ -25,10 +25,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Ubuntu deps
+      - name: Install deps
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libjemalloc-dev
+          brew install jemalloc
 
       - name: Git URL token override and misc
         run: |
