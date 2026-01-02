@@ -399,7 +399,7 @@ struct Parser {
 
     mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let keyHash = fastKeyHash(key)
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
@@ -423,7 +423,7 @@ struct Parser {
 
     mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let keyHash = fastKeyHash(key)
         // Check if parent table is readOnly (inline table)
         if isKeyed ? keyTables[tableIndex].table.readOnly : tables[tableIndex].readOnly {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
@@ -466,7 +466,7 @@ struct Parser {
 
     mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-        let keyHash = key.hashValue
+        let keyHash = fastKeyHash(key)
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
             throw TOMLError(.keyExists(lineNumber: token.lineNumber))
         }
@@ -811,7 +811,7 @@ struct Parser {
 
         if token.kind == .dot {
             let subTableKey = try normalizeKey(bytes: bytes, token: key, keyTransform: keyTransform)
-            let subTableHash = subTableKey.hashValue
+            let subTableHash = fastKeyHash(subTableKey)
             let subTableIndex: Int
 
             if let existingTableIndex = lookupTable(in: tableIndex, keyed: isKeyed, key: subTableKey, keyHash: subTableHash) {
@@ -868,7 +868,7 @@ struct Parser {
             }
 
             let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
-            tablePath.append((key: key, keyHash: key.hashValue, token: token))
+            tablePath.append((key: key, keyHash: fastKeyHash(key), token: token))
             try nextToken(bytes: bytes, isDotSpecial: true)
 
             if token.kind == .rbracket {
@@ -1764,6 +1764,30 @@ func normalizeKey(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform:
     }
 
     return makeString(bytes: bytes, range: start ..< end)
+}
+
+@inline(__always)
+func fastKeyHash(_ key: String) -> Int {
+    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
+    let prime: UInt64 = 1_099_511_628_211
+
+    if let hash = key.utf8.withContiguousStorageIfAvailable({ buffer -> UInt64 in
+        var hash = offsetBasis
+        for byte in buffer {
+            hash ^= UInt64(byte)
+            hash &*= prime
+        }
+        return hash
+    }) {
+        return Int(truncatingIfNeeded: hash)
+    }
+
+    var hash = offsetBasis
+    for byte in key.utf8 {
+        hash ^= UInt64(byte)
+        hash &*= prime
+    }
+    return Int(truncatingIfNeeded: hash)
 }
 
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
