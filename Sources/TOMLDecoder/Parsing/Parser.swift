@@ -1772,6 +1772,9 @@ func fastKeyHash(_ key: String) -> Int {
     let prime: UInt64 = 1_099_511_628_211
 
     if let hash = key.utf8.withContiguousStorageIfAvailable({ buffer -> UInt64 in
+        if buffer.count <= 8 {
+            return packedKeyHash(buffer)
+        }
         var hash = offsetBasis
         for byte in buffer {
             hash ^= UInt64(byte)
@@ -1783,11 +1786,50 @@ func fastKeyHash(_ key: String) -> Int {
     }
 
     var hash = offsetBasis
+    var packed: UInt64 = 0
+    var count = 0
     for byte in key.utf8 {
+        if count < 8 {
+            packed |= UInt64(byte) << (UInt64(count) * 8)
+        }
         hash ^= UInt64(byte)
         hash &*= prime
+        count += 1
     }
-    return Int(truncatingIfNeeded: hash)
+    return Int(truncatingIfNeeded: count <= 8 ? packed : hash)
+}
+
+@inline(__always)
+private func packedKeyHash(_ buffer: UnsafeBufferPointer<UInt8>) -> UInt64 {
+    var packed: UInt64 = 0
+    switch buffer.count {
+    case 8:
+        packed |= UInt64(buffer[7]) << 56
+        fallthrough
+    case 7:
+        packed |= UInt64(buffer[6]) << 48
+        fallthrough
+    case 6:
+        packed |= UInt64(buffer[5]) << 40
+        fallthrough
+    case 5:
+        packed |= UInt64(buffer[4]) << 32
+        fallthrough
+    case 4:
+        packed |= UInt64(buffer[3]) << 24
+        fallthrough
+    case 3:
+        packed |= UInt64(buffer[2]) << 16
+        fallthrough
+    case 2:
+        packed |= UInt64(buffer[1]) << 8
+        fallthrough
+    case 1:
+        packed |= UInt64(buffer[0])
+    default:
+        break
+    }
+    return packed
 }
 
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
