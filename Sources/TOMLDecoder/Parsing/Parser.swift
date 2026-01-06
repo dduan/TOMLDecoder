@@ -1840,19 +1840,22 @@ extension Parser {
     func tableValue(tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> InternalTOMLTable.Value? {
         let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
         for kv in table.keyValues {
-            if keyValues[kv].keyHash == keyHash, keyValues[kv].key == key {
+            let kvPair = keyValues[kv]
+            if kvPair.keyHash == keyHash, kvPair.key == key {
                 return .keyValue(kv)
             }
         }
 
         for arr in table.arrays {
-            if keyArrays[arr].keyHash == keyHash, keyArrays[arr].key == key {
+            let arrPair = keyArrays[arr]
+            if arrPair.keyHash == keyHash, arrPair.key == key {
                 return .array(arr)
             }
         }
 
         for table in table.tables {
-            if keyTables[table].keyHash == keyHash, keyTables[table].key == key {
+            let tablePair = keyTables[table]
+            if tablePair.keyHash == keyHash, tablePair.key == key {
                 return .table(table)
             }
         }
@@ -1864,7 +1867,8 @@ extension Parser {
         let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
         for i in 0 ..< table.tables.count {
             let tableIndexAtPosition = table.tables[i]
-            if keyTables[tableIndexAtPosition].keyHash == keyHash, keyTables[tableIndexAtPosition].key == key {
+            let tablePair = keyTables[tableIndexAtPosition]
+            if tablePair.keyHash == keyHash, tablePair.key == key {
                 return tableIndexAtPosition
             }
         }
@@ -1875,7 +1879,8 @@ extension Parser {
         let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
         for i in 0 ..< table.arrays.count {
             let arrayIndex = table.arrays[i]
-            if keyArrays[arrayIndex].keyHash == keyHash, keyArrays[arrayIndex].key == key {
+            let arrPair = keyArrays[arrayIndex]
+            if arrPair.keyHash == keyHash, arrPair.key == key {
                 return arrayIndex
             }
         }
