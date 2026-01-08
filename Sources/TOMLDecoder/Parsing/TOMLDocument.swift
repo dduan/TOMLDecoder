@@ -1,12 +1,11 @@
 import Foundation
 
-struct TOMLDocument: Equatable, @unchecked Sendable {
+final class DocumentStorage: @unchecked Sendable, Equatable {
     let tables: [InternalTOMLTable]
     let arrays: [InternalTOMLArray]
     let keyTables: [KeyTablePair]
     let keyArrays: [KeyArrayPair]
     let keyValues: [KeyValuePair]
-
     let source: String
 
     init(
@@ -23,6 +22,44 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
         self.keyTables = keyTables
         self.keyArrays = keyArrays
         self.keyValues = keyValues
+    }
+
+    static func == (lhs: DocumentStorage, rhs: DocumentStorage) -> Bool {
+        lhs.source == rhs.source &&
+            lhs.tables == rhs.tables &&
+            lhs.arrays == rhs.arrays &&
+            lhs.keyTables == rhs.keyTables &&
+            lhs.keyArrays == rhs.keyArrays &&
+            lhs.keyValues == rhs.keyValues
+    }
+}
+
+struct TOMLDocument: Equatable, @unchecked Sendable {
+    fileprivate let storage: DocumentStorage
+
+    var tables: [InternalTOMLTable] { storage.tables }
+    var arrays: [InternalTOMLArray] { storage.arrays }
+    var keyTables: [KeyTablePair] { storage.keyTables }
+    var keyArrays: [KeyArrayPair] { storage.keyArrays }
+    var keyValues: [KeyValuePair] { storage.keyValues }
+    var source: String { storage.source }
+
+    init(
+        source: String,
+        tables: [InternalTOMLTable],
+        arrays: [InternalTOMLArray],
+        keyTables: [KeyTablePair],
+        keyArrays: [KeyArrayPair],
+        keyValues: [KeyValuePair]
+    ) {
+        self.storage = DocumentStorage(
+            source: source,
+            tables: tables,
+            arrays: arrays,
+            keyTables: keyTables,
+            keyArrays: keyArrays,
+            keyValues: keyValues
+        )
     }
 
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
