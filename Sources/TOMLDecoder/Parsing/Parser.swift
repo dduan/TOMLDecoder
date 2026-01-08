@@ -1,4 +1,4 @@
-struct Parser {
+struct Parser: ~Copyable {
     var token = Token.empty
     var cursor = 0
     var currentLineNumber = 1
