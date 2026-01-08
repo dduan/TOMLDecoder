@@ -9,6 +9,22 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
 
     let source: String
 
+    init(
+        source: String,
+        tables: [InternalTOMLTable],
+        arrays: [InternalTOMLArray],
+        keyTables: [KeyTablePair],
+        keyArrays: [KeyArrayPair],
+        keyValues: [KeyValuePair]
+    ) {
+        self.source = source
+        self.tables = tables
+        self.arrays = arrays
+        self.keyTables = keyTables
+        self.keyArrays = keyArrays
+        self.keyValues = keyValues
+    }
+
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
         var hasContinousStorage = false
         var parser = Parser(keyTransform: keyTransform)
@@ -31,12 +47,7 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
             }
         }
 
-        self.source = source
-        tables = parser.tables
-        arrays = parser.arrays
-        keyValues = parser.keyValues
-        keyTables = parser.keyTables
-        keyArrays = parser.keyArrays
+        self = parser.finish(source: source)
     }
 }
 
