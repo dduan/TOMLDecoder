@@ -13,3 +13,4 @@ tmp
 Docs
 Package.resolved
 .benchmarkBaselines
+.benchmarkWorktrees
