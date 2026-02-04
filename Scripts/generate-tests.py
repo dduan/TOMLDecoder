@@ -17,7 +17,7 @@ from typing import Iterable, List
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SPEC_VERSION = "1.0.0"
+DEFAULT_SPEC_VERSION = "1.1.0"
 TMP_ROOT = REPO_ROOT / "tmp"
 TOML_TEST_REPO_URL = "git@github.com:toml-lang/toml-test.git"
 TOML_TEST_COMMIT = "0ee318ae97ae5dec5f74aeccafbdc75f435580e2"
