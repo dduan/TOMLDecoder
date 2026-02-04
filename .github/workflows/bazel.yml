@@ -1,9 +1,13 @@
 name: Bazel Tests
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
 jobs:
   bazel-test:
     name: Bazel tests

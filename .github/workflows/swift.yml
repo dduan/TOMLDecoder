@@ -1,9 +1,13 @@
 name: Swift Tests
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
 jobs:
   swift-test:
     name: ${{ matrix.os_name }} (Swift ${{ matrix.swift_version }})

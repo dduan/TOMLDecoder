@@ -1,9 +1,13 @@
 name: WASM Build
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release/**'
 jobs:
   swift-build:
     name: Build for WebAssembly
