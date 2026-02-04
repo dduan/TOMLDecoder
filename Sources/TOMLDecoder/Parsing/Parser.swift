@@ -1549,8 +1549,13 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
         ch = bytes[index]
         index += 1
 
-        if ch == CodeUnits.lowerU || ch == CodeUnits.upperU {
-            let hexCount = (ch == CodeUnits.lowerU ? 4 : 8)
+        if ch == CodeUnits.lowerU || ch == CodeUnits.upperU || ch == CodeUnits.lowerX {
+            let hexCount = switch ch {
+            case CodeUnits.lowerU: 4
+            case CodeUnits.upperU: 8
+            case CodeUnits.lowerX: 2
+            default: fatalError("Unsupported CodeUnit: \(ch)")
+            }
             var ucs: UInt32 = 0
             for _ in 0 ..< hexCount {
                 if index >= endIndex {
