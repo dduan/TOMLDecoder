@@ -1,7 +1,7 @@
 # TOMLDecoder
 
 A fast, Swift-native, minimal dependency library
-that fully implements [TOML](https://toml.io/) spec 1.0.
+that fully implements [TOML](https://toml.io/) spec 1.1.0.
 
 ```swift
 struct Team: Codable {
