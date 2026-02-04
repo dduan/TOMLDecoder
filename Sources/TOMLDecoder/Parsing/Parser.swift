@@ -1258,7 +1258,7 @@ extension Token {
                 // For standalone time values, don't advance index
                 mustParseTime = true
             }
-            if let (hour, minute, second, _) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
+            if let (hour, minute, second, newIndex) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
                 // Validate time components
                 if hour > 23 {
                     throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "hour must be between 00 and 23"))
@@ -1272,7 +1272,7 @@ extension Token {
 
                 time = (hour, minute, second)
 
-                index += 8
+                index = newIndex
                 if index < text.upperBound, bytes[index] == CodeUnits.dot {
                     index += 1
                     let beforeNanoIndex = index
