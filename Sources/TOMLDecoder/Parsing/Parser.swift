@@ -602,9 +602,7 @@ struct Parser: ~Copyable {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .rbrace {
                 break
@@ -616,16 +614,10 @@ struct Parser: ~Copyable {
 
             try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: true)
 
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .comma {
                 try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
-                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
-                if token.kind == .rbrace {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
-                }
                 continue
             }
             break
@@ -640,9 +632,7 @@ struct Parser: ~Copyable {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .rbrace {
                 break
@@ -654,16 +644,10 @@ struct Parser: ~Copyable {
 
             try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: false)
 
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .comma {
                 try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
-                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
-                if token.kind == .rbrace {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
-                }
                 continue
             }
             break
