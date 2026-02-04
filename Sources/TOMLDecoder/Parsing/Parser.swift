@@ -1658,7 +1658,7 @@ func scanTime(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> (Int, Int
 
     index += 2
     guard index < range.upperBound, bytes[index] == CodeUnits.colon else {
-        return nil
+        return (hour, minute, 0, index) // Seconds are optional since 1.1.0. When omitted, :00 seconds is assumed
     }
 
     index += 1
