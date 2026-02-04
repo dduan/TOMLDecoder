@@ -1,4 +1,5 @@
 enum CodeUnits {
+    static let escape: UTF8.CodeUnit = 27
     static let equal: UTF8.CodeUnit = 61
     static let comma: UTF8.CodeUnit = 44
     static let lbrace: UTF8.CodeUnit = 123

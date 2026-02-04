@@ -1586,6 +1586,8 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
             ch = CodeUnits.cr
         } else if ch == CodeUnits.lowerN {
             ch = CodeUnits.lf
+        } else if ch == CodeUnits.lowerE {
+            ch = CodeUnits.escape
         } else if ch != CodeUnits.doubleQuote, ch != CodeUnits.backslash {
             throw TOMLError(.illegalEscapeCharacter(ch))
         }
