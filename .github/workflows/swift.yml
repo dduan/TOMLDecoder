@@ -1,5 +1,8 @@
 name: Swift Tests
-on: [push]
+on:
+  push:
+  pull_request:
+    branches: [ main ]
 jobs:
   swift-test:
     name: ${{ matrix.os_name }} (Swift ${{ matrix.swift_version }})
