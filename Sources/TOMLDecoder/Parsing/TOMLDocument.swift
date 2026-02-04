@@ -114,10 +114,6 @@ struct KeyValuePair: Equatable {
     let key: String
     let keyHash: Int
     var value: Token
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.keyHash == rhs.keyHash && lhs.key == rhs.key && lhs.value == rhs.value
-    }
 }
 
 struct InternalTOMLTable: Equatable, Sendable {

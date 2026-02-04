@@ -3,7 +3,7 @@
 import Foundation
 import TOMLDecoder
 
-// iOS 13+ compatible date formatter functions
+/// iOS 13+ compatible date formatter functions
 private func createISO8601FullFormatter() -> ISO8601DateFormatter {
     let formatter = ISO8601DateFormatter()
     formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]

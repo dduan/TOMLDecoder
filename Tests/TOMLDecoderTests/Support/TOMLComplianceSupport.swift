@@ -3,8 +3,8 @@ import ProlepticGregorianTestHelpers
 import Testing
 import TOMLDecoder
 
-// The Foundation does not use a gregorian calendar for dates prior to the cutoff on 1582-10-04.
-// To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use the ProlepticGregorianTestHelpers module
+/// The Foundation does not use a gregorian calendar for dates prior to the cutoff on 1582-10-04.
+/// To get a strict proleptic Gregorian calendar per RFC 8949 §3.4.1.2, we use the ProlepticGregorianTestHelpers module
 func epochSecondsViaProlepticHelper(
     year: Int, month: Int = 1, day: Int = 1,
     hour: Int = 0, minute: Int = 0, second: Int = 0

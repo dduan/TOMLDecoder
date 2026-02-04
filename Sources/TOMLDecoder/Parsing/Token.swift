@@ -18,12 +18,6 @@ struct Token: Equatable {
     let text: Range<Int>
 
     static let empty = Token(kind: .newline, lineNumber: 1, text: 0 ..< 0)
-
-    init(kind: Kind, lineNumber: Int, text: Range<Int>) {
-        self.kind = kind
-        self.lineNumber = lineNumber
-        self.text = text
-    }
 }
 
 extension Token {

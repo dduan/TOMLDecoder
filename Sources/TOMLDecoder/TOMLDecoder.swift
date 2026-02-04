@@ -297,7 +297,7 @@ func snakeCasify(_ stringKey: String) -> String {
     }
 
     // Do a cheap isEmpty check before creating and appending potentially empty strings
-    let result: String = if leadingUnderscoreRange.isEmpty, trailingUnderscoreRange.isEmpty {
+    return if leadingUnderscoreRange.isEmpty, trailingUnderscoreRange.isEmpty {
         joinedString
     } else if !leadingUnderscoreRange.isEmpty, !trailingUnderscoreRange.isEmpty {
         // Both leading and trailing underscores
@@ -309,5 +309,4 @@ func snakeCasify(_ stringKey: String) -> String {
         // Just trailing
         joinedString + String(stringKey[trailingUnderscoreRange])
     }
-    return result
 }

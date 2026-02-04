@@ -20,7 +20,7 @@ final class _TOMLDecoder: Decoder {
         }
     }
 
-    func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
+    func container<Key: CodingKey>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> {
         guard case let .keyed(table) = container else {
             throw DecodingError.valueNotFound(
                 KeyedDecodingContainer<Key>.self,

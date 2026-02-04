@@ -67,14 +67,16 @@ struct Parser: ~Copyable {
                                     .syntax(
                                         lineNumber: lineNumber,
                                         message: "control characters are not allowed in comments"
-                                    ))
+                                    )
+                                )
                             }
                         } else {
                             throw TOMLError(
                                 .syntax(
                                     lineNumber: lineNumber,
                                     message: "control characters are not allowed in comments"
-                                ))
+                                )
+                            )
                         }
                     }
                     position += 1
@@ -128,7 +130,8 @@ struct Parser: ~Copyable {
                     .syntax(
                         lineNumber: lineNumber,
                         message: "bare carriage return is not allowed"
-                    ))
+                    )
+                )
             default:
                 break
             }
@@ -181,7 +184,8 @@ struct Parser: ~Copyable {
 
                     guard i < range.upperBound else {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote")
+                        )
                     }
 
                     let end = i + 3
@@ -221,7 +225,8 @@ struct Parser: ~Copyable {
 
                     guard i < range.upperBound else {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote")
+                        )
                     }
 
                     let end = i + 3
@@ -244,7 +249,8 @@ struct Parser: ~Copyable {
 
                     if i >= textCount || bytes[i] != CodeUnits.singleQuote {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated s-quote")
+                        )
                     }
 
                     emitToken(kind: .string, start: start, end: i + 1)
@@ -286,7 +292,8 @@ struct Parser: ~Copyable {
 
                     if i >= range.upperBound || bytes[i] != CodeUnits.doubleQuote {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated quote")
+                        )
                     }
 
                     emitToken(kind: .string, start: start, end: i + 1)
@@ -1512,7 +1519,8 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
                             lineNumber: 0,
                             message:
                             "basic multiline strings cannot contain more than 2 consecutive double quotes"
-                        ))
+                        )
+                    )
                 }
             } else {
                 consecutiveQuotes = 0
