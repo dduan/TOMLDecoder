@@ -4,6 +4,8 @@ Also known as release notes.
 
 ## In Development
 
+- Add support for TOML 1.1.0 (thanks, @nikitabobko!)
+
 ## 0.4.3
 
 Improved runtime performance.
