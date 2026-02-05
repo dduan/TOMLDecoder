@@ -5,9 +5,9 @@ Learn how to convert TOML into your Codable types.
 ## Overview
 
 Swift's standard library defines the `Encodable`,
-and `Decodable` protocol.
+and `Decodable` protocols.
 Combined, they form the superset, `Codable` protocol.
-If your types conforms to `Decodable`, or `Codable`,
+If your types conform to `Decodable`, or `Codable`,
 `TOMLDecoder` can create instances of your types from TOML data.
 
 The API for doing so is very similar to the `JSONDecoder` API from `Foundation`.
@@ -36,7 +36,7 @@ structural, or leaf types (<doc:DeserializingTOML>).
 But unlike the parsing phase,
 the decoding phase tries to accommodate different types in your `Decodable`.
 For example,
-a integer is parsed as an `Int64`,
+an integer is parsed as an `Int64`,
 but if you need a `UInt` in your `Decodable` type,
 TOMLDecoder will attempt the conversion
 instead of rejecting the request with an error.
@@ -54,9 +54,9 @@ different decoding strategies.
 
 ### Table key strategies
 
-To change how table keys maps into your property names,
+To change how table keys map into your property names,
 set ``/TOMLDecoder/TOMLDecoder/Strategy/key``.
-for example,
+For example,
 ``/TOMLDecoder/TOMLDecoder/KeyStrategy/convertFromSnakeCase``
 causes a key `ice_cream` in TOML
 to map to the property `iceCream` on your `Decodable` type.
@@ -75,7 +75,7 @@ This option has no effect if the decoded property is a ``/TOMLDecoder/OffsetDate
 
 ### Date strategies
 
-In TOML, a offset date-time represents a point in time.
+In TOML, an offset date-time represents a point in time.
 It's supposed to be interpreted as a date on the *proleptic Gregorian calendar*.
 That's a fancy way of saying a date in the current Gregorian calendar system,
 applied backwards as if it has always been in use.
@@ -83,22 +83,22 @@ applied backwards as if it has always been in use.
 A point in time is conventionally represented as a `Foundation.Date` in Swift.
 However, Foundation's Gregorian calendar is *not* proleptic.
 It uses the *Julian calendar* for dates before October 15, 1582.
-If one constructs a `DateComponents` with a old date prior to that cutoff date,
+If one constructs a `DateComponents` with an old date prior to that cutoff date,
 and creates a `Date` from it using Foundation's Gregorian calendar,
-the `.timeInteralSince1970` property of the resulting `Date` will disagree
-with the inteneded point in time in TOML.
+the `.timeIntervalSince1970` property of the resulting `Date` will disagree
+with the intended point in time in TOML.
 But this isn't a problem for modern dates.
 
 For this reason,
-`/TOMLDecoder/TOMLDecoder/DateStrategy` provides options for dealing with this
+``/TOMLDecoder/TOMLDecoder/DateStrategy`` provides options for dealing with this
 discrepancy for `Foundation` dates.
 A TOML offset date-time provides the components of a date.
 This strategy lets you decide how the components are converted into a `Foundation.Date`.
 
 By default, the date conversion is done by Foundation's Gregorian calendar.
-You may also choose an arbitrary calendar by specifying an calendar identifier.
+You may also choose an arbitrary calendar by specifying a calendar identifier.
 Or, you can choose the proleptic Gregorian calendar,
-which means the number of seconds are calculated by TOMLDecoder using the
+which means the number of seconds is calculated by TOMLDecoder using the
 proleptic Gregorian rules, and then used to create the `Date`.
 
 If you only need to deal with modern dates, the default option should be sufficient.
@@ -117,7 +117,7 @@ The rest of this section is a list of all the supported types.
 
 ### TOML Integer
 
-TOML Integers are parsed as `Int64`.
+TOML integers are parsed as `Int64`.
 
 TOMLDecoder will attempt to convert it to the following types,
 if the original number can be represented by the type.
@@ -128,14 +128,14 @@ if the original number can be represented by the type.
 * `Int8`
 * `UInt`
 * `UInt64`
-* `Int32`
-* `Int16`
-* `Int8`
+* `UInt32`
+* `UInt16`
+* `UInt8`
 
 ### TOML Float
 
-TOML floating number are parsed as `Double`.
-TOMLDecoder will attempt to convert it to a `Float`.
+TOML floating numbers are parsed as `Double`.
+TOMLDecoder will attempt to convert them to a `Float`.
 
 You may also interpret a float as a time interval,
 and represent it as a `Foundation.Date`.
@@ -143,7 +143,7 @@ See ``/TOMLDecoder/TOMLDecoder/TimeIntervalStrategy``.
 
 ### TOML String
 
-TOML String can only be represented by `String`.
+A TOML string can only be represented by `String`.
 
 ### TOML Offset Date-Time
 
@@ -202,4 +202,4 @@ TOMLDecoder will attempt to convert it to a `Dictionary<String, Any>`.
 
 Parsed as ``/TOMLDecoder/TOMLArray``.
 
-TOMLDecoder will attempt to convert it to a `Array<Any>`.
+TOMLDecoder will attempt to convert it to an `Array<Any>`.

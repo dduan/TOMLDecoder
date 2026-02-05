@@ -9,9 +9,9 @@ Also known as release notes.
 Improved runtime performance.
 
 For a TOML document such as [this twitter payload](https://github.com/dduan/TOMLDecoder/blob/cea8f0bee33f37e0fcc33b566a742485c71196e7/Sources/Resources/fixtures/twitter.toml),
-Parsing it costs >50% less CPU instructions, and ~100% less memory retains.
+parsing it costs >50% less CPU instructions, and ~100% less memory retains.
 
-The in release build, parsing this document with TOMLDecoder takes less time than the C library [tomlc99](https://github.com/cktan/tomlc99).
+In a release build, parsing this document with TOMLDecoder takes less time than the C library [tomlc99](https://github.com/cktan/tomlc99).
 
 
 ## 0.4.2
@@ -29,11 +29,11 @@ The parsing speed is significantly faster than 0.3.x releases.
 
 ### API overview
 
-The type `TOMLDecoder` still serves as the entry point for decoding TOML into types that conforms to `Swift.Decodable`.
+The type `TOMLDecoder` still serves as the entry point for decoding TOML into types that conform to `Swift.Decodable`.
 This is similar to previous releases.
 
 The library still provides APIs to deserialize/parse/demarshal TOML documents into structured data representations.
-During this process, Each TOML value, including container values, has a definitive, corresponding Swift type.
+During this process, each TOML value, including container values, has a definitive, corresponding Swift type.
 The decoding process can be lenient,
 and convert these initial value types into compatible types in the `Decodable`s.
 
@@ -65,7 +65,7 @@ and convert these initial value types into compatible types in the `Decodable`s.
 
 ## 0.3.2
 
-- Improved runtime performance for decoding by using less containers while
+- Improved runtime performance for decoding by using fewer containers while
   assembling decoded values (#65)
 - Fixed a leap year calculation bug (#66)
 - Fixed .superDecoder (#68)
@@ -80,8 +80,8 @@ and convert these initial value types into compatible types in the `Decodable`s.
 
 - Lowercase "z" is now accepted as zero-timezone-offset indicator
 - Space is no longer accepted as an escaped character
-- Hex/Octal/Binary numbers with no digits surrounding `_` is considered invalid
-- Comments or whitespace at start of document no longer causes parsing failure
+- Hex/Octal/Binary numbers with no digits surrounding `_` are considered invalid
+- Comments or whitespace at start of document no longer cause parsing failure
 - TOML with invalid UTF-8 byte sequence will be rejected. Previously these have
   been decoded with the replacement character (U-FFFD).
 - Local date with a trailing `T` such as `2023-04-16T` is considered invalid.
@@ -96,7 +96,7 @@ and convert these initial value types into compatible types in the `Decodable`s.
 - Mutating array of tables that were implicitly created (e.g. `a = [{}]`) is now
   invalid
 - Keys with spaces in between segments are now valid
-- Multiline strings can now have 1 or two quotes as valid content
+- Multiline strings can now have one or two quotes as valid content
 - Local date with a comment (`1970-01-01 # some comment`) is now accepted
 - Control characters (except tabs) in comments are now invalid
 - Escaped CRLF character in multiline string is properly handled
@@ -115,7 +115,7 @@ and convert these initial value types into compatible types in the `Decodable`s.
   expression. This is more deterministic compared to previous recovery attempts.
 - Add more specific errors regarding missing pieces at closing position. For
   example, string missing closing quotes, or table missing closing bracket.
-  These errors will cause the parser to report detailed error message.
+  These errors will cause the parser to report detailed error messages.
 - Fix a bug where newline characters sometimes are considered valid as part of
   basic string content.
 

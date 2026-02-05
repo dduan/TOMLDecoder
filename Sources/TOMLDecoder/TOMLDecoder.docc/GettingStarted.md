@@ -13,7 +13,7 @@ Let's assume you are starting with a [SwiftPM](https://docs.swift.org/swiftpm/do
 Add the following to your package dependencies:
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", exactly: "0.4.3")),
+.package(url: "https://github.com/dduan/TOMLDecoder", exactly: "0.4.3"),
 ```
 
 
@@ -29,7 +29,7 @@ You may have to update your package's `platforms` if you see a related error.
 ### via Bazel Central Registry
 
 You can use TOMLDecoder from the Bazel Central Registry.
-Include it in your MODULE.bazel
+Include it in your MODULE.bazel:
 
 ```
 bazel_dep(name = 'swift-tomldecoder', version = '0.4.1')
@@ -42,7 +42,7 @@ And add `@swift-tomldecoder//:TOMLDecoder` as a dependency to your target as nee
 
 ### Decoding TOML
 
-TOMLDecoder can turn TOML into your types that conforms to `Swift.Codable`.
+TOMLDecoder can turn TOML into your types that conform to `Swift.Codable`.
 
 ```swift
 import TOMLDecoder
@@ -95,7 +95,7 @@ you can use the lower-level APIs to deserialize TOML.
 // TOML is always a table at the root
 let rootTable = try TOMLTable(source: tomlString)
 
-// Get the `owner` table. It's a TOMLTable
+// Get the `owner` table. It's a `TOMLTable`
 let owner = try rootTable.table(forKey: "owner")
 
 // Get a string from `owner`
