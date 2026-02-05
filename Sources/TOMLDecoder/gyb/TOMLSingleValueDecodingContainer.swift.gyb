@@ -78,7 +78,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
     }
 
     @inline(__always)
-    func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+    func decode<T: Decodable>(_ type: T.Type) throws -> T {
         % for i, type_name in enumerate([t[0] for t in native_types] + int_types + ["Double", "Float"]):
         ${"if" if i == 0 else "} else if"} type == ${type_name}.self {
             return try decode(${type_name}.self) as! T

@@ -42,7 +42,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
         }
     }
 
-    func decode<T>(_ type: T.Type, forKey key: Key) throws -> T where T: Decodable {
+    func decode<T: Decodable>(_ type: T.Type, forKey key: Key) throws -> T {
         if type == TOMLArray.self {
             return try decode(TOMLArray.self, forKey: key) as! T
         } else if type == TOMLTable.self {
@@ -95,7 +95,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
         return try T(from: decoder)
     }
 
-    func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
+    func nestedContainer<NestedKey: CodingKey>(keyedBy _: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> {
         do {
             let nestedTable = try table.table(forKey: key.stringValue)
             var nestedCodingPath = codingPath

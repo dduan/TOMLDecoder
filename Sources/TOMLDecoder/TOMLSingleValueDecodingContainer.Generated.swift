@@ -232,7 +232,7 @@ extension _TOMLDecoder: SingleValueDecodingContainer {
     }
 
     @inline(__always)
-    func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+    func decode<T: Decodable>(_ type: T.Type) throws -> T {
         if type == Bool.self {
             return try decode(Bool.self) as! T
         } else if type == String.self {

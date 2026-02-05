@@ -9,7 +9,7 @@ It converts TOML into your `Codable` types
 It provides fast TOML deserialization
 (like `JSONDeserializer` for JSON),
 and type-safe access to parsed results.
-`TOMLDecoder` implements the TOML 1.0 spec.
+`TOMLDecoder` implements the TOML 1.1.0 spec.
 
 This library can do 2 things to TOML:
 * **Deserialize**:

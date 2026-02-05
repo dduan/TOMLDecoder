@@ -67,14 +67,16 @@ struct Parser: ~Copyable {
                                     .syntax(
                                         lineNumber: lineNumber,
                                         message: "control characters are not allowed in comments"
-                                    ))
+                                    )
+                                )
                             }
                         } else {
                             throw TOMLError(
                                 .syntax(
                                     lineNumber: lineNumber,
                                     message: "control characters are not allowed in comments"
-                                ))
+                                )
+                            )
                         }
                     }
                     position += 1
@@ -128,7 +130,8 @@ struct Parser: ~Copyable {
                     .syntax(
                         lineNumber: lineNumber,
                         message: "bare carriage return is not allowed"
-                    ))
+                    )
+                )
             default:
                 break
             }
@@ -181,7 +184,8 @@ struct Parser: ~Copyable {
 
                     guard i < range.upperBound else {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote")
+                        )
                     }
 
                     let end = i + 3
@@ -221,7 +225,8 @@ struct Parser: ~Copyable {
 
                     guard i < range.upperBound else {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote")
+                        )
                     }
 
                     let end = i + 3
@@ -244,7 +249,8 @@ struct Parser: ~Copyable {
 
                     if i >= textCount || bytes[i] != CodeUnits.singleQuote {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated s-quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated s-quote")
+                        )
                     }
 
                     emitToken(kind: .string, start: start, end: i + 1)
@@ -286,7 +292,8 @@ struct Parser: ~Copyable {
 
                     if i >= range.upperBound || bytes[i] != CodeUnits.doubleQuote {
                         throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated quote"))
+                            .syntax(lineNumber: lineNumber, message: "unterminated quote")
+                        )
                     }
 
                     emitToken(kind: .string, start: start, end: i + 1)
@@ -595,9 +602,7 @@ struct Parser: ~Copyable {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .rbrace {
                 break
@@ -609,16 +614,10 @@ struct Parser: ~Copyable {
 
             try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: true)
 
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .comma {
                 try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
-                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
-                if token.kind == .rbrace {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
-                }
                 continue
             }
             break
@@ -633,9 +632,7 @@ struct Parser: ~Copyable {
         try eatToken(bytes: bytes, kind: .lbrace, isDotSpecial: true)
 
         while true {
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .rbrace {
                 break
@@ -647,16 +644,10 @@ struct Parser: ~Copyable {
 
             try parseKeyValue(bytes: bytes, tableIndex: tableIndex, isKeyed: false)
 
-            if token.kind == .newline {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "newline not allowed in inline table"))
-            }
+            try skipNewlines(bytes: bytes, isDotSpecial: false)
 
             if token.kind == .comma {
                 try eatToken(bytes: bytes, kind: .comma, isDotSpecial: true)
-                // Check for trailing comma - if next token is rbrace, it's a trailing comma error
-                if token.kind == .rbrace {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "trailing comma not allowed in inline table"))
-                }
                 continue
             }
             break
@@ -1251,7 +1242,7 @@ extension Token {
                 // For standalone time values, don't advance index
                 mustParseTime = true
             }
-            if let (hour, minute, second, _) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
+            if let (hour, minute, second, newIndex) = scanTime(bytes: bytes, range: index ..< text.upperBound) {
                 // Validate time components
                 if hour > 23 {
                     throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "hour must be between 00 and 23"))
@@ -1265,7 +1256,7 @@ extension Token {
 
                 time = (hour, minute, second)
 
-                index += 8
+                index = newIndex
                 if index < text.upperBound, bytes[index] == CodeUnits.dot {
                     index += 1
                     let beforeNanoIndex = index
@@ -1512,7 +1503,8 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
                             lineNumber: 0,
                             message:
                             "basic multiline strings cannot contain more than 2 consecutive double quotes"
-                        ))
+                        )
+                    )
                 }
             } else {
                 consecutiveQuotes = 0
@@ -1557,8 +1549,13 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
         ch = bytes[index]
         index += 1
 
-        if ch == CodeUnits.lowerU || ch == CodeUnits.upperU {
-            let hexCount = (ch == CodeUnits.lowerU ? 4 : 8)
+        if ch == CodeUnits.lowerU || ch == CodeUnits.upperU || ch == CodeUnits.lowerX {
+            let hexCount = switch ch {
+            case CodeUnits.lowerU: 4
+            case CodeUnits.upperU: 8
+            case CodeUnits.lowerX: 2
+            default: fatalError("Unsupported CodeUnit: \(ch)")
+            }
             var ucs: UInt32 = 0
             for _ in 0 ..< hexCount {
                 if index >= endIndex {
@@ -1594,6 +1591,8 @@ func basicString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, multiline
             ch = CodeUnits.cr
         } else if ch == CodeUnits.lowerN {
             ch = CodeUnits.lf
+        } else if ch == CodeUnits.lowerE {
+            ch = CodeUnits.escape
         } else if ch != CodeUnits.doubleQuote, ch != CodeUnits.backslash {
             throw TOMLError(.illegalEscapeCharacter(ch))
         }
@@ -1666,7 +1665,7 @@ func scanTime(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> (Int, Int
 
     index += 2
     guard index < range.upperBound, bytes[index] == CodeUnits.colon else {
-        return nil
+        return (hour, minute, 0, index) // Seconds are optional since 1.1.0. When omitted, :00 seconds is assumed
     }
 
     index += 1

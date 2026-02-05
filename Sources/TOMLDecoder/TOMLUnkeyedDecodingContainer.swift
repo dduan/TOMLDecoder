@@ -60,7 +60,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
     }
 
-    mutating func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
+    mutating func decode<T: Decodable>(_ type: T.Type) throws -> T {
         if type == TOMLArray.self {
             return try decode(TOMLArray.self) as! T
         } else if type == TOMLTable.self {
@@ -75,12 +75,10 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         // Try to get nested table or array
         if let nestedTable = try? array.table(atIndex: currentIndex) {
             let nestedDecoder = _TOMLDecoder(referencing: .keyed(nestedTable), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
-            let decoded = try T(from: nestedDecoder)
-            return decoded
+            return try T(from: nestedDecoder)
         } else if let nestedArray = try? array.array(atIndex: currentIndex) {
             let nestedDecoder = _TOMLDecoder(referencing: .unkeyed(nestedArray), at: nestedCodingPath, strategy: decoder.strategy, isLenient: decoder.isLenient)
-            let decoded = try T(from: nestedDecoder)
-            return decoded
+            return try T(from: nestedDecoder)
         }
 
         let token = try array.token(forIndex: currentIndex, type: String(describing: T.self))
@@ -111,7 +109,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         return try T(from: decoder)
     }
 
-    mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
+    mutating func nestedContainer<NestedKey: CodingKey>(keyedBy _: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> {
         guard !isAtEnd else {
             throw DecodingError.valueNotFound(
                 KeyedDecodingContainer<NestedKey>.self,
