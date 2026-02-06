@@ -508,7 +508,11 @@ struct Parser: ~Copyable {
         }
 
         let index = keyArrays.count
-        keyArrays.append(KeyArrayPair(key: key, keyHash: keyHash, array: InternalTOMLArray(kind: kind)))
+        var array = InternalTOMLArray(kind: kind)
+        if kind == .table {
+            array.elements.reserveCapacity(8)
+        }
+        keyArrays.append(KeyArrayPair(key: key, keyHash: keyHash, array: array))
         if isKeyed {
             if keyTables[tableIndex].table.arrays.isEmpty {
                 keyTables[tableIndex].table.arrays.reserveCapacity(8)
@@ -923,15 +927,12 @@ struct Parser: ~Copyable {
 
     mutating func parseSelect(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
         assert(token.kind == .lbracket)
-        let index = token.text.lowerBound
-        let nextIndex = index + 1
-        let llb = index < bytes.count
-            && bytes[index] == CodeUnits.lbracket
-            && nextIndex < bytes.count
-            && bytes[nextIndex] == CodeUnits.lbracket
-
-        try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: true)
+        let nextIndex = token.text.lowerBound + 1
+        let llb = nextIndex < bytes.count && bytes[nextIndex] == CodeUnits.lbracket
         if llb {
+            cursor = nextIndex + 1
+            try nextToken(bytes: bytes, isDotSpecial: true)
+        } else {
             try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: true)
         }
 
@@ -994,14 +995,15 @@ struct Parser: ~Copyable {
                     }
                 } else {
                     let key = firstKey!
-                    var maybeArrayIndex = lookupArray(
+                    if let existingArrayIndex = lookupArray(
                         in: currentTable,
                         keyed: currentTableIsKeyed,
                         key: key,
                         keyHash: firstKeyHash
-                    )
-                    if maybeArrayIndex == nil {
-                        maybeArrayIndex = try createKeyArray(
+                    ) {
+                        arrayIndex = existingArrayIndex
+                    } else {
+                        arrayIndex = try createKeyArray(
                             normalizedKey: key,
                             keyHash: firstKeyHash,
                             lineNumber: firstToken.lineNumber,
@@ -1010,7 +1012,6 @@ struct Parser: ~Copyable {
                             kind: .table
                         )
                     }
-                    arrayIndex = maybeArrayIndex!
                 }
                 if keyArrays[arrayIndex].array.kind != .table {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
@@ -1018,9 +1019,6 @@ struct Parser: ~Copyable {
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                if keyArrays[arrayIndex].array.elements.isEmpty {
-                    keyArrays[arrayIndex].array.elements.reserveCapacity(8)
-                }
                 keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
                 currentTable = newTableIndex
                 currentTableIsKeyed = false
@@ -1030,12 +1028,21 @@ struct Parser: ~Copyable {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
             }
 
+            let firstPathKey = firstKey ?? makeString(bytes: bytes, range: firstToken.text)
+            var pathTableIndex = 0
+            var pathTableIsKeyed = false
+            try advanceTablePathSegment(
+                tableIndex: &pathTableIndex,
+                isKeyed: &pathTableIsKeyed,
+                key: firstPathKey,
+                keyHash: firstKeyHash
+            )
+
             tablePath.removeAll(keepingCapacity: true)
-            tablePath.append((key: firstKey ?? makeString(bytes: bytes, range: firstToken.text), keyHash: firstKeyHash))
             try nextToken(bytes: bytes, isDotSpecial: true)
 
             let (key, keyHash, keyToken) = try fillTablePath(bytes: bytes, clearPath: false)
-            try walkTablePath()
+            try walkTablePath(startTable: pathTableIndex, startKeyed: pathTableIsKeyed)
 
             if !llb {
                 currentTable = try createKeyTable(
@@ -1047,14 +1054,15 @@ struct Parser: ~Copyable {
                 )
                 currentTableIsKeyed = true
             } else {
-                var maybeArrayIndex = lookupArray(
+                let arrayIndex: Int = if let existingArrayIndex = lookupArray(
                     in: currentTable,
                     keyed: currentTableIsKeyed,
                     key: key,
                     keyHash: keyHash
-                )
-                if maybeArrayIndex == nil {
-                    maybeArrayIndex = try createKeyArray(
+                ) {
+                    existingArrayIndex
+                } else {
+                    try createKeyArray(
                         normalizedKey: key,
                         keyHash: keyHash,
                         lineNumber: keyToken.lineNumber,
@@ -1063,16 +1071,12 @@ struct Parser: ~Copyable {
                         kind: .table
                     )
                 }
-                let arrayIndex = maybeArrayIndex!
                 if keyArrays[arrayIndex].array.kind != .table {
                     throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
                 }
 
                 let newTableIndex = tables.count
                 tables.append(InternalTOMLTable())
-                if keyArrays[arrayIndex].array.elements.isEmpty {
-                    keyArrays[arrayIndex].array.elements.reserveCapacity(8)
-                }
                 keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
                 currentTable = newTableIndex
                 currentTableIsKeyed = false
@@ -1084,13 +1088,14 @@ struct Parser: ~Copyable {
         }
 
         if llb {
-            let nextIndex = token.text.index(after: token.text.startIndex)
-            guard nextIndex < bytes.count, bytes[nextIndex] == CodeUnits.rbracket else {
+            guard cursor < bytes.count, bytes[cursor] == CodeUnits.rbracket else {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "expects ]]"))
             }
+            cursor += 1
+            try nextToken(bytes: bytes, isDotSpecial: true)
+        } else {
             try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
         }
-        try eatToken(bytes: bytes, kind: .rbracket, isDotSpecial: true)
 
         if token.kind != .newline, token.kind != .eof {
             throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "extra chars after ] or ]]"))
@@ -2274,57 +2279,70 @@ extension Parser {
         )
     }
 
-    mutating func walkTablePath() throws(TOMLError) {
-        var tableIndex = 0
-        var isKeyed = false
-        for (key, keyHash) in tablePath {
-            switch tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) {
-            case let .table(index):
-                tableIndex = index
-                isKeyed = true
-            case let .array(arrayIndex):
-                let array = keyArrays[arrayIndex].array
-                guard case .table = array.kind else {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
-                }
-
-                if array.elements.isEmpty {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "empty array"))
-                }
-
-                guard case let .table(_, index) = array.elements.last else {
-                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
-                }
-
-                tableIndex = index
-                isKeyed = false
-            case .keyValue:
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "key-value already exists"))
-            default:
-                let newTableAddress = keyTables.count
-                var newTable = InternalTOMLTable()
-                newTable.implicit = true
-                newTable.definedByDottedKey = false
-                keyTables.append(KeyTablePair(key: key, keyHash: keyHash, table: newTable))
-
-                if isKeyed {
-                    if keyTables[tableIndex].table.tables.isEmpty {
-                        keyTables[tableIndex].table.tables.reserveCapacity(8)
-                    }
-                    keyTables[tableIndex].table.tables.append(newTableAddress)
-                    keyTables[tableIndex].table.recordKeyHash(keyHash)
-                } else {
-                    if tables[tableIndex].tables.isEmpty {
-                        tables[tableIndex].tables.reserveCapacity(8)
-                    }
-                    tables[tableIndex].tables.append(newTableAddress)
-                    tables[tableIndex].recordKeyHash(keyHash)
-                }
-                tableIndex = newTableAddress
-                isKeyed = true
+    mutating func advanceTablePathSegment(
+        tableIndex: inout Int,
+        isKeyed: inout Bool,
+        key: String,
+        keyHash: Int
+    ) throws(TOMLError) {
+        switch tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) {
+        case let .table(index):
+            tableIndex = index
+            isKeyed = true
+        case let .array(arrayIndex):
+            let array = keyArrays[arrayIndex].array
+            guard case .table = array.kind else {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
             }
-        }
 
+            if array.elements.isEmpty {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "empty array"))
+            }
+
+            guard case let .table(_, index) = array.elements.last else {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array element is not a table"))
+            }
+
+            tableIndex = index
+            isKeyed = false
+        case .keyValue:
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "key-value already exists"))
+        default:
+            let newTableAddress = keyTables.count
+            var newTable = InternalTOMLTable()
+            newTable.implicit = true
+            newTable.definedByDottedKey = false
+            keyTables.append(KeyTablePair(key: key, keyHash: keyHash, table: newTable))
+
+            if isKeyed {
+                if keyTables[tableIndex].table.tables.isEmpty {
+                    keyTables[tableIndex].table.tables.reserveCapacity(8)
+                }
+                keyTables[tableIndex].table.tables.append(newTableAddress)
+                keyTables[tableIndex].table.recordKeyHash(keyHash)
+            } else {
+                if tables[tableIndex].tables.isEmpty {
+                    tables[tableIndex].tables.reserveCapacity(8)
+                }
+                tables[tableIndex].tables.append(newTableAddress)
+                tables[tableIndex].recordKeyHash(keyHash)
+            }
+            tableIndex = newTableAddress
+            isKeyed = true
+        }
+    }
+
+    mutating func walkTablePath(startTable: Int = 0, startKeyed: Bool = false) throws(TOMLError) {
+        var tableIndex = startTable
+        var isKeyed = startKeyed
+        for (key, keyHash) in tablePath {
+            try advanceTablePathSegment(
+                tableIndex: &tableIndex,
+                isKeyed: &isKeyed,
+                key: key,
+                keyHash: keyHash
+            )
+        }
         currentTable = tableIndex
         currentTableIsKeyed = isKeyed
     }
