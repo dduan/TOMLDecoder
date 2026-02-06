@@ -1038,11 +1038,43 @@ struct Parser: ~Copyable {
                 keyHash: firstKeyHash
             )
 
-            tablePath.removeAll(keepingCapacity: true)
+            try nextToken(bytes: bytes, isDotSpecial: true)
+            if token.kind != .string, token.kind != .bareKey {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid or missing key"))
+            }
+
+            let secondToken = token
+            let (secondKey, secondKeyHash) = try normalizeKeyAndHash(
+                bytes: bytes,
+                token: secondToken,
+                keyTransform: keyTransform
+            )
             try nextToken(bytes: bytes, isDotSpecial: true)
 
-            let (key, keyHash, keyToken) = try fillTablePath(bytes: bytes, clearPath: false)
-            try walkTablePath(startTable: pathTableIndex, startKeyed: pathTableIsKeyed)
+            let key: String
+            let keyHash: Int
+            let keyToken: Token
+
+            if token.kind == .rbracket {
+                currentTable = pathTableIndex
+                currentTableIsKeyed = pathTableIsKeyed
+                key = secondKey
+                keyHash = secondKeyHash
+                keyToken = secondToken
+            } else {
+                tablePath.removeAll(keepingCapacity: true)
+                tablePath.append((key: secondKey, keyHash: secondKeyHash))
+                if token.kind != .dot {
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
+                }
+                try nextToken(bytes: bytes, isDotSpecial: true)
+
+                let terminal = try fillTablePath(bytes: bytes, clearPath: false)
+                key = terminal.key
+                keyHash = terminal.keyHash
+                keyToken = terminal.token
+                try walkTablePath(startTable: pathTableIndex, startKeyed: pathTableIsKeyed)
+            }
 
             if !llb {
                 currentTable = try createKeyTable(
