@@ -148,6 +148,7 @@ struct Parser: ~Copyable {
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
                 let isBareKeyChar = CodeUnits.isBareKeyChar
                 let isValueChar = CodeUnits.isValueChar
+                let isBasicStringBodyChar = CodeUnits.isBasicStringBodyChar
                 let start = range.lowerBound
                 let end = range.upperBound
                 let head = bytes[start]
@@ -263,19 +264,23 @@ struct Parser: ~Copyable {
 
                     // 8x unrolling for double-quoted strings
                     while i + 8 <= end {
-                        if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
-                        if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
-                        if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
-                        if bytes[i + 3] == CodeUnits.backslash || bytes[i + 3] == CodeUnits.doubleQuote || bytes[i + 3] == CodeUnits.lf { break }
-                        if bytes[i + 4] == CodeUnits.backslash || bytes[i + 4] == CodeUnits.doubleQuote || bytes[i + 4] == CodeUnits.lf { break }
-                        if bytes[i + 5] == CodeUnits.backslash || bytes[i + 5] == CodeUnits.doubleQuote || bytes[i + 5] == CodeUnits.lf { break }
-                        if bytes[i + 6] == CodeUnits.backslash || bytes[i + 6] == CodeUnits.doubleQuote || bytes[i + 6] == CodeUnits.lf { break }
-                        if bytes[i + 7] == CodeUnits.backslash || bytes[i + 7] == CodeUnits.doubleQuote || bytes[i + 7] == CodeUnits.lf { break }
+                        if !isBasicStringBodyChar[Int(bytes[i])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 1])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 2])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 3])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 4])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 5])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 6])] { break }
+                        if !isBasicStringBodyChar[Int(bytes[i + 7])] { break }
                         i += 8
                     }
 
                     while i < end {
                         let ch = bytes[i]
+                        if isBasicStringBodyChar[Int(ch)] {
+                            i += 1
+                            continue
+                        }
                         if ch == CodeUnits.backslash {
                             i += 1
                             if i < end {
@@ -285,10 +290,7 @@ struct Parser: ~Copyable {
                             break
                         }
 
-                        if ch == CodeUnits.lf || ch == CodeUnits.doubleQuote {
-                            break
-                        }
-                        i += 1
+                        break
                     }
 
                     if i >= end || bytes[i] != CodeUnits.doubleQuote {
