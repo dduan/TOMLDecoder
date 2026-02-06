@@ -13,6 +13,15 @@ struct Parser: ~Copyable {
     var keyTransform: (@Sendable (String) -> String)?
 
     mutating func parse(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
+        let estimatedKeyValues = max(32, bytes.count / 48)
+        let estimatedNodes = max(8, estimatedKeyValues / 8)
+        tables.reserveCapacity(max(8, estimatedNodes))
+        arrays.reserveCapacity(estimatedNodes)
+        keyTables.reserveCapacity(estimatedNodes)
+        keyArrays.reserveCapacity(estimatedNodes)
+        keyValues.reserveCapacity(estimatedKeyValues)
+        tablePath.reserveCapacity(8)
+
         while token.kind != .eof {
             switch token.kind {
             case .newline:
