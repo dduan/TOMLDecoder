@@ -431,23 +431,34 @@ struct Parser: ~Copyable {
     mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         let keyHash = fastKeyHash(key)
+        return try createKeyTable(
+            normalizedKey: key,
+            keyHash: keyHash,
+            lineNumber: token.lineNumber,
+            inTable: tableIndex,
+            isKeyed: isKeyed,
+            implicit: implicit
+        )
+    }
+
+    mutating func createKeyTable(normalizedKey key: String, keyHash: Int, lineNumber: Int, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
         // Check if parent table is readOnly (inline table)
         if isKeyed ? keyTables[tableIndex].table.readOnly : tables[tableIndex].readOnly {
-            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "cannot add to inline table"))
+            throw TOMLError(.syntax(lineNumber: lineNumber, message: "cannot add to inline table"))
         }
 
         switch tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) {
         case let .table(existingTableIndex):
             if keyTables[existingTableIndex].table.implicit {
                 if keyTables[existingTableIndex].table.definedByDottedKey {
-                    throw TOMLError(.keyExists(lineNumber: token.lineNumber))
+                    throw TOMLError(.keyExists(lineNumber: lineNumber))
                 }
                 keyTables[existingTableIndex].table.implicit = false
                 return existingTableIndex
             }
-            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
+            throw TOMLError(.keyExists(lineNumber: lineNumber))
         case .keyValue, .array:
-            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
+            throw TOMLError(.keyExists(lineNumber: lineNumber))
         case nil:
             break
         }
@@ -474,8 +485,19 @@ struct Parser: ~Copyable {
     mutating func createKeyArray(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         let key = try normalizeKey(bytes: bytes, token: token, keyTransform: keyTransform)
         let keyHash = fastKeyHash(key)
+        return try createKeyArray(
+            normalizedKey: key,
+            keyHash: keyHash,
+            lineNumber: token.lineNumber,
+            inTable: tableIndex,
+            isKeyed: isKeyed,
+            kind: kind
+        )
+    }
+
+    mutating func createKeyArray(normalizedKey key: String, keyHash: Int, lineNumber: Int, inTable tableIndex: Int, isKeyed: Bool, kind: InternalTOMLArray.Kind? = nil) throws(TOMLError) -> Int {
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
-            throw TOMLError(.keyExists(lineNumber: token.lineNumber))
+            throw TOMLError(.keyExists(lineNumber: lineNumber))
         }
 
         let index = keyArrays.count
@@ -812,7 +834,14 @@ struct Parser: ~Copyable {
                 }
                 subTableIndex = existingTableIndex
             } else {
-                subTableIndex = try createKeyTable(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed, implicit: true)
+                subTableIndex = try createKeyTable(
+                    normalizedKey: subTableKey,
+                    keyHash: subTableHash,
+                    lineNumber: key.lineNumber,
+                    inTable: tableIndex,
+                    isKeyed: isKeyed,
+                    implicit: true
+                )
             }
 
             try nextToken(bytes: bytes, isDotSpecial: true)
@@ -899,13 +928,26 @@ struct Parser: ~Copyable {
 
         if !llb {
             // [x.y.z] -> create z = {} in x.y
-            currentTable = try createKeyTable(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed)
+            currentTable = try createKeyTable(
+                normalizedKey: lastKey,
+                keyHash: lastKeyHash,
+                lineNumber: z.lineNumber,
+                inTable: currentTable,
+                isKeyed: currentTableIsKeyed
+            )
             currentTableIsKeyed = true
         } else {
             // [[x.y.z]] -> create z = [] in x.y
             var maybeArrayIndex = lookupArray(in: currentTable, keyed: currentTableIsKeyed, key: lastKey, keyHash: lastKeyHash)
             if maybeArrayIndex == nil {
-                maybeArrayIndex = try createKeyArray(bytes: bytes, token: z, inTable: currentTable, isKeyed: currentTableIsKeyed, kind: .table)
+                maybeArrayIndex = try createKeyArray(
+                    normalizedKey: lastKey,
+                    keyHash: lastKeyHash,
+                    lineNumber: z.lineNumber,
+                    inTable: currentTable,
+                    isKeyed: currentTableIsKeyed,
+                    kind: .table
+                )
             }
             let arrayIndex = maybeArrayIndex!
             if keyArrays[arrayIndex].array.kind != .table {
@@ -915,6 +957,9 @@ struct Parser: ~Copyable {
             // add to z[]
             let newTableIndex = tables.count
             tables.append(InternalTOMLTable())
+            if keyArrays[arrayIndex].array.elements.isEmpty {
+                keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+            }
             keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
             currentTable = newTableIndex
             currentTableIsKeyed = false
@@ -1920,8 +1965,14 @@ extension Parser {
                 keyTables.append(KeyTablePair(key: key, keyHash: keyHash, table: newTable))
 
                 if isKeyed {
+                    if keyTables[tableIndex].table.tables.isEmpty {
+                        keyTables[tableIndex].table.tables.reserveCapacity(8)
+                    }
                     keyTables[tableIndex].table.tables.append(newTableAddress)
                 } else {
+                    if tables[tableIndex].tables.isEmpty {
+                        tables[tableIndex].tables.reserveCapacity(8)
+                    }
                     tables[tableIndex].tables.append(newTableAddress)
                 }
                 tableIndex = newTableAddress
