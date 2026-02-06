@@ -881,13 +881,15 @@ struct Parser: ~Copyable {
         throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
     }
 
-    mutating func fillTablePath(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) -> (
+    mutating func fillTablePath(bytes: UnsafeBufferPointer<UInt8>, clearPath: Bool = true) throws(TOMLError) -> (
         key: String,
         keyHash: Int,
         token: Token
     ) {
         let lineNumber = token.lineNumber
-        tablePath.removeAll(keepingCapacity: true)
+        if clearPath {
+            tablePath.removeAll(keepingCapacity: true)
+        }
 
         while true {
             if token.kind != .string, token.kind != .bareKey {
@@ -926,15 +928,49 @@ struct Parser: ~Copyable {
             try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: true)
         }
 
-        let (lastKey, lastKeyHash, z) = try fillTablePath(bytes: bytes)
-        try walkTablePath()
+        if token.kind != .string, token.kind != .bareKey {
+            throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid or missing key"))
+        }
+
+        let firstToken = token
+        let (firstKey, firstKeyHash) = try normalizeKeyAndHash(
+            bytes: bytes,
+            token: token,
+            keyTransform: keyTransform
+        )
+        try nextToken(bytes: bytes, isDotSpecial: true)
+
+        let lastKey: String
+        let lastKeyHash: Int
+        let lastKeyToken: Token
+        if token.kind == .rbracket {
+            lastKey = firstKey
+            lastKeyHash = firstKeyHash
+            lastKeyToken = firstToken
+            currentTable = 0
+            currentTableIsKeyed = false
+        } else {
+            if token.kind != .dot {
+                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
+            }
+
+            tablePath.removeAll(keepingCapacity: true)
+            tablePath.append((key: firstKey, keyHash: firstKeyHash))
+            try nextToken(bytes: bytes, isDotSpecial: true)
+
+            let (key, keyHash, keyToken) = try fillTablePath(bytes: bytes, clearPath: false)
+            lastKey = key
+            lastKeyHash = keyHash
+            lastKeyToken = keyToken
+            try walkTablePath()
+        }
 
         if !llb {
             // [x.y.z] -> create z = {} in x.y
             currentTable = try createKeyTable(
                 normalizedKey: lastKey,
                 keyHash: lastKeyHash,
-                lineNumber: z.lineNumber,
+                lineNumber: lastKeyToken.lineNumber,
                 inTable: currentTable,
                 isKeyed: currentTableIsKeyed
             )
@@ -946,7 +982,7 @@ struct Parser: ~Copyable {
                 maybeArrayIndex = try createKeyArray(
                     normalizedKey: lastKey,
                     keyHash: lastKeyHash,
-                    lineNumber: z.lineNumber,
+                    lineNumber: lastKeyToken.lineNumber,
                     inTable: currentTable,
                     isKeyed: currentTableIsKeyed,
                     kind: .table
