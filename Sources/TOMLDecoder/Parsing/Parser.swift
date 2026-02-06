@@ -146,9 +146,6 @@ struct Parser: ~Copyable {
             }
 
             func scanString(range: Range<Int>, lineNumber: Int) throws(TOMLError) {
-                let isBareKeyChar = CodeUnits.isBareKeyChar
-                let isValueChar = CodeUnits.isValueChar
-                let isBasicStringBodyChar = CodeUnits.isBasicStringBodyChar
                 let start = range.lowerBound
                 let end = range.upperBound
                 let head = bytes[start]
@@ -156,6 +153,7 @@ struct Parser: ~Copyable {
                     (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
                     head == CodeUnits.underscore
                 {
+                    let isBareKeyChar = CodeUnits.isBareKeyChar
                     var index = start + 1
                     while index < end {
                         let ch = bytes[index]
@@ -261,6 +259,7 @@ struct Parser: ~Copyable {
                     }
 
                     var i = start + 1
+                    let isBasicStringBodyChar = CodeUnits.isBasicStringBodyChar
 
                     // 8x unrolling for double-quoted strings
                     while i + 8 <= end {
@@ -359,23 +358,28 @@ struct Parser: ~Copyable {
                 }
 
                 if isDotSpecial {
+                    let isBareKeyChar = CodeUnits.isBareKeyChar
                     var index = start
-                    var isValidKey = true
+                    while index < end, isBareKeyChar[Int(bytes[index])] {
+                        index += 1
+                    }
+                    if index >= end || bytes[index] != CodeUnits.plus {
+                        emitToken(kind: .bareKey, start: start, end: index)
+                        return
+                    }
+
+                    index += 1
                     while index < end {
                         let ch = bytes[index]
-                        if isBareKeyChar[Int(ch)] {
-                            index += 1
-                            continue
-                        }
-                        if ch == CodeUnits.plus {
-                            isValidKey = false
+                        if isBareKeyChar[Int(ch)] || ch == CodeUnits.plus {
                             index += 1
                             continue
                         }
                         break
                     }
-                    emitToken(kind: isValidKey ? .bareKey : .string, start: start, end: index)
+                    emitToken(kind: .string, start: start, end: index)
                 } else {
+                    let isValueChar = CodeUnits.isValueChar
                     var index = start
                     while index < end {
                         let ch = bytes[index]
