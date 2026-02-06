@@ -1816,15 +1816,17 @@ func normalizeKeyAndHash(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTra
 
 @inline(__always)
 func fastKeyHash(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> Int {
-    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
-    let prime: UInt64 = 1_099_511_628_211
-
     let count = range.upperBound - range.lowerBound
-    if count <= 8, let base = bytes.baseAddress {
+    if let base = bytes.baseAddress {
         let start = base.advanced(by: range.lowerBound)
-        return Int(truncatingIfNeeded: packedKeyHash(UnsafeBufferPointer(start: start, count: count)))
+        if count <= 8 {
+            return Int(truncatingIfNeeded: packedKeyHash(UnsafeBufferPointer(start: start, count: count)))
+        }
+        return Int(truncatingIfNeeded: sampledKeyHash(start: start, count: count))
     }
 
+    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
+    let prime: UInt64 = 1_099_511_628_211
     var hash = offsetBasis
     var index = range.lowerBound
     while index < range.upperBound {
@@ -1837,23 +1839,20 @@ func fastKeyHash(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> Int {
 
 @inline(__always)
 func fastKeyHash(_ key: String) -> Int {
-    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
-    let prime: UInt64 = 1_099_511_628_211
-
     if let hash = key.utf8.withContiguousStorageIfAvailable({ buffer -> UInt64 in
         if buffer.count <= 8 {
             return packedKeyHash(buffer)
         }
-        var hash = offsetBasis
-        for byte in buffer {
-            hash ^= UInt64(byte)
-            hash &*= prime
+        if let start = buffer.baseAddress {
+            return sampledKeyHash(start: start, count: buffer.count)
         }
-        return hash
+        return 0
     }) {
         return Int(truncatingIfNeeded: hash)
     }
 
+    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
+    let prime: UInt64 = 1_099_511_628_211
     var hash = offsetBasis
     var packed: UInt64 = 0
     var count = 0
@@ -1866,6 +1865,14 @@ func fastKeyHash(_ key: String) -> Int {
         count += 1
     }
     return Int(truncatingIfNeeded: count <= 8 ? packed : hash)
+}
+
+@inline(__always)
+private func sampledKeyHash(start: UnsafePointer<UInt8>, count: Int) -> UInt64 {
+    let prefix = packedKeyHash(UnsafeBufferPointer(start: start, count: 8))
+    let suffix = packedKeyHash(UnsafeBufferPointer(start: start.advanced(by: count - 8), count: 8))
+    let rotatedSuffix = (suffix << 1) | (suffix >> 63)
+    return prefix ^ rotatedSuffix ^ (UInt64(truncatingIfNeeded: count) &* 0x9E37_79B1_85EB_CA87)
 }
 
 @inline(__always)
