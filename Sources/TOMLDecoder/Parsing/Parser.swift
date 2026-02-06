@@ -149,13 +149,14 @@ struct Parser: ~Copyable {
                 let isBareKeyChar = CodeUnits.isBareKeyChar
                 let isValueChar = CodeUnits.isValueChar
                 let start = range.lowerBound
+                let end = range.upperBound
                 let head = bytes[start]
                 if (head >= CodeUnits.lowerA && head <= CodeUnits.lowerZ) ||
                     (head >= CodeUnits.upperA && head <= CodeUnits.upperZ) ||
                     head == CodeUnits.underscore
                 {
                     var index = start + 1
-                    while index < range.upperBound {
+                    while index < end {
                         let ch = bytes[index]
                         if isBareKeyChar[Int(ch)] {
                             index += 1
@@ -167,88 +168,42 @@ struct Parser: ~Copyable {
                     return
                 }
 
-                if start + 3 <= range.upperBound,
-                   bytes[start] == CodeUnits.singleQuote,
-                   bytes[start + 1] == CodeUnits.singleQuote,
-                   bytes[start + 2] == CodeUnits.singleQuote
-                {
-                    var i = start + 3
-                    var newlinesInToken = 0
+                if head == CodeUnits.singleQuote {
+                    if start + 3 <= end,
+                       bytes[start + 1] == CodeUnits.singleQuote,
+                       bytes[start + 2] == CodeUnits.singleQuote
+                    {
+                        var i = start + 3
+                        var newlinesInToken = 0
 
-                    while i < range.upperBound {
-                        if bytes[i] == CodeUnits.lf {
-                            newlinesInToken += 1
-                        }
-                        if i + 3 <= range.upperBound,
-                           bytes[i] == CodeUnits.singleQuote,
-                           bytes[i + 1] == CodeUnits.singleQuote,
-                           bytes[i + 2] == CodeUnits.singleQuote
-                        {
-                            if i + 3 >= range.upperBound || bytes[i + 3] != CodeUnits.singleQuote {
-                                break
+                        while i < end {
+                            if bytes[i] == CodeUnits.lf {
+                                newlinesInToken += 1
                             }
-                        }
-                        i += 1
-                    }
-
-                    guard i < range.upperBound else {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote")
-                        )
-                    }
-
-                    let end = i + 3
-                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
-                    return
-                }
-
-                if start + 3 < range.upperBound,
-                   bytes[start] == CodeUnits.doubleQuote,
-                   bytes[start + 1] == CodeUnits.doubleQuote,
-                   bytes[start + 2] == CodeUnits.doubleQuote
-                {
-                    var i = start + 3
-                    let textCount = range.upperBound
-                    var newlinesInToken = 0
-
-                    while i < textCount {
-                        if bytes[i] == CodeUnits.lf {
-                            newlinesInToken += 1
-                        }
-                        if i + 3 <= textCount,
-                           bytes[i] == CodeUnits.doubleQuote,
-                           bytes[i + 1] == CodeUnits.doubleQuote,
-                           bytes[i + 2] == CodeUnits.doubleQuote
-                        {
-                            // Check if this is exactly 3 quotes (not part of a longer sequence)
-                            if i + 3 >= textCount || bytes[i + 3] != CodeUnits.doubleQuote {
-                                if bytes[i - 1] == CodeUnits.backslash {
-                                    i += 1
-                                    continue
+                            if i + 3 <= end,
+                               bytes[i] == CodeUnits.singleQuote,
+                               bytes[i + 1] == CodeUnits.singleQuote,
+                               bytes[i + 2] == CodeUnits.singleQuote
+                            {
+                                if i + 3 >= end || bytes[i + 3] != CodeUnits.singleQuote {
+                                    break
                                 }
-                                break
                             }
+                            i += 1
                         }
-                        i += 1
+
+                        guard i < end else {
+                            throw TOMLError(
+                                .syntax(lineNumber: lineNumber, message: "unterminated triple-s-quote")
+                            )
+                        }
+
+                        emitToken(kind: .string, start: start, end: i + 3, newlines: newlinesInToken)
+                        return
                     }
 
-                    guard i < range.upperBound else {
-                        throw TOMLError(
-                            .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote")
-                        )
-                    }
-
-                    let end = i + 3
-                    emitToken(kind: .string, start: start, end: end, newlines: newlinesInToken)
-                    return
-                }
-
-                let ch = bytes[start]
-                if ch == CodeUnits.singleQuote {
                     var i = start + 1
-                    let textCount = range.upperBound
-
-                    while i < textCount {
+                    while i < end {
                         let ch = bytes[i]
                         if ch == CodeUnits.singleQuote || ch == CodeUnits.lf {
                             break
@@ -256,7 +211,7 @@ struct Parser: ~Copyable {
                         i += 1
                     }
 
-                    if i >= textCount || bytes[i] != CodeUnits.singleQuote {
+                    if i >= end || bytes[i] != CodeUnits.singleQuote {
                         throw TOMLError(
                             .syntax(lineNumber: lineNumber, message: "unterminated s-quote")
                         )
@@ -266,11 +221,48 @@ struct Parser: ~Copyable {
                     return
                 }
 
-                if ch == CodeUnits.doubleQuote {
+                if head == CodeUnits.doubleQuote {
+                    if start + 3 < end,
+                       bytes[start + 1] == CodeUnits.doubleQuote,
+                       bytes[start + 2] == CodeUnits.doubleQuote
+                    {
+                        var i = start + 3
+                        var newlinesInToken = 0
+
+                        while i < end {
+                            if bytes[i] == CodeUnits.lf {
+                                newlinesInToken += 1
+                            }
+                            if i + 3 <= end,
+                               bytes[i] == CodeUnits.doubleQuote,
+                               bytes[i + 1] == CodeUnits.doubleQuote,
+                               bytes[i + 2] == CodeUnits.doubleQuote
+                            {
+                                if i + 3 >= end || bytes[i + 3] != CodeUnits.doubleQuote {
+                                    if bytes[i - 1] == CodeUnits.backslash {
+                                        i += 1
+                                        continue
+                                    }
+                                    break
+                                }
+                            }
+                            i += 1
+                        }
+
+                        guard i < end else {
+                            throw TOMLError(
+                                .syntax(lineNumber: lineNumber, message: "unterminated triple-d-quote")
+                            )
+                        }
+
+                        emitToken(kind: .string, start: start, end: i + 3, newlines: newlinesInToken)
+                        return
+                    }
+
                     var i = start + 1
 
                     // 8x unrolling for double-quoted strings
-                    while i + 8 <= range.upperBound {
+                    while i + 8 <= end {
                         if bytes[i] == CodeUnits.backslash || bytes[i] == CodeUnits.doubleQuote || bytes[i] == CodeUnits.lf { break }
                         if bytes[i + 1] == CodeUnits.backslash || bytes[i + 1] == CodeUnits.doubleQuote || bytes[i + 1] == CodeUnits.lf { break }
                         if bytes[i + 2] == CodeUnits.backslash || bytes[i + 2] == CodeUnits.doubleQuote || bytes[i + 2] == CodeUnits.lf { break }
@@ -282,11 +274,11 @@ struct Parser: ~Copyable {
                         i += 8
                     }
 
-                    while i < range.upperBound {
+                    while i < end {
                         let ch = bytes[i]
                         if ch == CodeUnits.backslash {
                             i += 1
-                            if i < range.upperBound {
+                            if i < end {
                                 i += 1
                                 continue
                             }
@@ -299,7 +291,7 @@ struct Parser: ~Copyable {
                         i += 1
                     }
 
-                    if i >= range.upperBound || bytes[i] != CodeUnits.doubleQuote {
+                    if i >= end || bytes[i] != CodeUnits.doubleQuote {
                         throw TOMLError(
                             .syntax(lineNumber: lineNumber, message: "unterminated quote")
                         )
@@ -313,34 +305,34 @@ struct Parser: ~Copyable {
                     var index = start
                     var dateEnder: Int?
                     // Fast path: Dates must produce YYYY-MM-DD, so checks for the dash
-                    if start + 4 < range.upperBound && bytes[start + 4] == CodeUnits.minus {
+                    if start + 4 < end && bytes[start + 4] == CodeUnits.minus {
                         dateEnder = scanDate(bytes: bytes, range: range)?.3
                     }
 
-                    if let dateEnder, dateEnder < range.upperBound,
+                    if let dateEnder, dateEnder < end,
                        bytes[dateEnder] == CodeUnits.upperT || bytes[dateEnder] == CodeUnits.lowerT
                        || bytes[dateEnder] == CodeUnits.space
                     {
                         let timeStarter = dateEnder + 1
                         if let timeEnder = scanTime(
-                            bytes: bytes, range: timeStarter ..< range.upperBound
+                            bytes: bytes, range: timeStarter ..< end
                         )?.3 {
                             index = timeEnder
                         }
                     } else if let dateEnder {
                         index = dateEnder
-                    } else if start + 2 < range.upperBound, bytes[start + 2] == CodeUnits.colon,
+                    } else if start + 2 < end, bytes[start + 2] == CodeUnits.colon,
                               let timeEnder = scanTime(
-                                  bytes: bytes, range: start ..< range.upperBound
+                                  bytes: bytes, range: start ..< end
                               )?.3
                     {
                         index = timeEnder
                     }
                     if index > start {
-                        if index < range.upperBound {
+                        if index < end {
                             if bytes[index] == CodeUnits.dot {
                                 index += 1
-                                while index < range.upperBound, bytes[index] >= CodeUnits.number0,
+                                while index < end, bytes[index] >= CodeUnits.number0,
                                       bytes[index] <= CodeUnits.number9
                                 {
                                     index += 1
@@ -349,15 +341,13 @@ struct Parser: ~Copyable {
                             if bytes[index] == CodeUnits.upperZ || bytes[index] == CodeUnits.lowerZ {
                                 index += 1
                             } else if let timzoneEnder = scanTimezoneOffset(
-                                bytes: bytes, range: index ..< range.upperBound
+                                bytes: bytes, range: index ..< end
                             ) {
                                 index = timzoneEnder
                             }
                         }
                         // squeeze out any spaces at end of string
-                        while index >= start,
-                              bytes[index - 1] == CodeUnits.space
-                        {
+                        while index > start, bytes[index - 1] == CodeUnits.space {
                             index -= 1
                         }
                         // tokenize
@@ -369,7 +359,7 @@ struct Parser: ~Copyable {
                 if isDotSpecial {
                     var index = start
                     var isValidKey = true
-                    while index < range.upperBound {
+                    while index < end {
                         let ch = bytes[index]
                         if isBareKeyChar[Int(ch)] {
                             index += 1
@@ -385,7 +375,7 @@ struct Parser: ~Copyable {
                     emitToken(kind: isValidKey ? .bareKey : .string, start: start, end: index)
                 } else {
                     var index = start
-                    while index < range.upperBound {
+                    while index < end {
                         let ch = bytes[index]
                         if isValueChar[Int(ch)] {
                             index += 1
