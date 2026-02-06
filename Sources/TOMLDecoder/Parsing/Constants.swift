@@ -84,6 +84,15 @@ enum CodeUnits {
         return UnsafePointer(ptr)
     }()
 
+    nonisolated(unsafe) static let isBasicStringBodyChar: UnsafePointer<Bool> = {
+        let ptr = UnsafeMutablePointer<Bool>.allocate(capacity: 256)
+        ptr.initialize(repeating: true, count: 256)
+        ptr[Int(CodeUnits.backslash)] = false
+        ptr[Int(CodeUnits.doubleQuote)] = false
+        ptr[Int(CodeUnits.lf)] = false
+        return UnsafePointer(ptr)
+    }()
+
     static let null: UTF8.CodeUnit = 0x00
     static let unitSeparator: UTF8.CodeUnit = 0x1F
     static let delete: UTF8.CodeUnit = 0x7F
