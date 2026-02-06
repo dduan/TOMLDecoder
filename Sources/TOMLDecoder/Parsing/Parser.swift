@@ -1905,21 +1905,16 @@ extension Parser {
             guard let keyValueBase = keyValueBuffer.baseAddress else {
                 return nil
             }
-            return indices.withUnsafeBufferPointer { indexBuffer in
-                guard let indexBase = indexBuffer.baseAddress else {
-                    return nil
+            var i = 0
+            while i < indices.count {
+                let keyValueIndex = indices[i]
+                let keyValuePair = keyValueBase.advanced(by: keyValueIndex).pointee
+                if keyValuePair.keyHash == keyHash, keyValuePair.key == key {
+                    return keyValueIndex
                 }
-                var i = 0
-                while i < indexBuffer.count {
-                    let keyValueIndex = indexBase[i]
-                    let keyValuePair = keyValueBase[keyValueIndex]
-                    if keyValuePair.keyHash == keyHash, keyValuePair.key == key {
-                        return keyValueIndex
-                    }
-                    i += 1
-                }
-                return nil
+                i += 1
             }
+            return nil
         }
     }
 
@@ -1932,21 +1927,16 @@ extension Parser {
             guard let keyArrayBase = keyArrayBuffer.baseAddress else {
                 return nil
             }
-            return indices.withUnsafeBufferPointer { indexBuffer in
-                guard let indexBase = indexBuffer.baseAddress else {
-                    return nil
+            var i = 0
+            while i < indices.count {
+                let keyArrayIndex = indices[i]
+                let keyArrayPair = keyArrayBase.advanced(by: keyArrayIndex).pointee
+                if keyArrayPair.keyHash == keyHash, keyArrayPair.key == key {
+                    return keyArrayIndex
                 }
-                var i = 0
-                while i < indexBuffer.count {
-                    let keyArrayIndex = indexBase[i]
-                    let keyArrayPair = keyArrayBase[keyArrayIndex]
-                    if keyArrayPair.keyHash == keyHash, keyArrayPair.key == key {
-                        return keyArrayIndex
-                    }
-                    i += 1
-                }
-                return nil
+                i += 1
             }
+            return nil
         }
     }
 
@@ -1959,21 +1949,16 @@ extension Parser {
             guard let keyTableBase = keyTableBuffer.baseAddress else {
                 return nil
             }
-            return indices.withUnsafeBufferPointer { indexBuffer in
-                guard let indexBase = indexBuffer.baseAddress else {
-                    return nil
+            var i = 0
+            while i < indices.count {
+                let keyTableIndex = indices[i]
+                let keyTablePair = keyTableBase.advanced(by: keyTableIndex).pointee
+                if keyTablePair.keyHash == keyHash, keyTablePair.key == key {
+                    return keyTableIndex
                 }
-                var i = 0
-                while i < indexBuffer.count {
-                    let keyTableIndex = indexBase[i]
-                    let keyTablePair = keyTableBase[keyTableIndex]
-                    if keyTablePair.keyHash == keyHash, keyTablePair.key == key {
-                        return keyTableIndex
-                    }
-                    i += 1
-                }
-                return nil
+                i += 1
             }
+            return nil
         }
     }
 
