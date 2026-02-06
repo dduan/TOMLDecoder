@@ -4,7 +4,7 @@ struct Parser: ~Copyable {
     var currentLineNumber = 1
     var currentTable = 0
     var currentTableIsKeyed = false
-    var tablePath: [(key: String, keyHash: Int, token: Token)] = []
+    var tablePath: [(key: String, keyHash: Int)] = []
     var tables: [InternalTOMLTable] = [InternalTOMLTable()]
     var arrays: [InternalTOMLArray] = []
     var keyTables: [KeyTablePair] = []
@@ -877,7 +877,11 @@ struct Parser: ~Copyable {
         throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "syntax error"))
     }
 
-    mutating func fillTablePath(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) {
+    mutating func fillTablePath(bytes: UnsafeBufferPointer<UInt8>) throws(TOMLError) -> (
+        key: String,
+        keyHash: Int,
+        token: Token
+    ) {
         let lineNumber = token.lineNumber
         tablePath.removeAll(keepingCapacity: true)
 
@@ -886,22 +890,21 @@ struct Parser: ~Copyable {
                 throw TOMLError(.syntax(lineNumber: lineNumber, message: "invalid or missing key"))
             }
 
+            let currentToken = token
             let (key, keyHash) = try normalizeKeyAndHash(bytes: bytes, token: token, keyTransform: keyTransform)
-            tablePath.append((key: key, keyHash: keyHash, token: token))
             try nextToken(bytes: bytes, isDotSpecial: true)
 
             if token.kind == .rbracket {
-                break
+                return (key: key, keyHash: keyHash, token: currentToken)
             }
+
+            tablePath.append((key: key, keyHash: keyHash))
 
             if token.kind != .dot {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
             }
 
             try nextToken(bytes: bytes, isDotSpecial: true)
-        }
-        if tablePath.isEmpty {
-            throw TOMLError(.syntax(lineNumber: lineNumber, message: "empty table selector"))
         }
     }
 
@@ -919,10 +922,7 @@ struct Parser: ~Copyable {
             try eatToken(bytes: bytes, kind: .lbracket, isDotSpecial: true)
         }
 
-        try fillTablePath(bytes: bytes)
-
-        // For [x.y.z] or [[x.y.z]], remove z from tpath.
-        let (lastKey, lastKeyHash, z) = tablePath.removeLast()
+        let (lastKey, lastKeyHash, z) = try fillTablePath(bytes: bytes)
         try walkTablePath()
 
         if !llb {
@@ -2032,7 +2032,7 @@ extension Parser {
     mutating func walkTablePath() throws(TOMLError) {
         var tableIndex = 0
         var isKeyed = false
-        for (key, keyHash, _) in tablePath {
+        for (key, keyHash) in tablePath {
             switch tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) {
             case let .table(index):
                 tableIndex = index
