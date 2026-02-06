@@ -438,11 +438,13 @@ struct Parser: ~Copyable {
                 keyTables[tableIndex].table.keyValues.reserveCapacity(8)
             }
             keyTables[tableIndex].table.keyValues.append(index)
+            keyTables[tableIndex].table.recordKeyHash(keyHash)
         } else {
             if tables[tableIndex].keyValues.isEmpty {
                 tables[tableIndex].keyValues.reserveCapacity(8)
             }
             tables[tableIndex].keyValues.append(index)
+            tables[tableIndex].recordKeyHash(keyHash)
         }
     }
 
@@ -490,11 +492,13 @@ struct Parser: ~Copyable {
                 keyTables[tableIndex].table.tables.reserveCapacity(8)
             }
             keyTables[tableIndex].table.tables.append(index)
+            keyTables[tableIndex].table.recordKeyHash(keyHash)
         } else {
             if tables[tableIndex].tables.isEmpty {
                 tables[tableIndex].tables.reserveCapacity(8)
             }
             tables[tableIndex].tables.append(index)
+            tables[tableIndex].recordKeyHash(keyHash)
         }
         return index
     }
@@ -523,11 +527,13 @@ struct Parser: ~Copyable {
                 keyTables[tableIndex].table.arrays.reserveCapacity(8)
             }
             keyTables[tableIndex].table.arrays.append(index)
+            keyTables[tableIndex].table.recordKeyHash(keyHash)
         } else {
             if tables[tableIndex].arrays.isEmpty {
                 tables[tableIndex].arrays.reserveCapacity(8)
             }
             tables[tableIndex].arrays.append(index)
+            tables[tableIndex].recordKeyHash(keyHash)
         }
         return index
     }
@@ -2196,6 +2202,14 @@ extension Parser {
         keyHash: Int
     ) -> InternalTOMLTable.Value? {
         if keyed {
+            if !keyTables[tableIndex].table.mightContainKeyHash(keyHash) {
+                return nil
+            }
+        } else if !tables[tableIndex].mightContainKeyHash(keyHash) {
+            return nil
+        }
+
+        if keyed {
             if let keyValueIndex = matchKeyValue(in: keyTables[tableIndex].table.keyValues, key: key, keyHash: keyHash) {
                 return .keyValue(keyValueIndex)
             }
@@ -2228,7 +2242,13 @@ extension Parser {
     @inline(__always)
     func lookupTable(in tableIndex: Int, keyed: Bool, key: borrowing String, keyHash: Int) -> Int? {
         if keyed {
+            if !keyTables[tableIndex].table.mightContainKeyHash(keyHash) {
+                return nil
+            }
             return matchKeyTable(in: keyTables[tableIndex].table.tables, key: key, keyHash: keyHash)
+        }
+        if !tables[tableIndex].mightContainKeyHash(keyHash) {
+            return nil
         }
         return matchKeyTable(in: tables[tableIndex].tables, key: key, keyHash: keyHash)
     }
@@ -2236,7 +2256,13 @@ extension Parser {
     @inline(__always)
     func lookupArray(in tableIndex: Int, keyed: Bool, key: borrowing String, keyHash: Int) -> Int? {
         if keyed {
+            if !keyTables[tableIndex].table.mightContainKeyHash(keyHash) {
+                return nil
+            }
             return matchKeyArray(in: keyTables[tableIndex].table.arrays, key: key, keyHash: keyHash)
+        }
+        if !tables[tableIndex].mightContainKeyHash(keyHash) {
+            return nil
         }
         return matchKeyArray(in: tables[tableIndex].arrays, key: key, keyHash: keyHash)
     }
@@ -2250,12 +2276,18 @@ extension Parser {
         keyHash: Int
     ) -> Int? {
         if keyed {
+            if !keyTables[tableIndex].table.mightContainKeyHash(keyHash) {
+                return nil
+            }
             return matchKeyArray(
                 in: keyTables[tableIndex].table.arrays,
                 bytes: bytes,
                 token: token,
                 keyHash: keyHash
             )
+        }
+        if !tables[tableIndex].mightContainKeyHash(keyHash) {
+            return nil
         }
         return matchKeyArray(
             in: tables[tableIndex].arrays,
@@ -2303,11 +2335,13 @@ extension Parser {
                         keyTables[tableIndex].table.tables.reserveCapacity(8)
                     }
                     keyTables[tableIndex].table.tables.append(newTableAddress)
+                    keyTables[tableIndex].table.recordKeyHash(keyHash)
                 } else {
                     if tables[tableIndex].tables.isEmpty {
                         tables[tableIndex].tables.reserveCapacity(8)
                     }
                     tables[tableIndex].tables.append(newTableAddress)
+                    tables[tableIndex].recordKeyHash(keyHash)
                 }
                 tableIndex = newTableAddress
                 isKeyed = true

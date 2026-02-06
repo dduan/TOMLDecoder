@@ -120,9 +120,21 @@ struct InternalTOMLTable: Equatable, Sendable {
     var implicit: Bool = false
     var readOnly: Bool = false
     var definedByDottedKey: Bool = false
+    var keyHashBloom: UInt64 = 0
     var keyValues: [Int] = []
     var arrays: [Int] = []
     var tables: [Int] = []
+
+    @inline(__always)
+    mutating func recordKeyHash(_ keyHash: Int) {
+        keyHashBloom |= keyHashBloomMask(keyHash)
+    }
+
+    @inline(__always)
+    func mightContainKeyHash(_ keyHash: Int) -> Bool {
+        let mask = keyHashBloomMask(keyHash)
+        return (keyHashBloom & mask) == mask
+    }
 
     func allKeys(_ document: TOMLDocument) -> [String] {
         var keys = [String]()
@@ -166,6 +178,14 @@ struct InternalTOMLTable: Equatable, Sendable {
         case array(Int)
         case table(Int)
     }
+}
+
+@inline(__always)
+private func keyHashBloomMask(_ keyHash: Int) -> UInt64 {
+    let raw = UInt(bitPattern: keyHash)
+    let bit0 = UInt64(1) << UInt64(raw & 63)
+    let bit1 = UInt64(1) << UInt64((raw >> 6) & 63)
+    return bit0 | bit1
 }
 
 struct DateTimeComponents: Equatable {
