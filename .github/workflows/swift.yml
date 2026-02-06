@@ -32,6 +32,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Run tests
         run: swift test
+      - name: Run tests without Codable
+        run: swift test --disable-default-traits
 
   swift-test-macos:
     name: ${{ matrix.os_name }} (Swift ${{ matrix.swift_version }})
@@ -50,6 +52,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Run tests
         run: swift test
+      - name: Run tests without Codable
+        run: swift test --disable-default-traits
 
   swift-test-simulator:
     name: ${{ matrix.platform }} ${{ matrix.os_version }} (Swift 6.2)

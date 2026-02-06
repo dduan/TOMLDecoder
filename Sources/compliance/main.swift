@@ -3,6 +3,7 @@
 import Foundation
 import TOMLDecoder
 
+#if CodableSupport
 /// iOS 13+ compatible date formatter functions
 private func createISO8601FullFormatter() -> ISO8601DateFormatter {
     let formatter = ISO8601DateFormatter()
@@ -88,3 +89,7 @@ func translate(value: Any) -> Any {
 
 let json = try JSONSerialization.data(withJSONObject: translate(value: table))
 print(String(data: json, encoding: .utf8)!)
+#else
+fputs("compliance executable requires CodableSupport trait.\n", stderr)
+exit(1)
+#endif

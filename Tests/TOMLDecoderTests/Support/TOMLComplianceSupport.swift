@@ -1,3 +1,4 @@
+#if CodableSupport
 import Foundation
 import ProlepticGregorianTestHelpers
 import Testing
@@ -388,3 +389,4 @@ enum TOMLComplianceSupport {
         return description
     }
 }
+#endif

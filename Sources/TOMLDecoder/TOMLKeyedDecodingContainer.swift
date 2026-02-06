@@ -1,6 +1,6 @@
-#if canImport(Foundation)
+#if CodableSupport
 import Foundation
-#endif
+
 struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtocol {
     private let decoder: _TOMLDecoder
     private let table: TOMLTable
@@ -74,14 +74,12 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
             decoder.codingPath.removeLast()
         }
         decoder.token = token
-        #if canImport(Foundation)
         // have to intercept these here otherwise Foundation will try to decode it as a float
         if type == Date.self {
             return try decoder.decode(Date.self) as! T
         } else if type == DateComponents.self {
             return try decoder.decode(DateComponents.self) as! T
         }
-        #endif
         if type == LocalDate.self {
             return try decoder.decode(LocalDate.self) as! T
         } else if type == LocalTime.self {
@@ -134,3 +132,4 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
         _superDecoder(forKey: key)
     }
 }
+#endif

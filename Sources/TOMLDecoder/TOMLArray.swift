@@ -286,6 +286,7 @@ public struct TOMLArray: Equatable, Sendable {
         return localTime
     }
 
+    #if CodableSupport
     func array() throws(TOMLError) -> [Any] {
         if isKeyed {
             let count = source.keyArrays.count
@@ -301,6 +302,7 @@ public struct TOMLArray: Equatable, Sendable {
             return try source.arrays[index].array(source: source)
         }
     }
+    #endif
 
     @inline(__always)
     func resolvedArray() -> InternalTOMLArray {
@@ -308,6 +310,7 @@ public struct TOMLArray: Equatable, Sendable {
     }
 }
 
+#if CodableSupport
 extension TOMLArray: Codable {
     /// Makes ``TOMLArray`` eligible for `Codable`.
     ///
@@ -339,7 +342,9 @@ extension TOMLArray: Codable {
         throw TOMLError(.notReallyCodable)
     }
 }
+#endif
 
+#if CodableSupport
 extension [Any] {
     /// Create a `[Any]` from a `TOMLArray`.
     /// Validating all fields recursively.
@@ -356,3 +361,4 @@ extension [Any] {
         self = try tomlArray.array()
     }
 }
+#endif

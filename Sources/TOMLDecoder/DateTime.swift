@@ -19,7 +19,7 @@
 /// > This means for ancient dates,
 /// > ``OffsetDateTime`` may disagree with `Foundation.Date` on how much time has passed since a reference date.
 /// > For modern dates, there's no difference between the two.
-public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStringConvertible {
+public struct OffsetDateTime: Equatable, Hashable, Sendable, CustomStringConvertible {
     /// The date component of the offset date-time.
     public var date: LocalDate
     /// The time component of the offset date-time.
@@ -48,13 +48,20 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         self.features = features
     }
 
+    #if CodableSupport
     public init(from decoder: any Decoder) throws {
         if let decoder = decoder as? _TOMLDecoder {
             self = try decoder.decode(OffsetDateTime.self)
-        } else {
-            try self.init(from: decoder)
+            return
         }
+
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        date = try container.decode(LocalDate.self, forKey: .date)
+        time = try container.decode(LocalTime.self, forKey: .time)
+        offset = try container.decode(Int16.self, forKey: .offset)
+        features = try container.decode(Features.self, forKey: .features)
     }
+    #endif
 
     /// Create a new offset date-time from it's members.
     ///
@@ -183,7 +190,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
     ///
     /// A parser can preserve features of a offset date-time string with this type.
     /// If neither lowercase nor uppercase 'T' is present, the date-time seprator is a space, which is allowed by TOML.
-    public struct Features: OptionSet, Hashable, Sendable, Codable {
+    public struct Features: OptionSet, Hashable, Sendable {
         /// The raw value of the features.
         public let rawValue: UInt8
 
@@ -213,7 +220,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
 /// A local date-time as defined by TOML.
 ///
 /// ``LocalDateTime`` stores fractional seconds to the nanosecond precision.
-public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStringConvertible {
+public struct LocalDateTime: Equatable, Hashable, Sendable, CustomStringConvertible {
     /// The date component of the local date-time.
     public var date: LocalDate
     /// The time component of the local date-time.
@@ -231,13 +238,18 @@ public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStrin
         self.time = time
     }
 
+    #if CodableSupport
     public init(from decoder: any Decoder) throws {
         if let decoder = decoder as? _TOMLDecoder {
             self = try decoder.decode(LocalDateTime.self)
-        } else {
-            try self.init(from: decoder)
+            return
         }
+
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        date = try container.decode(LocalDate.self, forKey: .date)
+        time = try container.decode(LocalTime.self, forKey: .time)
     }
+    #endif
 
     /// Create a new local date-time from it's members.
     ///
@@ -271,7 +283,7 @@ public struct LocalDateTime: Equatable, Hashable, Sendable, Codable, CustomStrin
 /// A local time as defined by TOML.
 ///
 /// ``LocalTime`` stores fractional seconds to the nanosecond precision.
-public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringConvertible {
+public struct LocalTime: Equatable, Hashable, Sendable, CustomStringConvertible {
     /// The hour component of the local time.
     public var hour: UInt8
     /// The minute component of the local time.
@@ -340,7 +352,7 @@ public struct LocalTime: Equatable, Hashable, Sendable, Codable, CustomStringCon
 /// A local date as defined by TOML.
 ///
 /// ``LocalDate`` stores the year, month, and day components of a date.
-public struct LocalDate: Equatable, Hashable, Sendable, Codable, CustomStringConvertible {
+public struct LocalDate: Equatable, Hashable, Sendable, CustomStringConvertible {
     /// The year component of the local date.
     /// Valid range is [1, 9999].
     public var year: UInt16
@@ -431,7 +443,15 @@ extension String {
     }
 }
 
-#if canImport(Foundation)
+#if CodableSupport
+extension OffsetDateTime: Codable {}
+extension OffsetDateTime.Features: Codable {}
+extension LocalDateTime: Codable {}
+extension LocalTime: Codable {}
+extension LocalDate: Codable {}
+#endif
+
+#if CodableSupport
 public import Foundation
 
 extension DateComponents {

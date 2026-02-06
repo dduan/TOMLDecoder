@@ -1,3 +1,4 @@
+#if CodableSupport
 final class _TOMLDecoder: Decoder {
     enum Container {
         case keyed(TOMLTable)
@@ -72,3 +73,4 @@ extension Double {
         }
     }
 }
+#endif
