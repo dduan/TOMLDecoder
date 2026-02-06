@@ -1881,54 +1881,127 @@ private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
 }
 
 extension Parser {
+    @inline(__always)
+    func matchKeyValue(in indices: [Int], key: String, keyHash: Int) -> Int? {
+        keyValues.withUnsafeBufferPointer { keyValueBuffer in
+            guard let keyValueBase = keyValueBuffer.baseAddress else {
+                return nil
+            }
+            return indices.withUnsafeBufferPointer { indexBuffer in
+                guard let indexBase = indexBuffer.baseAddress else {
+                    return nil
+                }
+                var i = 0
+                while i < indexBuffer.count {
+                    let keyValueIndex = indexBase[i]
+                    let keyValuePair = keyValueBase[keyValueIndex]
+                    if keyValuePair.keyHash == keyHash, keyValuePair.key == key {
+                        return keyValueIndex
+                    }
+                    i += 1
+                }
+                return nil
+            }
+        }
+    }
+
+    @inline(__always)
+    func matchKeyArray(in indices: [Int], key: String, keyHash: Int) -> Int? {
+        keyArrays.withUnsafeBufferPointer { keyArrayBuffer in
+            guard let keyArrayBase = keyArrayBuffer.baseAddress else {
+                return nil
+            }
+            return indices.withUnsafeBufferPointer { indexBuffer in
+                guard let indexBase = indexBuffer.baseAddress else {
+                    return nil
+                }
+                var i = 0
+                while i < indexBuffer.count {
+                    let keyArrayIndex = indexBase[i]
+                    let keyArrayPair = keyArrayBase[keyArrayIndex]
+                    if keyArrayPair.keyHash == keyHash, keyArrayPair.key == key {
+                        return keyArrayIndex
+                    }
+                    i += 1
+                }
+                return nil
+            }
+        }
+    }
+
+    @inline(__always)
+    func matchKeyTable(in indices: [Int], key: String, keyHash: Int) -> Int? {
+        keyTables.withUnsafeBufferPointer { keyTableBuffer in
+            guard let keyTableBase = keyTableBuffer.baseAddress else {
+                return nil
+            }
+            return indices.withUnsafeBufferPointer { indexBuffer in
+                guard let indexBase = indexBuffer.baseAddress else {
+                    return nil
+                }
+                var i = 0
+                while i < indexBuffer.count {
+                    let keyTableIndex = indexBase[i]
+                    let keyTablePair = keyTableBase[keyTableIndex]
+                    if keyTablePair.keyHash == keyHash, keyTablePair.key == key {
+                        return keyTableIndex
+                    }
+                    i += 1
+                }
+                return nil
+            }
+        }
+    }
+
     func tableValue(tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> InternalTOMLTable.Value? {
-        let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
-        for kv in table.keyValues {
-            let kvPair = keyValues[kv]
-            if kvPair.keyHash == keyHash, kvPair.key == key {
-                return .keyValue(kv)
+        if keyed {
+            let keyValueIndices = keyTables[tableIndex].table.keyValues
+            if let keyValueIndex = matchKeyValue(in: keyValueIndices, key: key, keyHash: keyHash) {
+                return .keyValue(keyValueIndex)
             }
+
+            let keyArrayIndices = keyTables[tableIndex].table.arrays
+            if let keyArrayIndex = matchKeyArray(in: keyArrayIndices, key: key, keyHash: keyHash) {
+                return .array(keyArrayIndex)
+            }
+
+            let keyTableIndices = keyTables[tableIndex].table.tables
+            if let keyTableIndex = matchKeyTable(in: keyTableIndices, key: key, keyHash: keyHash) {
+                return .table(keyTableIndex)
+            }
+            return nil
         }
 
-        for arr in table.arrays {
-            let arrPair = keyArrays[arr]
-            if arrPair.keyHash == keyHash, arrPair.key == key {
-                return .array(arr)
-            }
+        let keyValueIndices = tables[tableIndex].keyValues
+        if let keyValueIndex = matchKeyValue(in: keyValueIndices, key: key, keyHash: keyHash) {
+            return .keyValue(keyValueIndex)
         }
 
-        for table in table.tables {
-            let tablePair = keyTables[table]
-            if tablePair.keyHash == keyHash, tablePair.key == key {
-                return .table(table)
-            }
+        let keyArrayIndices = tables[tableIndex].arrays
+        if let keyArrayIndex = matchKeyArray(in: keyArrayIndices, key: key, keyHash: keyHash) {
+            return .array(keyArrayIndex)
+        }
+
+        let keyTableIndices = tables[tableIndex].tables
+        if let keyTableIndex = matchKeyTable(in: keyTableIndices, key: key, keyHash: keyHash) {
+            return .table(keyTableIndex)
         }
 
         return nil
     }
 
     func lookupTable(in tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> Int? {
-        let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
-        for i in 0 ..< table.tables.count {
-            let tableIndexAtPosition = table.tables[i]
-            let tablePair = keyTables[tableIndexAtPosition]
-            if tablePair.keyHash == keyHash, tablePair.key == key {
-                return tableIndexAtPosition
-            }
+        if keyed {
+            return matchKeyTable(in: keyTables[tableIndex].table.tables, key: key, keyHash: keyHash)
         }
-        return nil
+        return matchKeyTable(in: tables[tableIndex].tables, key: key, keyHash: keyHash)
     }
 
     func lookupArray(in tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> Int? {
-        let table = keyed ? keyTables[tableIndex].table : tables[tableIndex]
-        for i in 0 ..< table.arrays.count {
-            let arrayIndex = table.arrays[i]
-            let arrPair = keyArrays[arrayIndex]
-            if arrPair.keyHash == keyHash, arrPair.key == key {
-                return arrayIndex
-            }
+        if keyed {
+            return matchKeyArray(in: keyTables[tableIndex].table.arrays, key: key, keyHash: keyHash)
         }
-        return nil
+        return matchKeyArray(in: tables[tableIndex].arrays, key: key, keyHash: keyHash)
     }
 
     mutating func walkTablePath() throws(TOMLError) {
