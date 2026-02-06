@@ -1885,14 +1885,23 @@ private func packedKeyHash(_ buffer: UnsafeBufferPointer<UInt8>) -> UInt64 {
     return packed
 }
 
+@inline(__always)
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
-    String(decoding: bytes[range], as: UTF8.self)
+    guard let baseAddress = bytes.baseAddress else {
+        return ""
+    }
+    let start = baseAddress.advanced(by: range.lowerBound)
+    let count = range.upperBound - range.lowerBound
+    return String(decoding: UnsafeBufferPointer(start: start, count: count), as: UTF8.self)
 }
 
 extension Parser {
     @inline(__always)
     func matchKeyValue(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
-        keyValues.withUnsafeBufferPointer { keyValueBuffer in
+        if indices.isEmpty {
+            return nil
+        }
+        return keyValues.withUnsafeBufferPointer { keyValueBuffer -> Int? in
             guard let keyValueBase = keyValueBuffer.baseAddress else {
                 return nil
             }
@@ -1916,7 +1925,10 @@ extension Parser {
 
     @inline(__always)
     func matchKeyArray(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
-        keyArrays.withUnsafeBufferPointer { keyArrayBuffer in
+        if indices.isEmpty {
+            return nil
+        }
+        return keyArrays.withUnsafeBufferPointer { keyArrayBuffer -> Int? in
             guard let keyArrayBase = keyArrayBuffer.baseAddress else {
                 return nil
             }
@@ -1940,7 +1952,10 @@ extension Parser {
 
     @inline(__always)
     func matchKeyTable(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
-        keyTables.withUnsafeBufferPointer { keyTableBuffer in
+        if indices.isEmpty {
+            return nil
+        }
+        return keyTables.withUnsafeBufferPointer { keyTableBuffer -> Int? in
             guard let keyTableBase = keyTableBuffer.baseAddress else {
                 return nil
             }
