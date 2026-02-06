@@ -90,7 +90,7 @@ struct InternalTOMLArray: Equatable, Sendable {
         }
     }
 
-    enum Kind {
+    enum Kind: UInt8 {
         case value
         case array
         case table

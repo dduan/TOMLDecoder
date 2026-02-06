@@ -1,5 +1,5 @@
 struct Token: Equatable {
-    enum Kind {
+    enum Kind: UInt8 {
         case dot
         case comma
         case equal
