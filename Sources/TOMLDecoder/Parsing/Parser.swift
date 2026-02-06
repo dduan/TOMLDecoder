@@ -1921,8 +1921,9 @@ extension Parser {
             guard let keyValueBase = keyValueBuffer.baseAddress else {
                 return nil
             }
+            let indexCount = indices.count
             var i = 0
-            while i < indices.count {
+            while i < indexCount {
                 let keyValueIndex = indices[i]
                 let keyValuePair = keyValueBase.advanced(by: keyValueIndex).pointee
                 if keyValuePair.keyHash == keyHash, keyValuePair.key == key {
@@ -1943,8 +1944,9 @@ extension Parser {
             guard let keyArrayBase = keyArrayBuffer.baseAddress else {
                 return nil
             }
+            let indexCount = indices.count
             var i = 0
-            while i < indices.count {
+            while i < indexCount {
                 let keyArrayIndex = indices[i]
                 let keyArrayPair = keyArrayBase.advanced(by: keyArrayIndex).pointee
                 if keyArrayPair.keyHash == keyHash, keyArrayPair.key == key {
@@ -1965,8 +1967,9 @@ extension Parser {
             guard let keyTableBase = keyTableBuffer.baseAddress else {
                 return nil
             }
+            let indexCount = indices.count
             var i = 0
-            while i < indices.count {
+            while i < indexCount {
                 let keyTableIndex = indices[i]
                 let keyTablePair = keyTableBase.advanced(by: keyTableIndex).pointee
                 if keyTablePair.keyHash == keyHash, keyTablePair.key == key {
