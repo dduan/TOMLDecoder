@@ -933,75 +933,143 @@ struct Parser: ~Copyable {
         }
 
         let firstToken = token
-        let (firstKey, firstKeyHash) = try normalizeKeyAndHash(
-            bytes: bytes,
-            token: token,
-            keyTransform: keyTransform
-        )
+        let firstIsBareNoTransform = keyTransform == nil && firstToken.kind == .bareKey
+        let firstKey: String?
+        let firstKeyHash: Int
+        if firstIsBareNoTransform {
+            firstKey = nil
+            firstKeyHash = fastKeyHash(bytes: bytes, range: firstToken.text)
+        } else {
+            let normalized = try normalizeKeyAndHash(
+                bytes: bytes,
+                token: firstToken,
+                keyTransform: keyTransform
+            )
+            firstKey = normalized.key
+            firstKeyHash = normalized.keyHash
+        }
         try nextToken(bytes: bytes, isDotSpecial: true)
 
-        let lastKey: String
-        let lastKeyHash: Int
-        let lastKeyToken: Token
         if token.kind == .rbracket {
-            lastKey = firstKey
-            lastKeyHash = firstKeyHash
-            lastKeyToken = firstToken
             currentTable = 0
             currentTableIsKeyed = false
+            if !llb {
+                let key = firstKey ?? makeString(bytes: bytes, range: firstToken.text)
+                currentTable = try createKeyTable(
+                    normalizedKey: key,
+                    keyHash: firstKeyHash,
+                    lineNumber: firstToken.lineNumber,
+                    inTable: currentTable,
+                    isKeyed: currentTableIsKeyed
+                )
+                currentTableIsKeyed = true
+            } else {
+                let arrayIndex: Int
+                if firstIsBareNoTransform {
+                    if let existingArrayIndex = lookupArray(
+                        in: currentTable,
+                        keyed: currentTableIsKeyed,
+                        bytes: bytes,
+                        token: firstToken,
+                        keyHash: firstKeyHash
+                    ) {
+                        arrayIndex = existingArrayIndex
+                    } else {
+                        let key = makeString(bytes: bytes, range: firstToken.text)
+                        arrayIndex = try createKeyArray(
+                            normalizedKey: key,
+                            keyHash: firstKeyHash,
+                            lineNumber: firstToken.lineNumber,
+                            inTable: currentTable,
+                            isKeyed: currentTableIsKeyed,
+                            kind: .table
+                        )
+                    }
+                } else {
+                    let key = firstKey!
+                    var maybeArrayIndex = lookupArray(
+                        in: currentTable,
+                        keyed: currentTableIsKeyed,
+                        key: key,
+                        keyHash: firstKeyHash
+                    )
+                    if maybeArrayIndex == nil {
+                        maybeArrayIndex = try createKeyArray(
+                            normalizedKey: key,
+                            keyHash: firstKeyHash,
+                            lineNumber: firstToken.lineNumber,
+                            inTable: currentTable,
+                            isKeyed: currentTableIsKeyed,
+                            kind: .table
+                        )
+                    }
+                    arrayIndex = maybeArrayIndex!
+                }
+                if keyArrays[arrayIndex].array.kind != .table {
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
+                }
+
+                let newTableIndex = tables.count
+                tables.append(InternalTOMLTable())
+                if keyArrays[arrayIndex].array.elements.isEmpty {
+                    keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+                }
+                keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                currentTable = newTableIndex
+                currentTableIsKeyed = false
+            }
         } else {
             if token.kind != .dot {
                 throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "invalid key"))
             }
 
             tablePath.removeAll(keepingCapacity: true)
-            tablePath.append((key: firstKey, keyHash: firstKeyHash))
+            tablePath.append((key: firstKey ?? makeString(bytes: bytes, range: firstToken.text), keyHash: firstKeyHash))
             try nextToken(bytes: bytes, isDotSpecial: true)
 
             let (key, keyHash, keyToken) = try fillTablePath(bytes: bytes, clearPath: false)
-            lastKey = key
-            lastKeyHash = keyHash
-            lastKeyToken = keyToken
             try walkTablePath()
-        }
 
-        if !llb {
-            // [x.y.z] -> create z = {} in x.y
-            currentTable = try createKeyTable(
-                normalizedKey: lastKey,
-                keyHash: lastKeyHash,
-                lineNumber: lastKeyToken.lineNumber,
-                inTable: currentTable,
-                isKeyed: currentTableIsKeyed
-            )
-            currentTableIsKeyed = true
-        } else {
-            // [[x.y.z]] -> create z = [] in x.y
-            var maybeArrayIndex = lookupArray(in: currentTable, keyed: currentTableIsKeyed, key: lastKey, keyHash: lastKeyHash)
-            if maybeArrayIndex == nil {
-                maybeArrayIndex = try createKeyArray(
-                    normalizedKey: lastKey,
-                    keyHash: lastKeyHash,
-                    lineNumber: lastKeyToken.lineNumber,
+            if !llb {
+                currentTable = try createKeyTable(
+                    normalizedKey: key,
+                    keyHash: keyHash,
+                    lineNumber: keyToken.lineNumber,
                     inTable: currentTable,
-                    isKeyed: currentTableIsKeyed,
-                    kind: .table
+                    isKeyed: currentTableIsKeyed
                 )
-            }
-            let arrayIndex = maybeArrayIndex!
-            if keyArrays[arrayIndex].array.kind != .table {
-                throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
-            }
+                currentTableIsKeyed = true
+            } else {
+                var maybeArrayIndex = lookupArray(
+                    in: currentTable,
+                    keyed: currentTableIsKeyed,
+                    key: key,
+                    keyHash: keyHash
+                )
+                if maybeArrayIndex == nil {
+                    maybeArrayIndex = try createKeyArray(
+                        normalizedKey: key,
+                        keyHash: keyHash,
+                        lineNumber: keyToken.lineNumber,
+                        inTable: currentTable,
+                        isKeyed: currentTableIsKeyed,
+                        kind: .table
+                    )
+                }
+                let arrayIndex = maybeArrayIndex!
+                if keyArrays[arrayIndex].array.kind != .table {
+                    throw TOMLError(.syntax(lineNumber: token.lineNumber, message: "array mismatch"))
+                }
 
-            // add to z[]
-            let newTableIndex = tables.count
-            tables.append(InternalTOMLTable())
-            if keyArrays[arrayIndex].array.elements.isEmpty {
-                keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+                let newTableIndex = tables.count
+                tables.append(InternalTOMLTable())
+                if keyArrays[arrayIndex].array.elements.isEmpty {
+                    keyArrays[arrayIndex].array.elements.reserveCapacity(8)
+                }
+                keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
+                currentTable = newTableIndex
+                currentTableIsKeyed = false
             }
-            keyArrays[arrayIndex].array.elements.append(.table(lineNumber: token.lineNumber, newTableIndex))
-            currentTable = newTableIndex
-            currentTableIsKeyed = false
         }
 
         if token.kind != .rbracket {
@@ -2004,6 +2072,70 @@ extension Parser {
     }
 
     @inline(__always)
+    func keyMatchesToken(bytes: UnsafeBufferPointer<UInt8>, token: Token, key: borrowing String) -> Bool {
+        let range = token.text
+        let count = range.upperBound - range.lowerBound
+
+        if let matches = key.utf8.withContiguousStorageIfAvailable({ keyBuffer -> Bool in
+            if keyBuffer.count != count {
+                return false
+            }
+
+            var keyIndex = 0
+            var byteIndex = range.lowerBound
+            while keyIndex < count {
+                if keyBuffer[keyIndex] != bytes[byteIndex] {
+                    return false
+                }
+                keyIndex += 1
+                byteIndex += 1
+            }
+            return true
+        }) {
+            return matches
+        }
+
+        var index = range.lowerBound
+        for byte in key.utf8 {
+            if index >= range.upperBound || bytes[index] != byte {
+                return false
+            }
+            index += 1
+        }
+        return index == range.upperBound
+    }
+
+    @inline(__always)
+    func matchKeyArray(
+        in indices: borrowing [Int],
+        bytes: UnsafeBufferPointer<UInt8>,
+        token: Token,
+        keyHash: Int
+    ) -> Int? {
+        if indices.isEmpty {
+            return nil
+        }
+        return keyArrays.withUnsafeBufferPointer { keyArrayBuffer -> Int? in
+            guard let keyArrayBase = keyArrayBuffer.baseAddress else {
+                return nil
+            }
+            let indexCount = indices.count
+            var i = 0
+            while i < indexCount {
+                let keyArrayIndex = indices[i]
+                let keyArrayPair = keyArrayBase.advanced(by: keyArrayIndex).pointee
+                if keyArrayPair.keyHash == keyHash,
+                   keyMatchesToken(bytes: bytes, token: token, key: keyArrayPair.key)
+                {
+                    return keyArrayIndex
+                }
+                i += 1
+            }
+            return nil
+        }
+    }
+
+    @inline(__always)
     func matchKeyTable(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
         if indices.isEmpty {
             return nil
@@ -2077,6 +2209,30 @@ extension Parser {
             return matchKeyArray(in: keyTables[tableIndex].table.arrays, key: key, keyHash: keyHash)
         }
         return matchKeyArray(in: tables[tableIndex].arrays, key: key, keyHash: keyHash)
+    }
+
+    @inline(__always)
+    func lookupArray(
+        in tableIndex: Int,
+        keyed: Bool,
+        bytes: UnsafeBufferPointer<UInt8>,
+        token: Token,
+        keyHash: Int
+    ) -> Int? {
+        if keyed {
+            return matchKeyArray(
+                in: keyTables[tableIndex].table.arrays,
+                bytes: bytes,
+                token: token,
+                keyHash: keyHash
+            )
+        }
+        return matchKeyArray(
+            in: tables[tableIndex].arrays,
+            bytes: bytes,
+            token: token,
+            keyHash: keyHash
+        )
     }
 
     mutating func walkTablePath() throws(TOMLError) {
