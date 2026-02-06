@@ -260,18 +260,28 @@ struct Parser: ~Copyable {
 
                     var i = start + 1
                     let isBasicStringBodyChar = CodeUnits.isBasicStringBodyChar
-
-                    // 8x unrolling for double-quoted strings
-                    while i + 8 <= end {
-                        if !isBasicStringBodyChar[Int(bytes[i])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 1])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 2])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 3])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 4])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 5])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 6])] { break }
-                        if !isBasicStringBodyChar[Int(bytes[i + 7])] { break }
-                        i += 8
+                    if let baseAddress = bytes.baseAddress {
+                        while i + 8 <= end {
+                            let chunk = UnsafeRawPointer(baseAddress.advanced(by: i)).loadUnaligned(
+                                as: UInt64.self
+                            )
+                            if chunkContainsDoubleQuotedStopByte(chunk) {
+                                break
+                            }
+                            i += 8
+                        }
+                    } else {
+                        while i + 8 <= end {
+                            if !isBasicStringBodyChar[Int(bytes[i])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 1])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 2])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 3])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 4])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 5])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 6])] { break }
+                            if !isBasicStringBodyChar[Int(bytes[i + 7])] { break }
+                            i += 8
+                        }
                     }
 
                     while i < end {
@@ -1868,6 +1878,22 @@ func scanTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
     }
     index += 2
     return index
+}
+
+@inline(__always)
+private func chunkContainsDoubleQuotedStopByte(_ chunk: UInt64) -> Bool {
+    let ones: UInt64 = 0x0101_0101_0101_0101
+    let highBits: UInt64 = 0x8080_8080_8080_8080
+
+    @inline(__always)
+    func hasByte(_ bytePattern: UInt64) -> Bool {
+        let xor = chunk ^ bytePattern
+        return ((xor &- ones) & ~xor & highBits) != 0
+    }
+
+    return hasByte(0x2222_2222_2222_2222)
+        || hasByte(0x5C5C_5C5C_5C5C_5C5C)
+        || hasByte(0x0A0A_0A0A_0A0A_0A0A)
 }
 
 func normalizeKeyAndHash(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) -> (key: String, keyHash: Int) {
