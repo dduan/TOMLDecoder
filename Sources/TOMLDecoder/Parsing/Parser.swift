@@ -260,28 +260,15 @@ struct Parser: ~Copyable {
 
                     var i = start + 1
                     let isBasicStringBodyChar = CodeUnits.isBasicStringBodyChar
-                    if let baseAddress = bytes.baseAddress {
-                        while i + 8 <= end {
-                            let chunk = UnsafeRawPointer(baseAddress.advanced(by: i)).loadUnaligned(
-                                as: UInt64.self
-                            )
-                            if chunkContainsDoubleQuotedStopByte(chunk) {
-                                break
-                            }
-                            i += 8
+                    let baseAddress = bytes.baseAddress!
+                    while i + 8 <= end {
+                        let chunk = UnsafeRawPointer(baseAddress.advanced(by: i)).loadUnaligned(
+                            as: UInt64.self
+                        )
+                        if chunkContainsDoubleQuotedStopByte(chunk) {
+                            break
                         }
-                    } else {
-                        while i + 8 <= end {
-                            if !isBasicStringBodyChar[Int(bytes[i])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 1])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 2])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 3])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 4])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 5])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 6])] { break }
-                            if !isBasicStringBodyChar[Int(bytes[i + 7])] { break }
-                            i += 8
-                        }
+                        i += 8
                     }
 
                     while i < end {
@@ -1959,24 +1946,14 @@ func normalizeKeyAndHash(bytes: UnsafeBufferPointer<UInt8>, token: Token, keyTra
 @inline(__always)
 func fastKeyHash(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> Int {
     let count = range.upperBound - range.lowerBound
-    if let base = bytes.baseAddress {
-        let start = base.advanced(by: range.lowerBound)
-        if count <= 8 {
-            return Int(truncatingIfNeeded: packedKeyHash(UnsafeBufferPointer(start: start, count: count)))
-        }
-        return Int(truncatingIfNeeded: sampledKeyHash(start: start, count: count))
+    if count == 0 {
+        return 0
     }
-
-    let offsetBasis: UInt64 = 14_695_981_039_346_656_037
-    let prime: UInt64 = 1_099_511_628_211
-    var hash = offsetBasis
-    var index = range.lowerBound
-    while index < range.upperBound {
-        hash ^= UInt64(bytes[index])
-        hash &*= prime
-        index += 1
+    let start = bytes.baseAddress!.advanced(by: range.lowerBound)
+    if count <= 8 {
+        return Int(truncatingIfNeeded: packedKeyHash(UnsafeBufferPointer(start: start, count: count)))
     }
-    return Int(truncatingIfNeeded: hash)
+    return Int(truncatingIfNeeded: sampledKeyHash(start: start, count: count))
 }
 
 @inline(__always)
@@ -2052,11 +2029,11 @@ private func packedKeyHash(_ buffer: UnsafeBufferPointer<UInt8>) -> UInt64 {
 
 @inline(__always)
 private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) -> String {
-    guard let baseAddress = bytes.baseAddress else {
+    let count = range.upperBound - range.lowerBound
+    if count == 0 {
         return ""
     }
-    let start = baseAddress.advanced(by: range.lowerBound)
-    let count = range.upperBound - range.lowerBound
+    let start = bytes.baseAddress!.advanced(by: range.lowerBound)
     return String(decoding: UnsafeBufferPointer(start: start, count: count), as: UTF8.self)
 }
 
