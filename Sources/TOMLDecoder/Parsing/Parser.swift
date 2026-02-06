@@ -1882,7 +1882,7 @@ private func makeString(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>) ->
 
 extension Parser {
     @inline(__always)
-    func matchKeyValue(in indices: [Int], key: String, keyHash: Int) -> Int? {
+    func matchKeyValue(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
         keyValues.withUnsafeBufferPointer { keyValueBuffer in
             guard let keyValueBase = keyValueBuffer.baseAddress else {
                 return nil
@@ -1906,7 +1906,7 @@ extension Parser {
     }
 
     @inline(__always)
-    func matchKeyArray(in indices: [Int], key: String, keyHash: Int) -> Int? {
+    func matchKeyArray(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
         keyArrays.withUnsafeBufferPointer { keyArrayBuffer in
             guard let keyArrayBase = keyArrayBuffer.baseAddress else {
                 return nil
@@ -1930,7 +1930,7 @@ extension Parser {
     }
 
     @inline(__always)
-    func matchKeyTable(in indices: [Int], key: String, keyHash: Int) -> Int? {
+    func matchKeyTable(in indices: borrowing [Int], key: borrowing String, keyHash: Int) -> Int? {
         keyTables.withUnsafeBufferPointer { keyTableBuffer in
             guard let keyTableBase = keyTableBuffer.baseAddress else {
                 return nil
@@ -1953,51 +1953,53 @@ extension Parser {
         }
     }
 
-    func tableValue(tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> InternalTOMLTable.Value? {
+    @inline(__always)
+    func tableValue(
+        tableIndex: Int,
+        keyed: Bool,
+        key: borrowing String,
+        keyHash: Int
+    ) -> InternalTOMLTable.Value? {
         if keyed {
-            let keyValueIndices = keyTables[tableIndex].table.keyValues
-            if let keyValueIndex = matchKeyValue(in: keyValueIndices, key: key, keyHash: keyHash) {
+            if let keyValueIndex = matchKeyValue(in: keyTables[tableIndex].table.keyValues, key: key, keyHash: keyHash) {
                 return .keyValue(keyValueIndex)
             }
 
-            let keyArrayIndices = keyTables[tableIndex].table.arrays
-            if let keyArrayIndex = matchKeyArray(in: keyArrayIndices, key: key, keyHash: keyHash) {
+            if let keyArrayIndex = matchKeyArray(in: keyTables[tableIndex].table.arrays, key: key, keyHash: keyHash) {
                 return .array(keyArrayIndex)
             }
 
-            let keyTableIndices = keyTables[tableIndex].table.tables
-            if let keyTableIndex = matchKeyTable(in: keyTableIndices, key: key, keyHash: keyHash) {
+            if let keyTableIndex = matchKeyTable(in: keyTables[tableIndex].table.tables, key: key, keyHash: keyHash) {
                 return .table(keyTableIndex)
             }
             return nil
         }
 
-        let keyValueIndices = tables[tableIndex].keyValues
-        if let keyValueIndex = matchKeyValue(in: keyValueIndices, key: key, keyHash: keyHash) {
+        if let keyValueIndex = matchKeyValue(in: tables[tableIndex].keyValues, key: key, keyHash: keyHash) {
             return .keyValue(keyValueIndex)
         }
 
-        let keyArrayIndices = tables[tableIndex].arrays
-        if let keyArrayIndex = matchKeyArray(in: keyArrayIndices, key: key, keyHash: keyHash) {
+        if let keyArrayIndex = matchKeyArray(in: tables[tableIndex].arrays, key: key, keyHash: keyHash) {
             return .array(keyArrayIndex)
         }
 
-        let keyTableIndices = tables[tableIndex].tables
-        if let keyTableIndex = matchKeyTable(in: keyTableIndices, key: key, keyHash: keyHash) {
+        if let keyTableIndex = matchKeyTable(in: tables[tableIndex].tables, key: key, keyHash: keyHash) {
             return .table(keyTableIndex)
         }
 
         return nil
     }
 
-    func lookupTable(in tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> Int? {
+    @inline(__always)
+    func lookupTable(in tableIndex: Int, keyed: Bool, key: borrowing String, keyHash: Int) -> Int? {
         if keyed {
             return matchKeyTable(in: keyTables[tableIndex].table.tables, key: key, keyHash: keyHash)
         }
         return matchKeyTable(in: tables[tableIndex].tables, key: key, keyHash: keyHash)
     }
 
-    func lookupArray(in tableIndex: Int, keyed: Bool, key: String, keyHash: Int) -> Int? {
+    @inline(__always)
+    func lookupArray(in tableIndex: Int, keyed: Bool, key: borrowing String, keyHash: Int) -> Int? {
         if keyed {
             return matchKeyArray(in: keyTables[tableIndex].table.arrays, key: key, keyHash: keyHash)
         }
