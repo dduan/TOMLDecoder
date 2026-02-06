@@ -405,14 +405,19 @@ struct Parser: ~Copyable {
         try nextToken(bytes: bytes, isDotSpecial: isDotSpecial)
     }
 
-    mutating func createKeyValue(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool) throws(TOMLError) -> Int {
+    mutating func createKeyValue(
+        bytes: UnsafeBufferPointer<UInt8>,
+        token: Token,
+        value: Token,
+        inTable tableIndex: Int,
+        isKeyed: Bool
+    ) throws(TOMLError) {
         let (key, keyHash) = try normalizeKeyAndHash(bytes: bytes, token: token, keyTransform: keyTransform)
         if tableValue(tableIndex: tableIndex, keyed: isKeyed, key: key, keyHash: keyHash) != nil {
             throw TOMLError(.badKey(lineNumber: token.lineNumber))
         }
-        let kv = KeyValuePair(key: key, keyHash: keyHash, value: Token.empty)
         let index = keyValues.count
-        keyValues.append(kv)
+        keyValues.append(KeyValuePair(key: key, keyHash: keyHash, value: value))
 
         if isKeyed {
             if keyTables[tableIndex].table.keyValues.isEmpty {
@@ -425,7 +430,6 @@ struct Parser: ~Copyable {
             }
             tables[tableIndex].keyValues.append(index)
         }
-        return index
     }
 
     mutating func createKeyTable(bytes: UnsafeBufferPointer<UInt8>, token: Token, inTable tableIndex: Int, isKeyed: Bool, implicit: Bool = false) throws(TOMLError) -> Int {
@@ -857,9 +861,7 @@ struct Parser: ~Copyable {
         try nextToken(bytes: bytes, isDotSpecial: false)
 
         if token.kind == .string || token.kind == .bareKey {
-            let index = try createKeyValue(bytes: bytes, token: key, inTable: tableIndex, isKeyed: isKeyed)
-            let value = token
-            keyValues[index].value = value
+            try createKeyValue(bytes: bytes, token: key, value: token, inTable: tableIndex, isKeyed: isKeyed)
             try nextToken(bytes: bytes, isDotSpecial: false)
             return
         }
