@@ -19,4 +19,4 @@ jobs:
         with:
           swift-version: "6.2.3"
       - name: Embedded
-        run: swift build -c release --target TOMLDecoder --disable-default-traits -Xswiftc -target -Xswiftc arm64-apple-macos14.0 -Xswiftc -enable-experimental-feature -Xswiftc Embedded -Xswiftc -wmo
+        run: swift build -c release --target TOMLDecoder --disable-default-traits -Xswiftc -target -Xswiftc x86_64-unknown-none-elf -Xswiftc -enable-experimental-feature -Xswiftc Embedded -Xswiftc -wmo
