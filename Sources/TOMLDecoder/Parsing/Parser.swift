@@ -2,6 +2,8 @@
 import Darwin
 #elseif canImport(Glibc)
 import Glibc
+#elseif canImport(MSVCRT)
+import MSVCRT
 #elseif canImport(WASILibc)
 import WASILibc
 #endif
@@ -1166,6 +1168,7 @@ extension Token {
     }
 
     func unpackFloat(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Double {
+        #if !CodableSupport
         @inline(__always)
         func parseNormalizedFloat(_ codeUnits: inout [UTF8.CodeUnit]) -> Double? {
             guard !codeUnits.isEmpty else {
@@ -1191,6 +1194,7 @@ extension Token {
                 }
             }
         }
+        #endif
 
         var resultCodeUnits: [UTF8.CodeUnit] = []
         var index = text.lowerBound
@@ -1268,9 +1272,15 @@ extension Token {
             }
         }
 
+        #if CodableSupport
+        guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
+            throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
+        }
+        #else
         guard let double = parseNormalizedFloat(&resultCodeUnits) else {
             throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
         }
+        #endif
 
         return double
     }
