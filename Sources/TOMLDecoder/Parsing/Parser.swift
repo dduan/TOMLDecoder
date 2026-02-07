@@ -2,8 +2,8 @@
 import Darwin
 #elseif canImport(Glibc)
 import Glibc
-#elseif canImport(MSVCRT)
-import MSVCRT
+#elseif canImport(ucrt)
+import ucrt
 #elseif canImport(WASILibc)
 import WASILibc
 #endif
