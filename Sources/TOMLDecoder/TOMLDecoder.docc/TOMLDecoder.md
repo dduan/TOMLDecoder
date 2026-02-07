@@ -15,6 +15,7 @@ This library can do 2 things to TOML:
 * **Deserialize**:
   convert TOML strings or byte sequences into strongly-typed,
   structured data, and provide access to parts of it.
+  This part works in the embedded Swift environment.
 * **Decode**:
   further convert the structured data into your `Codable` types
   according to your preferences.
@@ -37,6 +38,8 @@ and TOMLDecoder can attempt to create instances of your type
 from TOML data.
 You can configure the decoding strategies to customize
 the decoder's behaviors.
+The `CodableSupport` trait is included by default,
+it enables this functionality.
 
 - <doc:DecodingTOML>
 - ``TOMLDecoder``
@@ -52,6 +55,8 @@ Parse, un-marshal, deserialize.
 When TOMLDecoder does this to TOML strings or bytes,
 each data type as defined by the TOML specification
 is strictly mapped to a Swift type.
+This part works with embedded Swift,
+when `CodableSupport` is excluded.
 
 - <doc:DeserializingTOML>
 - ``TOMLTable``
