@@ -1,11 +1,9 @@
-#if canImport(Darwin)
-import Darwin
-#elseif canImport(Glibc)
-import Glibc
-#elseif canImport(ucrt)
-import ucrt
-#elseif canImport(WASILibc)
-import WASILibc
+#if !CodableSupport
+@_silgen_name("strtod")
+private func cStrtod(
+    _ nptr: UnsafePointer<CChar>?,
+    _ endptr: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Double
 #endif
 
 struct Parser: ~Copyable {
@@ -1182,7 +1180,7 @@ extension Token {
                 }
                 return base.withMemoryRebound(to: CChar.self, capacity: buffer.count) { cString in
                     var end: UnsafeMutablePointer<CChar>?
-                    let value = strtod(cString, &end)
+                    let value = cStrtod(cString, &end)
                     guard let end else {
                         return nil
                     }
