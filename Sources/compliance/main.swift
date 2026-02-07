@@ -1,6 +1,8 @@
 // This is CLI app that provides decoder interface for the test suite at
 // https://github.com/BurntSushi/toml-test
+#if CodableSupport
 import Foundation
+#endif
 import TOMLDecoder
 
 #if CodableSupport
@@ -90,6 +92,5 @@ func translate(value: Any) -> Any {
 let json = try JSONSerialization.data(withJSONObject: translate(value: table))
 print(String(data: json, encoding: .utf8)!)
 #else
-fputs("compliance executable requires CodableSupport trait.\n", stderr)
-exit(1)
+fatalError("compliance executable requires CodableSupport trait.")
 #endif
