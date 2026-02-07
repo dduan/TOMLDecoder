@@ -33,6 +33,7 @@ jobs:
       - name: Run tests
         run: swift test
       - name: Run tests without Codable
+        if: matrix.swift_version != '6.0'
         run: swift test --disable-default-traits
 
   swift-test-macos:
@@ -53,6 +54,7 @@ jobs:
       - name: Run tests
         run: swift test
       - name: Run tests without Codable
+        if: matrix.swift_version != '6.0'
         run: swift test --disable-default-traits
 
   swift-test-simulator:
