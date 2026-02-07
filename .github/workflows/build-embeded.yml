@@ -1,4 +1,4 @@
-name: Embedded Build
+name: Embedded
 on:
   push:
     branches:
@@ -10,13 +10,13 @@ on:
       - 'release/**'
 jobs:
   embedded-build:
-    name: Build embedded subset
+    name: Build
     runs-on: macos-26
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
       - uses: SwiftyLab/setup-swift@latest
         with:
-          swift-version: "6.2.2"
-      - name: Build embedded subset
+          swift-version: "6.2.3"
+      - name: Embedded
         run: swift build -c release --target TOMLDecoder --disable-default-traits -Xswiftc -target -Xswiftc arm64-apple-macos14.0 -Xswiftc -enable-experimental-feature -Xswiftc Embedded -Xswiftc -wmo
