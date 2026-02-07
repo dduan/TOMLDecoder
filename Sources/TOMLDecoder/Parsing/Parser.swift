@@ -1,3 +1,11 @@
+#if !CodableSupport
+@_silgen_name("strtod")
+private func cStrtod(
+    _ nptr: UnsafePointer<CChar>?,
+    _ endptr: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Double
+#endif
+
 struct Parser: ~Copyable {
     var token = Token.empty
     var cursor = 0
@@ -1158,6 +1166,34 @@ extension Token {
     }
 
     func unpackFloat(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Double {
+        #if !CodableSupport
+        @inline(__always)
+        func parseNormalizedFloat(_ codeUnits: inout [UTF8.CodeUnit]) -> Double? {
+            guard !codeUnits.isEmpty else {
+                return nil
+            }
+            codeUnits.append(0)
+
+            return codeUnits.withUnsafeMutableBufferPointer { buffer -> Double? in
+                guard let base = buffer.baseAddress else {
+                    return nil
+                }
+                return base.withMemoryRebound(to: CChar.self, capacity: buffer.count) { cString in
+                    var end: UnsafeMutablePointer<CChar>?
+                    let value = cStrtod(cString, &end)
+                    guard let end else {
+                        return nil
+                    }
+                    let expectedEnd = cString.advanced(by: buffer.count - 1)
+                    guard end == expectedEnd else {
+                        return nil
+                    }
+                    return value
+                }
+            }
+        }
+        #endif
+
         var resultCodeUnits: [UTF8.CodeUnit] = []
         var index = text.lowerBound
         if bytes[index] == CodeUnits.plus || bytes[index] == CodeUnits.minus {
@@ -1234,9 +1270,15 @@ extension Token {
             }
         }
 
+        #if CodableSupport
         guard let double = Double(String(decoding: resultCodeUnits, as: UTF8.self)) else {
             throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
         }
+        #else
+        guard let double = parseNormalizedFloat(&resultCodeUnits) else {
+            throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "not a float"))
+        }
+        #endif
 
         return double
     }
@@ -1494,32 +1536,19 @@ extension Token {
                     }
                 }
 
-                do {
-                    let (offsetHour, offsetMinute, consumedLength) = try parseTimezoneOffset(bytes: bytes, range: index ..< endIndex, lineNumber: lineNumber)
+                let (offsetHour, offsetMinute, consumedLength) = try parseTimezoneOffset(bytes: bytes, range: index ..< endIndex, lineNumber: lineNumber)
 
-                    // Validate timezone offset ranges
-                    if offsetHour > 24 {
-                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset hour must be between 00 and 24"))
-                    }
-                    if offsetMinute > 59 {
-                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset minute must be between 00 and 59"))
-                    }
-
-                    let offsetInMinutes = offsetHour * 60 + offsetMinute
-                    timeOffset = Int16(offsetIsNegative ? -offsetInMinutes : offsetInMinutes)
-                    index += consumedLength
-                } catch let parseError {
-                    if let tomlError = parseError as? TOMLError {
-                        switch tomlError.reason {
-                        case let .invalidDateTime(_, reason):
-                            throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: reason))
-                        default:
-                            throw tomlError
-                        }
-                    } else {
-                        throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone parsing error"))
-                    }
+                // Validate timezone offset ranges
+                if offsetHour > 24 {
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset hour must be between 00 and 24"))
                 }
+                if offsetMinute > 59 {
+                    throw TOMLError(.invalidDateTime3(context: context, lineNumber: lineNumber, reason: "timezone offset minute must be between 00 and 59"))
+                }
+
+                let offsetInMinutes = offsetHour * 60 + offsetMinute
+                timeOffset = Int16(offsetIsNegative ? -offsetInMinutes : offsetInMinutes)
+                index += consumedLength
             }
         }
 
@@ -1535,6 +1564,7 @@ extension Token {
         )
     }
 
+    #if CodableSupport
     func unpackAnyValue(bytes: UnsafeBufferPointer<UInt8>, context: TOMLKey) throws(TOMLError) -> Any {
         let firstChar = text.count > 0 ? bytes[text.lowerBound] : nil
         if firstChar == CodeUnits.singleQuote || firstChar == CodeUnits.doubleQuote {
@@ -1571,6 +1601,7 @@ extension Token {
             throw TOMLError(.invalidValueInTable(context: context, lineNumber: lineNumber))
         }
     }
+    #endif
 }
 
 func parseTimezoneOffset(bytes: UnsafeBufferPointer<UInt8>, range: Range<Int>, lineNumber: Int) throws(TOMLError) -> (hour: Int, minute: Int, consumedLength: Int) {

@@ -1,4 +1,4 @@
-enum TOMLKey: CodingKey {
+enum TOMLKey {
     case string(String)
     case int(Int)
     case `super`
@@ -31,3 +31,7 @@ enum TOMLKey: CodingKey {
         }
     }
 }
+
+#if CodableSupport
+extension TOMLKey: CodingKey {}
+#endif

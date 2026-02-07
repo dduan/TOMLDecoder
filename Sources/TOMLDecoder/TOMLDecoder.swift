@@ -1,3 +1,4 @@
+#if CodableSupport
 public import Foundation
 
 /// Convert data for a TOML document into `Codable` types.
@@ -310,3 +311,4 @@ func snakeCasify(_ stringKey: String) -> String {
         joinedString + String(stringKey[trailingUnderscoreRange])
     }
 }
+#endif

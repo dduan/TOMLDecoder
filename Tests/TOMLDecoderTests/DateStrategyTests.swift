@@ -1,3 +1,4 @@
+#if CodableSupport
 import Foundation
 import Testing
 @testable import TOMLDecoder
@@ -242,3 +243,4 @@ struct DateStrategyTests {
         }
     }
 }
+#endif

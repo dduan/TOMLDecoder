@@ -37,9 +37,17 @@ Our unit tests include the [official suite](https://github.com/toml-lang/toml-te
 from the TOML GitHub organization,
 systematically translated into Swift tests.
 
-Run tests with `swift test`, as well as `bazel test //...`.
+For any changes to land, `swift test` must pass on ...
 
-Tests must pass on macOS, Ubuntu, and Windows for any changes to land.
+* latest Swift toolchain on macOS, Ubuntu, and Windows 
+* same as above but with `--disable-default-traits`
+* simulators on supported Apple flatforms
+* Oldest supported Swift toolchain one of the oldest supported Apple OS.
+
+... in addition:
+
+* `bazel test //...` must pass
+* the library must _build_ for a embedded Swift
 
 
 ## Generating Code and Tests
@@ -96,6 +104,13 @@ to compare performance between two commits.
 ## Architecture Overview
 
 TOMLDecoder is a parser with a `Swift.Decoder` implementation sitting on top.
+The latter is gated in the `CodableSupport` SwiftPM trait,
+which is enabled by default.
+When the trait is excluded,
+the library still functions without the `Codable` APIs.
+This layer does not depend on Foundation,
+and it works in WASM and embedded Swift environments.
+
 
 TOML has a spec,
 and a large number of parser implementations in many languages.

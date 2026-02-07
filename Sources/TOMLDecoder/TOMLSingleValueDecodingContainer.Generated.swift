@@ -1,3 +1,4 @@
+#if CodableSupport
 //  WARNING: This file is generated from TOMLSingleValueDecodingContainer.swift.gyb
 //  Do not edit TOMLSingleValueDecodingContainer.swift directly.
 
@@ -374,3 +375,4 @@ extension _TOMLDecoder {
         return components
     }
 }
+#endif

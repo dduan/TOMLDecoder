@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 
 import Foundation
 import PackageDescription
@@ -88,6 +88,10 @@ let package = Package(
     products: [
         .executable(name: "compliance", targets: ["compliance"]),
         .library(name: "TOMLDecoder", targets: ["TOMLDecoder"]),
+    ],
+    traits: [
+        "CodableSupport",
+        .default(enabledTraits: ["CodableSupport"]),
     ],
     dependencies: benchmarksDeps + docsDeps + formattingDeps,
     targets: targets + testTargets + benchmarkTargets,

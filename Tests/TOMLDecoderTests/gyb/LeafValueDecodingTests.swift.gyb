@@ -1,3 +1,4 @@
+#if CodableSupport
 %{
 # gyb variables available: `__file__` gives the template’s path.
 from pathlib import Path
@@ -478,3 +479,4 @@ private enum AString: String, Decodable, Equatable {
     case foo
     case bar
 }
+#endif

@@ -29,26 +29,25 @@ extension TOMLTable {
 // String.init(validating:as:) does not exist in our supported OSes.
 extension String {
     fileprivate init(validatingUTF8 source: some Collection<Unicode.UTF8.CodeUnit>) throws(TOMLError) {
+        #if CodableSupport
         do {
-            if let result = try source.withContiguousStorageIfAvailable(
-                { buffer -> String in
-                    try validateAndCreateString(from: buffer)
-                }
-            ) {
+            if let result = try source.withContiguousStorageIfAvailable({ try validateAndCreateString(from: $0) }) {
                 self = result
                 return
             }
-
-            // Slow path: copy to contiguous buffer first
-            let array = Array(source)
-            self = try array.withUnsafeBufferPointer { buffer -> String in
-                try validateAndCreateString(from: buffer)
-            }
-        } catch let error as TOMLError {
-            throw error
         } catch {
-            fatalError("Unexpected error type")
+            throw error as! TOMLError
         }
+        #endif
+
+        let array = Array(source)
+        let storage = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: array.count)
+        _ = storage.initialize(from: array)
+        defer {
+            storage.deinitialize()
+            storage.deallocate()
+        }
+        self = try validateAndCreateString(from: UnsafeBufferPointer(storage))
     }
 }
 
@@ -382,11 +381,14 @@ public struct TOMLTable: Sendable, Equatable {
         return localTime
     }
 
+    #if CodableSupport
     func dictionary() throws(TOMLError) -> [String: Any] {
         try source.table(at: index, keyed: isKeyed).dictionary(source: source)
     }
+    #endif
 }
 
+#if CodableSupport
 extension TOMLTable: Codable {
     /// Makes ``TOMLTable`` eligible for `Codable`.
     ///
@@ -424,7 +426,9 @@ extension TOMLTable: Codable {
         throw TOMLError(.notReallyCodable)
     }
 }
+#endif
 
+#if CodableSupport
 extension [String: Any] {
     /// Create a `[String: Any]` from a `TOMLTable`.
     /// Validating all fields along the way.
@@ -443,3 +447,4 @@ extension [String: Any] {
         self = try tomlTable.dictionary()
     }
 }
+#endif

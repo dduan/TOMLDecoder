@@ -1,3 +1,4 @@
+#if CodableSupport
 //  WARNING: This file is generated from LeafValueDecodingTests.swift.gyb
 //  Do not edit LeafValueDecodingTests.swift directly.
 
@@ -811,3 +812,4 @@ private enum AString: String, Decodable, Equatable {
     case foo
     case bar
 }
+#endif
