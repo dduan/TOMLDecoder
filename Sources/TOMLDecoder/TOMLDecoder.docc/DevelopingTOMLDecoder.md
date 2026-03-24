@@ -92,6 +92,7 @@ to compare performance between two commits.
   Include the output as a code block in the release notes.
 * Publish the release on GitHub.
 * Generate and deploy the documentation site for the new release.
+* Publish the release on Bazel Central Registry.
 
 ## Architecture Overview
 
