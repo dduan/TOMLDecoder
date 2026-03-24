@@ -4,7 +4,15 @@ Also known as release notes.
 
 ## In Development
 
+## 0.4.4
+
 - Add support for TOML 1.1.0 (thanks, @nikitabobko!)
+- Increased benchmark perfermances.
+  Parsing the following TOML documents now costs less CPU instructions:
+    * toml.io example: -29%
+    * GitHub events archive: -27%
+    * canada.toml: -1.8%
+    * twitter.toml: -24%
 
 ## 0.4.3
 
