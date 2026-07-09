@@ -1,4 +1,7 @@
 --disable redundantBackticks
+--disable redundantSwiftTestingSuite
+--disable swiftTestingTestCaseNames
+--disable wrapIfStatementBodies
 --extension-acl on-declarations
 --ifdef no-indent
 --trailing-commas collections-only

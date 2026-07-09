@@ -24,7 +24,7 @@ var docsDeps: [Package.Dependency] = includeDocs ? [
 ] : []
 
 var formattingDeps: [Package.Dependency] = includeFormatting ? [
-    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.58.6"),
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", exact: "0.62.1"),
 ] : []
 
 var targets: [Target] = [
