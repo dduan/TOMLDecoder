@@ -35,4 +35,14 @@ struct TOMLTableKeyMembershipTests {
         #expect(table.contains(key: "c"))
         #expect(!table.contains(key: "d"))
     }
+
+    @Test
+    func stringAccessorMismatchInInlineTableThrowsWithoutTrapping() throws {
+        let table = try TOMLTable(source: "foo_bar = { x = 1 }\n")
+        let inlineTable = try table.table(forKey: "foo_bar")
+
+        #expect(throws: TOMLError.self) {
+            try inlineTable.string(forKey: "x")
+        }
+    }
 }

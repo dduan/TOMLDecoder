@@ -1249,6 +1249,9 @@ extension Token {
         }
 
         let quoteChar = bytes[text.lowerBound]
+        if quoteChar != CodeUnits.doubleQuote, quoteChar != CodeUnits.singleQuote {
+            throw TOMLError(.typeMismatch(context: context, lineNumber: lineNumber, expected: "string"))
+        }
         var index = text.lowerBound
         var endIndex = text.upperBound
 
