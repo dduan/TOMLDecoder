@@ -5,7 +5,6 @@ import Foundation
 import Testing
 import TOMLDecoder
 
-@Suite
 struct TOMLValidationTests {
     private var directoryURL: URL {
         URL(fileURLWithPath: #filePath)
@@ -20,1073 +19,1073 @@ struct TOMLValidationTests {
         try TOMLComplianceSupport.verifyValidFixture(jsonURL: jsonURL, tomlURL: tomlURL, sourceLocation: sourceLocation)
     }
 
-    @Test("[array] array", .tags(.array))
-    func array__array() throws {
+    @Test(.tags(.array))
+    func `[array] array`() throws {
         try verifyByFixture(pathComponents: ["array", "array"])
     }
 
-    @Test("[array] array subtables", .tags(.array))
-    func array__array_subtables() throws {
+    @Test(.tags(.array))
+    func `[array] array subtables`() throws {
         try verifyByFixture(pathComponents: ["array", "array-subtables"])
     }
 
-    @Test("[array] bool", .tags(.array))
-    func array__bool() throws {
+    @Test(.tags(.array))
+    func `[array] bool`() throws {
         try verifyByFixture(pathComponents: ["array", "bool"])
     }
 
-    @Test("[array] empty", .tags(.array))
-    func array__empty() throws {
+    @Test(.tags(.array))
+    func `[array] empty`() throws {
         try verifyByFixture(pathComponents: ["array", "empty"])
     }
 
-    @Test("[array] hetergeneous", .tags(.array))
-    func array__hetergeneous() throws {
+    @Test(.tags(.array))
+    func `[array] hetergeneous`() throws {
         try verifyByFixture(pathComponents: ["array", "hetergeneous"])
     }
 
-    @Test("[array] mixed int array", .tags(.array))
-    func array__mixed_int_array() throws {
+    @Test(.tags(.array))
+    func `[array] mixed int array`() throws {
         try verifyByFixture(pathComponents: ["array", "mixed-int-array"])
     }
 
-    @Test("[array] mixed int float", .tags(.array))
-    func array__mixed_int_float() throws {
+    @Test(.tags(.array))
+    func `[array] mixed int float`() throws {
         try verifyByFixture(pathComponents: ["array", "mixed-int-float"])
     }
 
-    @Test("[array] mixed int string", .tags(.array))
-    func array__mixed_int_string() throws {
+    @Test(.tags(.array))
+    func `[array] mixed int string`() throws {
         try verifyByFixture(pathComponents: ["array", "mixed-int-string"])
     }
 
-    @Test("[array] mixed string table", .tags(.array))
-    func array__mixed_string_table() throws {
+    @Test(.tags(.array))
+    func `[array] mixed string table`() throws {
         try verifyByFixture(pathComponents: ["array", "mixed-string-table"])
     }
 
-    @Test("[array] nested", .tags(.array))
-    func array__nested() throws {
+    @Test(.tags(.array))
+    func `[array] nested`() throws {
         try verifyByFixture(pathComponents: ["array", "nested"])
     }
 
-    @Test("[array] nested double", .tags(.array))
-    func array__nested_double() throws {
+    @Test(.tags(.array))
+    func `[array] nested double`() throws {
         try verifyByFixture(pathComponents: ["array", "nested-double"])
     }
 
-    @Test("[array] nested inline table", .tags(.array))
-    func array__nested_inline_table() throws {
+    @Test(.tags(.array))
+    func `[array] nested inline table`() throws {
         try verifyByFixture(pathComponents: ["array", "nested-inline-table"])
     }
 
-    @Test("[array] nospaces", .tags(.array))
-    func array__nospaces() throws {
+    @Test(.tags(.array))
+    func `[array] nospaces`() throws {
         try verifyByFixture(pathComponents: ["array", "nospaces"])
     }
 
-    @Test("[array] open parent table", .tags(.array))
-    func array__open_parent_table() throws {
+    @Test(.tags(.array))
+    func `[array] open parent table`() throws {
         try verifyByFixture(pathComponents: ["array", "open-parent-table"])
     }
 
-    @Test("[array] string quote comma 01", .tags(.array))
-    func array__string_quote_comma_01() throws {
+    @Test(.tags(.array))
+    func `[array] string quote comma 01`() throws {
         try verifyByFixture(pathComponents: ["array", "string-quote-comma-01"])
     }
 
-    @Test("[array] string quote comma 02", .tags(.array))
-    func array__string_quote_comma_02() throws {
+    @Test(.tags(.array))
+    func `[array] string quote comma 02`() throws {
         try verifyByFixture(pathComponents: ["array", "string-quote-comma-02"])
     }
 
-    @Test("[array] string with comma 01", .tags(.array))
-    func array__string_with_comma_01() throws {
+    @Test(.tags(.array))
+    func `[array] string with comma 01`() throws {
         try verifyByFixture(pathComponents: ["array", "string-with-comma-01"])
     }
 
-    @Test("[array] string with comma 02", .tags(.array))
-    func array__string_with_comma_02() throws {
+    @Test(.tags(.array))
+    func `[array] string with comma 02`() throws {
         try verifyByFixture(pathComponents: ["array", "string-with-comma-02"])
     }
 
-    @Test("[array] strings", .tags(.array))
-    func array__strings() throws {
+    @Test(.tags(.array))
+    func `[array] strings`() throws {
         try verifyByFixture(pathComponents: ["array", "strings"])
     }
 
-    @Test("[array] table array string backslash", .tags(.array))
-    func array__table_array_string_backslash() throws {
+    @Test(.tags(.array))
+    func `[array] table array string backslash`() throws {
         try verifyByFixture(pathComponents: ["array", "table-array-string-backslash"])
     }
 
-    @Test("[array] trailing comma", .tags(.array))
-    func array__trailing_comma() throws {
+    @Test(.tags(.array))
+    func `[array] trailing comma`() throws {
         try verifyByFixture(pathComponents: ["array", "trailing-comma"])
     }
 
-    @Test("[bool] bool", .tags(.bool))
-    func bool__bool() throws {
+    @Test(.tags(.bool))
+    func `[bool] bool`() throws {
         try verifyByFixture(pathComponents: ["bool", "bool"])
     }
 
-    @Test("[comment] after literal no ws", .tags(.comment))
-    func comment__after_literal_no_ws() throws {
+    @Test(.tags(.comment))
+    func `[comment] after literal no ws`() throws {
         try verifyByFixture(pathComponents: ["comment", "after-literal-no-ws"])
     }
 
-    @Test("[comment] at eof", .tags(.comment))
-    func comment__at_eof() throws {
+    @Test(.tags(.comment))
+    func `[comment] at eof`() throws {
         try verifyByFixture(pathComponents: ["comment", "at-eof"])
     }
 
-    @Test("[comment] at eof2", .tags(.comment))
-    func comment__at_eof2() throws {
+    @Test(.tags(.comment))
+    func `[comment] at eof2`() throws {
         try verifyByFixture(pathComponents: ["comment", "at-eof2"])
     }
 
-    @Test("[comment] everywhere", .tags(.comment))
-    func comment__everywhere() throws {
+    @Test(.tags(.comment))
+    func `[comment] everywhere`() throws {
         try verifyByFixture(pathComponents: ["comment", "everywhere"])
     }
 
-    @Test("[comment] noeol", .tags(.comment))
-    func comment__noeol() throws {
+    @Test(.tags(.comment))
+    func `[comment] noeol`() throws {
         try verifyByFixture(pathComponents: ["comment", "noeol"])
     }
 
-    @Test("[comment] nonascii", .tags(.comment))
-    func comment__nonascii() throws {
+    @Test(.tags(.comment))
+    func `[comment] nonascii`() throws {
         try verifyByFixture(pathComponents: ["comment", "nonascii"])
     }
 
-    @Test("[comment] tricky", .tags(.comment))
-    func comment__tricky() throws {
+    @Test(.tags(.comment))
+    func `[comment] tricky`() throws {
         try verifyByFixture(pathComponents: ["comment", "tricky"])
     }
 
-    @Test("[datetime] datetime", .tags(.datetime))
-    func datetime__datetime() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] datetime`() throws {
         try verifyByFixture(pathComponents: ["datetime", "datetime"])
     }
 
-    @Test("[datetime] edge", .tags(.datetime))
-    func datetime__edge() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] edge`() throws {
         try verifyByFixture(pathComponents: ["datetime", "edge"])
     }
 
-    @Test("[datetime] invalid date in string", .tags(.datetime))
-    func datetime__invalid_date_in_string() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] invalid date in string`() throws {
         try verifyByFixture(pathComponents: ["datetime", "invalid-date-in-string"])
     }
 
-    @Test("[datetime] leap year", .tags(.datetime))
-    func datetime__leap_year() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] leap year`() throws {
         try verifyByFixture(pathComponents: ["datetime", "leap-year"])
     }
 
-    @Test("[datetime] local", .tags(.datetime))
-    func datetime__local() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] local`() throws {
         try verifyByFixture(pathComponents: ["datetime", "local"])
     }
 
-    @Test("[datetime] local date", .tags(.datetime))
-    func datetime__local_date() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] local date`() throws {
         try verifyByFixture(pathComponents: ["datetime", "local-date"])
     }
 
-    @Test("[datetime] local time", .tags(.datetime))
-    func datetime__local_time() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] local time`() throws {
         try verifyByFixture(pathComponents: ["datetime", "local-time"])
     }
 
-    @Test("[datetime] milliseconds", .tags(.datetime))
-    func datetime__milliseconds() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] milliseconds`() throws {
         try verifyByFixture(pathComponents: ["datetime", "milliseconds"])
     }
 
-    @Test("[datetime] no seconds", .tags(.datetime))
-    func datetime__no_seconds() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] no seconds`() throws {
         try verifyByFixture(pathComponents: ["datetime", "no-seconds"])
     }
 
-    @Test("[datetime] timezone", .tags(.datetime))
-    func datetime__timezone() throws {
+    @Test(.tags(.datetime))
+    func `[datetime] timezone`() throws {
         try verifyByFixture(pathComponents: ["datetime", "timezone"])
     }
 
-    @Test("empty crlf")
-    func empty_crlf() throws {
+    @Test
+    func `empty crlf`() throws {
         try verifyByFixture(pathComponents: ["empty-crlf"])
     }
 
-    @Test("empty lf")
-    func empty_lf() throws {
+    @Test
+    func `empty lf`() throws {
         try verifyByFixture(pathComponents: ["empty-lf"])
     }
 
-    @Test("empty nothing")
-    func empty_nothing() throws {
+    @Test
+    func `empty nothing`() throws {
         try verifyByFixture(pathComponents: ["empty-nothing"])
     }
 
-    @Test("empty space")
-    func empty_space() throws {
+    @Test
+    func `empty space`() throws {
         try verifyByFixture(pathComponents: ["empty-space"])
     }
 
-    @Test("empty tab")
-    func empty_tab() throws {
+    @Test
+    func `empty tab`() throws {
         try verifyByFixture(pathComponents: ["empty-tab"])
     }
 
-    @Test("example")
+    @Test
     func example() throws {
         try verifyByFixture(pathComponents: ["example"])
     }
 
-    @Test("[float] exponent", .tags(.float))
-    func float__exponent() throws {
+    @Test(.tags(.float))
+    func `[float] exponent`() throws {
         try verifyByFixture(pathComponents: ["float", "exponent"])
     }
 
-    @Test("[float] float", .tags(.float))
-    func float__float() throws {
+    @Test(.tags(.float))
+    func `[float] float`() throws {
         try verifyByFixture(pathComponents: ["float", "float"])
     }
 
-    @Test("[float] inf and nan", .tags(.float))
-    func float__inf_and_nan() throws {
+    @Test(.tags(.float))
+    func `[float] inf and nan`() throws {
         try verifyByFixture(pathComponents: ["float", "inf-and-nan"])
     }
 
-    @Test("[float] long", .tags(.float))
-    func float__long() throws {
+    @Test(.tags(.float))
+    func `[float] long`() throws {
         try verifyByFixture(pathComponents: ["float", "long"])
     }
 
-    @Test("[float] max int", .tags(.float))
-    func float__max_int() throws {
+    @Test(.tags(.float))
+    func `[float] max int`() throws {
         try verifyByFixture(pathComponents: ["float", "max-int"])
     }
 
-    @Test("[float] underscore", .tags(.float))
-    func float__underscore() throws {
+    @Test(.tags(.float))
+    func `[float] underscore`() throws {
         try verifyByFixture(pathComponents: ["float", "underscore"])
     }
 
-    @Test("[float] zero", .tags(.float))
-    func float__zero() throws {
+    @Test(.tags(.float))
+    func `[float] zero`() throws {
         try verifyByFixture(pathComponents: ["float", "zero"])
     }
 
-    @Test("implicit and explicit after")
-    func implicit_and_explicit_after() throws {
+    @Test
+    func `implicit and explicit after`() throws {
         try verifyByFixture(pathComponents: ["implicit-and-explicit-after"])
     }
 
-    @Test("implicit and explicit before")
-    func implicit_and_explicit_before() throws {
+    @Test
+    func `implicit and explicit before`() throws {
         try verifyByFixture(pathComponents: ["implicit-and-explicit-before"])
     }
 
-    @Test("implicit groups")
-    func implicit_groups() throws {
+    @Test
+    func `implicit groups`() throws {
         try verifyByFixture(pathComponents: ["implicit-groups"])
     }
 
-    @Test("[inline-table] array 01", .tags(.inline_table))
-    func inline_table__array_01() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] array 01`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "array-01"])
     }
 
-    @Test("[inline-table] array 02", .tags(.inline_table))
-    func inline_table__array_02() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] array 02`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "array-02"])
     }
 
-    @Test("[inline-table] array 03", .tags(.inline_table))
-    func inline_table__array_03() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] array 03`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "array-03"])
     }
 
-    @Test("[inline-table] bool", .tags(.inline_table))
-    func inline_table__bool() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] bool`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "bool"])
     }
 
-    @Test("[inline-table] empty", .tags(.inline_table))
-    func inline_table__empty() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] empty`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "empty"])
     }
 
-    @Test("[inline-table] end in bool", .tags(.inline_table))
-    func inline_table__end_in_bool() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] end in bool`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "end-in-bool"])
     }
 
-    @Test("[inline-table] inline table", .tags(.inline_table))
-    func inline_table__inline_table() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] inline table`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "inline-table"])
     }
 
-    @Test("[inline-table] key dotted 01", .tags(.inline_table))
-    func inline_table__key_dotted_01() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 01`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-01"])
     }
 
-    @Test("[inline-table] key dotted 02", .tags(.inline_table))
-    func inline_table__key_dotted_02() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 02`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-02"])
     }
 
-    @Test("[inline-table] key dotted 03", .tags(.inline_table))
-    func inline_table__key_dotted_03() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 03`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-03"])
     }
 
-    @Test("[inline-table] key dotted 04", .tags(.inline_table))
-    func inline_table__key_dotted_04() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 04`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-04"])
     }
 
-    @Test("[inline-table] key dotted 05", .tags(.inline_table))
-    func inline_table__key_dotted_05() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 05`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-05"])
     }
 
-    @Test("[inline-table] key dotted 06", .tags(.inline_table))
-    func inline_table__key_dotted_06() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 06`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-06"])
     }
 
-    @Test("[inline-table] key dotted 07", .tags(.inline_table))
-    func inline_table__key_dotted_07() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] key dotted 07`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "key-dotted-07"])
     }
 
-    @Test("[inline-table] multiline", .tags(.inline_table))
-    func inline_table__multiline() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] multiline`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "multiline"])
     }
 
-    @Test("[inline-table] nest", .tags(.inline_table))
-    func inline_table__nest() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] nest`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "nest"])
     }
 
-    @Test("[inline-table] newline", .tags(.inline_table))
-    func inline_table__newline() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] newline`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "newline"])
     }
 
-    @Test("[inline-table] newline comment", .tags(.inline_table))
-    func inline_table__newline_comment() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] newline comment`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "newline-comment"])
     }
 
-    @Test("[inline-table] spaces", .tags(.inline_table))
-    func inline_table__spaces() throws {
+    @Test(.tags(.inline_table))
+    func `[inline-table] spaces`() throws {
         try verifyByFixture(pathComponents: ["inline-table", "spaces"])
     }
 
-    @Test("[integer] float64 max", .tags(.integer))
-    func integer__float64_max() throws {
+    @Test(.tags(.integer))
+    func `[integer] float64 max`() throws {
         try verifyByFixture(pathComponents: ["integer", "float64-max"])
     }
 
-    @Test("[integer] integer", .tags(.integer))
-    func integer__integer() throws {
+    @Test(.tags(.integer))
+    func `[integer] integer`() throws {
         try verifyByFixture(pathComponents: ["integer", "integer"])
     }
 
-    @Test("[integer] literals", .tags(.integer))
-    func integer__literals() throws {
+    @Test(.tags(.integer))
+    func `[integer] literals`() throws {
         try verifyByFixture(pathComponents: ["integer", "literals"])
     }
 
-    @Test("[integer] long", .tags(.integer))
-    func integer__long() throws {
+    @Test(.tags(.integer))
+    func `[integer] long`() throws {
         try verifyByFixture(pathComponents: ["integer", "long"])
     }
 
-    @Test("[integer] underscore", .tags(.integer))
-    func integer__underscore() throws {
+    @Test(.tags(.integer))
+    func `[integer] underscore`() throws {
         try verifyByFixture(pathComponents: ["integer", "underscore"])
     }
 
-    @Test("[integer] zero", .tags(.integer))
-    func integer__zero() throws {
+    @Test(.tags(.integer))
+    func `[integer] zero`() throws {
         try verifyByFixture(pathComponents: ["integer", "zero"])
     }
 
-    @Test("[key] alphanum", .tags(.key))
-    func key__alphanum() throws {
+    @Test(.tags(.key))
+    func `[key] alphanum`() throws {
         try verifyByFixture(pathComponents: ["key", "alphanum"])
     }
 
-    @Test("[key] case sensitive", .tags(.key))
-    func key__case_sensitive() throws {
+    @Test(.tags(.key))
+    func `[key] case sensitive`() throws {
         try verifyByFixture(pathComponents: ["key", "case-sensitive"])
     }
 
-    @Test("[key] dotted 01", .tags(.key))
-    func key__dotted_01() throws {
+    @Test(.tags(.key))
+    func `[key] dotted 01`() throws {
         try verifyByFixture(pathComponents: ["key", "dotted-01"])
     }
 
-    @Test("[key] dotted 02", .tags(.key))
-    func key__dotted_02() throws {
+    @Test(.tags(.key))
+    func `[key] dotted 02`() throws {
         try verifyByFixture(pathComponents: ["key", "dotted-02"])
     }
 
-    @Test("[key] dotted 03", .tags(.key))
-    func key__dotted_03() throws {
+    @Test(.tags(.key))
+    func `[key] dotted 03`() throws {
         try verifyByFixture(pathComponents: ["key", "dotted-03"])
     }
 
-    @Test("[key] dotted 04", .tags(.key))
-    func key__dotted_04() throws {
+    @Test(.tags(.key))
+    func `[key] dotted 04`() throws {
         try verifyByFixture(pathComponents: ["key", "dotted-04"])
     }
 
-    @Test("[key] dotted empty", .tags(.key))
-    func key__dotted_empty() throws {
+    @Test(.tags(.key))
+    func `[key] dotted empty`() throws {
         try verifyByFixture(pathComponents: ["key", "dotted-empty"])
     }
 
-    @Test("[key] empty 01", .tags(.key))
-    func key__empty_01() throws {
+    @Test(.tags(.key))
+    func `[key] empty 01`() throws {
         try verifyByFixture(pathComponents: ["key", "empty-01"])
     }
 
-    @Test("[key] empty 02", .tags(.key))
-    func key__empty_02() throws {
+    @Test(.tags(.key))
+    func `[key] empty 02`() throws {
         try verifyByFixture(pathComponents: ["key", "empty-02"])
     }
 
-    @Test("[key] empty 03", .tags(.key))
-    func key__empty_03() throws {
+    @Test(.tags(.key))
+    func `[key] empty 03`() throws {
         try verifyByFixture(pathComponents: ["key", "empty-03"])
     }
 
-    @Test("[key] equals nospace", .tags(.key))
-    func key__equals_nospace() throws {
+    @Test(.tags(.key))
+    func `[key] equals nospace`() throws {
         try verifyByFixture(pathComponents: ["key", "equals-nospace"])
     }
 
-    @Test("[key] escapes", .tags(.key))
-    func key__escapes() throws {
+    @Test(.tags(.key))
+    func `[key] escapes`() throws {
         try verifyByFixture(pathComponents: ["key", "escapes"])
     }
 
-    @Test("[key] like date", .tags(.key))
-    func key__like_date() throws {
+    @Test(.tags(.key))
+    func `[key] like date`() throws {
         try verifyByFixture(pathComponents: ["key", "like-date"])
     }
 
-    @Test("[key] numeric 01", .tags(.key))
-    func key__numeric_01() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 01`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-01"])
     }
 
-    @Test("[key] numeric 02", .tags(.key))
-    func key__numeric_02() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 02`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-02"])
     }
 
-    @Test("[key] numeric 03", .tags(.key))
-    func key__numeric_03() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 03`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-03"])
     }
 
-    @Test("[key] numeric 04", .tags(.key))
-    func key__numeric_04() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 04`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-04"])
     }
 
-    @Test("[key] numeric 05", .tags(.key))
-    func key__numeric_05() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 05`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-05"])
     }
 
-    @Test("[key] numeric 06", .tags(.key))
-    func key__numeric_06() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 06`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-06"])
     }
 
-    @Test("[key] numeric 07", .tags(.key))
-    func key__numeric_07() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 07`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-07"])
     }
 
-    @Test("[key] numeric 08", .tags(.key))
-    func key__numeric_08() throws {
+    @Test(.tags(.key))
+    func `[key] numeric 08`() throws {
         try verifyByFixture(pathComponents: ["key", "numeric-08"])
     }
 
-    @Test("[key] quoted dots", .tags(.key))
-    func key__quoted_dots() throws {
+    @Test(.tags(.key))
+    func `[key] quoted dots`() throws {
         try verifyByFixture(pathComponents: ["key", "quoted-dots"])
     }
 
-    @Test("[key] quoted unicode", .tags(.key))
-    func key__quoted_unicode() throws {
+    @Test(.tags(.key))
+    func `[key] quoted unicode`() throws {
         try verifyByFixture(pathComponents: ["key", "quoted-unicode"])
     }
 
-    @Test("[key] space", .tags(.key))
-    func key__space() throws {
+    @Test(.tags(.key))
+    func `[key] space`() throws {
         try verifyByFixture(pathComponents: ["key", "space"])
     }
 
-    @Test("[key] special chars", .tags(.key))
-    func key__special_chars() throws {
+    @Test(.tags(.key))
+    func `[key] special chars`() throws {
         try verifyByFixture(pathComponents: ["key", "special-chars"])
     }
 
-    @Test("[key] special word", .tags(.key))
-    func key__special_word() throws {
+    @Test(.tags(.key))
+    func `[key] special word`() throws {
         try verifyByFixture(pathComponents: ["key", "special-word"])
     }
 
-    @Test("[key] start", .tags(.key))
-    func key__start() throws {
+    @Test(.tags(.key))
+    func `[key] start`() throws {
         try verifyByFixture(pathComponents: ["key", "start"])
     }
 
-    @Test("[key] zero", .tags(.key))
-    func key__zero() throws {
+    @Test(.tags(.key))
+    func `[key] zero`() throws {
         try verifyByFixture(pathComponents: ["key", "zero"])
     }
 
-    @Test("multibyte")
+    @Test
     func multibyte() throws {
         try verifyByFixture(pathComponents: ["multibyte"])
     }
 
-    @Test("newline crlf")
-    func newline_crlf() throws {
+    @Test
+    func `newline crlf`() throws {
         try verifyByFixture(pathComponents: ["newline-crlf"])
     }
 
-    @Test("newline lf")
-    func newline_lf() throws {
+    @Test
+    func `newline lf`() throws {
         try verifyByFixture(pathComponents: ["newline-lf"])
     }
 
-    @Test("[spec-1.1.0] common 0", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_0() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 0`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-0"])
     }
 
-    @Test("[spec-1.1.0] common 1", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_1() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 1`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-1"])
     }
 
-    @Test("[spec-1.1.0] common 10", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_10() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 10`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-10"])
     }
 
-    @Test("[spec-1.1.0] common 11", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_11() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 11`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-11"])
     }
 
-    @Test("[spec-1.1.0] common 12", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_12() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 12`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-12"])
     }
 
-    @Test("[spec-1.1.0] common 13", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_13() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 13`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-13"])
     }
 
-    @Test("[spec-1.1.0] common 14", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_14() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 14`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-14"])
     }
 
-    @Test("[spec-1.1.0] common 15", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_15() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 15`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-15"])
     }
 
-    @Test("[spec-1.1.0] common 16", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_16() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 16`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-16"])
     }
 
-    @Test("[spec-1.1.0] common 17", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_17() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 17`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-17"])
     }
 
-    @Test("[spec-1.1.0] common 18", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_18() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 18`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-18"])
     }
 
-    @Test("[spec-1.1.0] common 19", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_19() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 19`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-19"])
     }
 
-    @Test("[spec-1.1.0] common 20", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_20() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 20`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-20"])
     }
 
-    @Test("[spec-1.1.0] common 21", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_21() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 21`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-21"])
     }
 
-    @Test("[spec-1.1.0] common 22", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_22() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 22`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-22"])
     }
 
-    @Test("[spec-1.1.0] common 23", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_23() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 23`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-23"])
     }
 
-    @Test("[spec-1.1.0] common 24", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_24() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 24`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-24"])
     }
 
-    @Test("[spec-1.1.0] common 25", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_25() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 25`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-25"])
     }
 
-    @Test("[spec-1.1.0] common 26", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_26() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 26`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-26"])
     }
 
-    @Test("[spec-1.1.0] common 27", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_27() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 27`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-27"])
     }
 
-    @Test("[spec-1.1.0] common 28", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_28() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 28`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-28"])
     }
 
-    @Test("[spec-1.1.0] common 29", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_29() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 29`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-29"])
     }
 
-    @Test("[spec-1.1.0] common 3", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_3() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 3`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-3"])
     }
 
-    @Test("[spec-1.1.0] common 30", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_30() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 30`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-30"])
     }
 
-    @Test("[spec-1.1.0] common 31", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_31() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 31`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-31"])
     }
 
-    @Test("[spec-1.1.0] common 32", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_32() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 32`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-32"])
     }
 
-    @Test("[spec-1.1.0] common 33", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_33() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 33`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-33"])
     }
 
-    @Test("[spec-1.1.0] common 34", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_34() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 34`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-34"])
     }
 
-    @Test("[spec-1.1.0] common 35", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_35() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 35`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-35"])
     }
 
-    @Test("[spec-1.1.0] common 36", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_36() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 36`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-36"])
     }
 
-    @Test("[spec-1.1.0] common 37", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_37() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 37`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-37"])
     }
 
-    @Test("[spec-1.1.0] common 38", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_38() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 38`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-38"])
     }
 
-    @Test("[spec-1.1.0] common 39", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_39() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 39`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-39"])
     }
 
-    @Test("[spec-1.1.0] common 4", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_4() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 4`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-4"])
     }
 
-    @Test("[spec-1.1.0] common 40", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_40() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 40`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-40"])
     }
 
-    @Test("[spec-1.1.0] common 41", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_41() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 41`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-41"])
     }
 
-    @Test("[spec-1.1.0] common 42", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_42() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 42`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-42"])
     }
 
-    @Test("[spec-1.1.0] common 43", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_43() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 43`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-43"])
     }
 
-    @Test("[spec-1.1.0] common 44", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_44() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 44`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-44"])
     }
 
-    @Test("[spec-1.1.0] common 45", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_45() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 45`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-45"])
     }
 
-    @Test("[spec-1.1.0] common 46", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_46() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 46`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-46"])
     }
 
-    @Test("[spec-1.1.0] common 47", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_47() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 47`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-47"])
     }
 
-    @Test("[spec-1.1.0] common 48", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_48() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 48`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-48"])
     }
 
-    @Test("[spec-1.1.0] common 49", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_49() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 49`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-49"])
     }
 
-    @Test("[spec-1.1.0] common 50", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_50() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 50`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-50"])
     }
 
-    @Test("[spec-1.1.0] common 51", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_51() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 51`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-51"])
     }
 
-    @Test("[spec-1.1.0] common 52", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_52() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 52`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-52"])
     }
 
-    @Test("[spec-1.1.0] common 53", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_53() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 53`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-53"])
     }
 
-    @Test("[spec-1.1.0] common 6", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_6() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 6`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-6"])
     }
 
-    @Test("[spec-1.1.0] common 7", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_7() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 7`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-7"])
     }
 
-    @Test("[spec-1.1.0] common 8", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_8() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 8`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-8"])
     }
 
-    @Test("[spec-1.1.0] common 9", .tags(.spec_1_1_0))
-    func spec_1_1_0__common_9() throws {
+    @Test(.tags(.spec_1_1_0))
+    func `[spec-1.1.0] common 9`() throws {
         try verifyByFixture(pathComponents: ["spec-1.1.0", "common-9"])
     }
 
-    @Test("spec example 1")
-    func spec_example_1() throws {
+    @Test
+    func `spec example 1`() throws {
         try verifyByFixture(pathComponents: ["spec-example-1"])
     }
 
-    @Test("spec example 1 compact")
-    func spec_example_1_compact() throws {
+    @Test
+    func `spec example 1 compact`() throws {
         try verifyByFixture(pathComponents: ["spec-example-1-compact"])
     }
 
-    @Test("[string] basic escape 01", .tags(.string))
-    func string__basic_escape_01() throws {
+    @Test(.tags(.string))
+    func `[string] basic escape 01`() throws {
         try verifyByFixture(pathComponents: ["string", "basic-escape-01"])
     }
 
-    @Test("[string] basic escape 02", .tags(.string))
-    func string__basic_escape_02() throws {
+    @Test(.tags(.string))
+    func `[string] basic escape 02`() throws {
         try verifyByFixture(pathComponents: ["string", "basic-escape-02"])
     }
 
-    @Test("[string] basic escape 03", .tags(.string))
-    func string__basic_escape_03() throws {
+    @Test(.tags(.string))
+    func `[string] basic escape 03`() throws {
         try verifyByFixture(pathComponents: ["string", "basic-escape-03"])
     }
 
-    @Test("[string] empty", .tags(.string))
-    func string__empty() throws {
+    @Test(.tags(.string))
+    func `[string] empty`() throws {
         try verifyByFixture(pathComponents: ["string", "empty"])
     }
 
-    @Test("[string] ends in whitespace escape", .tags(.string))
-    func string__ends_in_whitespace_escape() throws {
+    @Test(.tags(.string))
+    func `[string] ends in whitespace escape`() throws {
         try verifyByFixture(pathComponents: ["string", "ends-in-whitespace-escape"])
     }
 
-    @Test("[string] escape esc", .tags(.string))
-    func string__escape_esc() throws {
+    @Test(.tags(.string))
+    func `[string] escape esc`() throws {
         try verifyByFixture(pathComponents: ["string", "escape-esc"])
     }
 
-    @Test("[string] escape tricky", .tags(.string))
-    func string__escape_tricky() throws {
+    @Test(.tags(.string))
+    func `[string] escape tricky`() throws {
         try verifyByFixture(pathComponents: ["string", "escape-tricky"])
     }
 
-    @Test("[string] escaped escape", .tags(.string))
-    func string__escaped_escape() throws {
+    @Test(.tags(.string))
+    func `[string] escaped escape`() throws {
         try verifyByFixture(pathComponents: ["string", "escaped-escape"])
     }
 
-    @Test("[string] escapes", .tags(.string))
-    func string__escapes() throws {
+    @Test(.tags(.string))
+    func `[string] escapes`() throws {
         try verifyByFixture(pathComponents: ["string", "escapes"])
     }
 
-    @Test("[string] hex escape", .tags(.string))
-    func string__hex_escape() throws {
+    @Test(.tags(.string))
+    func `[string] hex escape`() throws {
         try verifyByFixture(pathComponents: ["string", "hex-escape"])
     }
 
-    @Test("[string] multibyte", .tags(.string))
-    func string__multibyte() throws {
+    @Test(.tags(.string))
+    func `[string] multibyte`() throws {
         try verifyByFixture(pathComponents: ["string", "multibyte"])
     }
 
-    @Test("[string] multibyte escape", .tags(.string))
-    func string__multibyte_escape() throws {
+    @Test(.tags(.string))
+    func `[string] multibyte escape`() throws {
         try verifyByFixture(pathComponents: ["string", "multibyte-escape"])
     }
 
-    @Test("[string] multiline", .tags(.string))
-    func string__multiline() throws {
+    @Test(.tags(.string))
+    func `[string] multiline`() throws {
         try verifyByFixture(pathComponents: ["string", "multiline"])
     }
 
-    @Test("[string] multiline empty", .tags(.string))
-    func string__multiline_empty() throws {
+    @Test(.tags(.string))
+    func `[string] multiline empty`() throws {
         try verifyByFixture(pathComponents: ["string", "multiline-empty"])
     }
 
-    @Test("[string] multiline escaped crlf", .tags(.string))
-    func string__multiline_escaped_crlf() throws {
+    @Test(.tags(.string))
+    func `[string] multiline escaped crlf`() throws {
         try verifyByFixture(pathComponents: ["string", "multiline-escaped-crlf"])
     }
 
-    @Test("[string] multiline quotes", .tags(.string))
-    func string__multiline_quotes() throws {
+    @Test(.tags(.string))
+    func `[string] multiline quotes`() throws {
         try verifyByFixture(pathComponents: ["string", "multiline-quotes"])
     }
 
-    @Test("[string] nl", .tags(.string))
-    func string__nl() throws {
+    @Test(.tags(.string))
+    func `[string] nl`() throws {
         try verifyByFixture(pathComponents: ["string", "nl"])
     }
 
-    @Test("[string] quoted unicode", .tags(.string))
-    func string__quoted_unicode() throws {
+    @Test(.tags(.string))
+    func `[string] quoted unicode`() throws {
         try verifyByFixture(pathComponents: ["string", "quoted-unicode"])
     }
 
-    @Test("[string] raw", .tags(.string))
-    func string__raw() throws {
+    @Test(.tags(.string))
+    func `[string] raw`() throws {
         try verifyByFixture(pathComponents: ["string", "raw"])
     }
 
-    @Test("[string] raw empty", .tags(.string))
-    func string__raw_empty() throws {
+    @Test(.tags(.string))
+    func `[string] raw empty`() throws {
         try verifyByFixture(pathComponents: ["string", "raw-empty"])
     }
 
-    @Test("[string] raw multiline", .tags(.string))
-    func string__raw_multiline() throws {
+    @Test(.tags(.string))
+    func `[string] raw multiline`() throws {
         try verifyByFixture(pathComponents: ["string", "raw-multiline"])
     }
 
-    @Test("[string] simple", .tags(.string))
-    func string__simple() throws {
+    @Test(.tags(.string))
+    func `[string] simple`() throws {
         try verifyByFixture(pathComponents: ["string", "simple"])
     }
 
-    @Test("[string] start mb", .tags(.string))
-    func string__start_mb() throws {
+    @Test(.tags(.string))
+    func `[string] start mb`() throws {
         try verifyByFixture(pathComponents: ["string", "start-mb"])
     }
 
-    @Test("[string] unicode escape", .tags(.string))
-    func string__unicode_escape() throws {
+    @Test(.tags(.string))
+    func `[string] unicode escape`() throws {
         try verifyByFixture(pathComponents: ["string", "unicode-escape"])
     }
 
-    @Test("[string] with pound", .tags(.string))
-    func string__with_pound() throws {
+    @Test(.tags(.string))
+    func `[string] with pound`() throws {
         try verifyByFixture(pathComponents: ["string", "with-pound"])
     }
 
-    @Test("[table] array empty", .tags(.table))
-    func table__array_empty() throws {
+    @Test(.tags(.table))
+    func `[table] array empty`() throws {
         try verifyByFixture(pathComponents: ["table", "array-empty"])
     }
 
-    @Test("[table] array empty name", .tags(.table))
-    func table__array_empty_name() throws {
+    @Test(.tags(.table))
+    func `[table] array empty name`() throws {
         try verifyByFixture(pathComponents: ["table", "array-empty-name"])
     }
 
-    @Test("[table] array implicit", .tags(.table))
-    func table__array_implicit() throws {
+    @Test(.tags(.table))
+    func `[table] array implicit`() throws {
         try verifyByFixture(pathComponents: ["table", "array-implicit"])
     }
 
-    @Test("[table] array implicit and explicit after", .tags(.table))
-    func table__array_implicit_and_explicit_after() throws {
+    @Test(.tags(.table))
+    func `[table] array implicit and explicit after`() throws {
         try verifyByFixture(pathComponents: ["table", "array-implicit-and-explicit-after"])
     }
 
-    @Test("[table] array many", .tags(.table))
-    func table__array_many() throws {
+    @Test(.tags(.table))
+    func `[table] array many`() throws {
         try verifyByFixture(pathComponents: ["table", "array-many"])
     }
 
-    @Test("[table] array nest", .tags(.table))
-    func table__array_nest() throws {
+    @Test(.tags(.table))
+    func `[table] array nest`() throws {
         try verifyByFixture(pathComponents: ["table", "array-nest"])
     }
 
-    @Test("[table] array one", .tags(.table))
-    func table__array_one() throws {
+    @Test(.tags(.table))
+    func `[table] array one`() throws {
         try verifyByFixture(pathComponents: ["table", "array-one"])
     }
 
-    @Test("[table] array table array", .tags(.table))
-    func table__array_table_array() throws {
+    @Test(.tags(.table))
+    func `[table] array table array`() throws {
         try verifyByFixture(pathComponents: ["table", "array-table-array"])
     }
 
-    @Test("[table] array within dotted", .tags(.table))
-    func table__array_within_dotted() throws {
+    @Test(.tags(.table))
+    func `[table] array within dotted`() throws {
         try verifyByFixture(pathComponents: ["table", "array-within-dotted"])
     }
 
-    @Test("[table] empty", .tags(.table))
-    func table__empty() throws {
+    @Test(.tags(.table))
+    func `[table] empty`() throws {
         try verifyByFixture(pathComponents: ["table", "empty"])
     }
 
-    @Test("[table] empty name", .tags(.table))
-    func table__empty_name() throws {
+    @Test(.tags(.table))
+    func `[table] empty name`() throws {
         try verifyByFixture(pathComponents: ["table", "empty-name"])
     }
 
-    @Test("[table] keyword", .tags(.table))
-    func table__keyword() throws {
+    @Test(.tags(.table))
+    func `[table] keyword`() throws {
         try verifyByFixture(pathComponents: ["table", "keyword"])
     }
 
-    @Test("[table] keyword with values", .tags(.table))
-    func table__keyword_with_values() throws {
+    @Test(.tags(.table))
+    func `[table] keyword with values`() throws {
         try verifyByFixture(pathComponents: ["table", "keyword-with-values"])
     }
 
-    @Test("[table] names", .tags(.table))
-    func table__names() throws {
+    @Test(.tags(.table))
+    func `[table] names`() throws {
         try verifyByFixture(pathComponents: ["table", "names"])
     }
 
-    @Test("[table] names with values", .tags(.table))
-    func table__names_with_values() throws {
+    @Test(.tags(.table))
+    func `[table] names with values`() throws {
         try verifyByFixture(pathComponents: ["table", "names-with-values"])
     }
 
-    @Test("[table] no eol", .tags(.table))
-    func table__no_eol() throws {
+    @Test(.tags(.table))
+    func `[table] no eol`() throws {
         try verifyByFixture(pathComponents: ["table", "no-eol"])
     }
 
-    @Test("[table] sub", .tags(.table))
-    func table__sub() throws {
+    @Test(.tags(.table))
+    func `[table] sub`() throws {
         try verifyByFixture(pathComponents: ["table", "sub"])
     }
 
-    @Test("[table] sub empty", .tags(.table))
-    func table__sub_empty() throws {
+    @Test(.tags(.table))
+    func `[table] sub empty`() throws {
         try verifyByFixture(pathComponents: ["table", "sub-empty"])
     }
 
-    @Test("[table] whitespace", .tags(.table))
-    func table__whitespace() throws {
+    @Test(.tags(.table))
+    func `[table] whitespace`() throws {
         try verifyByFixture(pathComponents: ["table", "whitespace"])
     }
 
-    @Test("[table] with literal string", .tags(.table))
-    func table__with_literal_string() throws {
+    @Test(.tags(.table))
+    func `[table] with literal string`() throws {
         try verifyByFixture(pathComponents: ["table", "with-literal-string"])
     }
 
-    @Test("[table] with pound", .tags(.table))
-    func table__with_pound() throws {
+    @Test(.tags(.table))
+    func `[table] with pound`() throws {
         try verifyByFixture(pathComponents: ["table", "with-pound"])
     }
 
-    @Test("[table] with single quotes", .tags(.table))
-    func table__with_single_quotes() throws {
+    @Test(.tags(.table))
+    func `[table] with single quotes`() throws {
         try verifyByFixture(pathComponents: ["table", "with-single-quotes"])
     }
 
-    @Test("[table] without super", .tags(.table))
-    func table__without_super() throws {
+    @Test(.tags(.table))
+    func `[table] without super`() throws {
         try verifyByFixture(pathComponents: ["table", "without-super"])
     }
 
-    @Test("[table] without super with values", .tags(.table))
-    func table__without_super_with_values() throws {
+    @Test(.tags(.table))
+    func `[table] without super with values`() throws {
         try verifyByFixture(pathComponents: ["table", "without-super-with-values"])
     }
 }
