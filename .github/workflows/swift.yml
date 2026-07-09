@@ -29,7 +29,7 @@ jobs:
         with:
           swift-version: ${{ matrix.swift_version }}
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run tests
         run: swift test
 
@@ -50,7 +50,7 @@ jobs:
         if: matrix.swift_version == '6.3.3'
         run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run tests
         run: swift test
 
@@ -82,7 +82,7 @@ jobs:
       - name: List simulators
         run: xcrun simctl list devices
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run tests (simulator)
         run: |
           xcodebuild -scheme TOMLDecoder-Package -destination "${{ matrix.destination }}" -sdk "${{ matrix.sdk }}" test
@@ -96,7 +96,7 @@ jobs:
       - name: List simulators
         run: xcrun simctl list devices
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run tests (simulator)
         run: |
           xcodebuild -scheme TOMLDecoder-Package -destination "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0.1" -sdk iphonesimulator test

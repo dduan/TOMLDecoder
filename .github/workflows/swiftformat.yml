@@ -16,7 +16,7 @@ jobs:
 
     - name: Check for Swift file changes
       id: changes
-      uses: dorny/paths-filter@v3
+      uses: dorny/paths-filter@v4
       with:
         filters: |
           swift:
@@ -29,7 +29,7 @@ jobs:
 
     - name: Cache SwiftPM artifacts
       if: steps.changes.outputs.swift == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.swiftpm

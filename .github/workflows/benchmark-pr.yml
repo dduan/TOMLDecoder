@@ -23,7 +23,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -38,7 +38,7 @@ jobs:
           echo "/opt/homebrew/bin:/usr/local/bin" >> $GITHUB_PATH
 
       - name: Cache SwiftPM artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.swiftpm
@@ -81,12 +81,14 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Comment PR with benchmark result
-        if: ${{ env.hasBenchmark == '1' }}
-        uses: thollander/actions-comment-pull-request@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          message: ${{ steps.benchmark.outputs.comment }}
-          comment-tag: execution
+        if: ${{ env.hasBenchmark == '1' && github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body-file benchmark_comment.md \
+            --edit-last \
+            --create-if-none
 
       - name: Exit with correct status
         if: ${{ env.hasBenchmark == '1' }}
