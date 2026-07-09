@@ -1164,18 +1164,23 @@ extension Token {
             resultCodeUnits.append(bytes[index])
             index += 1
         }
+        guard index < text.upperBound else {
+            throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "expected digit, nan or inf after sign"))
+        }
 
         if !bytes[index].isDecimalDigit {
-            guard (
-                bytes[index] == CodeUnits.lowerN &&
-                    bytes[index + 1] == CodeUnits.lowerA &&
-                    bytes[index + 2] == CodeUnits.lowerN
-            ) ||
-                (
-                    bytes[index] == CodeUnits.lowerI &&
-                        bytes[index + 1] == CodeUnits.lowerN &&
-                        bytes[index + 2] == CodeUnits.lowerF
-                )
+            let nameEnd = index + 3
+            guard nameEnd == text.upperBound,
+                  (
+                      bytes[index] == CodeUnits.lowerN &&
+                          bytes[index + 1] == CodeUnits.lowerA &&
+                          bytes[index + 2] == CodeUnits.lowerN
+                  ) ||
+                  (
+                      bytes[index] == CodeUnits.lowerI &&
+                          bytes[index + 1] == CodeUnits.lowerN &&
+                          bytes[index + 2] == CodeUnits.lowerF
+                  )
             else {
                 throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Expected nan or inf, found \(bytes[index])"))
             }
@@ -1183,9 +1188,10 @@ extension Token {
             resultCodeUnits.append(bytes[index + 1])
             resultCodeUnits.append(bytes[index + 2])
         } else {
+            let nextIndex = index + 1
             if bytes[index] == CodeUnits.number0,
-               index < text.upperBound,
-               case let next = bytes[index + 1],
+               nextIndex < text.upperBound,
+               case let next = bytes[nextIndex],
                next != CodeUnits.dot, next != CodeUnits.lowerE, next != CodeUnits.upperE
             {
                 throw TOMLError(.invalidFloat(context: context, lineNumber: lineNumber, reason: "Float begins with 0 must be followed by a '.', 'e' or 'E'"))

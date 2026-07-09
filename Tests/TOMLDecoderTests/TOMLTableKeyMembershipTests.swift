@@ -59,4 +59,18 @@ struct TOMLTableKeyMembershipTests {
             _ = try Dictionary(TOMLTable(source: "x = 0x\n"))
         }
     }
+
+    @Test
+    func singleZeroFloatAccessorDecodesWithoutTrapping() throws {
+        let table = try TOMLTable(source: "s = 0\n")
+
+        #expect(try table.float(forKey: "s") == 0)
+    }
+
+    @Test(arguments: ["x = +\n", "x = n\n", "x = na\n", "x = i\n", "x = in\n"])
+    func truncatedFloatThrowsWithoutTrapping(toml: String) throws {
+        #expect(throws: TOMLError.self) {
+            _ = try Dictionary(TOMLTable(source: toml))
+        }
+    }
 }
