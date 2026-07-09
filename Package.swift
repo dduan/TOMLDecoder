@@ -10,8 +10,8 @@ let includeFormatting = env["TOMLDECODER_FORMATTING"] == "1"
 
 var benchmarksDeps: [Package.Dependency] = includeBenchmarks ? [
     .package(
-        url: "https://github.com/ordo-one/package-benchmark",
-        exact: "1.29.6"
+        url: "https://github.com/ordo-one/benchmark",
+        exact: "1.35.0"
     ),
 ] : []
 
@@ -73,11 +73,11 @@ var benchmarkTargets: [Target] = includeBenchmarks ? [
         dependencies: [
             "TOMLDecoder",
             "Resources",
-            .product(name: "Benchmark", package: "package-benchmark"),
+            .product(name: "Benchmark", package: "benchmark"),
         ],
         path: "Benchmarks/TOMLDecoderBenchmarks",
         plugins: [
-            .plugin(name: "BenchmarkPlugin", package: "package-benchmark"),
+            .plugin(name: "BenchmarkPlugin", package: "benchmark"),
         ]
     ),
 ] : []
