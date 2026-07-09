@@ -17,7 +17,16 @@ import Foundation
 
 extension _TOMLDecoder: SingleValueDecodingContainer {
     var context: TOMLKey {
-        codingPath.last as! TOMLKey
+        guard let key = codingPath.last else {
+            return TOMLKey.super
+        }
+        if let key = key as? TOMLKey {
+            return key
+        }
+        if let intValue = key.intValue {
+            return TOMLKey(intValue: intValue)
+        }
+        return TOMLKey(stringValue: key.stringValue)
     }
 
     % for native_type in native_types:

@@ -144,6 +144,16 @@ struct TOMLDecoderTests {
         }
     }
 
+    @Test func optionalScalarArrayMismatchThrowsWithoutTrapping() throws {
+        struct Probe: Decodable {
+            let b: Bool?
+        }
+
+        #expect(throws: (any Error).self) {
+            try TOMLDecoder().decode(Probe.self, from: "b = [1, 2, 3]\n")
+        }
+    }
+
     @Test
     func foundationDateDecoding() throws {
         struct Player: Codable, Equatable {
