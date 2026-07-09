@@ -1343,6 +1343,9 @@ extension Token {
             }
             // Single zero is allowed to continue to the main loop
         }
+        guard index < text.upperBound else {
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "expected digit after base prefix"))
+        }
 
         while index < text.upperBound {
             let ch = bytes[index]

@@ -52,4 +52,11 @@ struct TOMLTableKeyMembershipTests {
             _ = try Dictionary(TOMLTable(source: "x = +\n"))
         }
     }
+
+    @Test
+    func basePrefixOnlyIntegerThrowsWithoutTrapping() throws {
+        #expect(throws: TOMLError.self) {
+            _ = try Dictionary(TOMLTable(source: "x = 0x\n"))
+        }
+    }
 }
