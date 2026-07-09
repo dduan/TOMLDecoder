@@ -18,15 +18,16 @@ health = 123
 id = "cde"
 health = 456
 """
+@Suite
 struct TOMLTableKeyMembershipTests {
     @Test
-    func `all keys for root table`() throws {
+    func allKeysForRootTable() throws {
         let table = try TOMLTable(source: toml)
         #expect(table.keys == ["a", "b", "players", "c"])
     }
 
     @Test
-    func `root table key contains`() throws {
+    func rootTableKeyContains() throws {
         let table = try TOMLTable(source: toml)
         #expect(table.keys == ["a", "b", "players", "c"])
         #expect(table.contains(key: "a"))

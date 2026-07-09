@@ -5,8 +5,9 @@ import Foundation
 import Testing
 import TOMLDecoder
 
+@Suite
 struct LeafValueDecodingTests {
-    @Test func `boolean as bool`() throws {
+    @Test func booleanAsBool() throws {
         struct Test: Decodable, Equatable {
             let boolean: Bool
             let booleans: [Bool]
@@ -41,7 +42,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `string as string`() throws {
+    @Test func stringAsString() throws {
         struct Test: Decodable, Equatable {
             let string: String
             let strings: [String]
@@ -76,7 +77,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as int`() throws {
+    @Test func integerAsInt() throws {
         struct Test: Decodable, Equatable {
             let integer: Int
             let integers: [Int]
@@ -111,7 +112,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as int 8`() throws {
+    @Test func integerAsInt8() throws {
         struct Test: Decodable, Equatable {
             let integer: Int8
             let integers: [Int8]
@@ -146,7 +147,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as int 16`() throws {
+    @Test func integerAsInt16() throws {
         struct Test: Decodable, Equatable {
             let integer: Int16
             let integers: [Int16]
@@ -181,7 +182,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as int 32`() throws {
+    @Test func integerAsInt32() throws {
         struct Test: Decodable, Equatable {
             let integer: Int32
             let integers: [Int32]
@@ -216,7 +217,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as U int`() throws {
+    @Test func integerAsUInt() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt
             let integers: [UInt]
@@ -251,7 +252,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as U int 8`() throws {
+    @Test func integerAsUInt8() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt8
             let integers: [UInt8]
@@ -286,7 +287,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as U int 16`() throws {
+    @Test func integerAsUInt16() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt16
             let integers: [UInt16]
@@ -321,7 +322,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as U int 32`() throws {
+    @Test func integerAsUInt32() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt32
             let integers: [UInt32]
@@ -356,7 +357,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `integer as U int 64`() throws {
+    @Test func integerAsUInt64() throws {
         struct Test: Decodable, Equatable {
             let integer: UInt64
             let integers: [UInt64]
@@ -391,7 +392,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `float as float`() throws {
+    @Test func floatAsFloat() throws {
         struct Test: Decodable, Equatable {
             let float: Float
             let floats: [Float]
@@ -426,7 +427,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `float as double`() throws {
+    @Test func floatAsDouble() throws {
         struct Test: Decodable, Equatable {
             let float: Double
             let floats: [Double]
@@ -461,7 +462,7 @@ struct LeafValueDecodingTests {
         #expect(result == expectation)
     }
 
-    @Test func `all the native dates`() throws {
+    @Test func allTheNativeDates() throws {
         struct Test: Decodable, Equatable {
             let localDate: LocalDate
             let localDateFromLocalDateTime: LocalDate

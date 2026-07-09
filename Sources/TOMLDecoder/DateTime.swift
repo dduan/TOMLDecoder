@@ -134,9 +134,7 @@ public struct OffsetDateTime: Equatable, Hashable, Sendable, Codable, CustomStri
         let offsetInSeconds = Int64(offset) * 60
 
         var y = year
-        if month <= 2 {
-            y -= 1
-        }
+        if month <= 2 { y -= 1 }
 
         let era = (y >= 0 ? y : y - 399) / 400
         let yoe = y - era * 400

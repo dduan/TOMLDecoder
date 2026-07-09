@@ -3,8 +3,9 @@ import Resources
 import Testing
 @testable import TOMLDecoder
 
+@Suite
 struct TOMLDecoderTests {
-    @Test func `basic generated codables`() throws {
+    @Test func basicGeneratedCodables() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int64
@@ -35,7 +36,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `decoding container keyed`() throws {
+    @Test func decodingContainerKeyed() throws {
         struct Player: Decodable, Equatable {
             let id: String
             let health: Int64
@@ -73,7 +74,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `nested unkeyed decoding container`() throws {
+    @Test func nestedUnkeyedDecodingContainer() throws {
         struct Player: Decodable, Equatable {
             let id: String
             let health: Int64
@@ -125,7 +126,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `lenient integer decoding strategy`() throws {
+    @Test func lenientIntegerDecodingStrategy() throws {
         struct Player: Codable, Equatable {
             let id: String
             let health: Int
@@ -144,7 +145,7 @@ struct TOMLDecoderTests {
     }
 
     @Test
-    func `foundation date decoding`() throws {
+    func foundationDateDecoding() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpDate: Date
@@ -164,7 +165,7 @@ struct TOMLDecoderTests {
     }
 
     @Test
-    func `foundation date components from local date decoding`() throws {
+    func foundationDateComponentsFromLocalDateDecoding() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpDate: DateComponents
@@ -184,7 +185,7 @@ struct TOMLDecoderTests {
     }
 
     @Test
-    func `foundation date components from local time decoding`() throws {
+    func foundationDateComponentsFromLocalTimeDecoding() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpTime: DateComponents
@@ -204,7 +205,7 @@ struct TOMLDecoderTests {
     }
 
     @Test
-    func `foundation date components from local date time decoding`() throws {
+    func foundationDateComponentsFromLocalDateTimeDecoding() throws {
         struct Player: Codable, Equatable {
             let id: String
             let signUpTime: DateComponents
@@ -224,7 +225,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `decoding snake case key strategy`() throws {
+    @Test func decodingSnakeCaseKeyStrategy() throws {
         struct Player: Codable, Equatable {
             let id: String
             let firstProfession: String
@@ -244,7 +245,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `decoding custom key strategy`() throws {
+    @Test func decodingCustomKeyStrategy() throws {
         struct Player: Codable, Equatable {
             let id: String
             let profession: String
@@ -265,7 +266,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `array of strings parsing`() throws {
+    @Test func arrayOfStringsParsing() throws {
         struct AppConfig: Codable, Equatable {
             let name: String
             let version: String
@@ -306,7 +307,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `super decoder`() throws {
+    @Test func superDecoder() throws {
         class Player: Codable {
             let id: String
             let health: Int
@@ -337,7 +338,7 @@ struct TOMLDecoderTests {
         _ = try decoder.decode(LocalPlayer.self, from: toml)
     }
 
-    @Test func `toml io example`() throws {
+    @Test func tomlIoExample() throws {
         let toml = """
         # This is a TOML document
 
@@ -420,7 +421,7 @@ struct TOMLDecoderTests {
         #expect(result == expectation)
     }
 
-    @Test func `mixing containers`() throws {
+    @Test func mixingContainers() throws {
         struct Test: Decodable, Equatable {
             let numbers: [[Int64]]
             let strings: TOMLArray
@@ -442,7 +443,7 @@ struct TOMLDecoderTests {
         #expect(result.numbers == [[1, 2], [3, 4]])
     }
 
-    @Test func `optional fields`() throws {
+    @Test func optionalFields() throws {
         struct Test: Codable, Equatable {
             let a: Int64?
             let b: Double?
@@ -469,7 +470,7 @@ struct TOMLDecoderTests {
         #expect(result2 == Test(a: nil, b: 1.0, c: "claude"))
     }
 
-    @Test func `single value container`() throws {
+    @Test func singleValueContainer() throws {
         enum Language: String, Codable {
             case swift
             case mojo

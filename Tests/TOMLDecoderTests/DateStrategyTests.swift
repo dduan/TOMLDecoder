@@ -2,9 +2,10 @@ import Foundation
 import Testing
 @testable import TOMLDecoder
 
+@Suite
 struct DateStrategyTests {
     @Test(.tags(.datetime))
-    func `datetime as date by key`() throws {
+    func datetimeAsDateByKey() throws {
         struct Test: Decodable {
             let datetime: OffsetDateTime
         }
@@ -25,7 +26,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as date`() throws {
+    func datetimeAsDate() throws {
         struct Test: Decodable {
             let datetime: Date
         }
@@ -41,7 +42,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as time interval since 1970`() throws {
+    func datetimeAsTimeIntervalSince1970() throws {
         struct Test: Decodable {
             let datetime: TimeInterval
         }
@@ -57,7 +58,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as time interval since 2001`() throws {
+    func datetimeAsTimeIntervalSince2001() throws {
         struct Test: Decodable {
             let datetime: TimeInterval
         }
@@ -73,7 +74,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as proleptic gregorian date`() throws {
+    func datetimeAsProlepticGregorianDate() throws {
         struct Test: Decodable {
             let datetime: Date
         }
@@ -89,7 +90,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as custom calendar`() throws {
+    func datetimeAsCustomCalendar() throws {
         struct Test: Decodable {
             let datetime: Date
         }
@@ -105,7 +106,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime with strict strategy`() throws {
+    func datetimeWithStrictStrategy() throws {
         struct Test: Decodable {
             let datetime: Date
         }
@@ -123,7 +124,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as offset date time in array`() throws {
+    func datetimeAsOffsetDateTimeInArray() throws {
         struct Test: Decodable {
             let datetimes: [OffsetDateTime]
         }
@@ -144,7 +145,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as date in array`() throws {
+    func datetimeAsDateInArray() throws {
         struct Test: Decodable {
             let datetimes: [Date]
         }
@@ -160,7 +161,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as time interval since 1970 in array`() throws {
+    func datetimeAsTimeIntervalSince1970InArray() throws {
         struct Test: Decodable {
             let datetimes: [TimeInterval]
         }
@@ -176,7 +177,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as time interval since 2001 in array`() throws {
+    func datetimeAsTimeIntervalSince2001InArray() throws {
         struct Test: Decodable {
             let datetimes: [TimeInterval]
         }
@@ -192,7 +193,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as proleptic gregorian date in array`() throws {
+    func datetimeAsProlepticGregorianDateInArray() throws {
         struct Test: Decodable {
             let datetimes: [Date]
         }
@@ -208,7 +209,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime as custom calendar in array`() throws {
+    func datetimeAsCustomCalendarInArray() throws {
         struct Test: Decodable {
             let datetimes: [Date]
         }
@@ -224,7 +225,7 @@ struct DateStrategyTests {
     }
 
     @Test(.tags(.datetime))
-    func `datetime with strict strategy in array`() throws {
+    func datetimeWithStrictStrategyInArray() throws {
         struct Test: Decodable {
             let datetimes: [Date]
         }
