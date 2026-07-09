@@ -1308,6 +1308,9 @@ extension Token {
             resultCodeUnits.append(bytes[index])
             index = text.index(after: index)
         }
+        guard index < text.upperBound else {
+            throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "expected digit after sign"))
+        }
 
         if bytes[index] == CodeUnits.underscore {
             throw TOMLError(.invalidInteger(context: context, lineNumber: lineNumber, reason: "cannot start with a '_'"))

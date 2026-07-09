@@ -45,4 +45,11 @@ struct TOMLTableKeyMembershipTests {
             try inlineTable.string(forKey: "x")
         }
     }
+
+    @Test
+    func signOnlyIntegerThrowsWithoutTrapping() throws {
+        #expect(throws: TOMLError.self) {
+            _ = try Dictionary(TOMLTable(source: "x = +\n"))
+        }
+    }
 }
