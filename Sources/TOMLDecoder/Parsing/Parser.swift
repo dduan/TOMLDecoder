@@ -774,7 +774,7 @@ struct Parser: ~Copyable {
             }
 
             switch token.kind {
-            case .string:
+            case .string, .bareKey:
                 if arrays[arrayIndex].kind == nil {
                     arrays[arrayIndex].kind = .value
                 } else if arrays[arrayIndex].kind != .value {

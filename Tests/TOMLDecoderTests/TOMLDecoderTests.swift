@@ -348,6 +348,11 @@ struct TOMLDecoderTests {
         _ = try decoder.decode(LocalPlayer.self, from: toml)
     }
 
+    @Test(arguments: ["x = [[true]]", "x = [[inf]]"])
+    func nestedBooleanAndSpecialFloatArraysParse(_ toml: String) throws {
+        _ = try TOMLTable(source: toml)
+    }
+
     @Test func tomlIoExample() throws {
         let toml = """
         # This is a TOML document
