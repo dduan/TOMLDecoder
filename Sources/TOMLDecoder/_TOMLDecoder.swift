@@ -51,7 +51,16 @@ final class _TOMLDecoder: Decoder {
     }
 
     func singleValueContainer() throws -> any SingleValueDecodingContainer {
-        self
+        guard token != .empty else {
+            throw DecodingError.typeMismatch(
+                (any SingleValueDecodingContainer).self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot decode a single value from a TOML table."
+                )
+            )
+        }
+        return self
     }
 
     init(referencing container: Container, at codingPath: [any CodingKey] = [], strategy: TOMLDecoder.Strategy, isLenient: Bool) {

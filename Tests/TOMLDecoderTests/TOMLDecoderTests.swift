@@ -501,6 +501,12 @@ struct TOMLDecoderTests {
         #expect(result == Team(languages: [.swift, .mojo, .zig], favorite: .swift))
     }
 
+    @Test func topLevelTableCannotDecodeAsSingleValue() {
+        #expect(throws: DecodingError.self) {
+            try TOMLDecoder().decode(Int.self, from: "-1 = true")
+        }
+    }
+
     @Test func twitter() throws {
         _ = try TOMLDecoder().decode(TwitterArchive.self, from: Resources.twitterTOMLString)
     }
