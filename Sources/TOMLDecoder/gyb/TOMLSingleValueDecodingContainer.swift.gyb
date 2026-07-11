@@ -1,3 +1,4 @@
+#if CodableSupport
 %{
 # gyb variables available: `__file__` gives the template’s path.
 from pathlib import Path
@@ -205,3 +206,4 @@ extension _TOMLDecoder {
         return components
     }
 }
+#endif

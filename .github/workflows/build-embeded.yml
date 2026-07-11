@@ -1,0 +1,22 @@
+name: Embedded
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - 'release/**'
+jobs:
+  embedded-build:
+    name: Build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: "6.2.3"
+      - name: Embedded
+        run: swift build -c release --target TOMLDecoder --disable-default-traits -Xswiftc -target -Xswiftc x86_64-unknown-linux-gnu -Xswiftc -enable-experimental-feature -Xswiftc Embedded -Xswiftc -wmo

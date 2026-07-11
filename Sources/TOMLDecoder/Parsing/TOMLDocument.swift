@@ -1,5 +1,3 @@
-import Foundation
-
 struct TOMLDocument: Equatable, @unchecked Sendable {
     let tables: [InternalTOMLTable]
     let arrays: [InternalTOMLArray]
@@ -26,27 +24,15 @@ struct TOMLDocument: Equatable, @unchecked Sendable {
     }
 
     init(source: String, keyTransform: (@Sendable (String) -> String)?) throws(TOMLError) {
-        var hasContinousStorage = false
         var parser = Parser(keyTransform: keyTransform)
-
-        do {
-            try source.utf8.withContiguousStorageIfAvailable {
-                hasContinousStorage = true
-                try parser.parse(bytes: $0)
-            }
-        } catch {
-            throw error as! TOMLError
+        let bytes = Array(source.utf8)
+        let storage = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: bytes.count)
+        _ = storage.initialize(from: bytes)
+        defer {
+            storage.deinitialize()
+            storage.deallocate()
         }
-
-        if !hasContinousStorage {
-            var source = source
-            do {
-                try source.withUTF8 { try parser.parse(bytes: $0) }
-            } catch {
-                throw error as! TOMLError
-            }
-        }
-
+        try parser.parse(bytes: UnsafeBufferPointer(storage))
         self = parser.finish(source: source)
     }
 }
@@ -231,6 +217,7 @@ struct DateTimeComponents: Equatable {
     }
 }
 
+#if CodableSupport
 extension InternalTOMLTable {
     func dictionary(source: TOMLDocument) throws(TOMLError) -> [String: Any] {
         var result = [String: Any]()
@@ -271,6 +258,7 @@ extension InternalTOMLArray {
         return result
     }
 }
+#endif
 
 extension TOMLDocument {
     @inline(__always)

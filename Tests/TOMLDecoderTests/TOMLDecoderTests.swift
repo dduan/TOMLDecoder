@@ -1,3 +1,4 @@
+#if CodableSupport
 import Foundation
 import Resources
 import Testing
@@ -520,3 +521,4 @@ struct TOMLDecoderTests {
         _ = try TOMLDecoder().decode(CanadaFeatureCollection.self, from: Resources.canadaTOMLString)
     }
 }
+#endif

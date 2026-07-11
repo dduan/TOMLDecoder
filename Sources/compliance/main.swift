@@ -1,8 +1,11 @@
 // This is CLI app that provides decoder interface for the test suite at
 // https://github.com/BurntSushi/toml-test
+#if CodableSupport
 import Foundation
+#endif
 import TOMLDecoder
 
+#if CodableSupport
 /// iOS 13+ compatible date formatter functions
 private func createISO8601FullFormatter() -> ISO8601DateFormatter {
     let formatter = ISO8601DateFormatter()
@@ -88,3 +91,6 @@ func translate(value: Any) -> Any {
 
 let json = try JSONSerialization.data(withJSONObject: translate(value: table))
 print(String(data: json, encoding: .utf8)!)
+#else
+fatalError("compliance executable requires CodableSupport trait.")
+#endif
