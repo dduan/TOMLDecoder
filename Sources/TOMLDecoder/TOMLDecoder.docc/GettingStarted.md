@@ -13,7 +13,7 @@ Let's assume you are starting with a [SwiftPM](https://docs.swift.org/swiftpm/do
 Add the following to your package dependencies:
 
 ```swift
-.package(url: "https://github.com/dduan/TOMLDecoder", exactly: "0.4.4"),
+.package(url: "https://github.com/dduan/TOMLDecoder", exactly: "0.4.5"),
 ```
 
 
@@ -32,7 +32,7 @@ You can use TOMLDecoder from the Bazel Central Registry.
 Include it in your MODULE.bazel:
 
 ```
-bazel_dep(name = 'swift-tomldecoder', version = '0.4.4')
+bazel_dep(name = 'swift-tomldecoder', version = '0.4.5')
 ```
 
 And add `@swift-tomldecoder//:TOMLDecoder` as a dependency to your target as needed.
