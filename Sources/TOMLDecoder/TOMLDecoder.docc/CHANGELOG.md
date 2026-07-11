@@ -4,6 +4,10 @@ Also known as release notes.
 
 ## In Development
 
+## 0.4.5
+
+- Fixed various edge cases that causes crashes.
+
 ## 0.4.4
 
 - Add support for TOML 1.1.0 (thanks, @nikitabobko!)
