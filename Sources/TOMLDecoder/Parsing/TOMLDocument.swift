@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 struct TOMLDocument: Equatable, @unchecked Sendable {
     let tables: [InternalTOMLTable]
