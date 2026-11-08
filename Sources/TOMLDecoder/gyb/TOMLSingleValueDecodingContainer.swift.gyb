@@ -13,7 +13,11 @@ native_types = [
 //  WARNING: This file is generated from ${template_name}
 //  Do not edit ${generated_file} directly.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension _TOMLDecoder: SingleValueDecodingContainer {
     var context: TOMLKey {

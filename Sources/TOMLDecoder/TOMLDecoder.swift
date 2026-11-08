@@ -1,4 +1,8 @@
+#if canImport(FoundationEssentials)
+public import FoundationEssentials
+#else
 public import Foundation
+#endif
 
 /// Convert data for a TOML document into `Codable` types.
 ///

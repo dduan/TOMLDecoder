@@ -1,5 +1,9 @@
-#if canImport(Foundation)
+#if canImport(FoundationEssentials) || canImport(Foundation)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 #endif
 struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtocol {
     private let decoder: _TOMLDecoder
@@ -74,7 +78,7 @@ struct TOMLKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtoco
             decoder.codingPath.removeLast()
         }
         decoder.token = token
-        #if canImport(Foundation)
+        #if canImport(FoundationEssentials) || canImport(Foundation)
         // have to intercept these here otherwise Foundation will try to decode it as a float
         if type == Date.self {
             return try decoder.decode(Date.self) as! T

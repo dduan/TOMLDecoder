@@ -1,7 +1,11 @@
 //  WARNING: This file is generated from TOMLSingleValueDecodingContainer.swift.gyb
 //  Do not edit TOMLSingleValueDecodingContainer.swift directly.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension _TOMLDecoder: SingleValueDecodingContainer {
     var context: TOMLKey {

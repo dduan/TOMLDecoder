@@ -431,8 +431,12 @@ extension String {
     }
 }
 
-#if canImport(Foundation)
+#if canImport(FoundationEssentials) || canImport(Foundation)
+#if canImport(FoundationEssentials)
+public import FoundationEssentials
+#else
 public import Foundation
+#endif
 
 extension DateComponents {
     /// Create a new `Foundation.DateComponents` from an offset date-time.

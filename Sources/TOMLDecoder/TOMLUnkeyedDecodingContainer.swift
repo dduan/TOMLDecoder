@@ -1,5 +1,9 @@
-#if canImport(Foundation)
+#if canImport(FoundationEssentials) || canImport(Foundation)
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 #endif
 
 struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
@@ -89,7 +93,7 @@ struct TOMLUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         decoder.token = token
 
         // have to intercept these here otherwise Foundation will try to decode it as a float
-        #if canImport(Foundation)
+        #if canImport(FoundationEssentials) || canImport(Foundation)
         if type == Date.self {
             return try decoder.decode(Date.self) as! T
         } else if type == DateComponents.self {
